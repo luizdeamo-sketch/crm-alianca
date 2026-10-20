@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="20261020-1812">
+<meta name="app-build" content="20261020-1920">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança · by Capacity Case</title>
@@ -21,8 +21,10 @@ window.ALIANCA = {
   supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1b3R2b3R0bmFpbG9meGJheW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1Mjg2NjMsImV4cCI6MjEwODEwNDY2M30._0FhywQ4Vq3km5Rl4tHEPtCLBVom4VAGaXG3X3nrUyQ',
   cores: { '--navy': '#111827', '--navy-deep': '#0d1117', '--brand': '#9c7518', '--brand-hover': '#7d5e13',
            '--brand-soft': '#f7f1e3', '--brand-ink': '#9c7518', '--teal': '#d7aa42', '--teal-deep': '#9c7518', '--teal-ink': '#9c7518' },
-  modulos: ['indicadores', 'operacao', 'vendas', 'agenda', 'sugestoes'],
-  inicio: 'vendas'
+  modulos: null,          // sistema inteiro; o master escolhe os módulos de cada pessoa na Admin
+  inicio: 'vendas',
+  primeiroAcesso: true,   // a pessoa liberada pelo master cria a própria senha na tela de login
+  ia: false               // sem chave da Anthropic por enquanto: botões de IA avisam "em breve"
 };
 /*ALIANCA_CONFIG_FIM*/
 (function(){ var c = window.ALIANCA || {}; if(c.titulo) document.title = c.titulo;
@@ -207,7 +209,6 @@ window.ALIANCA = {
 </style>
 
 
-<style>/* demo Capacity Case */ #btn-app{display:none!important}</style>
 </head>
 <body>
 
@@ -221,6 +222,7 @@ window.ALIANCA = {
     <div class="field"><label>Senha</label><input id="login-pass" type="password" autocomplete="current-password"></div>
     <button class="btn btn-primary" id="btn-login">Entrar</button>
     <button class="btn-ghost" id="btn-forgot" type="button">Esqueci minha senha</button>
+    <button class="btn-ghost" id="btn-primeiro" type="button" style="display:none">Primeiro acesso: criar minha senha</button>
     <div class="err" id="login-err"></div>
   </div>
 </div>
@@ -887,6 +889,26 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // módulos do cliente: os desligados ficam escondidos (não apagados: outras telas ainda podem chamar o botão)
 const aliancaModuloLigado = v => !window.ALIANCA.modulos || v==='admin' || window.ALIANCA.modulos.includes(v);
 document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ if(!aliancaModuloLigado(b.dataset.view)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+// módulos por usuário (crm_usuarios.modulos; vazio = todos). O master sempre vê tudo. Roda depois do login.
+async function aliancaModulosDoUsuario(email){
+  try{
+    const [{ data: master }, { data: u }] = await Promise.all([ sb.rpc('crm_is_master'), sb.from('crm_usuarios').select('modulos').ilike('email', email||'').maybeSingle() ]);
+    const lista = (u && u.modulos) || [];
+    if(master === true || !lista.length) return;
+    document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(v!=='admin' && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+    const ativo = document.querySelector('.nav-btn.active');
+    if(!ativo || ativo.dataset.off){ const p = document.querySelector('.nav-btn[data-view]:not([data-off]):not(#nav-admin)'); if(p) p.click(); }
+  }catch(e){}
+}
+// IA desligada pela configuração: as funções de IA respondem "em breve" sem chamar o servidor
+if(window.ALIANCA.ia === false){
+  // sb.functions é um getter que cria um cliente novo a cada uso: intercepta o getter
+  const LIVRES = ['admin-usuarios','primeiro-acesso'], MSG = 'Disponível em breve nesta versão do CRM Aliança.';
+  let proto = Object.getPrototypeOf(sb), desc = null; while(proto && !(desc = Object.getOwnPropertyDescriptor(proto, 'functions'))) proto = Object.getPrototypeOf(proto);
+  if(desc && desc.get) Object.defineProperty(sb, 'functions', { configurable:true, get(){ const f = desc.get.call(sb), invocar = f.invoke.bind(f);
+    f.invoke = (nome, opts)=> LIVRES.includes(nome) ? invocar(nome, opts) : Promise.resolve({ data:null, error:{ message:MSG, context:{ json: async ()=>({ error:MSG }) } } });
+    return f; } });
+}
 
 let currentPersonId = null;
 let searchTimer = null;
@@ -927,6 +949,32 @@ document.getElementById('btn-forgot').addEventListener('click', async ()=>{
   if(error){ errEl.textContent = error.message; return; }
   errEl.textContent = 'Se essa conta existir, um email de redefinição foi enviado. Confira spam/lixo eletrônico também.';
 });
+// Primeiro acesso (só onde a configuração liga): a pessoa liberada pelo master na Admin cria a própria senha aqui, sem e-mail
+if(window.ALIANCA.primeiroAcesso){
+  const bp = document.getElementById('btn-primeiro'); bp.style.display = '';
+  bp.addEventListener('click', ()=>{
+    const box = dlgOpen(`<div class="om-title"><div><h3>Primeiro acesso</h3><div class="om-sub">Use o e-mail que o administrador liberou para você e crie a sua senha.</div></div><button data-close>✕</button></div>
+      <div class="dlg-body"><div class="fgrid">
+        <label class="fl full"><span>E-mail</span><input id="pa-email" type="email" autocomplete="username" value="${escapeHtml(document.getElementById('login-email').value.trim())}"></label>
+        <label class="fl"><span>Nova senha (10 ou mais caracteres)</span><input id="pa-senha" type="password" autocomplete="new-password"></label>
+        <label class="fl"><span>Repita a senha</span><input id="pa-senha2" type="password" autocomplete="new-password"></label>
+      </div><div class="om-err" id="pa-err"></div></div>
+      <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="pa-ok">Criar senha e entrar</button></div>`);
+    box.querySelector('#pa-ok').addEventListener('click', async ev=>{
+      const email = box.querySelector('#pa-email').value.trim(), senha = box.querySelector('#pa-senha').value, err = box.querySelector('#pa-err');
+      if(!email){ err.textContent = 'Digite o seu e-mail.'; return; }
+      if(senha.length < 10){ err.textContent = 'A senha precisa ter pelo menos 10 caracteres.'; return; }
+      if(senha !== box.querySelector('#pa-senha2').value){ err.textContent = 'As duas senhas não são iguais.'; return; }
+      ev.target.disabled = true; ev.target.textContent = 'Criando…';
+      const { data, error } = await sb.functions.invoke('primeiro-acesso', { body:{ email, senha } });
+      let msg = data && data.error; if(error){ msg = error.message; try{ const j = await error.context.json(); if(j && j.error) msg = j.error; }catch(x){} }
+      if(msg){ err.textContent = msg; ev.target.disabled = false; ev.target.textContent = 'Criar senha e entrar'; return; }
+      const res = await sb.auth.signInWithPassword({ email, password: senha });
+      if(res.error){ err.textContent = 'Senha criada, mas o login falhou: '+res.error.message; ev.target.disabled = false; ev.target.textContent = 'Criar senha e entrar'; return; }
+      dlgClose(); mfaGate();
+    });
+  });
+}
 sb.auth.onAuthStateChange((event)=>{
   if(event === 'PASSWORD_RECOVERY'){
     document.getElementById('login-screen').style.display = 'none';
@@ -1026,7 +1074,7 @@ async function novidadesIniciar(){
 function boot(){
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('active');
-  sb.auth.getUser().then(({data})=>{ window._userEmail = data.user ? data.user.email : ''; document.getElementById('who-email').textContent = window._userEmail; ensureUserName(data.user);
+  sb.auth.getUser().then(({data})=>{ window._userEmail = data.user ? data.user.email : ''; document.getElementById('who-email').textContent = window._userEmail; ensureUserName(data.user); aliancaModulosDoUsuario(window._userEmail);
     if(data.user && data.user.user_metadata && data.user.user_metadata.must_change_password){ window._trocaObrigatoria = true; document.getElementById('app').classList.remove('active'); const rs = document.getElementById('reset-screen'); rs.querySelector('h1').textContent = 'Defina a sua senha'; rs.querySelector('.sub').textContent = 'Por segurança, troque a senha temporária por uma só sua antes de continuar.'; rs.style.display = 'flex'; } });
   sb.rpc('crm_is_master').then(({data})=>{ window._isMaster = data===true; const nb = document.getElementById('nav-admin'); if(nb) nb.style.display = window._isMaster ? '' : 'none'; });
   backupReminder();
@@ -10184,17 +10232,30 @@ async function admUsrHtml(){
   const { data, error } = await sb.rpc('crm_admin_usuarios');
   if(error) return '<div class="om-err">Não consegui ler os usuários: '+escapeHtml(error.message)+'</div>';
   ADM.usr = data||[]; const eu = (window._userEmail||'').toLowerCase();
-  const novo = `<div class="es-box" style="margin:0 0 14px"><div class="ql">➕ Novo usuário</div><div class="hint" style="margin:2px 0 8px">Cria o login já confirmado, com uma senha temporária que a pessoa é obrigada a trocar no primeiro acesso.</div>
+  // dados extras de crm_usuarios: módulos e liberação de primeiro acesso (inclui quem ainda não tem login)
+  const ext = await sb.from('crm_usuarios').select('email,nome,papel,ativo,modulos,primeiro_acesso_ate');
+  ADM.ext = new Map((ext.data||[]).map(r=>[String(r.email).toLowerCase(), r]));
+  const comLogin = new Set(ADM.usr.map(u=>String(u.email).toLowerCase()));
+  const modsTxt = em=>{ const r = ADM.ext.get(String(em).toLowerCase()), m = (r && r.modulos) || []; return m.length ? m.length+' módulo(s)' : 'Todos'; };
+  const pendentes = [...ADM.ext.values()].filter(r=>!comLogin.has(String(r.email).toLowerCase()));
+  const blocoPA = !window.ALIANCA.primeiroAcesso ? '' : `<div class="es-box" style="margin:0 0 14px"><div class="ql">➕ Liberar primeiro acesso</div><div class="hint" style="margin:2px 0 8px">A pessoa entra no link do sistema, clica em <b>Primeiro acesso</b> e cria a própria senha. A liberação vale 48 horas.</div>
+    <div class="adm-filtros" style="margin:0"><label style="flex:1;min-width:220px">E-mail<input id="pa-n-email" type="email" placeholder="nome@suacorretora.com.br"></label><label style="min-width:180px">Nome<input id="pa-n-nome" placeholder="Nome completo"></label>
+    <label>Papel<select id="pa-n-papel"><option value="especialista">Especialista</option><option value="leitura">Somente leitura</option><option value="master">Master (tudo)</option></select></label>
+    <button class="adm-b pri" id="pa-liberar" type="button">Liberar primeiro acesso</button></div>
+    ${pendentes.length ? `<div class="ql" style="margin-top:12px">Aguardando primeiro acesso</div>${pendentes.map(r=>{ const ok = r.primeiro_acesso_ate && new Date(r.primeiro_acesso_ate) > new Date();
+      return `<div class="rec" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${escapeHtml(r.email)}</b> <span class="hint" style="margin:0">${escapeHtml(r.nome||'')} · ${escapeHtml(r.papel||'')} · ${ok ? 'liberado até '+escapeHtml(admDh(r.primeiro_acesso_ate)) : 'liberação vencida'}</span><span style="flex:1"></span><button class="adm-b adm-mod" data-e="${escapeHtml(r.email)}">Módulos: ${modsTxt(r.email)}</button><button class="adm-b pa-renovar" data-e="${escapeHtml(r.email)}">${ok?'Renovar':'Liberar de novo'} (48 h)</button></div>`; }).join('')}` : ''}</div>`;
+  const novo = window.ALIANCA.primeiroAcesso ? blocoPA : `<div class="es-box" style="margin:0 0 14px"><div class="ql">➕ Novo usuário</div><div class="hint" style="margin:2px 0 8px">Cria o login já confirmado, com uma senha temporária que a pessoa é obrigada a trocar no primeiro acesso.</div>
     <div class="adm-filtros" style="margin:0"><label style="flex:1;min-width:220px">E-mail<input id="adm-n-email" type="email" placeholder="nome@suacorretora.com.br"></label><label style="min-width:180px">Nome<input id="adm-n-nome" placeholder="Nome completo"></label>
     <label>Papel<select id="adm-n-papel"><option value="especialista">Especialista</option><option value="leitura">Somente leitura</option><option value="master">Master (tudo)</option></select></label>
     <label style="min-width:200px">Senha temporária (10+ caracteres)<input id="adm-n-senha" type="text" autocomplete="off" placeholder="digite ou clique em Gerar"></label>
     <button class="adm-b" id="adm-gerar" type="button">Gerar senha</button><button class="adm-b pri" id="adm-criar" type="button">Criar usuário</button></div></div>`;
   let obrig=false; try{ const r = await sb.rpc('crm_mfa_obrigatorio'); obrig = r.data===true; }catch(e){}
   const mfaBox = `<div class="es-box" style="margin:0 0 14px"><div class="ql">🔐 Verificação em 2 etapas</div><div class="hint" style="margin:2px 0 8px">${ADM.usr.filter(u=>u.mfa).length} de ${ADM.usr.filter(u=>u.ativo).length} usuários ativos já cadastraram o código. Quando ligar a obrigatoriedade, quem ainda não cadastrou será levado a cadastrar no próximo acesso (sem isso não entra).</div><label style="font-size:13px"><input type="checkbox" id="adm-mfa-obrig" ${obrig?'checked':''}> Tornar a verificação em 2 etapas obrigatória para todos</label></div>`;
-  return mfaBox+novo+`<table class="adm-t"><thead><tr><th>Usuário</th><th>Nome</th><th>Papel</th><th>Acesso</th><th>Senha</th><th>2 etapas</th><th>Último acesso</th><th>Criado em</th></tr></thead><tbody>${ADM.usr.map(u=>{ const bl = u.bloqueado || !u.ativo, voce = u.email.toLowerCase()===eu;
+  return mfaBox+novo+`<table class="adm-t"><thead><tr><th>Usuário</th><th>Nome</th><th>Papel</th><th>Módulos</th><th>Acesso</th><th>Senha</th><th>2 etapas</th><th>Último acesso</th><th>Criado em</th></tr></thead><tbody>${ADM.usr.map(u=>{ const bl = u.bloqueado || !u.ativo, voce = u.email.toLowerCase()===eu;
     return `<tr><td><b>${escapeHtml(u.email)}</b>${voce?' <span class="hint">(você)</span>':''}</td>
       <td><input class="adm-nome" data-e="${escapeHtml(u.email)}" value="${escapeHtml(u.nome||'')}" placeholder="Nome"></td>
       <td><select class="adm-papel" data-e="${escapeHtml(u.email)}" ${voce?'disabled title="Você é o master"':''}>${['master','especialista','leitura'].map(p=>`<option value="${p}" ${u.papel===p?'selected':''}>${p==='master'?'Master (tudo)':p==='especialista'?'Especialista':'Somente leitura'}</option>`).join('')}</select></td>
+      <td>${u.papel==='master' ? '<span class="hint" style="margin:0">Todos (master)</span>' : `<button class="adm-b adm-mod" data-e="${escapeHtml(u.email)}">${modsTxt(u.email)}</button>`}</td>
       <td><span class="adm-ac ${bl?'DELETE':'INSERT'}">${bl?'Bloqueado':'Ativo'}</span> ${voce?'':`<button class="adm-b adm-acesso" data-e="${escapeHtml(u.email)}" data-a="${bl?1:0}">${bl?'Liberar':'Bloquear'}</button>`}</td>
       <td><button class="adm-b adm-senha" data-e="${escapeHtml(u.email)}" ${(!u.ativo&&u.papel==='sem cadastro')?'disabled':''}>Definir senha temporária</button></td>
       <td>${u.mfa?'<span class="adm-ac INSERT">Ativa</span> <button class="adm-b adm-mfa-reset" data-e="'+escapeHtml(u.email)+'" title="Perdeu o celular? Remove a 2ª etapa para a pessoa cadastrar de novo">Reiniciar</button>':'<span class="adm-ac DELETE">Não ativou</span>'}</td>
@@ -10243,6 +10304,47 @@ document.addEventListener('click', async e=>{
   const ac = e.target.closest('.adm-acesso'); if(ac){ const lib = ac.dataset.a==='1'; if(!confirm((lib?'Liberar':'Bloquear')+' o acesso de '+ac.dataset.e+'?')) return;
     const { error } = await sb.rpc('crm_admin_acesso',{p_email:ac.dataset.e, p_ativo:lib}); if(error){ showToast('Erro: '+error.message); return; } showToast(lib?'Acesso liberado.':'Acesso bloqueado.'); renderAdmin(); }
 });
+// ===== Admin › Usuários: módulos por pessoa e liberação de primeiro acesso =====
+document.addEventListener('click', async e=>{
+  const mb = e.target.closest('.adm-mod');
+  if(mb){
+    const em = mb.dataset.e, r = (ADM.ext && ADM.ext.get(em.toLowerCase())) || {}, atuais = r.modulos || [];
+    const mods = [...document.querySelectorAll('.nav-btn[data-view]')].filter(b=>b.dataset.view!=='admin' && aliancaModuloLigado(b.dataset.view))
+      .map(b=>({ v:b.dataset.view, l:(b.textContent||'').trim() || b.title || b.dataset.view }));
+    const box = dlgOpen(`<div class="om-title"><div><h3>Módulos de ${escapeHtml(em)}</h3><div class="om-sub">Marque o que esta pessoa vê no menu. Nenhum marcado = vê tudo.</div></div><button data-close>✕</button></div>
+      <div class="dlg-body">${mods.map(m=>`<label class="chk" style="display:block;margin:6px 0"><input type="checkbox" value="${escapeHtml(m.v)}" ${atuais.includes(m.v)?'checked':''}> ${escapeHtml(m.l)}</label>`).join('')}<div class="om-err" id="mod-err"></div></div>
+      <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="mod-ok">Salvar</button></div>`);
+    box.querySelector('#mod-ok').addEventListener('click', async ()=>{
+      const sel = [...box.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value);
+      const { error } = await sb.from('crm_usuarios').update({ modulos: sel.length ? sel : null, atualizado_em: new Date().toISOString() }).ilike('email', em);
+      if(error){ box.querySelector('#mod-err').textContent = 'Erro: '+error.message; return; }
+      dlgClose(); showToast('Módulos salvos. Valem no próximo acesso da pessoa.'); renderAdmin();
+    });
+    return;
+  }
+  const lib = e.target.closest('#pa-liberar'), ren = e.target.closest('.pa-renovar');
+  if(lib || ren){
+    const ate = new Date(Date.now()+48*3600000).toISOString();
+    let upd;
+    if(lib){
+      const email = document.getElementById('pa-n-email').value.trim().toLowerCase(), nome = document.getElementById('pa-n-nome').value.trim(), papel = document.getElementById('pa-n-papel').value;
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showToast('Digite um e-mail válido.'); return; }
+      if(ADM.usr.some(u=>String(u.email).toLowerCase()===email)){ showToast('Esse e-mail já tem login. Use “Definir senha temporária” na tabela.'); return; }
+      upd = await sb.from('crm_usuarios').upsert({ email, nome:nome||null, papel, ativo:true, primeiro_acesso_ate:ate, atualizado_em:new Date().toISOString() }, { onConflict:'email' });
+    } else {
+      upd = await sb.from('crm_usuarios').update({ primeiro_acesso_ate:ate, ativo:true, atualizado_em:new Date().toISOString() }).ilike('email', ren.dataset.e);
+    }
+    if(upd.error){ showToast('Erro: '+upd.error.message); return; }
+    const link = location.origin + location.pathname;
+    dlgOpen(`<h3 style="margin-top:0">Primeiro acesso liberado por 48 horas</h3><div class="hint">Envie para a pessoa: ela abre o link, clica em <b>Primeiro acesso</b>, digita o e-mail e cria a própria senha.</div>
+      <div style="margin:12px 0;padding:12px;background:#f4f5fb;border-radius:10px;font-size:14px"><div><b>Link:</b> ${escapeHtml(link)}</div><div style="margin-top:6px"><b>E-mail:</b> ${escapeHtml(lib ? document.getElementById('pa-n-email').value.trim() : ren.dataset.e)}</div></div>
+      <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end"><button class="adm-b pri" id="pa-copiar">Copiar mensagem</button><button class="adm-b" onclick="dlgClose()">Fechar</button></div>`);
+    const msg = 'Seu acesso ao CRM Aliança está liberado. Abra '+link+' , clique em "Primeiro acesso", use este e-mail e crie a sua senha (vale por 48 horas).';
+    document.getElementById('pa-copiar').addEventListener('click', async ev=>{ try{ await navigator.clipboard.writeText(msg); ev.target.textContent = 'Copiado ✓'; }catch(x){ showToast('Não consegui copiar; selecione e copie à mão.'); } });
+    renderAdmin();
+  }
+});
+
 // ===== Admin › Melhorias: propostas do agente de boas práticas (outros sistemas → Aliança). Só quem está em crm_config 'propostas_aprovadores' vê. =====
 const MEL = { rows:[], f:'proposta', ok:null };
 const MEL_ST = [['proposta','Para decidir','#0018fc'],['aprovada','Aplicar','#1a7f4b'],['depois','Depois','#b7791f'],['recusada','Não aplicar','#c23636'],['em_construcao','Em construção','#6b46c1'],['publicada','No ar','#0f766e']];

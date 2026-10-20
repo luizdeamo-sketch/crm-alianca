@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CRM Aliança">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>CRM Aliança</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{--brand:#0018fc;--navy:#111827;--bg:#f4f5f9;--card:#fff;--line:#e3e6ee;--ink:#0b1433;--soft:#4a5270;--faint:#7a819c;--ok:#0f7a53;--warn:#c8790b;--bad:#c23636}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Segoe UI',system-ui,Arial,sans-serif;font-size:16px}
+body{padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:10px}
+header b{font-size:18px;letter-spacing:-.3px}header small{opacity:.7;font-size:12px}
+header .sp{flex:1}header button{background:transparent;border:0;color:#fff;font-size:15px;padding:6px 8px}
+main{padding:14px;max-width:560px;margin:0 auto}
+.hide{display:none!important}
+input,textarea,select{width:100%;font:inherit;border:1px solid #b8bed4;border-radius:12px;padding:14px;background:#fff;color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:15px 16px;font:inherit;font-weight:700;background:var(--brand);color:#fff;width:100%}
+.btn.sec{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.btn.sm{width:auto;padding:9px 14px;font-size:14px;border-radius:10px}
+.grid3{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
+.big{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;font:inherit;text-align:left;color:var(--ink)}
+.big i{font-style:normal;font-size:28px}.big b{display:block;font-size:17px}.big span{font-size:13px;color:var(--soft)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.row{display:flex;align-items:center;gap:8px}.row .sp{flex:1;min-width:0}
+.nm{font-weight:700}.mut{color:var(--soft);font-size:13px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#e8ecff;color:var(--brand)}
+.tag.warn{background:#fbeed9;color:#8a5406}.tag.bad{background:#fde4e4;color:var(--bad)}.tag.ok{background:#dff6ea;color:var(--ok)}
+.ic{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:20px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);flex:none}
+.ic.wa{background:#e8f8ee;border-color:#bfe8cd}.ic.ok{background:#fff;color:var(--ok)}
+h2{font-size:15px;margin:18px 0 4px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
+.msg{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;line-height:1.55;font-size:15px}
+.sheet{position:fixed;inset:0;background:rgba(11,20,51,.55);z-index:20;display:flex;align-items:flex-end}
+.sheet>div{background:#fff;border-radius:20px 20px 0 0;padding:16px;width:100%;max-height:88vh;overflow:auto;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.chip{border:1px solid #cfd4e6;border-radius:999px;padding:8px 12px;background:#fff;font:inherit;font-size:14px}.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.err{color:var(--bad);font-size:14px;margin-top:8px}
+.toast{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));background:#0b1433;color:#fff;padding:12px 14px;border-radius:12px;z-index:30;font-size:14px}
+.lab{font-size:12px;font-weight:700;color:var(--soft);margin:12px 0 4px}
+</style>
+</head>
+<body>
+<header><div><b>CRM Aliança</b><br><small id="quem"></small></div><span class="sp"></span><button id="voltar" class="hide">← Início</button><button id="sair" class="hide">Sair</button></header>
+<main>
+
+<section id="v-login" class="hide">
+  <div class="card" style="margin-top:24px"><div class="lab">E-mail</div><input id="l-email" type="email" autocomplete="username" inputmode="email"><div class="lab">Senha</div><input id="l-senha" type="password" autocomplete="current-password">
+  <div style="margin-top:14px"><button class="btn" id="l-ok">Entrar</button></div><div class="err" id="l-err"></div></div>
+</section>
+
+<section id="v-troca" class="hide">
+  <div class="card" style="margin-top:24px"><b>Defina a sua senha</b><div class="mut">Por segurança, troque a senha temporária por uma só sua.</div><div class="lab">Nova senha (8+ caracteres)</div><input id="t-senha" type="password" autocomplete="new-password"><div style="margin-top:14px"><button class="btn" id="t-ok">Salvar senha</button></div><div class="err" id="t-err"></div></div>
+</section>
+
+<section id="v-mfa" class="hide">
+  <div class="card" style="margin-top:24px"><b id="m-h">Confirme o código</b><div class="mut" id="m-sub">Abra o aplicativo autenticador e digite o código de 6 números.</div><div id="m-corpo"><div class="lab">Código</div><input id="m-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="text-align:center;font-size:22px;letter-spacing:.3em"><div style="margin-top:14px"><button class="btn" id="m-ok">Confirmar</button> <button class="btn sec sm" id="m-sair" type="button">Sair</button></div></div><div class="err" id="m-err"></div></div>
+</section>
+
+<section id="v-home" class="hide">
+  <input id="busca" type="search" placeholder="🔎 Buscar cliente (nome ou telefone)" autocomplete="off">
+  <div id="res"></div>
+  <div class="grid3" id="menu">
+    <button class="big" id="b-hoje"><i>☀️</i><div><b>Hoje</b><span>O que fazer agora e lembretes</span></div></button>
+    <button class="big" id="b-resumo"><i>✨</i><div><b>Resumo do dia</b><span>A IA lê o CRM e diz por onde começar</span></div></button>
+    <button class="big" id="b-reuniao"><i>🎙️</i><div><b>Registrar reunião</b><span>Cole ou envie a transcrição</span></div></button>
+  </div>
+  <div class="card hide" id="instalar" style="margin-top:16px"><b>Instalar no celular</b><div class="mut" id="instalar-txt"></div><div style="margin-top:8px"><button class="btn sm" id="instalar-bt">Instalar</button></div></div>
+</section>
+
+<section id="v-hoje" class="hide"><div id="hoje-corpo"><div class="mut">Carregando…</div></div></section>
+
+<section id="v-resumo" class="hide">
+  <div id="resumo-corpo"><div class="mut">A IA está lendo o CRM…</div></div>
+</section>
+
+<section id="v-reuniao" class="hide">
+  <div class="lab">Cliente</div><input id="r-busca" type="search" placeholder="Buscar cliente da reunião" autocomplete="off"><div id="r-res"></div><div id="r-sel" class="card hide"></div>
+  <div class="lab">Transcrição</div><textarea id="r-txt" placeholder="Cole aqui o texto da reunião…"></textarea>
+  <div class="row" style="margin-top:8px"><input id="r-file" type="file" accept=".txt,.md,.vtt,.srt,.text,text/plain" class="hide"><button class="btn sec sm" id="r-arq">📎 Enviar arquivo de texto</button><span class="mut" id="r-arq-nome"></span></div>
+  <div style="margin-top:14px"><button class="btn" id="r-ok">Analisar e salvar na ficha</button></div><div class="err" id="r-err"></div><div id="r-out"></div>
+</section>
+
+<section id="v-ficha" class="hide"><div id="ficha-corpo"></div></section>
+</main>
+<div id="sheet" class="sheet hide"><div id="sheet-corpo"></div></div>
+
+<script>
+const SUPABASE_URL = "https://iuotvottnailofxbaynx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1b3R2b3R0bmFpbG9meGJheW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1Mjg2NjMsImV4cCI6MjEwODEwNDY2M30._0FhywQ4Vq3km5Rl4tHEPtCLBVom4VAGaXG3X3nrUyQ";   // chave pública (anon), a mesma do CRM principal
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let EU = { email:'', nome:'' }, MODELOS = null, HIST = [];
+const hojeISO = ()=>{ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const dBR = s => s ? String(s).slice(0,10).split('-').reverse().join('/') : '';
+const dias = s => Math.round((new Date(String(s).slice(0,10)+'T00:00:00') - new Date(hojeISO()+'T00:00:00'))/86400000);
+const digitos = t => String(t||'').replace(/\D/g,'');
+const primeiro = n => { const t = String(n||'').trim().split(/\s+/)[0]||''; return t ? t.charAt(0).toUpperCase()+t.slice(1).toLowerCase() : ''; };
+const waUrl = (tel, txt) => { let d = digitos(tel); if(d.length<10) return ''; if(d.length<=11) d = '55'+d; return 'https://wa.me/'+d+(txt?'?text='+encodeURIComponent(txt):''); };
+function toast(m){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(()=>t.remove(), 2600); }
+
+// ----- telas -----
+const TELAS = ['login','troca','mfa','home','hoje','resumo','reuniao','ficha'];
+function ir(nome, empilha=true){
+  TELAS.forEach(t=>$('v-'+t).classList.toggle('hide', t!==nome));
+  $('voltar').classList.toggle('hide', !(nome!=='home' && nome!=='login' && nome!=='troca' && nome!=='mfa')); $('sair').classList.toggle('hide', nome!=='home');
+  if(empilha && nome!=='home') HIST.push(nome); window.scrollTo(0,0);
+}
+$('voltar').onclick = ()=>{ HIST = []; ir('home'); };
+$('sair').onclick = async ()=>{ await sb.auth.signOut({scope:'local'}); location.reload(); };
+
+// ----- 2 etapas -----
+$('m-ok').onclick = async ()=>{ const code = $('m-code').value.replace(/\D/g,''); $('m-err').textContent=''; if(code.length!==6){ $('m-err').textContent='Digite os 6 números.'; return; }
+  const { error } = await sb.auth.mfa.challengeAndVerify({ factorId:window._fid, code }); if(error){ $('m-err').textContent='Código incorreto ou vencido.'; return; } boot(); };
+$('m-sair').onclick = async ()=>{ await sb.auth.signOut({scope:'local'}); location.reload(); };
+// ----- entrar -----
+$('l-ok').onclick = async ()=>{
+  $('l-err').textContent = ''; const { error } = await sb.auth.signInWithPassword({ email:$('l-email').value.trim(), password:$('l-senha').value });
+  if(error){ $('l-err').textContent = error.message; return; } boot(); };
+$('t-ok').onclick = async ()=>{
+  const s = $('t-senha').value; if(s.length<8){ $('t-err').textContent = 'Use pelo menos 8 caracteres.'; return; }
+  const { error } = await sb.auth.updateUser({ password:s, data:{ must_change_password:false } }); if(error){ $('t-err').textContent = error.message; return; } boot(); };
+async function boot(){
+  const { data:{ user } } = await sb.auth.getUser(); if(!user){ ir('login', false); return; }
+  if(user.user_metadata && user.user_metadata.must_change_password){ ir('troca', false); return; }
+  let aal=null, fat=[]; try{ const a = await sb.auth.mfa.getAuthenticatorAssuranceLevel(); aal = a.data; const f = await sb.auth.mfa.listFactors(); fat = (f.data&&f.data.totp)||[]; }catch(e){}
+  if(aal && aal.nextLevel==='aal2' && aal.currentLevel!=='aal2' && fat.length){ window._fid = fat[0].id; ir('mfa', false); $('m-code').focus(); return; }
+  if(!fat.length){ let ob=false; try{ const r = await sb.rpc('crm_mfa_obrigatorio'); ob = r.data===true; }catch(e){} if(ob){ $('m-h').textContent = 'Ative a verificação em 2 etapas'; $('m-sub').textContent = 'Entre no CRM Aliança pelo computador, ative a verificação em 2 etapas (botão no topo) e volte aqui.'; $('m-corpo').innerHTML = '<div style="margin-top:14px"><button class="btn sec sm" id="m-sair2">Sair</button></div>'; ir('mfa', false); $('m-sair2').onclick = async ()=>{ await sb.auth.signOut({scope:'local'}); location.reload(); }; return; } }
+  EU.email = user.email; const { data:u } = await sb.from('crm_usuarios').select('nome').ilike('email', user.email).maybeSingle();
+  EU.nome = (u && u.nome) || user.email.split('@')[0]; $('quem').textContent = primeiro(EU.nome);
+  ir('home', false); $('busca').focus();
+}
+
+// ----- busca de cliente (compartilhada) -----
+function ligaBusca(input, saida, aoEscolher){
+  let t = null;
+  input.oninput = ()=>{ clearTimeout(t); const q = input.value.trim(); if(q.length<2){ saida.innerHTML = ''; return; }
+    t = setTimeout(async ()=>{
+      const d = digitos(q); let f = `nome.ilike.%${q.replace(/[,()%]/g,' ')}%`; if(d.length>=4) f += `,telefone.ilike.%${d}%`;
+      const { data } = await sb.from('crm_pessoas').select('id,nome,telefone').or(f).order('nome').limit(10);
+      saida.innerHTML = (data||[]).map(p=>`<div class="card row" data-id="${p.id}" style="cursor:pointer"><div class="sp"><div class="nm">${esc(p.nome)}</div><div class="mut">${esc(p.telefone||'sem telefone')}</div></div><span>›</span></div>`).join('') || '<div class="mut" style="padding:8px">Ninguém encontrado.</div>';
+      saida.querySelectorAll('[data-id]').forEach(el=>el.onclick = ()=>aoEscolher((data||[]).find(x=>x.id===el.dataset.id)));
+    }, 250); };
+}
+ligaBusca($('busca'), $('res'), p=>{ $('busca').value = ''; $('res').innerHTML = ''; ficha(p.id); });
+
+// ----- mensagens prontas (folha de baixo) -----
+async function modelos(){ if(!MODELOS){ const { data } = await sb.from('crm_mensagens_modelo').select('momento,titulo,texto').eq('ativo', true).order('ordem'); MODELOS = data||[]; } return MODELOS; }
+function personaliza(txt, p, ex){
+  ex = ex||{}; const v = { primeiro_nome:primeiro(p.nome), corretor:primeiro(EU.nome), produto:ex.produto||'sua proteção', seguradora:ex.seguradora||'', vencimento:ex.vencimento?dBR(ex.vencimento):'', familiar:ex.familiar||'', parentesco:ex.parentesco||'familiar' };
+  return String(txt||'').replace(/ \(\{seguradora\}\)/g, v.seguradora?' ('+v.seguradora+')':'').replace(/\{(\w+)\}/g, (m,k)=>v[k]!==undefined?v[k]:m);
+}
+async function abrirMensagem(p, sugerido, ex){
+  const ms = await modelos(); let atual = ms.find(m=>m.momento===sugerido) || ms[0]; if(!atual){ toast('Sem modelos de mensagem.'); return; }
+  const desenha = ()=>{
+    $('sheet-corpo').innerHTML = `<div class="row"><b class="sp">Mensagem para ${esc(primeiro(p.nome))}</b><button class="chip" id="sh-x">Fechar</button></div>
+      <div class="chips">${ms.map(m=>`<button class="chip ${m.momento===atual.momento?'on':''}" data-m="${m.momento}">${esc(m.titulo)}</button>`).join('')}</div>
+      <textarea id="sh-txt">${esc(personaliza(atual.texto, p, ex))}</textarea>
+      <div style="margin-top:10px;display:grid;gap:8px"><button class="btn" id="sh-wa">💬 Abrir no WhatsApp</button></div>`;
+    $('sh-x').onclick = ()=>$('sheet').classList.add('hide');
+    $('sheet-corpo').querySelectorAll('[data-m]').forEach(b=>b.onclick = ()=>{ atual = ms.find(m=>m.momento===b.dataset.m); desenha(); });
+    $('sh-wa').onclick = ()=>{ const u = waUrl(p.telefone, $('sh-txt').value); if(!u){ toast('Sem telefone cadastrado.'); return; } window.open(u, '_blank', 'noopener'); };
+  };
+  desenha(); $('sheet').classList.remove('hide');
+}
+$('sheet').onclick = e=>{ if(e.target===$('sheet')) $('sheet').classList.add('hide'); };
+
+// ----- ficha curta -----
+async function ficha(id){
+  ir('ficha'); const c = $('ficha-corpo'); c.innerHTML = '<div class="mut">Carregando…</div>';
+  const [p, ap, at, fam] = await Promise.all([
+    sb.from('crm_pessoas').select('id,nome,telefone,email,origem,proxima_acao,proxima_data,data_nascimento,sexo').eq('id', id).maybeSingle(),
+    sb.from('crm_apolices').select('tipo_seguro,seguradora,data_vencimento,status').eq('pessoa_id', id).order('data_vencimento', {ascending:false}).limit(8),
+    sb.from('crm_atividades').select('data_hora,tipo,resumo').eq('pessoa_id', id).order('data_hora', {ascending:false}).limit(3),
+    sb.from('crm_familiares').select('nome,parentesco,data_nascimento,herdeiro').eq('pessoa_id', id)]);
+  const x = p.data; if(!x){ c.innerHTML = '<div class="err">Cliente não encontrado.</div>'; return; }
+  const wa = waUrl(x.telefone), tel = digitos(x.telefone);
+  const apos = (ap.data||[]).filter(a=>a.status!=='cancelada');
+  c.innerHTML = `<div class="card"><div class="nm" style="font-size:20px">${esc(x.nome)}</div><div class="mut">${esc(x.origem||'')}${x.email?' · '+esc(x.email):''}</div>
+      <div class="row" style="margin-top:12px"><a class="btn ${tel?'':'sec'}" style="flex:1;text-decoration:none" ${tel?`href="tel:${tel}"`:''}>📞 Ligar</a><a class="btn ${wa?'':'sec'}" style="flex:1;text-decoration:none;background:#16a34a" ${wa?`href="${wa}" target="_blank" rel="noopener"`:''}>💬 WhatsApp</a></div>
+      <div class="mut" style="margin-top:8px">${esc(x.telefone||'sem telefone')}</div></div>
+    <button class="btn sec" id="f-msg" style="margin-top:6px">✉️ Mensagem pronta</button>
+    ${x.proxima_acao?`<h2>Próxima ação</h2><div class="card"><b>${esc(x.proxima_acao)}</b> ${x.proxima_data?`<span class="tag ${dias(x.proxima_data)<0?'bad':(dias(x.proxima_data)===0?'warn':'')}">${dBR(x.proxima_data)}</span>`:''}</div>`:''}
+    <h2>Carteira</h2>${apos.length?apos.map(a=>`<div class="card row"><div class="sp"><div class="nm">${esc(a.tipo_seguro||'Apólice')}</div><div class="mut">${esc(a.seguradora||'')}</div></div>${a.data_vencimento?`<span class="tag ${dias(a.data_vencimento)<=30&&dias(a.data_vencimento)>=0?'warn':(dias(a.data_vencimento)<0?'bad':'')}">vence ${dBR(a.data_vencimento)}</span>`:''}</div>`).join(''):'<div class="mut">Sem apólices.</div>'}
+    ${(fam.data||[]).length?`<h2>Família</h2>${fam.data.map(f=>`<div class="card row"><div class="sp"><b>${esc(f.nome)}</b> <span class="mut">${esc(f.parentesco)}${f.herdeiro?' · herdeiro':''}</span></div><span class="mut">${f.data_nascimento?'🎂 '+dBR(f.data_nascimento).slice(0,5):''}</span></div>`).join('')}`:''}
+    <h2>Últimas conversas</h2>${(at.data||[]).length?at.data.map(a=>`<div class="card"><div class="mut">${dBR(a.data_hora)} · ${esc(a.tipo||'')}</div><div>${esc(String(a.resumo||'').slice(0,220))}</div></div>`).join(''):'<div class="mut">Nada registrado.</div>'}
+    <h2>Adicionar observação</h2><textarea id="f-obs" placeholder="O que aconteceu ou o que combinaram…"></textarea>
+    <div style="margin-top:8px"><button class="btn" id="f-salvar">Salvar observação</button></div>
+    ${x.data_nascimento?'':`<h2>Aniversário</h2><div class="row"><input id="f-nasc" type="date"><button class="btn sm" id="f-nasc-ok">Salvar</button></div><div class="mut" style="margin-top:4px">Com a data, o CRM lembra de parabenizar.</div>`}`;
+  $('f-msg').onclick = ()=>abrirMensagem(x, 'follow_up');
+  $('f-salvar').onclick = async ()=>{ const t = $('f-obs').value.trim(); if(!t){ toast('Escreva a observação.'); return; }
+    const { error } = await sb.from('crm_atividades').insert({ pessoa_id:id, tipo:'outro', data_hora:new Date().toISOString(), resumo:'Observação (celular): '+t, resultado:'Outro', responsavel:EU.nome }); if(error){ toast('Erro: '+error.message); return; } toast('Observação salva'); ficha(id); };
+  const nb = $('f-nasc-ok'); if(nb) nb.onclick = async ()=>{ const d = $('f-nasc').value; if(!d) return; const { error } = await sb.from('crm_pessoas').update({ data_nascimento:d }).eq('id', id); if(error){ toast('Erro: '+error.message); return; } toast('Aniversário salvo'); ficha(id); };
+}
+
+// ----- Hoje: ações, retornos, avisos e lembretes numa lista só -----
+$('b-hoje').onclick = hoje;
+async function hoje(){
+  ir('hoje'); const c = $('hoje-corpo'); c.innerHTML = '<div class="mut">Carregando…</div>'; const h = hojeISO();
+  const [acoes, ret, avisos, lemb, ag] = await Promise.all([
+    sb.from('crm_pessoas').select('id,nome,telefone,proxima_acao,proxima_data').not('proxima_acao','is',null).lte('proxima_data', h).order('proxima_data').limit(40),
+    sb.from('crm_prospeccao').select('id,nome,telefone,pessoa_id,retorno_data,status').lte('retorno_data', h).not('status','in','(Virou cliente,Sem interesse)').order('retorno_data').limit(40),
+    sb.from('crm_avisos').select('id,tipo,titulo,data_aviso,pessoa_id,crm_pessoas(id,nome,telefone)').eq('status','pendente').in('tipo',['renovacao','pos_venda']).lte('data_aviso', h).order('data_aviso').limit(30),
+    sb.rpc('crm_lembretes', { p_dias:3 }),
+    sb.from('crm_agenda').select('titulo,data_inicio').gte('data_inicio', h+'T00:00:00-03:00').lt('data_inicio', h+'T23:59:59-03:00').order('data_inicio')]);
+  const ids = new Set((acoes.data||[]).map(a=>a.id)); const rets = (ret.data||[]).filter(r=>!r.pessoa_id || !ids.has(r.pessoa_id));
+  const botoes = (p, momento, ex, extraBt)=>`<span class="row">${p.telefone?`<a class="ic" href="tel:${digitos(p.telefone)}">📞</a>`:''}<button class="ic wa" data-msg='${esc(JSON.stringify({id:p.id||null, nome:p.nome, telefone:p.telefone, momento, ex:ex||{}}))}'>💬</button>${extraBt||''}</span>`;
+  const sec = (t, n, html)=> n ? `<h2>${t} (${n})</h2>${html}` : '';
+  const acoesH = (acoes.data||[]).map(a=>`<div class="card row"><div class="sp" data-f="${a.id}" style="cursor:pointer"><div class="nm">${esc(a.nome)}</div><div class="mut">${esc(a.proxima_acao)} <span class="tag ${dias(a.proxima_data)<0?'bad':'warn'}">${dias(a.proxima_data)<0?'atrasada '+(-dias(a.proxima_data))+'d':'hoje'}</span></div></div>${botoes(a,'follow_up')}</div>`).join('');
+  const retH = rets.map(r=>`<div class="card row"><div class="sp" ${r.pessoa_id?`data-f="${r.pessoa_id}" style="cursor:pointer"`:''}><div class="nm">${esc(r.nome)}</div><div class="mut">${esc(r.status)} · retorno ${dBR(r.retorno_data)}</div></div>${botoes({id:r.pessoa_id,nome:r.nome,telefone:r.telefone},'follow_up')}</div>`).join('');
+  const avH = (avisos.data||[]).map(a=>{ const p = a.crm_pessoas; if(!p) return ''; const mom = a.tipo==='pos_venda'?'pos_venda':(dias(a.data_aviso)>=-100?(/30 dias/.test(a.titulo)?'renovacao_30':/15 dias/.test(a.titulo)?'renovacao_15':'renovacao_7'):'renovacao_7');
+    return `<div class="card row"><div class="sp" data-f="${p.id}" style="cursor:pointer"><div class="nm">${esc(p.nome)}</div><div class="mut">${esc(a.titulo)}</div></div>${botoes(p, mom, {}, `<button class="ic ok" data-aviso="${a.id}">✔</button>`)}</div>`; }).join('');
+  const lemH = (lemb.data||[]).slice(0,30).map(r=>{ const camp = r.tipo==='data_comemorativa';
+    return `<div class="card row"><div class="sp" ${r.pessoa_id?`data-f="${r.pessoa_id}" style="cursor:pointer"`:''}><div class="nm">${esc(r.pessoa_id?r.nome:r.titulo)}</div><div class="mut">${esc(r.pessoa_id?r.titulo:'Toque em Lista para ver os clientes')}</div></div>
+      <span class="row">${camp?`<button class="chip" data-camp='${esc(JSON.stringify(r))}'>Lista</button>`:`<button class="ic wa" data-msg='${esc(JSON.stringify({id:r.pessoa_id,nome:r.nome,telefone:r.telefone,momento:r.momento,ex:r.extra||{}}))}'>💬</button>`}<button class="ic ok" data-lemb='${esc(JSON.stringify(r))}'>✔</button></span></div>`; }).join('');
+  const agH = (ag.data||[]).map(e=>`<div class="card row"><b>${String(e.data_inicio).slice(11,16)}</b><div class="sp">${esc(e.titulo)}</div></div>`).join('');
+  const tudo = sec('Compromissos de hoje', (ag.data||[]).length, agH) + sec('Fazer agora', (acoes.data||[]).length, acoesH) + sec('Retornos da prospecção', rets.length, retH) + sec('Renovações e pós-venda', (avisos.data||[]).length, avH) + sec('Relacionamento e datas', (lemb.data||[]).length, lemH);
+  c.innerHTML = tudo || '<div class="card"><b>Tudo em dia 🎉</b><div class="mut">Nada pendente para hoje.</div></div>';
+  c.querySelectorAll('[data-f]').forEach(el=>el.onclick = ()=>ficha(el.dataset.f));
+  c.querySelectorAll('[data-msg]').forEach(el=>el.onclick = ()=>{ const m = JSON.parse(el.dataset.msg); abrirMensagem({ id:m.id, nome:m.nome, telefone:m.telefone }, m.momento, m.ex); });
+  c.querySelectorAll('[data-aviso]').forEach(el=>el.onclick = async ()=>{ const { error } = await sb.from('crm_avisos').update({ status:'feito', feito_em:new Date().toISOString(), feito_por:EU.nome }).eq('id', el.dataset.aviso); if(error){ toast('Erro: '+error.message); return; } el.closest('.card').remove(); toast('Feito'); });
+  c.querySelectorAll('[data-lemb]').forEach(el=>el.onclick = async ()=>{ const r = JSON.parse(el.dataset.lemb);
+    const { error } = await sb.from('crm_avisos').insert({ chave:r.chave, tipo:r.tipo, pessoa_id:r.pessoa_id||null, data_aviso:r.data_ref, titulo:r.titulo, status:'feito', feito_em:new Date().toISOString(), feito_por:EU.nome });
+    if(error && !/duplicate|unique/i.test(error.message)){ toast('Erro: '+error.message); return; }
+    if(r.tipo==='relacionamento' && r.pessoa_id) await sb.from('crm_atividades').insert({ pessoa_id:r.pessoa_id, tipo:'whatsapp', data_hora:new Date().toISOString(), resumo:'Contato de relacionamento (lembrete): '+r.titulo, resultado:'Conversou', responsavel:EU.nome });
+    el.closest('.card').remove(); toast('Feito'); });
+  c.querySelectorAll('[data-camp]').forEach(el=>el.onclick = async ()=>{ const r = JSON.parse(el.dataset.camp); const { data } = await sb.rpc('crm_destinatarios', { p_publico:r.extra.publico }); const ms = await modelos(); const mod = (ms.find(m=>m.momento===r.momento)||{}).texto||'';
+    $('sheet-corpo').innerHTML = `<div class="row"><b class="sp">${esc(r.titulo)}</b><button class="chip" id="sh-x">Fechar</button></div>${(data||[]).map(x=>{ const u = waUrl(x.telefone, personaliza(mod, x)); return `<div class="card row"><div class="sp"><div class="nm">${esc(x.nome)}</div></div>${u?`<a class="ic wa" target="_blank" rel="noopener" href="${u}">💬</a>`:'<span class="mut">sem telefone</span>'}</div>`; }).join('')||'<div class="mut">Ninguém neste público.</div>'}`;
+    $('sh-x').onclick = ()=>$('sheet').classList.add('hide'); $('sheet').classList.remove('hide'); });
+}
+
+// ----- Resumo do dia (IA) -----
+$('b-resumo').onclick = async ()=>{
+  ir('resumo'); const c = $('resumo-corpo'); c.innerHTML = '<div class="card"><b>✨ Lendo o CRM…</b><div class="mut">Isso leva alguns segundos.</div></div>';
+  const { data, error } = await sb.functions.invoke('resumo-corretor');
+  if(error || !data || data.error){ c.innerHTML = '<div class="card"><div class="err">Não consegui gerar o resumo agora.</div><div class="mut">'+esc((data&&data.error)||(error&&error.message)||'')+'</div></div>'; return; }
+  c.innerHTML = `<div class="msg">${esc(data.texto)}</div><div class="mut" style="margin:8px 0">${data.ia?'Resumo feito pela IA a partir do seu CRM.':'Resumo simples (a IA não respondeu).'}</div><button class="btn" id="rs-hoje">Ver a lista de hoje</button>`;
+  $('rs-hoje').onclick = hoje;
+};
+
+// ----- Registrar reunião -----
+let REU = { pessoa:null };
+$('b-reuniao').onclick = ()=>{ REU = { pessoa:null }; $('r-sel').classList.add('hide'); $('r-out').innerHTML = ''; $('r-err').textContent = ''; $('r-txt').value = ''; $('r-busca').value = ''; $('r-arq-nome').textContent = ''; ir('reuniao'); };
+ligaBusca($('r-busca'), $('r-res'), p=>{ REU.pessoa = p; $('r-res').innerHTML = ''; $('r-busca').value = ''; const s = $('r-sel'); s.classList.remove('hide'); s.innerHTML = `<b>${esc(p.nome)}</b> <span class="mut">${esc(p.telefone||'')}</span>`; });
+$('r-arq').onclick = ()=>$('r-file').click();
+$('r-file').onchange = async ()=>{ const f = $('r-file').files[0]; if(!f) return; let t = await f.text();
+  t = t.replace(/\r/g,'').split('\n').filter(l=>!/^\d+$/.test(l.trim()) && !/-->/.test(l) && !/^WEBVTT/i.test(l.trim())).join('\n').trim(); $('r-txt').value = t; $('r-arq-nome').textContent = f.name; };
+$('r-ok').onclick = async ()=>{
+  const err = $('r-err'), out = $('r-out'); err.textContent = ''; out.innerHTML = '';
+  if(!REU.pessoa){ err.textContent = 'Escolha o cliente da reunião.'; return; } const t = $('r-txt').value.trim(); if(t.length<200){ err.textContent = 'A transcrição está curta demais (mínimo de 200 caracteres) para a IA analisar.'; return; }
+  $('r-ok').disabled = true; $('r-ok').textContent = 'Analisando…';
+  try{
+    const { data:reu, error:e1 } = await sb.from('crm_reunioes').insert({ pessoa_id:REU.pessoa.id, titulo:'Reunião com '+REU.pessoa.nome+' (celular)', data_hora:new Date().toISOString(), formato:'presencial', transcricao:t, status:'rascunho', criado_por:EU.nome }).select('id').single(); if(e1) throw e1;
+    const { data, error:e2 } = await sb.functions.invoke('analisar-reuniao', { body:{ reuniao_id:reu.id } }); if(e2 || (data&&data.error)) throw new Error((data&&data.error)||e2.message);
+    const a = data.analise||{};
+    await sb.from('crm_atividades').insert({ pessoa_id:REU.pessoa.id, tipo:'reuniao', data_hora:new Date().toISOString(), resumo:'Reunião (celular): '+(a.nota_para_crm||a.resumo||'registrada'), resultado:'Conversou', responsavel:EU.nome });
+    out.innerHTML = `<div class="card" style="margin-top:14px"><b>✅ Salvo na ficha de ${esc(primeiro(REU.pessoa.nome))}</b><div class="msg" style="margin-top:8px">${esc(a.resumo||a.nota_para_crm||'')}</div>
+      ${(a.proximas_acoes||[]).length?`<h2>Próximas ações sugeridas</h2>${a.proximas_acoes.map(x=>`<div class="card">${esc(x.acao)}${x.prazo_dias?` <span class="tag">em ${x.prazo_dias} dias</span>`:''}</div>`).join('')}`:''}
+      ${a.estagio_sugerido&&a.estagio_sugerido.etapa?`<div class="mut" style="margin-top:8px">Etapa sugerida: <b>${esc(a.estagio_sugerido.etapa)}</b>. Para aplicar no funil, abra a reunião no CRM completo (aba Reuniões).</div>`:''}</div>`;
+  }catch(e){ err.textContent = 'Erro: '+(e.message||e); }
+  $('r-ok').disabled = false; $('r-ok').textContent = 'Analisar e salvar na ficha';
+};
+
+// ----- instalar -----
+let EV = null; window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); EV = e; mostraInstalar(); });
+function mostraInstalar(){
+  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent); if(!EV && !ios) return;
+  $('instalar').classList.remove('hide'); $('instalar-txt').textContent = ios ? 'No iPhone: toque em Compartilhar (quadrado com seta) e depois em "Adicionar à Tela de Início".' : 'Instale para abrir como um aplicativo, direto da tela inicial.';
+  $('instalar-bt').classList.toggle('hide', ios); $('instalar-bt').onclick = async ()=>{ if(EV){ EV.prompt(); await EV.userChoice; EV = null; $('instalar').classList.add('hide'); } };
+}
+mostraInstalar();
+if('serviceWorker' in navigator) window.addEventListener('load', ()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+sb.auth.getSession().then(({data})=>{ if(data.session) boot(); else ir('login', false); });
+</script>
+</body>
+</html>

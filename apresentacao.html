@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Apresentação · CRM Aliança</title>
+<meta name="description" content="Quem sou eu e como vai ser a nossa conversa (demonstração).">
+<style>
+  :root{ --navy:#111827; --navy-deep:#0d1117; --brand:#9c7518; --gold:#d7aa42; --ink:#111827; --ink-soft:#4b5563; --bg:#f6f5f2; --line:#e7e3da; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:16px; line-height:1.55; }
+  h1,h2{ margin:0; letter-spacing:-.01em; }
+  .topo{ background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%); color:#fff; padding:28px 20px 36px; }
+  .topo img{ height:46px; display:block; margin-bottom:24px; }
+  .topo h1{ font-size:27px; line-height:1.2; }
+  .topo p{ color:#d1d5db; margin:10px 0 0; }
+  .aviso{ display:inline-block; margin-top:14px; background:rgba(215,170,66,.18); color:var(--gold); border-radius:999px; padding:3px 12px; font-size:13px; }
+  main{ max-width:640px; margin:-18px auto 0; padding:0 16px 40px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 20px; margin-bottom:14px; }
+  .card h2{ font-size:19px; margin-bottom:12px; }
+  .passos{ list-style:none; padding:0; margin:0; counter-reset:p; }
+  .passos li{ counter-increment:p; position:relative; padding:0 0 14px 42px; }
+  .passos li::before{ content:counter(p); position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%; background:var(--brand); color:#fff; font-weight:600; font-size:14px; display:grid; place-items:center; }
+  .passos b{ display:block; }
+  .passos span{ color:var(--ink-soft); font-size:15px; }
+  .trilha{ display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+  .trilha span{ background:#f7f1e3; color:var(--brand); border-radius:999px; padding:4px 12px; font-size:14px; font-weight:600; }
+  .fatos{ margin:0; padding:0; list-style:none; }
+  .fatos li{ padding:9px 0 9px 26px; border-top:1px solid var(--line); position:relative; }
+  .fatos li:first-child{ border-top:0; }
+  .fatos li::before{ content:''; position:absolute; left:4px; top:17px; width:9px; height:9px; border-radius:50%; background:var(--gold); }
+  .quem{ display:flex; gap:14px; align-items:center; }
+  .avatar{ width:58px; height:58px; border-radius:50%; background:var(--navy); color:var(--gold); display:grid; place-items:center; font-weight:700; font-size:20px; flex:none; }
+  .quem p{ margin:2px 0 0; color:var(--ink-soft); font-size:15px; }
+  footer{ text-align:center; color:var(--ink-soft); font-size:13px; padding:10px 16px 30px; }
+</style>
+</head>
+<body>
+<header class="topo">
+  <img src="assets/logo-branco.png" alt="CRM Aliança by Capacity Case">
+  <h1>Que bom que vamos conversar.</h1>
+  <p>Antes do nosso encontro, um pouco de quem sou e de como vai ser a conversa.</p>
+  <span class="aviso">Página de demonstração: cada corretor tem a sua</span>
+</header>
+<main>
+  <section class="card">
+    <div class="quem">
+      <div class="avatar">SC</div>
+      <div><h2 style="margin:0">Seu Corretor</h2><p>Consultor de proteção de renda e patrimônio</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Como vai ser a nossa conversa</h2>
+    <ol class="passos">
+      <li><b>Entender o seu momento</b><span>Carreira, renda, família e planos. Sem formulário, uma conversa.</span></li>
+      <li><b>Olhar o que você já tem</b><span>Se você já tem alguma proteção, olhamos juntos o que ela cobre e o que fica de fora.</span></li>
+      <li><b>Mostrar as lacunas, sem compromisso</b><span>Onde a sua renda e o seu patrimônio estão expostos e quanto custa fechar cada lacuna, comparando as principais companhias.</span></li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Como penso a sua proteção</h2>
+    <p style="margin:0 0 10px;color:var(--ink-soft)">Cada fase da vida pede um cuidado diferente:</p>
+    <div class="trilha"><span>Carreira</span><span>Renda</span><span>Patrimônio</span><span>Família</span><span>Legado</span></div>
+  </section>
+
+  <section class="card">
+    <h2>Por que trabalhar comigo</h2>
+    <ul class="fatos">
+      <li>Comparo as principais seguradoras do mercado, não só uma.</li>
+      <li>Acompanho você depois da contratação: renovação, datas importantes e qualquer dúvida.</li>
+      <li>Tudo organizado num só lugar, com lembretes para nada ficar esquecido.</li>
+    </ul>
+  </section>
+</main>
+<footer>Feito com o CRM Aliança · by Capacity Case</footer>
+</body>
+</html>

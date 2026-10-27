@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#111827">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="CRM Aliança">
+<meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>CRM Aliança</title>
+<title>Torre de Controle - Aliança</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{--brand:#0018fc;--navy:#111827;--bg:#f4f5f9;--card:#fff;--line:#e3e6ee;--ink:#0b1433;--soft:#4a5270;--faint:#7a819c;--ok:#0f7a53;--warn:#c8790b;--bad:#c23636}
@@ -49,7 +49,7 @@ h2{font-size:15px;margin:18px 0 4px;color:var(--soft);text-transform:uppercase;l
 </style>
 </head>
 <body>
-<header><div><b>CRM Aliança</b><br><small id="quem"></small></div><span class="sp"></span><button id="voltar" class="hide">← Início</button><button id="sair" class="hide">Sair</button></header>
+<header><div><b>Torre de Controle</b> <small style="opacity:.85">Aliança</small><br><small id="quem"></small></div><span class="sp"></span><button id="voltar" class="hide">← Início</button><button id="sair" class="hide">Sair</button></header>
 <main>
 
 <section id="v-login" class="hide">
@@ -136,7 +136,7 @@ async function boot(){
   if(user.user_metadata && user.user_metadata.must_change_password){ ir('troca', false); return; }
   let aal=null, fat=[]; try{ const a = await sb.auth.mfa.getAuthenticatorAssuranceLevel(); aal = a.data; const f = await sb.auth.mfa.listFactors(); fat = (f.data&&f.data.totp)||[]; }catch(e){}
   if(aal && aal.nextLevel==='aal2' && aal.currentLevel!=='aal2' && fat.length){ window._fid = fat[0].id; ir('mfa', false); $('m-code').focus(); return; }
-  if(!fat.length){ let ob=false; try{ const r = await sb.rpc('crm_mfa_obrigatorio'); ob = r.data===true; }catch(e){} if(ob){ $('m-h').textContent = 'Ative a verificação em 2 etapas'; $('m-sub').textContent = 'Entre no CRM Aliança pelo computador, ative a verificação em 2 etapas (botão no topo) e volte aqui.'; $('m-corpo').innerHTML = '<div style="margin-top:14px"><button class="btn sec sm" id="m-sair2">Sair</button></div>'; ir('mfa', false); $('m-sair2').onclick = async ()=>{ await sb.auth.signOut({scope:'local'}); location.reload(); }; return; } }
+  if(!fat.length){ let ob=false; try{ const r = await sb.rpc('crm_mfa_obrigatorio'); ob = r.data===true; }catch(e){} if(ob){ $('m-h').textContent = 'Ative a verificação em 2 etapas'; $('m-sub').textContent = 'Entre na Torre de Controle - Aliança pelo computador, ative a verificação em 2 etapas (botão no topo) e volte aqui.'; $('m-corpo').innerHTML = '<div style="margin-top:14px"><button class="btn sec sm" id="m-sair2">Sair</button></div>'; ir('mfa', false); $('m-sair2').onclick = async ()=>{ await sb.auth.signOut({scope:'local'}); location.reload(); }; return; } }
   EU.email = user.email; const { data:u } = await sb.from('crm_usuarios').select('nome').ilike('email', user.email).maybeSingle();
   EU.nome = (u && u.nome) || user.email.split('@')[0]; $('quem').textContent = primeiro(EU.nome);
   ir('home', false); $('busca').focus();

@@ -1,7 +1,7 @@
 {
-  "name": "CRM Aliança",
-  "short_name": "Aliança",
-  "description": "CRM Aliança no celular: buscar cliente, ver o que fazer hoje e registrar reuniões.",
+  "name": "Torre de Controle - Aliança",
+  "short_name": "Torre Aliança",
+  "description": "Torre de Controle - Aliança no celular: buscar cliente, ver o que fazer hoje e registrar reuniões.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",

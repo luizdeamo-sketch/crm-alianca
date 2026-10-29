@@ -77,6 +77,7 @@
       MARCA = data;
       try { localStorage.setItem('tc_marca', JSON.stringify({ nome_exibicao: data.nome_exibicao, logo_url: data.logo_url, cores: data.cores })); } catch (e) { /* sem armazenamento */ }
       aplicarMarca();
+      carregarEtapas();
     } catch (e) { console.warn('marca da corretora:', e); }
   }
   // tela de entrada: usa a última marca vista neste navegador
@@ -89,6 +90,11 @@
       const b = document.createElement('button'); b.id = 'btn-minha-corretora'; b.type = 'button'; b.textContent = '🏷️ Minha corretora';
       b.title = 'Nome, logo e cores da sua corretora no sistema'; b.addEventListener('click', abrirMinhaCorretora);
       who.insertBefore(b, who.firstChild.nextSibling);
+    }
+    if (MARCA.sou_admin && temFunil() && !document.getElementById('btn-funil')) {
+      const f = document.createElement('button'); f.id = 'btn-funil'; f.type = 'button'; f.textContent = '⚙️ Parâmetros do funil';
+      f.title = 'Nome, cor e ordem das etapas do funil de vendas da sua corretora'; f.addEventListener('click', abrirFunil);
+      who.insertBefore(f, who.firstChild.nextSibling);
     }
     if (MARCA.dono_plataforma && !document.getElementById('btn-plataforma')) {
       const a = document.createElement('button'); a.id = 'btn-plataforma'; a.type = 'button'; a.textContent = '🏢 Plataforma';
@@ -161,6 +167,116 @@
     });
     dlg.showModal();
   }
+
+  /* ---------- Parâmetros do funil (etapas por corretora) ---------- */
+  // ETAPAS_FUNIL e OP_STAGE_COLORS são do sistema (index.html). Guardamos o padrão e trocamos o conteúdo
+  // dos arrays (não a variável), então todas as telas passam a usar as etapas da corretora.
+  const temFunil = () => typeof ETAPAS_FUNIL !== 'undefined' && Array.isArray(ETAPAS_FUNIL);
+  const temCores = () => typeof OP_STAGE_COLORS !== 'undefined' && Array.isArray(OP_STAGE_COLORS);
+  const ETAPAS_PADRAO = temFunil() ? ETAPAS_FUNIL.map((e, i) => ({ chave: e.key, rotulo: e.label, cor: (temCores() && OP_STAGE_COLORS[i]) || '#9c7518' })) : [];
+  let ETAPAS_ATUAIS = null;   // null = padrão
+
+  function aplicarEtapas(lista) {
+    if (!temFunil()) return;
+    const usar = lista && lista.length ? lista : ETAPAS_PADRAO;
+    ETAPAS_FUNIL.length = 0; usar.forEach((e) => ETAPAS_FUNIL.push({ key: e.chave, label: e.rotulo }));
+    if (temCores()) { OP_STAGE_COLORS.length = 0; usar.forEach((e) => OP_STAGE_COLORS.push(e.cor)); }
+    const ativo = document.querySelector('.nav-btn.active');   // redesenha a tela aberta
+    if (ativo) ativo.click();
+  }
+  async function carregarEtapas() {
+    if (!temFunil()) return;
+    const { data, error } = await sb.from('crm_funil_etapas').select('chave,rotulo,cor,ordem').order('ordem');
+    if (error) return;
+    ETAPAS_ATUAIS = data && data.length ? data : null;
+    if (ETAPAS_ATUAIS) aplicarEtapas(ETAPAS_ATUAIS);
+  }
+
+  function chaveNova(rotulo, usadas) {
+    let base = String(rotulo || 'etapa').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30) || 'etapa';
+    let k = base, i = 2; while (usadas.has(k)) k = base + '_' + (i++); return k;
+  }
+
+  async function abrirFunil() {
+    let dlg = document.getElementById('dlg-funil');
+    if (!dlg) {
+      dlg = document.createElement('dialog'); dlg.id = 'dlg-funil';
+      dlg.style.cssText = 'border:0;border-radius:14px;padding:0;width:min(760px,96vw);box-shadow:0 30px 80px rgba(0,0,0,.35);font:inherit;';
+      document.body.appendChild(dlg);
+    }
+    const { data: uso } = await sb.rpc('crm_funil_etapas_uso');
+    const usoPor = new Map((uso || []).map((u) => [u.chave, Number(u.registros)]));
+    let linhas = (ETAPAS_ATUAIS || ETAPAS_PADRAO).map((e) => ({ chave: e.chave, rotulo: e.rotulo, cor: e.cor }));
+    const pintar = () => {
+      dlg.querySelector('#fu-linhas').innerHTML = linhas.map((e, i) => {
+        const n = usoPor.get(e.chave) || 0;
+        return `<div class="fu-l" data-i="${i}" style="display:grid;grid-template-columns:28px 1fr 52px auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #eef0ee;">
+          <span style="font-weight:700;color:#5d6871;text-align:center;">${i + 1}</span>
+          <input class="fu-nome" maxlength="40" value="${esc(e.rotulo)}" aria-label="Nome da etapa ${i + 1}" style="min-height:40px;padding:0 10px;border:1px solid #d5d8d2;border-radius:8px;">
+          <input class="fu-cor" type="color" value="${esc(e.cor)}" aria-label="Cor da etapa ${i + 1}" style="width:52px;height:36px;border:0;background:none;">
+          <span style="display:flex;gap:4px;align-items:center;">
+            <button type="button" class="fu-sobe" title="Subir" ${i === 0 ? 'disabled' : ''} style="min-width:36px;min-height:36px;">↑</button>
+            <button type="button" class="fu-desce" title="Descer" ${i === linhas.length - 1 ? 'disabled' : ''} style="min-width:36px;min-height:36px;">↓</button>
+            <button type="button" class="fu-tira" title="${n ? n + ' registro(s) nesta etapa: mova antes de excluir' : 'Excluir etapa'}" ${n ? 'disabled' : ''} style="min-width:36px;min-height:36px;color:#9e2f24;">✕</button>
+            <small style="color:#5d6871;min-width:86px;">${n ? n + ' registro' + (n > 1 ? 's' : '') : 'sem registros'}</small>
+          </span></div>`;
+      }).join('');
+      dlg.querySelector('#fu-barra').innerHTML = linhas.map((e) => `<span style="flex:1;background:${esc(e.cor)};color:#fff;padding:6px 4px;font-size:12px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.35);">${esc(e.rotulo)}</span>`).join('');
+    };
+    const ler = () => { dlg.querySelectorAll('.fu-l').forEach((el) => { const i = +el.dataset.i; linhas[i].rotulo = el.querySelector('.fu-nome').value; linhas[i].cor = el.querySelector('.fu-cor').value; }); };
+    dlg.innerHTML = `
+      <form method="dialog" style="padding:22px 24px;display:grid;gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <h3 style="margin:0;">Etapas do funil de vendas</h3><button value="cancel" type="submit" aria-label="Fechar" style="border:0;background:none;font-size:20px;cursor:pointer;">✕</button>
+        </div>
+        <p style="margin:0;color:#5d6871;font-size:14px;">Dê o nome que a sua corretora usa, escolha a cor e a ordem. Etapa com registros não pode ser excluída: mova os clientes para outra etapa antes. De 2 a 15 etapas.</p>
+        <div id="fu-barra" style="display:flex;border-radius:8px;overflow:hidden;" aria-label="Prévia do funil"></div>
+        <div id="fu-linhas"></div>
+        <div style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;">
+          <button type="button" id="fu-add" style="min-height:42px;padding:0 14px;border:1px dashed #9c7518;border-radius:8px;background:#fff;cursor:pointer;">+ Nova etapa</button>
+          <span style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" id="fu-padrao" style="min-height:42px;padding:0 14px;border:1px solid #d5d8d2;border-radius:8px;background:#fff;cursor:pointer;">Voltar ao padrão</button>
+            <button type="button" id="fu-salvar" style="min-height:42px;padding:0 18px;border:0;border-radius:8px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer;">Salvar funil</button>
+          </span>
+        </div>
+        <div id="fu-msg" style="font-size:13px;color:#5d6871;min-height:18px;"></div>
+      </form>`;
+    const msg = (t) => { dlg.querySelector('#fu-msg').textContent = t; };
+    dlg.querySelector('#fu-linhas').addEventListener('input', () => { ler(); dlg.querySelector('#fu-barra').innerHTML = linhas.map((e) => `<span style="flex:1;background:${esc(e.cor)};color:#fff;padding:6px 4px;font-size:12px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.35);">${esc(e.rotulo)}</span>`).join(''); });
+    dlg.querySelector('#fu-linhas').addEventListener('click', (ev) => {
+      const b = ev.target.closest('button'); if (!b) return; ler();
+      const i = +b.closest('.fu-l').dataset.i;
+      if (b.classList.contains('fu-sobe') && i > 0) [linhas[i - 1], linhas[i]] = [linhas[i], linhas[i - 1]];
+      if (b.classList.contains('fu-desce') && i < linhas.length - 1) [linhas[i + 1], linhas[i]] = [linhas[i], linhas[i + 1]];
+      if (b.classList.contains('fu-tira')) { if (linhas.length <= 2) { msg('O funil precisa ter pelo menos 2 etapas.'); return; } linhas.splice(i, 1); }
+      pintar();
+    });
+    dlg.querySelector('#fu-add').addEventListener('click', () => {
+      ler(); if (linhas.length >= 15) { msg('No máximo 15 etapas.'); return; }
+      linhas.push({ chave: chaveNova('nova etapa', new Set(linhas.map((e) => e.chave))), rotulo: 'Nova etapa', cor: '#9c7518' }); pintar();
+      const ult = dlg.querySelectorAll('.fu-nome'); if (ult.length) { ult[ult.length - 1].focus(); ult[ult.length - 1].select(); }
+    });
+    dlg.querySelector('#fu-padrao').addEventListener('click', async () => {
+      if (!confirm('Voltar ao funil padrão do sistema? Nomes, cores e etapas novas serão desfeitos.')) return;
+      const { error } = await sb.rpc('crm_funil_etapas_padrao');
+      if (error) { msg(error.message); return; }
+      ETAPAS_ATUAIS = null; aplicarEtapas(null); msg('Funil padrão aplicado.'); setTimeout(() => dlg.close(), 700);
+    });
+    dlg.querySelector('#fu-salvar').addEventListener('click', async () => {
+      ler();
+      if (linhas.some((e) => !String(e.rotulo).trim())) { msg('Toda etapa precisa de um nome.'); return; }
+      const nomes = linhas.map((e) => e.rotulo.trim().toLowerCase()); if (new Set(nomes).size !== nomes.length) { msg('Há duas etapas com o mesmo nome.'); return; }
+      msg('Salvando…');
+      const enviar = linhas.map((e) => ({ chave: e.chave, rotulo: e.rotulo.trim(), cor: e.cor }));
+      const { error } = await sb.rpc('crm_funil_etapas_salvar', { p_etapas: enviar });
+      if (error) { msg('Não foi possível salvar: ' + error.message); return; }
+      ETAPAS_ATUAIS = enviar; aplicarEtapas(enviar); msg('Funil salvo e aplicado em todas as telas.'); setTimeout(() => dlg.close(), 800);
+    });
+    pintar(); dlg.showModal();
+  }
+
+  // para suporte e testes: as permissões valem no banco, então expor as telas não abre nada
+  window.TorrePlataforma = { abrirFunil, abrirMinhaCorretora, aplicarEtapas, recarregar: carregar };
 
   /* ---------- liga ---------- */
   function iniciar() {

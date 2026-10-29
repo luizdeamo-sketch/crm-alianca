@@ -70,10 +70,27 @@
   };
 
   /* ---------- carregar a marca depois do login ---------- */
+  // quem entrou mas não é usuário ativo de nenhuma corretora (ou a corretora está suspensa) não passa da entrada
+  function barrar(titulo, texto) {
+    if (document.getElementById('tc-barreira')) return;
+    const d = document.createElement('div'); d.id = 'tc-barreira';
+    d.setAttribute('role', 'alertdialog'); d.setAttribute('aria-modal', 'true');
+    d.style.cssText = 'position:fixed;inset:0;z-index:100000;background:var(--navy,#111827);display:flex;align-items:center;justify-content:center;padding:24px;';
+    d.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px 30px;max-width:520px;width:100%;display:grid;gap:14px;box-shadow:0 30px 80px rgba(0,0,0,.4);">
+      <h2 style="margin:0;font-size:22px;color:#111827;">${esc(titulo)}</h2>
+      <p style="margin:0;color:#2a3540;line-height:1.5;">${esc(texto)}</p>
+      <button type="button" id="tc-barreira-sair" style="justify-self:start;min-height:44px;padding:0 20px;border:0;border-radius:8px;background:var(--brand,#9c7518);color:#fff;font-weight:600;cursor:pointer;">Sair</button></div>`;
+    document.body.appendChild(d);
+    d.querySelector('#tc-barreira-sair').addEventListener('click', async () => { try { await sb.auth.signOut(); } catch (e) { /* nada */ } try { localStorage.removeItem('tc_marca'); } catch (e) { /* nada */ } location.reload(); });
+    d.querySelector('#tc-barreira-sair').focus();
+  }
+
   async function carregar() {
     try {
       const { data, error } = await sb.rpc('crm_minha_corretora');
-      if (error || !data) return;
+      if (error) return;   // falha de rede: não barra por engano
+      if (!data) { barrar('Este e-mail não tem acesso', 'Seu login existe, mas você não está cadastrado em nenhuma corretora deste sistema. Peça ao administrador da sua corretora para liberar o seu acesso.'); return; }
+      if (data.ativo === false) { barrar('Acesso suspenso', 'O acesso da sua corretora está suspenso no momento. Fale com o administrador da sua corretora. Os dados continuam guardados.'); return; }
       MARCA = data;
       try { localStorage.setItem('tc_marca', JSON.stringify({ nome_exibicao: data.nome_exibicao, logo_url: data.logo_url, cores: data.cores })); } catch (e) { /* sem armazenamento */ }
       aplicarMarca();

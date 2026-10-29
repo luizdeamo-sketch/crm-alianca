@@ -5,13 +5,16 @@
    liberar o primeiro acesso, redefinir senha por e-mail, zerar as 2 etapas. Nenhum dado de cliente aparece aqui. */
 (function () {
   'use strict';
-  const PLANOS = { vendas: 'Módulo de Vendas', completo: 'Sistema completo' };
   const PAPEIS = { master: 'Administrador', especialista: 'Corretor', leitura: 'Só leitura' };
-  // telas do menu e recursos liberados por corretora (sem lista = tudo). Sugestões e Admin ficam sempre no menu.
+  // os 3 módulos que se vendem; as telas e a IA de cada um são calculadas no banco (crm_recursos_dos_modulos).
+  // Cadastro, Agenda, Sugestões e Admin vêm em todos. Sem lista = tudo liberado (inclusive os extras).
   const MODULOS = [
-    ['indicadores', 'Indicadores'], ['operacao', 'Operação'], ['central', 'Central'], ['comercial', 'Comercial'], ['vendas', 'Vendas'],
-    ['reunioes', 'Reuniões'], ['analitico', 'Analítico'], ['agenda', 'Agenda'], ['conhecimento', 'Conhecimento'], ['ata', 'Ata'],
-    ['ia', 'Leitura com IA'], ['premium', 'Premium / COPA / fidelizados'], ['agenda_externa', 'Agenda no Outlook, Google e Teams']];
+    ['vendas', 'Vendas', 'Prospecção, Consultoria, Reuniões, Base de conhecimento, agenda no Outlook/Teams e IA de vendas'],
+    ['carteira', 'Carteira', 'Operação, Central de Apólices, renovações, pós-venda e IA de carteira (apólice e documento)'],
+    ['gestao', 'Gestão', 'Indicadores, metas, orçamento, funil, Mais Carlas e Ata']];
+  const EXTRAS = [['analitico', 'Analítico (base de plantões)'], ['premium', 'Premium / COPA / fidelizados']];
+  const nomeMod = (k) => (MODULOS.concat(EXTRAS).find(([x]) => x === k) || [k, k])[1];
+  const resumoMods = (m) => !Array.isArray(m) ? 'Tudo liberado' : (m.filter((k) => MODULOS.some(([x]) => x === k)).map(nomeMod).join(' · ') || 'Nenhum módulo') + (m.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : '');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const quando = (d) => d ? new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
   const link = () => location.origin + location.pathname;
@@ -110,13 +113,10 @@
   function telaCorretoras() {
     const linhas = EST.corretoras.map((c) => {
       const sit = !c.ativo ? '<span class="pill susp">Suspensa</span>' : c.primeiro_acesso_pendente ? '<span class="pill pend">Aguardando 1º acesso</span>' : '<span class="pill ok">Ativa</span>';
-      const opts = Object.entries(PLANOS).map(([k, v]) => `<option value="${k}" ${c.plano === k ? 'selected' : ''}>${v}</option>`).join('');
-      const mods = Array.isArray(c.modulos) ? `${c.modulos.filter((k) => MODULOS.some(([x]) => x === k)).length} de ${MODULOS.length}` : 'Tudo liberado';
       const nome = c.nome_exibicao || c.nome;
       return `<tr>
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
-        <td><select data-plano="${c.id}">${PLANOS[c.plano] ? '' : `<option selected>${esc(c.plano || '—')}</option>`}${opts}</select></td>
-        <td><button class="b" data-modulos="${c.id}">${mods}</button></td>
+        <td><button class="b" data-modulos="${c.id}" title="Escolher os módulos contratados">${esc(resumoMods(c.modulos))} ✎</button></td>
         <td>${sit}</td>
         <td><button class="b" data-ver-usuarios="${c.id}">${c.usuarios_ativos} de ${c.usuarios}</button></td>
         <td>${quando(c.ultimo_acesso)}</td>
@@ -130,29 +130,30 @@
         <p class="sub">Cria a corretora e libera o administrador dela por 48 horas para criar a senha em "Primeiro acesso". Depois ele sobe o logo e cadastra a equipe.</p>
         <form class="lin" id="pp-nova">
           <label class="f">Nome da corretora<input name="nome" required maxlength="60" placeholder="Ex.: Bravita"></label>
-          <label class="f">Plano<select name="plano"><option value="completo">Sistema completo</option><option value="vendas">Módulo de Vendas</option></select></label>
+          <div class="f" style="display:grid;gap:4px;font-size:13px">Módulos contratados<div style="display:flex;gap:12px;flex-wrap:wrap;min-height:40px;align-items:center">${MODULOS.map(([k, v]) => `<label class="chk" title="${esc(MODULOS.find(([x]) => x === k)[2])}"><input type="checkbox" name="mod" value="${k}" checked> ${v}</label>`).join('')}</div></div>
           <label class="f">Nome do administrador<input name="admin_nome" maxlength="80"></label>
           <label class="f">E-mail do administrador<input name="admin_email" type="email" required></label>
           <button class="b pri" type="submit">Criar corretora</button>
         </form><div class="msg" id="pp-msg"></div></div>
       <div class="card"><h3>Corretoras</h3>
         <p class="sub">Suspender corta o acesso de toda a equipe da corretora; os dados ficam guardados e voltam ao reativar. Clique nos usuários para administrar a equipe.</p>
-        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Módulos</th><th>Situação</th><th>Usuários</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
-        <tbody>${linhas || '<tr><td colspan="8">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
+        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Módulos</th><th>Situação</th><th>Usuários</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="7">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
   }
 
   function ligarCorretoras() {
     raiz.querySelector('#pp-nova').onsubmit = async (e) => {
       e.preventDefault();
       const f = new FormData(e.target), nome = String(f.get('nome')).trim(), email = String(f.get('admin_email')).trim().toLowerCase();
+      const mods = f.getAll('mod');
+      if (!mods.length) { raiz.querySelector('#pp-msg').textContent = 'Escolha pelo menos um módulo.'; return; }
       raiz.querySelector('#pp-msg').textContent = 'Criando…';
-      try { await rpc('crm_plataforma_criar', { p_nome: nome, p_plano: f.get('plano'), p_admin_email: email, p_admin_nome: f.get('admin_nome') }); }
-      catch (err) { raiz.querySelector('#pp-msg').textContent = 'Não foi possível criar: ' + err.message; return; }
+      try {
+        const id = await rpc('crm_plataforma_criar', { p_nome: nome, p_plano: mods.length === 3 ? 'completo' : mods.join('+'), p_admin_email: email, p_admin_nome: f.get('admin_nome') });
+        await rpc('crm_plataforma_modulos', { p_id: id, p_modulos: mods });
+      } catch (err) { raiz.querySelector('#pp-msg').textContent = 'Não foi possível criar: ' + err.message; return; }
       recarregar(convite('Torre de Controle - ' + nome, email));
     };
-    raiz.querySelectorAll('select[data-plano]').forEach((s) => s.onchange = async () => {
-      try { await rpc('crm_plataforma_atualizar', { p_id: s.dataset.plano, p_plano: s.value, p_ativo: null, p_observacao: null }); } catch (err) { alert(err.message); }
-    });
     raiz.querySelectorAll('[data-suspender]').forEach((b) => b.onclick = async () => {
       if (!confirm(`Suspender ${b.dataset.nome}? Toda a equipe perde o acesso até você reativar. Os dados ficam guardados.`)) return;
       try { await rpc('crm_plataforma_atualizar', { p_id: b.dataset.suspender, p_plano: null, p_ativo: false, p_observacao: null }); recarregar(''); } catch (err) { alert(err.message); }
@@ -171,16 +172,22 @@
     const c = EST.corretoras.find((x) => x.id === id), nome = c.nome_exibicao || c.nome;
     const lig = (k) => !Array.isArray(c.modulos) || c.modulos.includes(k);
     const tr = document.createElement('tr'); tr.className = 'pp-mod'; tr.id = 'pp-mod-' + id;
-    tr.innerHTML = `<td colspan="8"><div class="modbox"><b>Módulos de ${esc(nome)}</b>
-      <p class="sub" style="margin:0">O que ficar desmarcado some do menu da corretora. Sugestões e Admin ficam sempre. A IA e a agenda externa só funcionam marcadas.</p>
-      <div class="modgrid">${MODULOS.map(([k, v]) => `<label class="chk"><input type="checkbox" value="${k}" ${lig(k) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
+    tr.innerHTML = `<td colspan="7"><div class="modbox"><b>Módulos de ${esc(nome)}</b>
+      <p class="sub" style="margin:0">Cada módulo libera as próprias telas e a própria IA. Cadastro, Agenda, Sugestões e Admin vêm em todos.</p>
+      <div style="display:grid;gap:8px">${MODULOS.map(([k, v, d]) => `<label class="chk"><input type="checkbox" value="${k}" ${lig(k) ? 'checked' : ''}> <b>${esc(v)}</b> <span style="color:#5d6871">· ${esc(d)}</span></label>`).join('')}</div>
+      <p class="sub" style="margin:4px 0 0">Extras (só para quem tem a base de plantões, como a CallMed):</p>
+      <div class="modgrid">${EXTRAS.map(([k, v]) => `<label class="chk"><input type="checkbox" value="${k}" ${lig(k) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
       <div class="acoes"><button class="b pri" data-s>Salvar módulos</button><button class="b" data-t>Liberar tudo</button><button class="b" data-f>Fechar</button></div></div></td>`;
     botao.closest('tr').after(tr);
     const salvar = async (mods) => {
       try { await rpc('crm_plataforma_modulos', { p_id: id, p_modulos: mods }); } catch (err) { alert(err.message); return; }
       recarregar(`<div class="aviso">Módulos de <b>${esc(nome)}</b> salvos. A equipe vê a mudança ao recarregar o sistema.</div>`);
     };
-    tr.querySelector('[data-s]').onclick = () => { const m = [...tr.querySelectorAll('input:checked')].map((i) => i.value); salvar(m.length === MODULOS.length ? null : m.concat('sugestoes')); };
+    tr.querySelector('[data-s]').onclick = () => {
+      const m = [...tr.querySelectorAll('input:checked')].map((i) => i.value);
+      if (!m.some((k) => MODULOS.some(([x]) => x === k))) { alert('Escolha pelo menos um módulo (Vendas, Carteira ou Gestão).'); return; }
+      salvar(m);
+    };
     tr.querySelector('[data-t]').onclick = () => salvar(null);
     tr.querySelector('[data-f]').onclick = () => tr.remove();
   }

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610292014">
+<meta name="app-build" content="202610292056">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -935,7 +935,7 @@ function tcAplicarModulosCorretora(){   // Admin e Sugestões ficam sempre no me
 async function aliancaModulosDoUsuario(email){
   try{
     const [{ data: master }, { data: u }, mc] = await Promise.all([ sb.rpc('crm_is_master'), sb.from('crm_usuarios').select('modulos').ilike('email', email||'').maybeSingle(), sb.rpc('crm_minha_corretora').then(r=>r, ()=>({data:null})) ]);
-    if(mc && mc.data && Array.isArray(mc.data.modulos) && mc.data.modulos.length){ window.TC_MODULOS = mc.data.modulos; tcAplicarModulosCorretora(); }
+    if(mc && mc.data && Array.isArray(mc.data.recursos)){ window.TC_MODULOS = mc.data.recursos; tcAplicarModulosCorretora(); }   // recursos = telas e IA dos módulos contratados (Vendas, Carteira, Gestão), calculados no banco
     const lista = (u && u.modulos) || [];   // módulos por usuário (vazio = todos os da corretora); o master vê todos os da corretora
     if(master !== true && lista.length){
       document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(v!=='admin' && v!=='sugestoes' && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
@@ -957,10 +957,11 @@ async function tcAplicarConfigCorretora(){
 // Funções do servidor travadas pela configuração (IA desligada) ou pelo plano da corretora (módulos 'ia' e 'agenda_externa'):
 // respondem com um aviso sem chamar o servidor. sb.functions é um getter que cria um cliente novo a cada uso: intercepta o getter.
 {
-  const IA_FN = ['chat-cliente','extrair-cotacao','extrair-apolice','extrair-documento','inteligencia-pessoa','analisar-reuniao','resumo-corretor'];
+  // IA dividida entre os módulos: a de vendas vem com Vendas, a de carteira (apólice e documento) com Carteira
+  const IA_FN = { 'chat-cliente':'ia_vendas', 'extrair-cotacao':'ia_vendas', 'inteligencia-pessoa':'ia_vendas', 'analisar-reuniao':'ia_vendas', 'resumo-corretor':'ia_vendas', 'extrair-apolice':'ia_carteira', 'extrair-documento':'ia_carteira' };
   const motivo = nome => {
-    if(IA_FN.includes(nome)){ if(window.ALIANCA.ia === false) return 'Disponível em breve nesta versão da Torre de Controle - Aliança.'; if(!tcModulo('ia')) return 'A leitura com IA não está liberada no plano da sua corretora.'; }
-    if(nome === 'agenda-teams' && !tcModulo('agenda_externa')) return 'A integração com Outlook e Teams não está liberada no plano da sua corretora.';
+    if(IA_FN[nome]){ if(window.ALIANCA.ia === false) return 'Disponível em breve nesta versão da Torre de Controle - Aliança.'; if(!tcModulo(IA_FN[nome])) return IA_FN[nome] === 'ia_carteira' ? 'A IA de carteira faz parte do módulo Carteira, que não está contratado pela sua corretora.' : 'A IA de vendas faz parte do módulo Vendas, que não está contratado pela sua corretora.'; }
+    if(nome === 'agenda-teams' && !tcModulo('agenda_externa')) return 'A integração com Outlook e Teams faz parte do módulo Vendas, que não está contratado pela sua corretora.';
     return null; };
   let proto = Object.getPrototypeOf(sb), desc = null; while(proto && !(desc = Object.getOwnPropertyDescriptor(proto, 'functions'))) proto = Object.getPrototypeOf(proto);
   if(desc && desc.get) Object.defineProperty(sb, 'functions', { configurable:true, get(){ const f = desc.get.call(sb), invocar = f.invoke.bind(f);
@@ -10949,7 +10950,7 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610292014"></script>
-<script src="painel.js?v=202610292014"></script>
+<script src="plataforma.js?v=202610292056"></script>
+<script src="painel.js?v=202610292056"></script>
 </body>
 </html>

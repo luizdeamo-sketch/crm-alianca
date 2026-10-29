@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="20261027-1815">
+<meta name="app-build" content="20261028-2132">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -1288,7 +1288,7 @@ async function renderComercial(){
       <div style="margin-top:10px"><button class="om-save" id="com-par-save">Salvar padrões e recalcular</button> <small style="color:var(--ink-faint)">Usado no cálculo de "Necessário hoje/fim" das Estratégias, abaixo.</small></div></details>`);
   host.querySelector('#com-par-save').addEventListener('click', async ()=>{
     const upserts = [...host.querySelectorAll('.com-par')].map(i=>({chave:i.dataset.k, valor:String(i.value===''?0:Number(i.value)), atualizado_em:new Date().toISOString()}));
-    const { error } = await sb.from('crm_metas').upsert(upserts, {onConflict:'chave'});
+    const { error } = await sb.from('crm_metas').upsert(upserts, {onConflict:'corretor_id,chave'});
     if(error){ showToast('Erro: '+error.message); return; } showToast('Padrões salvos'); renderComercial(); });
 }
 
@@ -1424,7 +1424,7 @@ function orcRepintar(host){
 function orcSalvarMes(ym, col, v){
   const st = document.getElementById('orc-status'); if(st) st.textContent = 'Salvando…';
   clearTimeout(ORC.timers[ym+col]); ORC.timers[ym+col] = setTimeout(async ()=>{
-    const { error } = await sb.from('crm_meta_comercial').upsert({mes:ym+'-01', [col]:v, atualizado_em:new Date().toISOString()}, {onConflict:'mes'});
+    const { error } = await sb.from('crm_meta_comercial').upsert({mes:ym+'-01', [col]:v, atualizado_em:new Date().toISOString()}, {onConflict:'corretor_id,mes'});
     const s2 = document.getElementById('orc-status'); if(s2) s2.textContent = error ? 'Erro ao salvar: '+error.message : 'Salvo ✓'; if(error) showToast('Erro: '+error.message); }, 500);
 }
 async function renderOrcamento(){
@@ -1443,7 +1443,7 @@ async function renderOrcamento(){
   host.querySelectorAll('.orc-in').forEach(inp=>inp.addEventListener('input', ()=>{
     const v = inp.value===''?0:Number(inp.value); if(isNaN(v)) return; const r = ORC.rows.find(x=>orcYm(x)===inp.dataset.ym); if(!r) return; r[inp.dataset.col] = v; orcRepintar(host); orcSalvarMes(inp.dataset.ym, inp.dataset.col, v); }));
   host.querySelector('#orc-fator').addEventListener('change', async e=>{ const v = Number(e.target.value); if(isNaN(v) || v<0){ showToast('Volume inválido.'); return; } ORC.P.orc_fator = v; orcRepintar(host);
-    const { error } = await sb.from('crm_metas').upsert({chave:'orc_fator', valor:v, atualizado_em:new Date().toISOString()}, {onConflict:'chave'}); document.getElementById('orc-status').textContent = error ? 'Erro: '+error.message : 'Volume salvo ✓'; });
+    const { error } = await sb.from('crm_metas').upsert({chave:'orc_fator', valor:v, atualizado_em:new Date().toISOString()}, {onConflict:'corretor_id,chave'}); document.getElementById('orc-status').textContent = error ? 'Erro: '+error.message : 'Volume salvo ✓'; });
 }
 // ---- Parâmetros ----
 const orcYmNum = ym=> { const [y,m] = String(ym).split('-'); return (+y)*12 + (+m) - 1; };
@@ -1483,11 +1483,11 @@ async function renderParametros(){
     const metas = [['churn_vida',val('v-churn')],['churn_saude',val('s-churn')],['churn_rc',val('r-churn')],['orc_fator',val('fator')],['orc_vida_ticket',val('v-ticket')],['orc_rc_ticket',val('r-ticket')],['orc_imposto',val('imposto')],['orc_comissao_esp',val('comesp')],['orc_custo_fixo',val('custo')],
       ['orc_vida_ini',ym2n('v-ini')],['orc_vida_val',val('v-val')],['orc_vida_inc',val('v-inc')],['orc_vida_teto',val('v-teto')],['orc_saude_ini',ym2n('s-ini')],['orc_saude_val',val('s-val')],['orc_saude_inc',val('s-inc')],['orc_saude_teto',val('s-teto')],['orc_rc_ini',ym2n('r-ini')],['orc_rc_val',val('r-val')],['orc_rc_inc',val('r-inc')],['orc_rc_teto',val('r-teto')]]
       .map(([chave,valor])=>({chave, valor, atualizado_em:new Date().toISOString()}));
-    const e1 = (await sb.from('crm_metas').upsert(metas, {onConflict:'chave'})).error; if(e1){ st.textContent = 'Erro: '+e1.message; return; }
+    const e1 = (await sb.from('crm_metas').upsert(metas, {onConflict:'corretor_id,chave'})).error; if(e1){ st.textContent = 'Erro: '+e1.message; return; }
     const gen = (ini, v0, inc, teto, ym)=>{ if(!ini || orcYmNum(ym) < orcYmNum(ini)) return 0; const k = orcYmNum(ym)-orcYmNum(ini); let x = v0 + inc*k; if(teto>0) x = Math.min(x, teto); return Math.max(0, x); };
     const linhas = ORC.rows.map(r=>{ const ym = orcYm(r), o = {mes:ym+'-01', vida_com_pct:val('v-pct'), vida_agen:val('v-agen'), saude_ticket:val('s-ticket'), saude_com_pct:val('s-pct'), saude_agen:val('s-agen'), rc_com_pct:val('r-pct'), rc_agen:val('r-agen'), atualizado_em:new Date().toISOString()};
       if(gerar){ o.vida_premio_novo = gen(mval('v-ini'), val('v-val'), val('v-inc'), val('v-teto'), ym); o.saude_vidas = gen(mval('s-ini'), val('s-val'), val('s-inc'), val('s-teto'), ym); o.rc_premio_novo = gen(mval('r-ini'), val('r-val'), val('r-inc'), val('r-teto'), ym); } return o; });
-    const e2 = (await sb.from('crm_meta_comercial').upsert(linhas, {onConflict:'mes'})).error; if(e2){ st.textContent = 'Erro: '+e2.message; return; }
+    const e2 = (await sb.from('crm_meta_comercial').upsert(linhas, {onConflict:'corretor_id,mes'})).error; if(e2){ st.textContent = 'Erro: '+e2.message; return; }
     ORC.ok = false; st.textContent = 'Salvo e aplicado a '+linhas.length+' meses ✓'; showToast('Parâmetros aplicados'); });
 }
 
@@ -5780,7 +5780,7 @@ async function demOutraNec(p, prefill){
     const { error } = await sb.from('crm_demandas').insert({ pessoa_id:p.id, produto:prod, acao:g('on-acao'), descricao:desc, quem_pediu:'Cliente (outra necessidade)', para_quem:esp||null, status:'Pendente', prazo:g('on-prazo')||null, responsavel:esp||g('on-resp')||null, criado_por:por, dados:{ origem:'outra_necessidade', especialista_telefone: tel||null } });
     if(error){ err.textContent = 'Erro: '+error.message; btn.disabled = false; return; }
     try{ await sb.from('crm_atividades').insert({ pessoa_id:p.id, tipo:'outro', data_hora:agora, resumo:'Outra necessidade identificada · '+prod+(esp?' · especialista: '+esp:'')+String.fromCharCode(10)+desc, resultado:'Demonstrou interesse', responsavel:por }); }catch(e){}
-    if(box.querySelector('#on-lembrar').checked && (esp || tel)){ esps[prod] = { nome:esp, telefone:tel }; try{ await sb.from('crm_config').upsert({ chave:'especialistas', valor:JSON.stringify(esps), atualizado_em:agora }, { onConflict:'chave' }); }catch(e){} }
+    if(box.querySelector('#on-lembrar').checked && (esp || tel)){ esps[prod] = { nome:esp, telefone:tel }; try{ await sb.from('crm_config').upsert({ chave:'especialistas', valor:JSON.stringify(esps), atualizado_em:agora }, { onConflict:'corretor_id,chave' }); }catch(e){} }
     OP.dirty = true; dlgClose(); showToast('Demanda de '+prod+' registrada'+(wa?' e WhatsApp aberto para o especialista':'')+'.');
     if(document.getElementById('pv-dem')) pvDemandas(p); });
 }
@@ -6950,7 +6950,7 @@ document.getElementById('teams-save').addEventListener('click', async ()=>{
   const v = document.getElementById('teams-url').value.trim(), st = document.getElementById('teams-status');
   if(v && !/^(https?|webcal):\/\//i.test(v)){ st.textContent = 'Cole o link completo do calendário publicado.'; return; }
   st.textContent = 'Salvando…';
-  const { error } = await sb.from('crm_config').upsert({ chave:'teams_ics:'+(window._userEmail||''), valor: v||null, atualizado_em:new Date().toISOString() }, { onConflict:'chave' });
+  const { error } = await sb.from('crm_config').upsert({ chave:'teams_ics:'+(window._userEmail||''), valor: v||null, atualizado_em:new Date().toISOString() }, { onConflict:'corretor_id,chave' });
   if(error){ st.textContent = 'Erro: '+error.message; return; }
   AG_TEAMS.url = v||null; AG_TEAMS.loaded = true; AG_TEAMS.at = 0;
   await agTeamsFetch(true); renderCalendar();
@@ -6960,7 +6960,7 @@ document.getElementById('teams-eq-save').addEventListener('click', async ()=>{
   if(!window._isMaster){ st.textContent = 'Só o gestor define o calendário da equipe.'; return; }
   if(v && !/^(https?|webcal):\/\//i.test(v)){ st.textContent = 'Cole o link completo do calendário publicado.'; return; }
   st.textContent = 'Salvando…';
-  const { error } = await sb.from('crm_config').upsert({ chave:'teams_ics:equipe', valor: v||null, atualizado_em:new Date().toISOString() }, { onConflict:'chave' });
+  const { error } = await sb.from('crm_config').upsert({ chave:'teams_ics:equipe', valor: v||null, atualizado_em:new Date().toISOString() }, { onConflict:'corretor_id,chave' });
   if(error){ st.textContent = 'Erro: '+error.message; return; }
   AG_TEAMS.eqUrl = v||null; AG_TEAMS.at = 0; st.textContent = v ? 'Salvo ✓ Lendo o calendário…' : 'Calendário da equipe removido.';
   await agTeamsFetch(true); renderCalendar(); if(v) st.textContent = 'Salvo ✓ '+AG_TEAMS.events.length+' evento(s) no total.';
@@ -6972,7 +6972,7 @@ document.getElementById('rl-save').addEventListener('click', async ()=>{
   const v = document.getElementById('rl-url').value.trim(), st = document.getElementById('rl-status');
   if(v && !/^https:\/\//i.test(v)){ st.textContent = 'Cole o link completo da reunião (começa com https://).'; return; }
   st.textContent = 'Salvando…';
-  const { error } = await sb.from('crm_config').upsert({ chave:'reuniao_link_padrao', valor: v||null, atualizado_em:new Date().toISOString() }, { onConflict:'chave' });
+  const { error } = await sb.from('crm_config').upsert({ chave:'reuniao_link_padrao', valor: v||null, atualizado_em:new Date().toISOString() }, { onConflict:'corretor_id,chave' });
   if(error){ st.textContent = 'Erro: '+error.message; return; }
   if(!v){ st.textContent = 'Link fixo removido. As reuniões novas ficam sem link.'; return; }
   const { data: n, error: e2 } = await sb.from('crm_agenda').update({ link_reuniao:v, updated_at:new Date().toISOString() }).is('link_reuniao', null).eq('tipo','reuniao_online').eq('status','agendado').gte('data_inicio', new Date().toISOString()).select('id');
@@ -10899,5 +10899,6 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
+<script src="plataforma.js?v=20261028-2132"></script>
 </body>
 </html>

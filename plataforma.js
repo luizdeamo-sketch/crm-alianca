@@ -2,7 +2,7 @@
    1) Marca da corretora: nome "Torre de Controle - <corretora>", logo e cores, aplicados depois do login
       (e lembrados neste navegador para a tela de entrada da próxima vez).
    2) "Minha corretora": o administrador da corretora troca nome, logo e cores.
-   3) "Plataforma": atalho para o painel do dono da plataforma (plataforma.html). */
+   3) "Plataforma": abre o Painel da Plataforma dentro do sistema (painel.js), só para o dono. */
 (function () {
   'use strict';
   const PADRAO = { nome: 'Aliança', logo: 'assets/logo-icone.png', logoGrande: 'assets/logo-marinho.png' };
@@ -124,7 +124,7 @@
     if (MARCA.dono_plataforma && !document.getElementById('btn-plataforma')) {
       const a = document.createElement('button'); a.id = 'btn-plataforma'; a.type = 'button'; a.textContent = '🏢 Plataforma';
       a.title = 'Painel da Plataforma: corretoras, planos e acessos (sem dados de clientes)';
-      a.addEventListener('click', () => window.open('plataforma.html', '_blank'));
+      a.addEventListener('click', () => { if (window.TorrePainel) window.TorrePainel.abrir(); else window.open('plataforma.html', '_blank'); });   // painel dentro do sistema (painel.js)
       who.insertBefore(a, who.firstChild.nextSibling);
     }
   }

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610291928">
+<meta name="app-build" content="202610292014">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -4707,7 +4707,7 @@ const ANA_SEGMENTOS = [
 function anaBar(list, total, dim){ const mx = Math.max(1, ...list.map(x=>x[1])); return list.map(([k,n])=>`<div class="an-bar"><span class="l">${escapeHtml(k)}</span><span class="b"><i style="width:${Math.max(2,100*n/mx)}%;background:${anaCor(dim,k)}"></i></span><span class="v">${anaN(n)} <small>${anaPct(n,total)}%</small></span></div>`).join(''); }
 function anaCardHtml(S){
   const kp = (v,l,s)=>`<div class="an-kpi"><b>${v}</b><span>${l}</span>${s?`<small>${s}</small>`:''}</div>`;
-  return `<div class="an-kpis">${kp(anaN(S.N),'médicos na base','cadastro de plantões e CRM')}${kp(anaN(S.nAtivos),'com plantão nos últimos 12 meses',anaPct(S.nAtivos,S.N)+'% da base')}${kp(S.mediana!=null?S.mediana+' anos':'—','idade mediana','de '+anaN(S.comIdade)+' com data de nascimento')}${kp(anaN(S.nProt),'com apólice ativa',anaPct(S.nProt,S.N)+'% da base')}${kp(anaN(S.alvo.length),'ativos de renda média/alta sem apólice','fila para a Amanda')}</div>`;
+  return `<div class="an-kpis">${kp(anaN(S.N),'médicos na base','cadastro de plantões e CRM')}${kp(anaN(S.nAtivos),'com plantão nos últimos 12 meses',anaPct(S.nAtivos,S.N)+'% da base')}${kp(S.mediana!=null?S.mediana+' anos':'—','idade mediana','de '+anaN(S.comIdade)+' com data de nascimento')}${kp(anaN(S.nProt),'com apólice ativa',anaPct(S.nProt,S.N)+'% da base')}${kp(anaN(S.alvo.length),'ativos de renda média/alta sem apólice','fila para a equipe comercial')}</div>`;
 }
 const anaMoney = v=> 'R$ '+Math.round(Number(v)||0).toLocaleString('pt-BR');
 const anaFalaMoney = v=>{ v = Math.round(Number(v)||0); if(v>=1e6) return (v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+(v<2e6?' milhão':' milhões')+' de reais'; if(v>=1e3) return Math.round(v/1e3).toLocaleString('pt-BR')+' mil reais'; return v.toLocaleString('pt-BR')+' reais'; };
@@ -10949,6 +10949,7 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610291928"></script>
+<script src="plataforma.js?v=202610292014"></script>
+<script src="painel.js?v=202610292014"></script>
 </body>
 </html>

@@ -81,7 +81,7 @@
       <p style="margin:0;color:#2a3540;line-height:1.5;">${esc(texto)}</p>
       <button type="button" id="tc-barreira-sair" style="justify-self:start;min-height:44px;padding:0 20px;border:0;border-radius:8px;background:var(--brand,#9c7518);color:#fff;font-weight:600;cursor:pointer;">Sair</button></div>`;
     document.body.appendChild(d);
-    d.querySelector('#tc-barreira-sair').addEventListener('click', async () => { try { await sb.auth.signOut(); } catch (e) { /* nada */ } try { localStorage.removeItem('tc_marca'); } catch (e) { /* nada */ } location.reload(); });
+    d.querySelector('#tc-barreira-sair').addEventListener('click', async () => { try { await sb.auth.signOut({ scope: 'local' }); } catch (e) { /* nada */ } try { localStorage.removeItem('tc_marca'); } catch (e) { /* nada */ } location.reload(); });
     d.querySelector('#tc-barreira-sair').focus();
   }
 

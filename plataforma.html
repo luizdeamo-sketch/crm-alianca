@@ -52,7 +52,7 @@
 <script>
 const SUPABASE_URL = 'https://iuotvottnailofxbaynx.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1b3R2b3R0bmFpbG9meGJheW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1Mjg2NjMsImV4cCI6MjEwODEwNDY2M30._0FhywQ4Vq3km5Rl4tHEPtCLBVom4VAGaXG3X3nrUyQ';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ storageKey:'tc-alianca-auth' } });   // mesma sessão do sistema, separada dos outros sistemas do endereço
 const LINK_SISTEMA = new URL('./', location.href).href;
 const PLANOS = { vendas: 'Módulo de Vendas', completo: 'Sistema completo' };
 const $ = (s) => document.querySelector(s);

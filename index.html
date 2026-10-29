@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610291611">
+<meta name="app-build" content="202610291620">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -916,7 +916,7 @@ const ICO = {"sun": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\
 
 const SUPABASE_URL = window.ALIANCA.supabaseUrl;          // vem da configuração do cliente (topo da página)
 const SUPABASE_ANON_KEY = window.ALIANCA.supabaseAnonKey;
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ storageKey:'tc-alianca-auth' } });
 // módulos do cliente: os desligados ficam escondidos (não apagados: outras telas ainda podem chamar o botão)
 const aliancaModuloLigado = v => !window.ALIANCA.modulos || v==='admin' || window.ALIANCA.modulos.includes(v);
 document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ if(!aliancaModuloLigado(b.dataset.view)){ b.style.display = 'none'; b.dataset.off = '1'; } });
@@ -10922,6 +10922,6 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610291611"></script>
+<script src="plataforma.js?v=202610291620"></script>
 </body>
 </html>

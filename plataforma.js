@@ -103,13 +103,21 @@
   /* ---------- botões no topo ---------- */
   function botoes() {
     const who = document.querySelector('header .who'); if (!who || !MARCA) return;
+    // os botões do topo são translúcidos (feitos para o fundo escuro); quando caem na parte clara do cabeçalho
+    // somem. Os da plataforma têm fundo sólido para ficar legíveis em qualquer ponto.
+    if (!document.getElementById('tc-estilo-botoes')) {
+      const st = document.createElement('style'); st.id = 'tc-estilo-botoes';
+      st.textContent = '#btn-minha-corretora,#btn-funil,#btn-plataforma{background:var(--navy,#111827)!important;border:1px solid rgba(255,255,255,.35)!important;color:#fff!important;box-shadow:0 1px 3px rgba(0,0,0,.25);white-space:nowrap}' +
+        '#btn-minha-corretora:hover,#btn-funil:hover,#btn-plataforma:hover{background:var(--brand,#9c7518)!important;border-color:var(--brand,#9c7518)!important}';
+      document.head.appendChild(st);
+    }
     if (MARCA.sou_admin && !document.getElementById('btn-minha-corretora')) {
       const b = document.createElement('button'); b.id = 'btn-minha-corretora'; b.type = 'button'; b.textContent = '🏷️ Minha corretora';
       b.title = 'Nome, logo e cores da sua corretora no sistema'; b.addEventListener('click', abrirMinhaCorretora);
       who.insertBefore(b, who.firstChild.nextSibling);
     }
     if (MARCA.sou_admin && temFunil() && !document.getElementById('btn-funil')) {
-      const f = document.createElement('button'); f.id = 'btn-funil'; f.type = 'button'; f.textContent = '⚙️ Parâmetros do funil';
+      const f = document.createElement('button'); f.id = 'btn-funil'; f.type = 'button'; f.textContent = '⚙️ Funil';
       f.title = 'Nome, cor e ordem das etapas do funil de vendas da sua corretora'; f.addEventListener('click', abrirFunil);
       who.insertBefore(f, who.firstChild.nextSibling);
     }

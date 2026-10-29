@@ -60,7 +60,14 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 const data = (d) => d ? new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
 
 async function iniciar() {
-  const { data: s } = await sb.auth.getSession();
+  let { data: s } = await sb.auth.getSession();
+  // aberto pelo botão "Plataforma": usa o login da aba do sistema (algumas configurações do navegador não dividem a sessão salva)
+  if ((!s || !s.session) && window.opener && window.opener.TorrePlataforma) {
+    try {
+      const { data: o } = await window.opener.TorrePlataforma.sessao();
+      if (o && o.session) { await sb.auth.setSession({ access_token: o.session.access_token, refresh_token: o.session.refresh_token }); ({ data: s } = await sb.auth.getSession()); }
+    } catch (e) { /* sem acesso à aba do sistema */ }
+  }
   if (!s || !s.session) {
     $('#conteudo').innerHTML = `<div class="card bloq"><h2>Entre no sistema primeiro</h2><p class="sub">O Painel da Plataforma usa o mesmo login do sistema.</p><p><a href="${esc(LINK_SISTEMA)}">Abrir o sistema</a></p></div>`;
     return;

@@ -124,7 +124,7 @@
     if (MARCA.dono_plataforma && !document.getElementById('btn-plataforma')) {
       const a = document.createElement('button'); a.id = 'btn-plataforma'; a.type = 'button'; a.textContent = '🏢 Plataforma';
       a.title = 'Painel da Plataforma: corretoras, planos e acessos (sem dados de clientes)';
-      a.addEventListener('click', () => window.open('plataforma.html', '_blank', 'noopener'));
+      a.addEventListener('click', () => window.open('plataforma.html', '_blank'));
       who.insertBefore(a, who.firstChild.nextSibling);
     }
   }
@@ -301,7 +301,7 @@
   }
 
   // para suporte e testes: as permissões valem no banco, então expor as telas não abre nada
-  window.TorrePlataforma = { abrirFunil, abrirMinhaCorretora, aplicarEtapas, recarregar: carregar };
+  window.TorrePlataforma = { abrirFunil, abrirMinhaCorretora, aplicarEtapas, recarregar: carregar, sessao: () => sb.auth.getSession() };   // sessao: o Painel da Plataforma (outra aba) usa o login desta
 
   /* ---------- liga ---------- */
   function iniciar() {

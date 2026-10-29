@@ -39,6 +39,12 @@
   #msg { min-height:20px; font-size:14px; }
   .aviso { background:var(--atb); color:var(--g); border-radius:10px; padding:12px 14px; font-size:14px; }
   pre.convite { white-space:pre-wrap; background:var(--bg); border:1px solid var(--ln); border-radius:10px; padding:12px 14px; margin:10px 0; font-family:inherit; font-size:14px; line-height:1.5; }
+  button.mini { min-height:34px; font-size:13px; padding:0 10px; }
+  .modbox { background:var(--bg); border:1px solid var(--ln); border-radius:12px; padding:14px 16px; display:grid; gap:10px; }
+  .modbox p.sub { margin:0; color:var(--mu); font-size:13px; }
+  .modgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:8px 16px; }
+  label.chk { display:flex; align-items:center; gap:8px; font-size:14px; }
+  label.chk input { width:18px; min-height:18px; height:18px; }
   .bloq { max-width:none; text-align:center; padding:60px 24px; }
 </style>
 </head>
@@ -55,6 +61,12 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ storageKey:'tc-alianca-auth' } });   // mesma sessão do sistema, separada dos outros sistemas do endereço
 const LINK_SISTEMA = new URL('./', location.href).href;
 const PLANOS = { vendas: 'Módulo de Vendas', completo: 'Sistema completo' };
+// telas do menu e recursos que se liberam por corretora (sem lista = tudo liberado). Sugestões e Admin ficam sempre no menu.
+const MODULOS = [
+  ['indicadores','Indicadores'], ['operacao','Operação'], ['central','Central'], ['comercial','Comercial'], ['vendas','Vendas'],
+  ['reunioes','Reuniões'], ['analitico','Analítico'], ['agenda','Agenda'], ['conhecimento','Conhecimento'], ['ata','Ata'],
+  ['ia','Leitura com IA'], ['premium','Premium / COPA / fidelizados'], ['agenda_externa','Agenda no Outlook, Google e Teams'] ];
+let LISTA = [];
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 const data = (d) => d ? new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
@@ -84,6 +96,7 @@ async function iniciar() {
 async function desenhar(aviso) {
   const { data: lista, error } = await sb.rpc('crm_plataforma_corretoras');
   if (error) { $('#conteudo').innerHTML = `<div class="card">Erro ao carregar: ${esc(error.message)}</div>`; return; }
+  LISTA = lista;
   const ativas = lista.filter((c) => c.ativo);
   const usuarios = lista.reduce((a, c) => a + Number(c.usuarios_ativos || 0), 0);
   const pend = lista.filter((c) => c.primeiro_acesso_pendente).length;
@@ -111,13 +124,47 @@ async function desenhar(aviso) {
       <h2>Corretoras</h2>
       <p class="sub">Suspender corta o acesso de toda a equipe da corretora; os dados ficam guardados e voltam ao reativar.</p>
       <div class="tbl"><table>
-        <thead><tr><th>Corretora</th><th>Plano</th><th>Situação</th><th>Usuários</th><th>Último acesso</th><th>Administrador</th><th>Desde</th><th>Ações</th></tr></thead>
+        <thead><tr><th>Corretora</th><th>Plano</th><th>Módulos</th><th>Situação</th><th>Usuários</th><th>Último acesso</th><th>Administrador</th><th>Desde</th><th>Ações</th></tr></thead>
         <tbody>${lista.map(linha).join('')}</tbody>
       </table></div>
     </div>`;
   $('#f-nova').addEventListener('submit', criar);
   document.querySelectorAll('[data-acao]').forEach((b) => b.addEventListener('click', acao));
   document.querySelectorAll('select[data-plano]').forEach((s) => s.addEventListener('change', mudarPlano));
+  document.querySelectorAll('[data-modulos]').forEach((b) => b.addEventListener('click', abrirModulos));
+}
+
+function resumoModulos(c) {
+  return Array.isArray(c.modulos) ? `${c.modulos.filter((k) => MODULOS.some(([x]) => x === k)).length} de ${MODULOS.length} liberados` : 'Tudo liberado';
+}
+
+function abrirModulos(e) {
+  const id = e.currentTarget.dataset.modulos;
+  const aberta = document.getElementById('mod-' + id);
+  document.querySelectorAll('tr.mod').forEach((t) => t.remove());
+  if (aberta) return;
+  const c = LISTA.find((x) => x.id === id);
+  const lig = (k) => !Array.isArray(c.modulos) || c.modulos.includes(k);
+  const tr = document.createElement('tr');
+  tr.className = 'mod'; tr.id = 'mod-' + id;
+  tr.innerHTML = `<td colspan="9"><div class="modbox">
+    <b>Módulos de ${esc(c.nome_exibicao || c.nome)}</b>
+    <p class="sub">O que ficar desmarcado some do menu da corretora. Sugestões e Admin ficam sempre. A IA e a agenda externa só funcionam marcadas.</p>
+    <div class="modgrid">${MODULOS.map(([k, v]) => `<label class="chk"><input type="checkbox" value="${k}" ${lig(k) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
+    <div class="acoes"><button class="pri" type="button" data-salvar>Salvar módulos</button><button type="button" data-tudo>Liberar tudo</button><button type="button" data-fechar>Fechar</button></div>
+  </div></td>`;
+  e.currentTarget.closest('tr').after(tr);
+  const salvar = async (mods) => {
+    const { error } = await sb.rpc('crm_plataforma_modulos', { p_id: id, p_modulos: mods });
+    if (error) { alert(error.message); return; }
+    desenhar(`<div class="aviso">Módulos de <b>${esc(c.nome_exibicao || c.nome)}</b> salvos. A equipe vê a mudança ao recarregar o sistema.</div>`);
+  };
+  tr.querySelector('[data-salvar]').onclick = () => {
+    const mods = [...tr.querySelectorAll('input:checked')].map((i) => i.value);
+    salvar(mods.length === MODULOS.length ? null : mods.concat('sugestoes'));
+  };
+  tr.querySelector('[data-tudo]').onclick = () => salvar(null);
+  tr.querySelector('[data-fechar]').onclick = () => tr.remove();
 }
 
 function linha(c) {
@@ -126,6 +173,7 @@ function linha(c) {
   return `<tr>
     <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(c.nome_exibicao || c.nome)}</b></td>
     <td><select data-plano="${c.id}">${PLANOS[c.plano] ? '' : `<option selected>${esc(c.plano || '—')}</option>`}${opts}</select></td>
+    <td><button type="button" class="mini" data-modulos="${c.id}">${resumoModulos(c)}</button></td>
     <td>${sit}</td>
     <td>${c.usuarios_ativos} de ${c.usuarios}</td>
     <td>${data(c.ultimo_acesso)}</td>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610291620">
+<meta name="app-build" content="202610291645">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -906,6 +906,8 @@ window.ALIANCA = {
   .kb-card h4{ font-size:.95rem; margin-bottom:4px;}
   .kb-card .cat{ font-family:'Inter',sans-serif; font-size:10px; color:var(--brand); text-transform:uppercase; font-weight:700; letter-spacing:.03em;}
   .kb-card p{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0;}
+  /* módulo 'agenda_externa' desligado no plano da corretora: some a assinatura no Outlook/Google e o Teams */
+  body.tc-sem-agenda-externa #agenda-side .ics-box{ display:none; }
 </style>
 
 <div class="toast" id="toast"></div>
@@ -921,23 +923,38 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 const aliancaModuloLigado = v => !window.ALIANCA.modulos || v==='admin' || window.ALIANCA.modulos.includes(v);
 document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ if(!aliancaModuloLigado(b.dataset.view)){ b.style.display = 'none'; b.dataset.off = '1'; } });
 // módulos por usuário (crm_usuarios.modulos; vazio = todos). O master sempre vê tudo. Roda depois do login.
+// módulos da corretora (plano contratado; crm_corretores.modulos; vazio = todos): valem até para o master.
+// Recursos que não são tela: 'ia', 'premium' (grupos Premium/COPA/fidelizados) e 'agenda_externa' (Outlook/Google/Teams).
+window.TC_MODULOS = null;
+const tcModulo = k => !Array.isArray(window.TC_MODULOS) || window.TC_MODULOS.includes(k);
+function tcAplicarModulosCorretora(){   // Admin e Sugestões ficam sempre no menu
+  document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(v!=='admin' && v!=='sugestoes' && !tcModulo(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+  if(!tcModulo('premium')) document.querySelectorAll('#op-f-class option[value="premium"], #op-f-class option[value="fidelizado"]').forEach(o=>o.remove());
+  document.body.classList.toggle('tc-sem-agenda-externa', !tcModulo('agenda_externa'));
+}
 async function aliancaModulosDoUsuario(email){
   try{
-    const [{ data: master }, { data: u }] = await Promise.all([ sb.rpc('crm_is_master'), sb.from('crm_usuarios').select('modulos').ilike('email', email||'').maybeSingle() ]);
-    const lista = (u && u.modulos) || [];
-    if(master === true || !lista.length) return;
-    document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(v!=='admin' && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+    const [{ data: master }, { data: u }, mc] = await Promise.all([ sb.rpc('crm_is_master'), sb.from('crm_usuarios').select('modulos').ilike('email', email||'').maybeSingle(), sb.rpc('crm_minha_corretora').then(r=>r, ()=>({data:null})) ]);
+    if(mc && mc.data && Array.isArray(mc.data.modulos) && mc.data.modulos.length){ window.TC_MODULOS = mc.data.modulos; tcAplicarModulosCorretora(); }
+    const lista = (u && u.modulos) || [];   // módulos por usuário (vazio = todos os da corretora); o master vê todos os da corretora
+    if(master !== true && lista.length){
+      document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(v!=='admin' && v!=='sugestoes' && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+    }
     const ativo = document.querySelector('.nav-btn.active');
     if(!ativo || ativo.dataset.off){ const p = document.querySelector('.nav-btn[data-view]:not([data-off]):not(#nav-admin)'); if(p) p.click(); }
   }catch(e){}
 }
-// IA desligada pela configuração: as funções de IA respondem "em breve" sem chamar o servidor
-if(window.ALIANCA.ia === false){
-  // sb.functions é um getter que cria um cliente novo a cada uso: intercepta o getter
-  const LIVRES = ['admin-usuarios','primeiro-acesso'], MSG = 'Disponível em breve nesta versão da Torre de Controle - Aliança.';
+// Funções do servidor travadas pela configuração (IA desligada) ou pelo plano da corretora (módulos 'ia' e 'agenda_externa'):
+// respondem com um aviso sem chamar o servidor. sb.functions é um getter que cria um cliente novo a cada uso: intercepta o getter.
+{
+  const IA_FN = ['chat-cliente','extrair-cotacao','extrair-apolice','extrair-documento','inteligencia-pessoa','analisar-reuniao','resumo-corretor'];
+  const motivo = nome => {
+    if(IA_FN.includes(nome)){ if(window.ALIANCA.ia === false) return 'Disponível em breve nesta versão da Torre de Controle - Aliança.'; if(!tcModulo('ia')) return 'A leitura com IA não está liberada no plano da sua corretora.'; }
+    if(nome === 'agenda-teams' && !tcModulo('agenda_externa')) return 'A integração com Outlook e Teams não está liberada no plano da sua corretora.';
+    return null; };
   let proto = Object.getPrototypeOf(sb), desc = null; while(proto && !(desc = Object.getOwnPropertyDescriptor(proto, 'functions'))) proto = Object.getPrototypeOf(proto);
   if(desc && desc.get) Object.defineProperty(sb, 'functions', { configurable:true, get(){ const f = desc.get.call(sb), invocar = f.invoke.bind(f);
-    f.invoke = (nome, opts)=> LIVRES.includes(nome) ? invocar(nome, opts) : Promise.resolve({ data:null, error:{ message:MSG, context:{ json: async ()=>({ error:MSG }) } } });
+    f.invoke = (nome, opts)=>{ const m = motivo(nome); return m ? Promise.resolve({ data:null, error:{ message:m, context:{ json: async ()=>({ error:m }) } } }) : invocar(nome, opts); };
     return f; } });
 }
 
@@ -1111,7 +1128,7 @@ function boot(){
   backupReminder();
   setTimeout(novidadesIniciar, 1500);
   setTimeout(reuBadge, 2500);
-  sb.from('crm_config').select('valor').eq('chave','agenda_feed_token').maybeSingle().then(({data})=>{ document.getElementById('ics-url').value = data && data.valor ? `${SUPABASE_URL}/functions/v1/agenda-ics?token=${data.valor}` : ''; });   // o token vem do banco (só quem está logado lê), nunca do código
+  sb.rpc('crm_agenda_feed_token').then(({data})=>{ document.getElementById('ics-url').value = data ? `${SUPABASE_URL}/functions/v1/agenda-ics?token=${data}` : ''; });   // o token vem do banco (só quem está logado lê), nunca do código
   renderCalendar();
   renderOperacao();
   // página inicial: a da configuração do cliente (Aliança = Indicadores); se estiver desligada, o primeiro módulo ligado
@@ -10922,6 +10939,6 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610291620"></script>
+<script src="plataforma.js?v=202610291645"></script>
 </body>
 </html>

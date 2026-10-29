@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610291645">
+<meta name="app-build" content="202610291928">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -942,7 +942,17 @@ async function aliancaModulosDoUsuario(email){
     }
     const ativo = document.querySelector('.nav-btn.active');
     if(!ativo || ativo.dataset.off){ const p = document.querySelector('.nav-btn[data-view]:not([data-off]):not(#nav-admin)'); if(p) p.click(); }
+    tcAplicarConfigCorretora();
   }catch(e){}
+}
+// apresentação do convite de reunião e vídeos de treinamento próprios da corretora (crm_config), quando ela tiver
+async function tcAplicarConfigCorretora(){
+  const { data } = await sb.from('crm_config').select('chave,valor').in('chave', ['apresentacao_url','video_corretor','video_gestor']);
+  const c = Object.fromEntries((data||[]).map(r=>[r.chave, r.valor]));
+  if(c.apresentacao_url) APRESENTACAO_URL = c.apresentacao_url;
+  const vids = document.querySelectorAll('video[src]');
+  if(c.video_corretor && vids[0]) vids[0].src = c.video_corretor;
+  if(c.video_gestor && vids[1]) vids[1].src = c.video_gestor;
 }
 // Funções do servidor travadas pela configuração (IA desligada) ou pelo plano da corretora (módulos 'ia' e 'agenda_externa'):
 // respondem com um aviso sem chamar o servidor. sb.functions é um getter que cria um cliente novo a cada uso: intercepta o getter.
@@ -9623,7 +9633,7 @@ async function lembAbrirLista(r){
 // ===== Confirmação automática da reunião: a Prospecção ("Agendou reunião") ou a Agenda criam o compromisso e o banco monta
 // a régua de lembretes em crm_envios (confirmação, 3/2/1 dia antes às 9h, 1 hora antes e na hora). Sem API de WhatsApp:
 // o Hoje mostra o que está na hora de enviar, com 1 clique para o WhatsApp; o enviado entra na linha do tempo do cliente. =====
-const APRESENTACAO_URL = 'https://luizdeamo-sketch.github.io/crm-alianca/apresentacao.html';
+let APRESENTACAO_URL = 'https://luizdeamo-sketch.github.io/crm-alianca/apresentacao.html';   // a corretora pode ter a própria (crm_config.apresentacao_url)
 const REU_MOM = { reuniao_confirmacao:'Confirmação', reuniao_3d:'3 dias antes', reuniao_2d:'2 dias antes', reuniao_1d:'1 dia antes', reuniao_1h:'1 hora antes', reuniao_agora:'Na hora' };
 function reuTexto(modelo, env){
   const a = env.crm_agenda||{}, ini = new Date(a.data_inicio), link = a.link_reuniao || (/^https?:\/\//.test(a.local||'') ? a.local : '');
@@ -10939,6 +10949,6 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610291645"></script>
+<script src="plataforma.js?v=202610291928"></script>
 </body>
 </html>

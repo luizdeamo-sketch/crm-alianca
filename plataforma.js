@@ -36,7 +36,10 @@
     let n; while ((n = w.nextNode())) { if (n.nodeValue && n.nodeValue.indexOf(NOME_BASE) >= 0) n.nodeValue = n.nodeValue.split(NOME_BASE).join(novo); }
     raiz.querySelectorAll && raiz.querySelectorAll('img').forEach((img) => {
       if (img.alt && img.alt.indexOf(NOME_BASE) >= 0) img.alt = img.alt.split(NOME_BASE).join(novo);
-      if (MARCA.logo_url && /assets\/logo-(azul|marinho|branco|icone)\.png/.test(img.getAttribute('src') || '')) img.src = MARCA.logo_url;
+      const src = img.getAttribute('src') || '';
+      // logo branco fica nas faixas escuras (capas e PDFs): usa a versão da corretora para fundo escuro, se houver
+      if (/assets\/logo-branco\.png/.test(src) && MARCA.cores && MARCA.cores.logo_fundo_escuro) img.src = MARCA.cores.logo_fundo_escuro;
+      else if (MARCA.logo_url && /assets\/logo-(azul|marinho|branco|icone)\.png/.test(src)) img.src = MARCA.logo_url;
     });
   }
   function aplicarNoDocumento(doc) {
@@ -92,13 +95,67 @@
       if (!data) { barrar('Este e-mail não tem acesso', 'Seu login existe, mas você não está cadastrado em nenhuma corretora deste sistema. Peça ao administrador da sua corretora para liberar o seu acesso.'); return; }
       if (data.ativo === false) { barrar('Acesso suspenso', 'O acesso da sua corretora está suspenso no momento. Fale com o administrador da sua corretora. Os dados continuam guardados.'); return; }
       MARCA = data;
-      try { localStorage.setItem('tc_marca', JSON.stringify({ nome_exibicao: data.nome_exibicao, logo_url: data.logo_url, cores: data.cores })); } catch (e) { /* sem armazenamento */ }
+      try { localStorage.setItem('tc_marca', JSON.stringify({ nome_exibicao: data.nome_exibicao, logo_url: data.logo_url, cores: data.cores })); if (data.slug) localStorage.setItem('tc_slug', data.slug); } catch (e) { /* sem armazenamento */ }
+      // o endereço passa a mostrar o link próprio da corretora (fica certo nos favoritos)
+      const cAtual = new URLSearchParams(location.search).get('c');
+      if (data.slug && cAtual !== data.slug && !/[?&]painel=1/.test(location.search) && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash);
       aplicarMarca();
       carregarEtapas();
+      if (data.sou_admin) primeirosPassos();
     } catch (e) { console.warn('marca da corretora:', e); }
   }
-  // tela de entrada: usa a última marca vista neste navegador
-  try { const m = JSON.parse(localStorage.getItem('tc_marca') || 'null'); if (m) { MARCA = m; aplicarMarca(); MARCA = null; } } catch (e) { /* nada */ }
+  // tela de entrada: a marca do link próprio da corretora (…/crm-alianca/<link> ou ?c=<link>); sem link, a última marca vista neste navegador
+  const slugDoLink = (new URLSearchParams(location.search).get('c') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+  try { const m = JSON.parse(localStorage.getItem('tc_marca') || 'null'); if (m && (!slugDoLink || localStorage.getItem('tc_slug') === slugDoLink)) { MARCA = m; aplicarMarca(); MARCA = null; } } catch (e) { /* nada */ }
+  async function marcaDoLink() {
+    if (!slugDoLink) return;
+    if (typeof sb === 'undefined') return setTimeout(marcaDoLink, 200);
+    try {
+      const { data: s } = await sb.auth.getSession(); if (s && s.session) return;   // logado: vale a corretora do usuário
+      const { data } = await sb.rpc('crm_marca_publica', { p_slug: slugDoLink });
+      if (!data) return;
+      try { localStorage.setItem('tc_marca', JSON.stringify(data)); localStorage.setItem('tc_slug', data.slug); } catch (e) { /* nada */ }
+      MARCA = data; aplicarMarca(); MARCA = null;
+    } catch (e) { /* sem rede: fica a marca padrão */ }
+  }
+  marcaDoLink();
+
+  /* ---------- primeiros passos do administrador (corretora nova) ---------- */
+  async function primeirosPassos() {
+    const chave = 'tc_primeiros_' + MARCA.id;
+    try { if (localStorage.getItem(chave) === 'fechado') return; } catch (e) { /* nada */ }
+    const [p, u] = await Promise.all([
+      sb.from('crm_pessoas').select('id', { count: 'exact', head: true }),
+      sb.from('crm_usuarios').select('email', { count: 'exact', head: true })]);
+    const temClientes = (p.count || 0) > 0, temEquipe = (u.count || 0) > 1, temMarca = !!MARCA.logo_url;
+    if (temClientes && temEquipe && temMarca) return;
+    const passo = (feito, titulo, texto, botao, id) => `<li style="display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;padding:8px 0;border-top:1px solid #eef0f5">
+      <span style="font-size:18px">${feito ? '✅' : '⬜'}</span><div><b>${titulo}</b><div style="color:#5d6871;font-size:13px">${texto}</div>
+      ${feito ? '' : `<button type="button" data-pp="${id}" style="margin-top:6px;min-height:34px;padding:0 12px;border-radius:8px;border:0;background:var(--navy,#111827);color:#fff;cursor:pointer;font-weight:600">${botao}</button>`}</div></li>`;
+    let c = document.getElementById('tc-primeiros'); if (c) c.remove();
+    c = document.createElement('div'); c.id = 'tc-primeiros'; c.setAttribute('role', 'region'); c.setAttribute('aria-label', 'Primeiros passos');
+    c.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:9500;width:min(380px,calc(100vw - 32px));max-height:calc(100vh - 120px);overflow:auto;background:#fff;border:1px solid #e4e6e2;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:14px 16px;font:14px/1.45 "Segoe UI",system-ui,sans-serif;color:#2a3540';
+    c.innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:16px;color:#111827">Comece por aqui</b>
+      <button type="button" data-pp="fechar" aria-label="Fechar" style="border:0;background:none;font-size:18px;cursor:pointer">✕</button></div>
+      <div style="color:#5d6871;font-size:13px;margin:4px 0 6px">Quatro passos para deixar a ${esc(nomeSistema())} pronta para a sua equipe.</div>
+      <ol style="list-style:none;margin:0;padding:0">
+        ${passo(temEquipe, '1. Cadastre a sua equipe', 'Em Admin, inclua o e-mail de cada pessoa e libere o primeiro acesso.', 'Abrir Admin', 'equipe')}
+        ${passo(temClientes, '2. Baixe a planilha padrão', 'Uma linha por apólice; o mesmo cliente com duas apólices ocupa duas linhas.', 'Baixar planilha', 'modelo')}
+        ${passo(temClientes, '3. Suba os seus clientes', 'Envie a planilha preenchida; o sistema mostra uma prévia antes de gravar.', 'Importar carteira', 'importar')}
+        ${passo(temMarca, '4. Coloque o logo e as cores', 'É assim que o sistema aparece para todos, inclusive no link próprio da corretora.', 'Minha corretora', 'marca')}
+      </ol>`;
+    document.body.appendChild(c);
+    const abrirImport = () => { const b = document.getElementById('op-import'); if (b) b.click(); return !!b; };
+    c.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pp]'); if (!b) return;
+      const a = b.dataset.pp;
+      if (a === 'fechar') { try { localStorage.setItem(chave, 'fechado'); } catch (er) { /* nada */ } c.remove(); }
+      else if (a === 'equipe') { const n = document.getElementById('nav-admin'); if (n) n.click(); }
+      else if (a === 'modelo') { if (abrirImport()) setTimeout(() => { const m = document.getElementById('ct-modelo'); if (m) m.click(); }, 300); }
+      else if (a === 'importar') abrirImport();
+      else if (a === 'marca') abrirMinhaCorretora();
+    });
+  }
 
   /* ---------- botões no topo ---------- */
   function botoes() {

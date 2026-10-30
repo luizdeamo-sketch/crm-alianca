@@ -22,7 +22,8 @@
   const resumoMods = (m) => !Array.isArray(m) ? 'Tudo liberado' : (m.filter((k) => MODULOS.some(([x]) => x === k)).map(nomeMod).join(' · ') || 'Nenhum módulo') + (m.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : '');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const quando = (d) => d ? new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
-  const link = () => location.origin + location.pathname;
+  const link = () => new URL('./', location.href).href;            // endereço do sistema (pasta)
+  const linkCorretora = (slug) => link() + encodeURIComponent(slug); // link próprio: …/crm-alianca/<link>
   let EST = { aba: 'corretoras', filtro: '', busca: '', corretoras: [], usuarios: [], aviso: '' };
   let raiz = null;
 
@@ -86,7 +87,7 @@
     if (aviso !== undefined) EST.aviso = aviso;
     raiz.innerHTML = '<div style="padding:40px;text-align:center">Carregando…</div>';
     try {
-      [EST.corretoras, EST.usuarios, EST.faturas, EST.config] = await Promise.all([rpc('crm_plataforma_corretoras'), rpc('crm_plataforma_usuarios', { p_corretor: null }),
+      [EST.corretoras, EST.usuarios, EST.faturas, EST.config] = await Promise.all([rpc('crm_plataforma_corretoras'), rpc('crm_plataforma_administradores'),
         rpc('crm_plataforma_faturas'), rpc('crm_plataforma_config_ler')]);
       EST.faturas = EST.faturas || []; EST.config = EST.config || {};
     } catch (e) { raiz.innerHTML = `<div style="padding:40px">Erro ao carregar o painel: ${esc(e.message)} <button class="b" id="pp-x">Fechar</button></div>`; raiz.querySelector('#pp-x').onclick = fechar; return; }
@@ -96,17 +97,17 @@
   function desenhar() {
     const lista = EST.corretoras;
     const ativas = lista.filter((c) => c.ativo).length;
-    const usuAtivos = EST.usuarios.filter((u) => u.ativo).length;
-    const pend = EST.usuarios.filter((u) => u.primeiro_acesso_ate && new Date(u.primeiro_acesso_ate) > new Date() && !u.tem_login).length;
+    const usuAtivos = lista.reduce((a, c) => a + Number(c.usuarios_ativos || 0), 0);
+    const pend = lista.filter((c) => c.primeiro_acesso_pendente).length;
     raiz.innerHTML = `
       <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Corretoras, planos, módulos e usuários. Nenhum dado de cliente aparece aqui.</small></div>
-        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Usuários</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
+        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
       <main>
         <div class="kpis">
           <div class="kpi"><b>${ativas}</b><span>corretoras ativas</span></div>
           <div class="kpi"><b>${lista.length - ativas}</b><span>suspensas</span></div>
           <div class="kpi"><b>${usuAtivos}</b><span>usuários ativos</span></div>
-          <div class="kpi"><b>${pend}</b><span>aguardando o 1º acesso</span></div>
+          <div class="kpi"><b>${pend}</b><span>corretora(s) com acesso liberado aguardando a senha</span></div>
         </div>
         ${EST.aviso || ''}
         ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : telaUsuarios()}
@@ -126,7 +127,8 @@
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
         <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
         <td>${sit} ${pagto(c)}</td>
-        <td><button class="b" data-ver-usuarios="${c.id}">${c.usuarios_ativos} de ${c.usuarios}</button></td>
+        <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas ativas na equipe (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">${c.usuarios_ativos} de ${c.usuarios}</button></td>
+        <td>${c.slug ? `<button class="b" data-copiar-link="${esc(linkCorretora(c.slug))}" title="Copiar o link próprio da corretora">🔗 /${esc(c.slug)}</button>` : '—'}</td>
         <td>${quando(c.ultimo_acesso)}</td>
         <td>${esc(c.admin_email || '—')}</td>
         <td><div class="acoes">
@@ -145,8 +147,8 @@
         </form><div class="msg" id="pp-msg"></div></div>
       <div class="card"><h3>Corretoras</h3>
         <p class="sub">Suspender corta o acesso de toda a equipe da corretora; os dados ficam guardados e voltam ao reativar. Clique nos usuários para administrar a equipe.</p>
-        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Mensalidade</th><th>Situação</th><th>Usuários</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
-        <tbody>${linhas || '<tr><td colspan="8">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
+        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Mensalidade</th><th>Situação</th><th>Usuários</th><th>Link próprio</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="9">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
   }
 
   function ligarCorretoras() {
@@ -156,10 +158,11 @@
       const plano = String(f.get('plano'));
       raiz.querySelector('#pp-msg').textContent = 'Criando…';
       try {
-        const id = await rpc('crm_plataforma_criar', { p_nome: nome, p_plano: plano, p_admin_email: email, p_admin_nome: f.get('admin_nome') });
-        await rpc('crm_plataforma_cobranca_corretora', { p_id: id, p_plano: plano, p_extras: [], p_gratuita: false, p_preco_especial: null, p_degustacao_inicio: null });
+        var novoId = await rpc('crm_plataforma_criar', { p_nome: nome, p_plano: plano, p_admin_email: email, p_admin_nome: f.get('admin_nome') });
+        await rpc('crm_plataforma_cobranca_corretora', { p_id: novoId, p_plano: plano, p_extras: [], p_gratuita: false, p_preco_especial: null, p_degustacao_inicio: null });
+        EST.corretoras = await rpc('crm_plataforma_corretoras');
       } catch (err) { raiz.querySelector('#pp-msg').textContent = 'Não foi possível criar: ' + err.message; return; }
-      recarregar(convite('Torre de Controle - ' + nome, email));
+      recarregar(convite(EST.corretoras.find((x) => x.id === novoId) || { nome }, email, true));
     };
     raiz.querySelectorAll('[data-suspender]').forEach((b) => b.onclick = async () => {
       if (!confirm(`Suspender ${b.dataset.nome}? Toda a equipe perde o acesso até você reativar. Os dados ficam guardados.`)) return;
@@ -170,6 +173,7 @@
     });
     raiz.querySelectorAll('[data-ver-usuarios]').forEach((b) => b.onclick = () => { EST.aba = 'usuarios'; EST.filtro = b.dataset.verUsuarios; EST.aviso = ''; desenhar(); });
     raiz.querySelectorAll('[data-modulos]').forEach((b) => b.onclick = () => modulos(b));
+    raiz.querySelectorAll('[data-copiar-link]').forEach((b) => b.onclick = () => navigator.clipboard.writeText(b.dataset.copiarLink).then(() => { const t = b.textContent; b.textContent = 'Copiado ✓'; setTimeout(() => { b.textContent = t; }, 1500); }));
   }
 
   function modulos(botao) {
@@ -180,7 +184,8 @@
     const lig = (k) => !Array.isArray(c.modulos) || c.modulos.includes(k);
     const plano = PLANOS[c.plano] ? c.plano : 'completo';
     const tr = document.createElement('tr'); tr.className = 'pp-mod'; tr.id = 'pp-mod-' + id;
-    tr.innerHTML = `<td colspan="8"><div class="modbox"><b>Plano e cobrança de ${esc(nome)}</b>
+    tr.innerHTML = `<td colspan="9"><div class="modbox"><b>Plano, cobrança e link de ${esc(nome)}</b>
+      <form class="lin" onsubmit="return false"><label class="f" style="grid-column:1/-1">Link próprio da corretora<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="color:#5d6871">${esc(link())}</span><input data-slug value="${esc(c.slug || '')}" maxlength="40" style="max-width:260px"><button type="button" class="b" data-salvar-slug>Salvar link</button></div></label></form>
       <div style="display:grid;gap:8px">${Object.entries(PLANOS).map(([k, v]) => `<label class="chk"><input type="radio" name="pl-${id}" value="${k}" ${plano === k ? 'checked' : ''}> <b>${esc(v)}</b> · ${brl(preco(k))} <span style="color:#5d6871">· ${esc(DESC_PLANO[k])}</span></label>`).join('')}</div>
       <p class="sub" style="margin:4px 0 0">Extras (só para quem tem a base de plantões, como a CallMed):</p>
       <div class="modgrid">${EXTRAS.map(([k, v]) => `<label class="chk"><input type="checkbox" data-extra value="${k}" ${lig(k) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
@@ -209,6 +214,10 @@
       recarregar(`<div class="aviso">Plano de <b>${esc(nome)}</b> salvo. A equipe vê as telas novas ao recarregar o sistema.</div>`);
     };
     tr.querySelector('[data-f]').onclick = () => tr.remove();
+    tr.querySelector('[data-salvar-slug]').onclick = async () => {
+      try { const s = await rpc('crm_plataforma_slug', { p_id: id, p_slug: tr.querySelector('[data-slug]').value }); recarregar(`<div class="aviso">Link de <b>${esc(nome)}</b>: ${esc(linkCorretora(s))}</div>`); }
+      catch (err) { alert(err.message); }
+    };
   }
 
   function pagto(c) {
@@ -308,44 +317,51 @@
     return '<span class="pill ok">Ativo</span>';
   }
 
-  function telaUsuarios() {
-    const optsCorr = (sel) => EST.corretoras.map((c) => `<option value="${c.id}" ${sel === c.id ? 'selected' : ''}>${esc(c.nome_exibicao || c.nome)}</option>`).join('');
-    const busca = EST.busca.trim().toLowerCase();
-    const lista = EST.usuarios.filter((u) => (!EST.filtro || u.corretor_id === EST.filtro) && (!busca || (u.email + ' ' + (u.nome || '')).toLowerCase().includes(busca)));
-    const linhas = lista.map((u) => `<tr>
-      <td><b>${esc(u.email)}</b>${u.dono ? ' <span class="pill neu" title="Dono da plataforma">dono</span>' : ''}<br><span style="color:#5d6871;font-size:13px">${esc(u.nome || '')}</span></td>
-      <td><select data-corr="${esc(u.email)}">${optsCorr(u.corretor_id)}</select></td>
-      <td><select data-papel="${esc(u.email)}">${Object.entries(PAPEIS).map(([k, v]) => `<option value="${k}" ${u.papel === k ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+  // linha de um usuário (administrador ou o resultado da busca do suporte)
+  function linhaUsuario(u, comPapel) {
+    return `<tr>
+      <td><b>${esc(u.corretora || '—')}</b></td>
+      <td><b>${esc(u.email)}</b>${u.dono ? ' <span class="pill neu" title="Dono da plataforma">dono</span>' : ''}<br><span style="color:#5d6871;font-size:13px">${esc(u.nome || '')}${comPapel ? ' · ' + esc(PAPEIS[u.papel] || u.papel) : ''}</span></td>
       <td>${situacao(u)}</td>
       <td>${u.tem_login ? (u.mfa ? '<span class="pill ok">Sim</span>' : '<span class="pill neu">Não</span>') : '—'}</td>
       <td>${quando(u.ultimo_acesso)}</td>
       <td><div class="acoes">
-        ${u.tem_login ? `<button class="b" data-redef="${esc(u.email)}" title="Manda para a pessoa o e-mail de criar uma senha nova">Redefinir senha</button>` : `<button class="b" data-liberar="${esc(u.email)}" data-nome="${esc(u.nome || '')}" data-corretora="${esc(u.corretora || '')}">Liberar acesso (48h)</button>`}
+        ${u.tem_login ? `<button class="b" data-redef="${esc(u.email)}" title="Manda para a pessoa o e-mail de criar uma senha nova">Redefinir senha</button>` : `<button class="b" data-liberar="${esc(u.email)}" data-corretor="${esc(u.corretor_id)}">Liberar acesso (48h)</button>`}
         ${u.mfa ? `<button class="b" data-zerar="${esc(u.email)}" title="Para quem trocou ou perdeu o celular: cadastra as 2 etapas de novo no próximo login">Zerar 2 etapas</button>` : ''}
         ${u.ativo ? `<button class="b warn" data-desativar="${esc(u.email)}">Desativar</button>` : `<button class="b" data-ativar="${esc(u.email)}">Ativar</button>`}
-      </div></td></tr>`).join('');
+      </div></td></tr>`;
+  }
+  const CAB_USU = '<thead><tr><th>Corretora</th><th>Pessoa</th><th>Situação</th><th>2 etapas</th><th>Último acesso</th><th>Ações</th></tr></thead>';
+
+  function telaUsuarios() {
+    const optsCorr = (sel) => EST.corretoras.map((c) => `<option value="${c.id}" ${sel === c.id ? 'selected' : ''}>${esc(c.nome_exibicao || c.nome)}</option>`).join('');
+    const lista = EST.usuarios.filter((u) => !EST.filtro || u.corretor_id === EST.filtro);
     return `
-      <div class="card"><h3>Novo usuário</h3>
-        <p class="sub">Cadastra a pessoa numa corretora. Marque "liberar acesso" para ela criar a própria senha em "Primeiro acesso" nas próximas 48 horas.</p>
+      <div class="aviso">Aqui ficam só os <b>administradores</b> de cada corretora (quem contratou). A equipe de cada cliente é cadastrada pelo administrador dele, na tela <b>Admin</b> do próprio sistema, e você não vê a lista de funcionários. Se alguém da equipe de um cliente precisar de ajuda, use a busca do <b>Suporte</b> no fim da página.</div>
+      <div class="card"><h3>Administradores</h3>
+        <form class="lin" id="pp-filtro" style="margin-bottom:10px" onsubmit="return false">
+          <label class="f">Corretora<select name="f"><option value="">Todas</option>${optsCorr(EST.filtro)}</select></label>
+        </form>
+        <div class="tbl"><table>${CAB_USU}<tbody>${lista.map((u) => linhaUsuario(u, false)).join('') || '<tr><td colspan="6">Nenhum administrador.</td></tr>'}</tbody></table></div></div>
+      <div class="card"><h3>Novo administrador</h3>
+        <p class="sub">Para incluir mais um administrador numa corretora, ou trocar quem administra. Marque "liberar acesso" para ele criar a própria senha em "Primeiro acesso" nas próximas 48 horas.</p>
         <form class="lin" id="pp-novo-usu">
           <label class="f">E-mail<input name="email" type="email" required></label>
           <label class="f">Nome<input name="nome" maxlength="80"></label>
           <label class="f">Corretora<select name="corretor" required>${optsCorr(EST.filtro)}</select></label>
-          <label class="f">Papel<select name="papel">${Object.entries(PAPEIS).map(([k, v]) => `<option value="${k}" ${k === 'especialista' ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
           <label class="chk" style="min-height:40px"><input type="checkbox" name="liberar" checked> Liberar acesso (48h)</label>
-          <button class="b pri" type="submit">Cadastrar</button>
+          <button class="b pri" type="submit">Cadastrar administrador</button>
         </form><div class="msg" id="pp-msg-u"></div></div>
-      <div class="card"><h3>Usuários</h3>
-        <p class="sub">Mudar a corretora leva a pessoa para outra equipe (o e-mail é único no sistema). Desativar bloqueia o login na hora.</p>
-        <form class="lin" id="pp-filtro" style="margin-bottom:10px">
-          <label class="f">Corretora<select name="f"><option value="">Todas</option>${optsCorr(EST.filtro)}</select></label>
-          <label class="f">Buscar<input name="b" value="${esc(EST.busca)}" placeholder="e-mail ou nome"></label>
+      <div class="card"><h3>Suporte: ajudar uma pessoa da equipe de um cliente</h3>
+        <p class="sub">Digite o e-mail exato de quem pediu ajuda. Aparece só essa pessoa, para liberar o acesso, mandar o e-mail de nova senha, zerar as 2 etapas ou desativar.</p>
+        <form class="lin" id="pp-busca" onsubmit="return false">
+          <label class="f">E-mail da pessoa<input name="e" type="email" value="${esc(EST.busca)}" placeholder="nome@corretora.com.br"></label>
+          <button class="b pri" type="submit">Procurar</button>
         </form>
-        <div class="tbl"><table><thead><tr><th>Usuário</th><th>Corretora</th><th>Papel</th><th>Situação</th><th>2 etapas</th><th>Último acesso</th><th>Ações</th></tr></thead>
-        <tbody>${linhas || '<tr><td colspan="7">Nenhum usuário.</td></tr>'}</tbody></table></div></div>`;
+        <div id="pp-busca-res">${EST.achado === undefined ? '' : EST.achado ? `<div class="tbl" style="margin-top:10px"><table>${CAB_USU}<tbody>${linhaUsuario(EST.achado, true)}</tbody></table></div>` : '<div class="msg" style="margin-top:8px">Nenhuma pessoa com esse e-mail.</div>'}</div></div>`;
   }
 
-  function usuario(email) { return EST.usuarios.find((u) => u.email === email); }
+  function usuario(email) { return EST.usuarios.find((u) => u.email === email) || (EST.achado && EST.achado.email === email ? EST.achado : null); }
   async function salvarUsuario(u, mudancas, aviso) {
     const n = Object.assign({ corretor: u.corretor_id, nome: u.nome, papel: u.papel, ativo: u.ativo, liberar: false }, mudancas);
     try { await rpc('crm_plataforma_usuario_salvar', { p_corretor: n.corretor, p_email: u.email, p_nome: n.nome || '', p_papel: n.papel, p_ativo: n.ativo, p_liberar: n.liberar }); }
@@ -356,25 +372,24 @@
   function ligarUsuarios() {
     const filtro = raiz.querySelector('#pp-filtro');
     filtro.f.onchange = () => { EST.filtro = filtro.f.value; desenhar(); };
-    filtro.b.oninput = () => { EST.busca = filtro.b.value; clearTimeout(filtro._t); filtro._t = setTimeout(() => { desenhar(); const i = raiz.querySelector('#pp-filtro').b; i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 300); };
-    filtro.onsubmit = (e) => e.preventDefault();
+    raiz.querySelector('#pp-busca').onsubmit = async (e) => {
+      e.preventDefault();
+      EST.busca = String(e.target.e.value || '').trim();
+      if (!EST.busca) { EST.achado = undefined; desenhar(); return; }
+      try { const r = await rpc('crm_plataforma_usuario_buscar', { p_email: EST.busca }); EST.achado = (r && r[0]) || null; } catch (err) { alert(err.message); return; }
+      desenhar();
+    };
     raiz.querySelector('#pp-novo-usu').onsubmit = async (e) => {
       e.preventDefault();
       const f = new FormData(e.target), email = String(f.get('email')).trim().toLowerCase(), liberar = !!f.get('liberar');
-      const existente = usuario(email);
+      const existente = (await rpc('crm_plataforma_usuario_buscar', { p_email: email }).catch(() => []))[0];
       if (existente && existente.corretor_id !== f.get('corretor') && !confirm(`${email} já está na corretora ${existente.corretora}. Levar para a corretora escolhida?`)) return;
       raiz.querySelector('#pp-msg-u').textContent = 'Salvando…';
-      try { await rpc('crm_plataforma_usuario_salvar', { p_corretor: f.get('corretor'), p_email: email, p_nome: f.get('nome') || '', p_papel: f.get('papel'), p_ativo: true, p_liberar: liberar }); }
+      try { await rpc('crm_plataforma_usuario_salvar', { p_corretor: f.get('corretor'), p_email: email, p_nome: f.get('nome') || '', p_papel: 'master', p_ativo: true, p_liberar: liberar }); }
       catch (err) { raiz.querySelector('#pp-msg-u').textContent = 'Não foi possível cadastrar: ' + err.message; return; }
       const corr = EST.corretoras.find((c) => c.id === f.get('corretor'));
-      recarregar(liberar ? convite('Torre de Controle - ' + (corr ? corr.nome_exibicao || corr.nome : ''), email) : `<div class="aviso">${esc(email)} cadastrado.</div>`);
+      recarregar(liberar ? convite(corr, email) : `<div class="aviso">${esc(email)} cadastrado como administrador.</div>`);
     };
-    raiz.querySelectorAll('[data-corr]').forEach((s) => s.onchange = () => {
-      const u = usuario(s.dataset.corr), corr = EST.corretoras.find((c) => c.id === s.value);
-      if (!confirm(`Levar ${u.email} para a corretora ${corr.nome_exibicao || corr.nome}? Ela passa a ver só os dados dessa corretora.`)) { s.value = u.corretor_id; return; }
-      salvarUsuario(u, { corretor: s.value }, `<div class="aviso">${esc(u.email)} agora está na corretora ${esc(corr.nome_exibicao || corr.nome)}.</div>`);
-    });
-    raiz.querySelectorAll('[data-papel]').forEach((s) => s.onchange = () => salvarUsuario(usuario(s.dataset.papel), { papel: s.value }));
     raiz.querySelectorAll('[data-desativar]').forEach((b) => b.onclick = () => {
       const u = usuario(b.dataset.desativar);
       if (!confirm(`Desativar ${u.email}? O login fica bloqueado até você ativar de novo.`)) return;
@@ -383,7 +398,9 @@
     raiz.querySelectorAll('[data-ativar]').forEach((b) => b.onclick = () => salvarUsuario(usuario(b.dataset.ativar), { ativo: true }));
     raiz.querySelectorAll('[data-liberar]').forEach((b) => b.onclick = async () => {
       try { await rpc('crm_plataforma_usuario_liberar', { p_email: b.dataset.liberar }); } catch (err) { alert(err.message); return; }
-      recarregar(convite('Torre de Controle - ' + b.dataset.corretora, b.dataset.liberar));
+      const ehAdmin = ((usuario(b.dataset.liberar) || {}).papel) === 'master';
+      EST.achado = undefined;
+      recarregar(convite(EST.corretoras.find((c) => c.id === b.dataset.corretor), b.dataset.liberar, ehAdmin));
     });
     raiz.querySelectorAll('[data-redef]').forEach((b) => b.onclick = async () => {
       if (!confirm(`Mandar para ${b.dataset.redef} o e-mail de criar uma senha nova?`)) return;
@@ -397,8 +414,12 @@
     });
   }
 
-  function convite(sistema, email) {
-    const txt = `Olá! O acesso à ${sistema} está liberado para você.\n\n1. Abra ${link()}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie sua senha e ative a confirmação em 2 etapas\n\nO link para criar a senha vale por 48 horas.`;
+  // convite com o link próprio da corretora; o administrador também recebe os primeiros passos
+  function convite(corr, email, admin) {
+    const nome = corr ? 'Torre de Controle - ' + (corr.nome_exibicao || corr.nome) : 'Torre de Controle';
+    const url = corr && corr.slug ? linkCorretora(corr.slug) : link();
+    const passos = admin ? `\n\nAo entrar, o quadro "Comece por aqui" mostra os próximos passos: cadastrar a sua equipe, baixar a planilha padrão, subir os seus clientes e colocar o logo e as cores.` : '';
+    const txt = `Olá! O acesso à ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie sua senha e ative a confirmação em 2 etapas\n\nO link para criar a senha vale por 48 horas. Salve o endereço nos favoritos: é o link próprio da sua corretora.${passos}`;
     return `<div class="aviso"><b>Pronto. Mande esta mensagem para a pessoa:</b><pre class="convite">${esc(txt)}</pre>
       <div class="acoes"><button class="b" type="button" onclick="navigator.clipboard.writeText(${esc(JSON.stringify(txt))}).then(()=>this.textContent='Copiado ✓')">Copiar mensagem</button>
       <a href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener"><button class="b" type="button">Enviar pelo WhatsApp</button></a></div></div>`;

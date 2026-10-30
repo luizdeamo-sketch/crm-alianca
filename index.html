@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610292128">
+<meta name="app-build" content="202610292137">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -10950,8 +10950,8 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610292128"></script>
-<script src="painel.js?v=202610292128"></script>
-<script src="cobranca.js?v=202610292128"></script>
+<script src="plataforma.js?v=202610292137"></script>
+<script src="painel.js?v=202610292137"></script>
+<script src="cobranca.js?v=202610292137"></script>
 </body>
 </html>

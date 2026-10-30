@@ -124,7 +124,7 @@
       return `<tr>
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
-        <td>${c.gratuita ? '<span class="pill neu">Grátis</span>' : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
+        <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
         <td>${sit} ${pagto(c)}</td>
         <td><button class="b" data-ver-usuarios="${c.id}">${c.usuarios_ativos} de ${c.usuarios}</button></td>
         <td>${quando(c.ultimo_acesso)}</td>
@@ -184,18 +184,27 @@
       <div style="display:grid;gap:8px">${Object.entries(PLANOS).map(([k, v]) => `<label class="chk"><input type="radio" name="pl-${id}" value="${k}" ${plano === k ? 'checked' : ''}> <b>${esc(v)}</b> · ${brl(preco(k))} <span style="color:#5d6871">· ${esc(DESC_PLANO[k])}</span></label>`).join('')}</div>
       <p class="sub" style="margin:4px 0 0">Extras (só para quem tem a base de plantões, como a CallMed):</p>
       <div class="modgrid">${EXTRAS.map(([k, v]) => `<label class="chk"><input type="checkbox" data-extra value="${k}" ${lig(k) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
+      <p class="sub" style="margin:4px 0 0">Forma de cobrança:</p>
+      <div style="display:flex;gap:18px;flex-wrap:wrap">
+        <label class="chk"><input type="radio" name="fc-${id}" value="mensal" ${c.gratuita ? '' : 'checked'}> <b>Mensalidade</b> · Pix pelo sistema, com degustação</label>
+        <label class="chk"><input type="radio" name="fc-${id}" value="permuta" ${c.gratuita ? 'checked' : ''}> <b>Permuta</b> · sem cobrança, em troca de algo combinado</label>
+      </div>
       <form class="lin" onsubmit="return false">
-        <label class="chk" style="min-height:40px"><input type="checkbox" data-gratis ${c.gratuita ? 'checked' : ''}> Grátis para sempre (sem cobrança)</label>
-        <label class="f">Preço especial por mês (vazio = preço do plano)<input data-especial type="number" min="0" step="0.01" value="${c.preco_especial != null ? c.preco_especial : ''}"></label>
-        <label class="f">Início da degustação (vazio = no primeiro acesso)<input data-degust type="date" value="${c.degustacao_inicio || ''}"></label>
+        <label class="f" data-so="mensal">Preço especial por mês (vazio = preço do plano)<input data-especial type="number" min="0" step="0.01" value="${c.preco_especial != null ? c.preco_especial : ''}"></label>
+        <label class="f" data-so="mensal">Início da degustação (vazio = no primeiro acesso)<input data-degust type="date" value="${c.degustacao_inicio || ''}"></label>
+        <label class="f" data-so="permuta" style="grid-column:1/-1">Contrapartida da permuta (o que a corretora dá em troca)<input data-contra maxlength="200" placeholder="Ex.: indica 5 clientes por mês; divulgação no Instagram" value="${esc(c.permuta_contrapartida || '')}"></label>
       </form>
       <div class="acoes"><button class="b pri" data-s>Salvar</button><button class="b" data-f>Fechar</button></div></div></td>`;
     botao.closest('tr').after(tr);
+    const forma = () => tr.querySelector(`input[name="fc-${id}"]:checked`).value;
+    const mostrar = () => tr.querySelectorAll('[data-so]').forEach((el) => { el.style.display = el.dataset.so === forma() ? '' : 'none'; });
+    tr.querySelectorAll(`input[name="fc-${id}"]`).forEach((r) => r.onchange = mostrar); mostrar();
     tr.querySelector('[data-s]').onclick = async () => {
       const pl = tr.querySelector(`input[name="pl-${id}"]:checked`).value;
       const extras = [...tr.querySelectorAll('[data-extra]:checked')].map((i) => i.value);
-      const esp = tr.querySelector('[data-especial]').value, deg = tr.querySelector('[data-degust]').value;
-      try { await rpc('crm_plataforma_cobranca_corretora', { p_id: id, p_plano: pl, p_extras: extras, p_gratuita: tr.querySelector('[data-gratis]').checked, p_preco_especial: esp === '' ? null : Number(esp), p_degustacao_inicio: deg || null }); }
+      const esp = tr.querySelector('[data-especial]').value, deg = tr.querySelector('[data-degust]').value, permuta = forma() === 'permuta';
+      if (permuta && !c.gratuita && c.faturas_abertas > 0 && !confirm(`${nome} tem fatura em aberto. Ao passar para permuta, ela é cancelada. Continuar?`)) return;
+      try { await rpc('crm_plataforma_cobranca_corretora', { p_id: id, p_plano: pl, p_extras: extras, p_gratuita: permuta, p_preco_especial: permuta || esp === '' ? null : Number(esp), p_degustacao_inicio: permuta ? null : (deg || null), p_contrapartida: permuta ? tr.querySelector('[data-contra]').value : null }); }
       catch (err) { alert(err.message); return; }
       recarregar(`<div class="aviso">Plano de <b>${esc(nome)}</b> salvo. A equipe vê as telas novas ao recarregar o sistema.</div>`);
     };
@@ -237,6 +246,7 @@
         <div class="kpi"><b>${brl(vencidas.reduce((a, f) => a + Number(f.valor), 0))}</b><span>${vencidas.length} vencida(s)</span></div>
         <div class="kpi"><b>${brl(recebidoMes)}</b><span>recebido neste mês</span></div>
         <div class="kpi"><b>${informadas}</b><span>"já paguei" para conferir</span></div>
+        <div class="kpi"><b>${EST.corretoras.filter((c) => c.ativo && c.gratuita).length}</b><span>corretora(s) em permuta</span></div>
       </div>
       <div class="card"><h3>Faturas</h3>
         <p class="sub">As faturas nascem sozinhas todo dia às 7h, ${esc(r.aviso_dias || 5)} dias antes do vencimento. O cliente paga pelo QR Code do Pix no sistema e clica em "Já paguei"; confira no extrato pelo identificador e confirme aqui. Com ${esc(r.bloqueio_dias || 10)} dias de atraso o acesso da corretora fica só na tela do Pix.</p>

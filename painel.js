@@ -13,6 +13,11 @@
     ['carteira', 'Carteira', 'Operação, Central de Apólices, renovações, pós-venda e IA de carteira (apólice e documento)'],
     ['gestao', 'Gestão', 'Indicadores, metas, orçamento, funil, Mais Carlas e Ata']];
   const EXTRAS = [['analitico', 'Analítico (base de plantões)'], ['premium', 'Premium / COPA / fidelizados']];
+  // escada de planos (decisão do Luiz, 29/10/2026); os preços ficam na configuração da plataforma (aba Pagamentos)
+  const PLANOS = { vendas: 'Vendas', vendas_carteira: 'Vendas + Carteira', completo: 'Completo' };
+  const DESC_PLANO = { vendas: 'módulo Vendas', vendas_carteira: 'módulos Vendas e Carteira', completo: 'Vendas, Carteira e Gestão' };
+  const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const preco = (k) => Number(((EST.config || {}).precos || {})[k] || 0);
   const nomeMod = (k) => (MODULOS.concat(EXTRAS).find(([x]) => x === k) || [k, k])[1];
   const resumoMods = (m) => !Array.isArray(m) ? 'Tudo liberado' : (m.filter((k) => MODULOS.some(([x]) => x === k)).map(nomeMod).join(' · ') || 'Nenhum módulo') + (m.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : '');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -81,7 +86,9 @@
     if (aviso !== undefined) EST.aviso = aviso;
     raiz.innerHTML = '<div style="padding:40px;text-align:center">Carregando…</div>';
     try {
-      [EST.corretoras, EST.usuarios] = await Promise.all([rpc('crm_plataforma_corretoras'), rpc('crm_plataforma_usuarios', { p_corretor: null })]);
+      [EST.corretoras, EST.usuarios, EST.faturas, EST.config] = await Promise.all([rpc('crm_plataforma_corretoras'), rpc('crm_plataforma_usuarios', { p_corretor: null }),
+        rpc('crm_plataforma_faturas'), rpc('crm_plataforma_config_ler')]);
+      EST.faturas = EST.faturas || []; EST.config = EST.config || {};
     } catch (e) { raiz.innerHTML = `<div style="padding:40px">Erro ao carregar o painel: ${esc(e.message)} <button class="b" id="pp-x">Fechar</button></div>`; raiz.querySelector('#pp-x').onclick = fechar; return; }
     desenhar();
   }
@@ -93,7 +100,7 @@
     const pend = EST.usuarios.filter((u) => u.primeiro_acesso_ate && new Date(u.primeiro_acesso_ate) > new Date() && !u.tem_login).length;
     raiz.innerHTML = `
       <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Corretoras, planos, módulos e usuários. Nenhum dado de cliente aparece aqui.</small></div>
-        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Usuários</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
+        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Usuários</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
       <main>
         <div class="kpis">
           <div class="kpi"><b>${ativas}</b><span>corretoras ativas</span></div>
@@ -102,11 +109,11 @@
           <div class="kpi"><b>${pend}</b><span>aguardando o 1º acesso</span></div>
         </div>
         ${EST.aviso || ''}
-        ${EST.aba === 'corretoras' ? telaCorretoras() : telaUsuarios()}
+        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : telaUsuarios()}
       </main>`;
     raiz.querySelector('#pp-fechar').onclick = fechar;
     raiz.querySelectorAll('[data-aba]').forEach((b) => b.onclick = () => { EST.aba = b.dataset.aba; EST.aviso = ''; desenhar(); });
-    if (EST.aba === 'corretoras') ligarCorretoras(); else ligarUsuarios();
+    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else ligarUsuarios();
   }
 
   /* ---------- corretoras ---------- */
@@ -116,8 +123,9 @@
       const nome = c.nome_exibicao || c.nome;
       return `<tr>
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
-        <td><button class="b" data-modulos="${c.id}" title="Escolher os módulos contratados">${esc(resumoMods(c.modulos))} ✎</button></td>
-        <td>${sit}</td>
+        <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
+        <td>${c.gratuita ? '<span class="pill neu">Grátis</span>' : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
+        <td>${sit} ${pagto(c)}</td>
         <td><button class="b" data-ver-usuarios="${c.id}">${c.usuarios_ativos} de ${c.usuarios}</button></td>
         <td>${quando(c.ultimo_acesso)}</td>
         <td>${esc(c.admin_email || '—')}</td>
@@ -130,27 +138,26 @@
         <p class="sub">Cria a corretora e libera o administrador dela por 48 horas para criar a senha em "Primeiro acesso". Depois ele sobe o logo e cadastra a equipe.</p>
         <form class="lin" id="pp-nova">
           <label class="f">Nome da corretora<input name="nome" required maxlength="60" placeholder="Ex.: Bravita"></label>
-          <div class="f" style="display:grid;gap:4px;font-size:13px">Módulos contratados<div style="display:flex;gap:12px;flex-wrap:wrap;min-height:40px;align-items:center">${MODULOS.map(([k, v]) => `<label class="chk" title="${esc(MODULOS.find(([x]) => x === k)[2])}"><input type="checkbox" name="mod" value="${k}" checked> ${v}</label>`).join('')}</div></div>
+          <label class="f">Plano<select name="plano">${Object.entries(PLANOS).map(([k, v]) => `<option value="${k}" ${k === 'completo' ? 'selected' : ''}>${v} · ${brl(preco(k))}</option>`).join('')}</select></label>
           <label class="f">Nome do administrador<input name="admin_nome" maxlength="80"></label>
           <label class="f">E-mail do administrador<input name="admin_email" type="email" required></label>
           <button class="b pri" type="submit">Criar corretora</button>
         </form><div class="msg" id="pp-msg"></div></div>
       <div class="card"><h3>Corretoras</h3>
         <p class="sub">Suspender corta o acesso de toda a equipe da corretora; os dados ficam guardados e voltam ao reativar. Clique nos usuários para administrar a equipe.</p>
-        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Módulos</th><th>Situação</th><th>Usuários</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
-        <tbody>${linhas || '<tr><td colspan="7">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
+        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Mensalidade</th><th>Situação</th><th>Usuários</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="8">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
   }
 
   function ligarCorretoras() {
     raiz.querySelector('#pp-nova').onsubmit = async (e) => {
       e.preventDefault();
       const f = new FormData(e.target), nome = String(f.get('nome')).trim(), email = String(f.get('admin_email')).trim().toLowerCase();
-      const mods = f.getAll('mod');
-      if (!mods.length) { raiz.querySelector('#pp-msg').textContent = 'Escolha pelo menos um módulo.'; return; }
+      const plano = String(f.get('plano'));
       raiz.querySelector('#pp-msg').textContent = 'Criando…';
       try {
-        const id = await rpc('crm_plataforma_criar', { p_nome: nome, p_plano: mods.length === 3 ? 'completo' : mods.join('+'), p_admin_email: email, p_admin_nome: f.get('admin_nome') });
-        await rpc('crm_plataforma_modulos', { p_id: id, p_modulos: mods });
+        const id = await rpc('crm_plataforma_criar', { p_nome: nome, p_plano: plano, p_admin_email: email, p_admin_nome: f.get('admin_nome') });
+        await rpc('crm_plataforma_cobranca_corretora', { p_id: id, p_plano: plano, p_extras: [], p_gratuita: false, p_preco_especial: null, p_degustacao_inicio: null });
       } catch (err) { raiz.querySelector('#pp-msg').textContent = 'Não foi possível criar: ' + err.message; return; }
       recarregar(convite('Torre de Controle - ' + nome, email));
     };
@@ -171,25 +178,115 @@
     if (aberta) return;
     const c = EST.corretoras.find((x) => x.id === id), nome = c.nome_exibicao || c.nome;
     const lig = (k) => !Array.isArray(c.modulos) || c.modulos.includes(k);
+    const plano = PLANOS[c.plano] ? c.plano : 'completo';
     const tr = document.createElement('tr'); tr.className = 'pp-mod'; tr.id = 'pp-mod-' + id;
-    tr.innerHTML = `<td colspan="7"><div class="modbox"><b>Módulos de ${esc(nome)}</b>
-      <p class="sub" style="margin:0">Cada módulo libera as próprias telas e a própria IA. Cadastro, Agenda, Sugestões e Admin vêm em todos.</p>
-      <div style="display:grid;gap:8px">${MODULOS.map(([k, v, d]) => `<label class="chk"><input type="checkbox" value="${k}" ${lig(k) ? 'checked' : ''}> <b>${esc(v)}</b> <span style="color:#5d6871">· ${esc(d)}</span></label>`).join('')}</div>
+    tr.innerHTML = `<td colspan="8"><div class="modbox"><b>Plano e cobrança de ${esc(nome)}</b>
+      <div style="display:grid;gap:8px">${Object.entries(PLANOS).map(([k, v]) => `<label class="chk"><input type="radio" name="pl-${id}" value="${k}" ${plano === k ? 'checked' : ''}> <b>${esc(v)}</b> · ${brl(preco(k))} <span style="color:#5d6871">· ${esc(DESC_PLANO[k])}</span></label>`).join('')}</div>
       <p class="sub" style="margin:4px 0 0">Extras (só para quem tem a base de plantões, como a CallMed):</p>
-      <div class="modgrid">${EXTRAS.map(([k, v]) => `<label class="chk"><input type="checkbox" value="${k}" ${lig(k) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
-      <div class="acoes"><button class="b pri" data-s>Salvar módulos</button><button class="b" data-t>Liberar tudo</button><button class="b" data-f>Fechar</button></div></div></td>`;
+      <div class="modgrid">${EXTRAS.map(([k, v]) => `<label class="chk"><input type="checkbox" data-extra value="${k}" ${lig(k) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
+      <form class="lin" onsubmit="return false">
+        <label class="chk" style="min-height:40px"><input type="checkbox" data-gratis ${c.gratuita ? 'checked' : ''}> Grátis para sempre (sem cobrança)</label>
+        <label class="f">Preço especial por mês (vazio = preço do plano)<input data-especial type="number" min="0" step="0.01" value="${c.preco_especial != null ? c.preco_especial : ''}"></label>
+        <label class="f">Início da degustação (vazio = no primeiro acesso)<input data-degust type="date" value="${c.degustacao_inicio || ''}"></label>
+      </form>
+      <div class="acoes"><button class="b pri" data-s>Salvar</button><button class="b" data-f>Fechar</button></div></div></td>`;
     botao.closest('tr').after(tr);
-    const salvar = async (mods) => {
-      try { await rpc('crm_plataforma_modulos', { p_id: id, p_modulos: mods }); } catch (err) { alert(err.message); return; }
-      recarregar(`<div class="aviso">Módulos de <b>${esc(nome)}</b> salvos. A equipe vê a mudança ao recarregar o sistema.</div>`);
+    tr.querySelector('[data-s]').onclick = async () => {
+      const pl = tr.querySelector(`input[name="pl-${id}"]:checked`).value;
+      const extras = [...tr.querySelectorAll('[data-extra]:checked')].map((i) => i.value);
+      const esp = tr.querySelector('[data-especial]').value, deg = tr.querySelector('[data-degust]').value;
+      try { await rpc('crm_plataforma_cobranca_corretora', { p_id: id, p_plano: pl, p_extras: extras, p_gratuita: tr.querySelector('[data-gratis]').checked, p_preco_especial: esp === '' ? null : Number(esp), p_degustacao_inicio: deg || null }); }
+      catch (err) { alert(err.message); return; }
+      recarregar(`<div class="aviso">Plano de <b>${esc(nome)}</b> salvo. A equipe vê as telas novas ao recarregar o sistema.</div>`);
     };
-    tr.querySelector('[data-s]').onclick = () => {
-      const m = [...tr.querySelectorAll('input:checked')].map((i) => i.value);
-      if (!m.some((k) => MODULOS.some(([x]) => x === k))) { alert('Escolha pelo menos um módulo (Vendas, Carteira ou Gestão).'); return; }
-      salvar(m);
-    };
-    tr.querySelector('[data-t]').onclick = () => salvar(null);
     tr.querySelector('[data-f]').onclick = () => tr.remove();
+  }
+
+  function pagto(c) {
+    if (c.gratuita || !c.ativo) return '';
+    if (c.maior_atraso > 0) return `<span class="pill susp">${c.maior_atraso} dias em atraso</span>`;
+    if (c.faturas_abertas > 0) return '<span class="pill pend">Fatura em aberto</span>';
+    if (!c.degustacao_inicio) return '<span class="pill neu">Degustação começa no 1º acesso</span>';
+    const fim = new Date(c.degustacao_inicio + 'T12:00:00'); fim.setDate(fim.getDate() + Number((EST.config.regua || {}).degustacao_dias || 15));
+    return fim > new Date() ? `<span class="pill neu">Degustação até ${fim.toLocaleDateString('pt-BR')}</span>` : '<span class="pill ok">Em dia</span>';
+  }
+
+  /* ---------- pagamentos ---------- */
+  function telaPagamentos() {
+    const F = EST.faturas, hoje = new Date().toISOString().slice(0, 10), mes = hoje.slice(0, 7);
+    const abertas = F.filter((f) => f.status === 'aberta'), vencidas = abertas.filter((f) => f.dias_atraso > 0);
+    const recebidoMes = F.filter((f) => f.status === 'paga' && f.paga_em && f.paga_em.slice(0, 7) === mes).reduce((a, f) => a + Number(f.valor), 0);
+    const mrr = EST.corretoras.filter((c) => c.ativo && !c.gratuita).reduce((a, c) => a + Number(c.valor_mensal || 0), 0);
+    const informadas = abertas.filter((f) => f.cliente_informou_em).length;
+    const p = EST.config.precos || {}, x = EST.config.pix || {}, r = EST.config.regua || {};
+    const linhas = F.map((f) => {
+      const sit = f.status === 'paga' ? `<span class="pill ok">Paga ${f.paga_em ? new Date(f.paga_em).toLocaleDateString('pt-BR') : ''}</span>`
+        : f.status === 'cancelada' ? '<span class="pill neu">Cancelada</span>'
+        : f.dias_atraso > 0 ? `<span class="pill susp">${f.dias_atraso} dias em atraso</span>` : '<span class="pill pend">Em aberto</span>';
+      return `<tr><td><b>${esc(f.corretora)}</b><br><span style="color:#5d6871;font-size:12px">${esc(f.codigo)}</span></td>
+        <td>${esc(PLANOS[f.plano] || f.plano)}</td><td>${brl(f.valor)}</td><td>${new Date(f.vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
+        <td>${sit}${f.cliente_informou_em ? ' <span class="pill pend" title="O cliente clicou em Já paguei">cliente informou</span>' : ''}</td>
+        <td><div class="acoes">${f.status === 'aberta' ? `<button class="b pri" data-pago="${f.id}" data-nome="${esc(f.corretora)}" data-valor="${f.valor}">Confirmar pagamento</button>
+          <button class="b" data-cobrar="${f.id}">Cobrar no WhatsApp</button><button class="b warn" data-cancelar="${f.id}">Cancelar</button>`
+          : `<button class="b" data-reabrir="${f.id}">Reabrir</button>`}</div></td></tr>`;
+    }).join('');
+    return `
+      <div class="kpis">
+        <div class="kpi"><b>${brl(mrr)}</b><span>receita mensal contratada</span></div>
+        <div class="kpi"><b>${brl(abertas.reduce((a, f) => a + Number(f.valor), 0))}</b><span>${abertas.length} fatura(s) em aberto</span></div>
+        <div class="kpi"><b>${brl(vencidas.reduce((a, f) => a + Number(f.valor), 0))}</b><span>${vencidas.length} vencida(s)</span></div>
+        <div class="kpi"><b>${brl(recebidoMes)}</b><span>recebido neste mês</span></div>
+        <div class="kpi"><b>${informadas}</b><span>"já paguei" para conferir</span></div>
+      </div>
+      <div class="card"><h3>Faturas</h3>
+        <p class="sub">As faturas nascem sozinhas todo dia às 7h, ${esc(r.aviso_dias || 5)} dias antes do vencimento. O cliente paga pelo QR Code do Pix no sistema e clica em "Já paguei"; confira no extrato pelo identificador e confirme aqui. Com ${esc(r.bloqueio_dias || 10)} dias de atraso o acesso da corretora fica só na tela do Pix.</p>
+        <div class="acoes" style="margin-bottom:10px"><button class="b" id="pp-gerar">Gerar faturas agora</button></div>
+        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="6">Nenhuma fatura ainda. A primeira nasce quando terminar a degustação de uma corretora paga.</td></tr>'}</tbody></table></div></div>
+      <div class="card"><h3>Preços, Pix e régua</h3>
+        <form class="lin" id="pp-cfg">
+          <label class="f">Vendas (R$/mês)<input name="vendas" type="number" min="0" step="0.01" value="${esc(p.vendas)}"></label>
+          <label class="f">Vendas + Carteira (R$/mês)<input name="vendas_carteira" type="number" min="0" step="0.01" value="${esc(p.vendas_carteira)}"></label>
+          <label class="f">Completo (R$/mês)<input name="completo" type="number" min="0" step="0.01" value="${esc(p.completo)}"></label>
+          <label class="f">Chave Pix (celular com +55)<input name="chave" value="${esc(x.chave)}"></label>
+          <label class="f">Nome do recebedor<input name="nome" maxlength="25" value="${esc(x.nome)}"></label>
+          <label class="f">Cidade<input name="cidade" maxlength="15" value="${esc(x.cidade)}"></label>
+          <label class="f">Degustação (dias)<input name="degustacao_dias" type="number" min="0" value="${esc(r.degustacao_dias)}"></label>
+          <label class="f">Aviso antes do vencimento (dias)<input name="aviso_dias" type="number" min="0" value="${esc(r.aviso_dias)}"></label>
+          <label class="f">Bloqueio após atraso (dias)<input name="bloqueio_dias" type="number" min="1" value="${esc(r.bloqueio_dias)}"></label>
+          <button class="b pri" type="submit">Salvar</button>
+        </form><div class="msg" id="pp-msg-cfg">Faturas já abertas mantêm o valor; as próximas usam o preço novo.</div></div>`;
+  }
+
+  function ligarPagamentos() {
+    const fat = (id) => EST.faturas.find((f) => f.id === id);
+    const status = async (id, s, aviso) => { try { await rpc('crm_plataforma_fatura_status', { p_id: id, p_status: s, p_obs: null }); } catch (err) { alert(err.message); return; } recarregar(aviso || ''); };
+    raiz.querySelectorAll('[data-pago]').forEach((b) => b.onclick = () => {
+      if (!confirm(`Confirmar o pagamento de ${brl(b.dataset.valor)} da ${b.dataset.nome}? O aviso some do sistema dela e o acesso volta, se estiver bloqueado.`)) return;
+      status(b.dataset.pago, 'paga', `<div class="aviso">Pagamento da <b>${esc(b.dataset.nome)}</b> confirmado.</div>`);
+    });
+    raiz.querySelectorAll('[data-cancelar]').forEach((b) => b.onclick = () => { if (confirm('Cancelar esta fatura? Ela deixa de ser cobrada.')) status(b.dataset.cancelar, 'cancelada'); });
+    raiz.querySelectorAll('[data-reabrir]').forEach((b) => b.onclick = () => { if (confirm('Reabrir esta fatura? Ela volta a ser cobrada.')) status(b.dataset.reabrir, 'aberta'); });
+    raiz.querySelectorAll('[data-cobrar]').forEach((b) => b.onclick = () => {
+      const f = fat(b.dataset.cobrar), pix = EST.config.pix || {};
+      const copia = window.TorreCobranca ? window.TorreCobranca.pixPayload(pix, f.valor, f.codigo) : '';
+      const venc = new Date(f.vencimento + 'T12:00:00').toLocaleDateString('pt-BR');
+      const txt = `Olá! A mensalidade da Torre de Controle - ${f.corretora} (${PLANOS[f.plano] || f.plano}), no valor de ${brl(f.valor)}, ${f.dias_atraso > 0 ? `venceu em ${venc}` : `vence em ${venc}`}.\n\nO QR Code está no sistema, no botão 💳 Pagamento. Se preferir, use o Pix copia e cola:\n\n${copia}\n\nDepois de pagar, clique em "Já paguei" no sistema. Obrigado!`;
+      window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener');
+    });
+    raiz.querySelector('#pp-gerar').onclick = async () => { try { const n = await rpc('crm_plataforma_cobranca_gerar'); recarregar(`<div class="aviso">${n} fatura(s) nova(s) gerada(s).</div>`); } catch (err) { alert(err.message); } };
+    raiz.querySelector('#pp-cfg').onsubmit = async (e) => {
+      e.preventDefault();
+      const f = new FormData(e.target), num = (k) => Number(f.get(k));
+      const chave = String(f.get('chave')).replace(/[^\d+]/g, '');
+      if (!/^\+55\d{10,11}$/.test(chave)) { raiz.querySelector('#pp-msg-cfg').textContent = 'A chave Pix de celular precisa estar no formato +55 DDD número (ex.: +5511999998888).'; return; }
+      try {
+        await rpc('crm_plataforma_config_salvar', { p_chave: 'precos', p_valor: { vendas: num('vendas'), vendas_carteira: num('vendas_carteira'), completo: num('completo') } });
+        await rpc('crm_plataforma_config_salvar', { p_chave: 'pix', p_valor: { chave, nome: String(f.get('nome')).trim(), cidade: String(f.get('cidade')).trim() } });
+        await rpc('crm_plataforma_config_salvar', { p_chave: 'regua', p_valor: { degustacao_dias: num('degustacao_dias'), aviso_dias: num('aviso_dias'), bloqueio_dias: Math.max(1, num('bloqueio_dias')) } });
+      } catch (err) { raiz.querySelector('#pp-msg-cfg').textContent = 'Não foi possível salvar: ' + err.message; return; }
+      recarregar('<div class="aviso">Preços, Pix e régua salvos.</div>');
+    };
   }
 
   /* ---------- usuários ---------- */

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610292200">
+<meta name="app-build" content="202610292213">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -934,7 +934,7 @@ function tcAplicarModulosCorretora(){   // Admin e Sugestões ficam sempre no me
 }
 async function aliancaModulosDoUsuario(email){
   try{
-    const [{ data: master }, { data: u }, mc] = await Promise.all([ sb.rpc('crm_is_master'), sb.from('crm_usuarios').select('modulos').ilike('email', email||'').maybeSingle(), sb.rpc('crm_minha_corretora').then(r=>r, ()=>({data:null})) ]);
+    const [{ data: master }, { data: u }, mc] = await Promise.all([ sb.rpc('crm_is_master'), sb.from('crm_usuarios').select('modulos').eq('email', String(email||'').toLowerCase()).maybeSingle(), sb.rpc('crm_minha_corretora').then(r=>r, ()=>({data:null})) ]);
     if(mc && mc.data && Array.isArray(mc.data.recursos)){ window.TC_MODULOS = mc.data.recursos; tcAplicarModulosCorretora(); }   // recursos = telas e IA dos módulos contratados (Vendas, Carteira, Gestão), calculados no banco
     const lista = (u && u.modulos) || [];   // módulos por usuário (vazio = todos os da corretora); o master vê todos os da corretora
     if(master !== true && lista.length){
@@ -7823,9 +7823,9 @@ async function caEdit(id, onSaved){
 document.getElementById('ca-export').addEventListener('click', ()=>{
   const cols = [['Cliente',r=>r.crm_pessoas?.nome],['CPF',r=>r.crm_pessoas?.cpf],['Seguradora',r=>r.seguradora],['Produto',r=>r.tipo_seguro],['Nº apólice',r=>r.numero_apolice],['Contratação',r=>r.tipo_contratacao],
     ['Início',r=>r.data_emissao],['Fim',r=>r.data_vencimento],['Prêmio anual',r=>r.valor_premio],['Capital',r=>r.valor_cobertura],['Comissão %',r=>r.comissao_pct],['Pagamento',r=>r.forma_pagamento],['Vendedor/origem',r=>r.corretor_origem],['Status',r=>caEfetivo(r)],['Origem',r=>r.origem_apolice],['Observações',r=>r.observacoes]];
-  const esc = v=>{ const t = v==null?'':String(v); return /[;"\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; };
+  const esc = v=>{ let t = v==null?'':String(v); if(/^[=+\-@]/.test(t) && !/^-?\d+([.,]\d+)?$/.test(t)) t = "'"+t; return /[;"\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; };
   const csv = '﻿' + [cols.map(c=>c[0]).join(';')].concat(CA.filtered.map(r=>cols.map(c=>esc(c[1](r))).join(';'))).join('\n');
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download = 'apolices-callmed-'+ymd(new Date())+'.csv'; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download = 'apolices-'+tcArqNome()+'-'+ymd(new Date())+'.csv'; a.click();
 });
 
 // ---- importar planilha (CSV / XLSX) ----
@@ -7843,9 +7843,39 @@ function impCsv(text){
   return rows.filter(r=>r.some(x=>String(x).trim()!==''));
 }
 function impMoney(v){ if(v==null||v==='') return null; if(typeof v==='number') return v; let t = String(v).replace(/[^\d.,-]/g,''); if(!t) return null;
-  if(t.includes(',') && t.includes('.')) t = t.replace(/\./g,'').replace(',','.'); else if(t.includes(',')) t = t.replace(',','.'); const n = parseFloat(t); return isNaN(n)?null:n; }
-function impDate(v){ if(!v) return null; const t = String(v).trim(); let m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})/); if(m) return `${m[3]}-${m[2]}-${m[1]}`; m = t.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return `${m[1]}-${m[2]}-${m[3]}`;
-  m = t.match(/^(\d{2})\/(\d{2})\/(\d{2})$/); if(m) return `20${m[3]}-${m[2]}-${m[1]}`; return null; }
+  const lp = t.lastIndexOf('.'), lc = t.lastIndexOf(',');
+  if(lp>=0 && lc>=0) t = lc>lp ? t.replace(/\./g,'').replace(',','.') : t.replace(/,/g,'');   // 1.234,56 ou 1,234.56
+  else if(lc>=0) t = t.replace(/\./g,'').replace(',','.');                                   // 1234,56
+  else if(/^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g,'');                         // 1.850 e 500.000 são milhar
+  const n = parseFloat(t); return isNaN(n)?null:n; }
+function impDate(v){ if(!v) return null; const t = String(v).trim(); let m, y, mo, d;
+  if((m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))){ d = +m[1]; mo = +m[2]; y = +m[3]; }
+  else if((m = t.match(/^(\d{4})-(\d{2})-(\d{2})/))){ y = +m[1]; mo = +m[2]; d = +m[3]; }
+  else if((m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/))){ d = +m[1]; mo = +m[2]; y = +m[3]; y += y <= (new Date().getFullYear()%100)+15 ? 2000 : 1900; }
+  else return null;
+  const dt = new Date(Date.UTC(y, mo-1, d));   // recusa 31/02, 99/99/9999 e afins
+  if(y<1900 || y>2100 || dt.getUTCFullYear()!==y || dt.getUTCMonth()!==mo-1 || dt.getUTCDate()!==d) return null;
+  return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+// linhas de uma planilha Excel como texto, lendo o valor real de cada célula (o texto pronto do SheetJS sai no formato americano:
+// 12/11/2026 virava 11/12/26 e 1.850,00 virava 1,850.00)
+function xlsxLinhas(wb){ const ws = wb.Sheets[wb.SheetNames[0]]; if(!ws || !ws['!ref']) return []; const R = XLSX.utils.decode_range(ws['!ref']);
+  const p2 = n=>String(n).padStart(2,'0'), out = [];
+  for(let r=R.s.r; r<=R.e.r; r++){ const lin = [];
+    for(let c=R.s.c; c<=R.e.c; c++){ const cel = ws[XLSX.utils.encode_cell({r, c})]; let v = '';
+      if(cel && cel.v!=null){
+        if(cel.t==='n' && cel.z && XLSX.SSF.is_date(cel.z)){ const d = XLSX.SSF.parse_date_code(cel.v); v = d ? p2(d.d)+'/'+p2(d.m)+'/'+d.y : ''; }
+        else if(cel.t==='d'){ const d = cel.v; v = p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear(); }
+        else if(cel.t==='n'){ v = String(Math.round(cel.v*(cel.z && /%/.test(cel.z) ? 100 : 1)*1e6)/1e6); }
+        else if(cel.t==='b') v = cel.v ? 'Sim' : 'Não';
+        else if(cel.t!=='e') v = String(cel.v); }
+      lin.push(v); }
+    out.push(lin); }
+  return out; }
+// CPF digitado como número no Excel perde os zeros à esquerda; aqui eles voltam
+function cpfDigitos(v){ let d = dOnly(v); if(d.length>=9 && d.length<11) d = d.padStart(11,'0'); return d.length===11 ? d : ''; }
+function cpfDvOk(d){ if(!/^\d{11}$/.test(d) || /^(\d)\1{10}$/.test(d)) return false;
+  for(const n of [9,10]){ let s = 0; for(let i=0;i<n;i++) s += +d[i]*(n+1-i); const dv = (s*10)%11%10; if(dv!==+d[n]) return false; } return true; }
+function tcArqNome(){ try{ return localStorage.getItem('tc_slug') || 'crm'; }catch(e){ return 'crm'; } }
 function impStatus(v){ const t = String(v||'').toLowerCase(); if(/cancel/.test(t)) return 'cancelada'; if(/encerr|vencid/.test(t)) return 'encerrada'; if(/proposta|an[aá]lise/.test(t)) return 'proposta'; if(/aguard/.test(t)) return 'aguardando_emissao'; return 'ativa'; }
 let IMP = null;
 document.getElementById('ca-import').addEventListener('click', ()=>{
@@ -7862,8 +7892,8 @@ async function impLoad(file){
     let rows;
     if(/\.xlsx?$/i.test(file.name)){
       await docsLoadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-      const wb = XLSX.read(await file.arrayBuffer(), {type:'array', cellDates:false}); const ws = wb.Sheets[wb.SheetNames[0]];
-      rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, dateNF:'dd/mm/yyyy', defval:''}).filter(r=>r.some(x=>String(x).trim()!==''));
+      const wb = XLSX.read(await file.arrayBuffer(), {type:'array', cellNF:true});
+      rows = xlsxLinhas(wb).filter(r=>r.some(x=>String(x).trim()!==''));
     } else rows = impCsv(await file.text());
     if(rows.length<2) throw new Error('A planilha precisa ter título e ao menos uma linha de dados.');
     const heads = rows[0].map(h=>String(h||'').trim());
@@ -9268,9 +9298,9 @@ document.getElementById('op-export-contatos').addEventListener('click', ()=>{
     const sel = [...box.querySelectorAll('.oex-col:checked')].map(c=>c.value);
     if(!sel.length){ showToast('Escolha ao menos uma coluna.'); return; }
     const cols = OP_EXPORT_COLS.filter(c=>sel.includes(c[0]));
-    const esc = v=>{ const t = v==null?'':String(v); return /[;"\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; };
+    const esc = v=>{ let t = v==null?'':String(v); if(/^[=+\-@]/.test(t) && !/^-?\d+([.,]\d+)?$/.test(t)) t = "'"+t; return /[;"\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; };
     const csv = '﻿' + [cols.map(c=>c[1]).join(';')].concat(OP.filtered.map(p=>cols.map(c=>esc(c[2](p))).join(';'))).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download = 'contatos-callmed-'+ymd(new Date())+'.csv'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download = 'contatos-'+tcArqNome()+'-'+ymd(new Date())+'.csv'; a.click();
     dlgClose(); showToast(n+' contato(s) exportado(s)');
   });
 });
@@ -9322,7 +9352,7 @@ async function ctLoad(file){
     let rows, vcf = false;
     if(/\.vcf$/i.test(file.name) || /vcard/i.test(file.type)){ rows = ctParseVcf(await file.text()); vcf = true; }
     else if(/\.xlsx?$/i.test(file.name)){ await docsLoadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-      const wb = XLSX.read(await file.arrayBuffer(), {type:'array'}); rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:false, dateNF:'dd/mm/yyyy', defval:''}); }
+      const wb = XLSX.read(await file.arrayBuffer(), {type:'array', cellNF:true}); rows = xlsxLinhas(wb); }
     else rows = impCsv(await file.text());
     rows = rows.filter(r=>r.some(x=>String(x).trim()!==''));
     if(rows.length<2) throw new Error(vcf ? 'Não encontrei contatos com nome neste arquivo .vcf.' : 'A planilha precisa ter os títulos na primeira linha e ao menos um contato.');
@@ -9386,7 +9416,7 @@ function ctNormRow(r){
   if(o.sobrenome){ if(!(o.nome||'').toLowerCase().endsWith(o.sobrenome.toLowerCase())) o.nome = ((o.nome||'')+' '+o.sobrenome).trim(); } delete o.sobrenome;
   if(o.telefone && CT.mode==='celular'){ o.telefone = ctFone(o.telefone); if(!o.telefone) delete o.telefone; }
   if(CT.mode==='celular'){ if(!o.origem) o.origem = 'WhatsApp/contatos'; o.tags = [...new Set([...(o.tags||[]), 'whatsapp-contatos'])]; if(!o.telefone && !o.email) avisos.push('contato sem telefone nem e-mail'); }
-  if(o.cpf){ const d = dOnly(o.cpf); if(d.length===11) o.cpf = d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); else { avisos.push('CPF inválido ('+o.cpf+'): ignorado'); delete o.cpf; } }
+  if(o.cpf){ const d = cpfDigitos(o.cpf); if(d && cpfDvOk(d)) o.cpf = d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); else { avisos.push('CPF inválido ('+o.cpf+'): ignorado'); delete o.cpf; } }
   if(o.data_nascimento){ const d = impDate(o.data_nascimento); if(d) o.data_nascimento = d; else { avisos.push('data de nascimento inválida: ignorada'); delete o.data_nascimento; } }
   if(o.sexo){ o.sexo = /^f/i.test(o.sexo) ? 'F' : (/^m/i.test(o.sexo) ? 'M' : null); if(!o.sexo) delete o.sexo; }
   if(o.classificacao){ const t = o.classificacao.toLowerCase(); o.classificacao = /hot/.test(t) ? 'call_hot' : (/quente/.test(t) ? 'quente' : (/frio/.test(t) ? 'frio' : null)); if(!o.classificacao) delete o.classificacao; }
@@ -9419,7 +9449,8 @@ async function ctPreview(){
     n.avisos.forEach(a=>leves.push({linha, nome:o.nome, motivo:a}));
     const temCpf = !!o.cpf, tel = dOnly(o.telefone).slice(-9);
     const found = await findPessoas({cpf:o.cpf, crm:o.crm, nome:o.nome, telefone:o.telefone});
-    let forte = found.find(isStrong), via = forte ? forte.why : '';
+    // nome idêntico com outro CPF no cadastro é homônimo, não a mesma pessoa
+    let forte = found.find(x=> isStrong(x) && !(temCpf && x.why==='nome idêntico' && dOnly(x.cpf) && dOnly(x.cpf)!==dOnly(o.cpf))), via = forte ? forte.why : '';
     // sem CPF na linha: o telefone normalizado também identifica a pessoa
     if(!forte && !temCpf && tel.length>=8){ const t = found.find(x=>x.why==='telefone igual'); if(t){ forte = t; via = 'telefone'; } }
     const fraco = !forte ? found.find(x=>x.why==='nome semelhante') : null;
@@ -9497,12 +9528,14 @@ async function ctRun(){
         if(ex){
           const patch = {}; if(!ex.numero_apolice && a.numero_apolice) patch.numero_apolice = a.numero_apolice; if(!ex.seguradora && a.seguradora) patch.seguradora = a.seguradora; if(!ex.tipo_seguro && a.tipo_seguro) patch.tipo_seguro = a.tipo_seguro; if(!ex.data_vencimento && a.vencimento) patch.data_vencimento = a.vencimento;
           if(!ex.data_emissao && a.emissao) patch.data_emissao = a.emissao; if(ex.valor_premio==null && a.premio!=null) patch.valor_premio = a.premio; if(ex.valor_cobertura==null && a.capital!=null) patch.valor_cobertura = a.capital; if(ex.comissao_pct==null && a.comissao!=null) patch.comissao_pct = a.comissao; if(!ex.forma_pagamento && a.forma_pagamento) patch.forma_pagamento = a.forma_pagamento; if(a.a_status && a.a_status!==ex.status) patch.status = a.a_status;
-          if(Object.keys(patch).length){ const { error } = await sb.from('crm_apolices').update(patch).eq('id', ex.id); if(error) rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não atualizada: '+error.message, raw:CT.rows[x.linha-2]}); else rel.apoAtualizadas++; }
+          if(ex.id && Object.keys(patch).length){ const { error } = await sb.from('crm_apolices').update(patch).eq('id', ex.id); if(error) rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não atualizada: '+error.message, raw:CT.rows[x.linha-2]}); else rel.apoAtualizadas++; }
           continue; }
         const status = a.a_status || (a.vencimento && a.vencimento < hoje ? 'encerrada' : 'ativa');
         const { error } = await sb.from('crm_apolices').insert({ pessoa_id:x.pessoa_id, numero_apolice:a.numero_apolice||null, seguradora:a.seguradora||null, tipo_seguro:a.tipo_seguro||null, data_emissao:a.emissao||null, data_vencimento:a.vencimento||null, valor_premio:a.premio==null?null:a.premio, valor_cobertura:a.capital==null?null:a.capital, comissao_pct:a.comissao==null?null:a.comissao, forma_pagamento:a.forma_pagamento||null, status, origem_apolice:'importada', dados_extraidos:{importado_de:CT.file} });
         if(error){ rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não criada: '+error.message, raw:CT.rows[x.linha-2]}); continue; }
         rel.apoNovas++;
+        if(!jaTem.has(x.pessoa_id)) jaTem.set(x.pessoa_id, lista);   // linha repetida mais abaixo na planilha encontra esta apólice
+        lista.push({id:null, numero_apolice:a.numero_apolice||null, seguradora:a.seguradora||null, tipo_seguro:a.tipo_seguro||null, data_vencimento:a.vencimento||null});
         if(a.vencimento && status==='ativa'){ [30,15,7].forEach(d=>{ const dt = new Date(a.vencimento+'T12:00:00'); dt.setDate(dt.getDate()-d); if(ymd(dt)>=hoje) rel.avisos++; }); }
       }
       OP.dirty = true; CA.loaded = false;
@@ -10869,7 +10902,7 @@ document.addEventListener('click', async e=>{
       <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="mod-ok">Salvar</button></div>`);
     box.querySelector('#mod-ok').addEventListener('click', async ()=>{
       const sel = [...box.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value);
-      const { error } = await sb.from('crm_usuarios').update({ modulos: sel.length ? sel : null, atualizado_em: new Date().toISOString() }).ilike('email', em);
+      const { error } = await sb.from('crm_usuarios').update({ modulos: sel.length ? sel : null, atualizado_em: new Date().toISOString() }).eq('email', String(em).toLowerCase());
       if(error){ box.querySelector('#mod-err').textContent = 'Erro: '+error.message; return; }
       dlgClose(); showToast('Módulos salvos. Valem no próximo acesso da pessoa.'); renderAdmin();
     });
@@ -10885,10 +10918,10 @@ document.addEventListener('click', async e=>{
       if(ADM.usr.some(u=>String(u.email).toLowerCase()===email)){ showToast('Esse e-mail já tem login. Use “Definir senha temporária” na tabela.'); return; }
       upd = await sb.from('crm_usuarios').upsert({ email, nome:nome||null, papel, ativo:true, primeiro_acesso_ate:ate, atualizado_em:new Date().toISOString() }, { onConflict:'email' });
     } else {
-      upd = await sb.from('crm_usuarios').update({ primeiro_acesso_ate:ate, ativo:true, atualizado_em:new Date().toISOString() }).ilike('email', ren.dataset.e);
+      upd = await sb.from('crm_usuarios').update({ primeiro_acesso_ate:ate, ativo:true, atualizado_em:new Date().toISOString() }).eq('email', String(ren.dataset.e).toLowerCase());
     }
-    if(upd.error){ showToast('Erro: '+upd.error.message); return; }
-    const link = location.origin + location.pathname;
+    if(upd.error){ showToast(/row-level security/i.test(upd.error.message) ? 'Esse e-mail já é usado em outra empresa no sistema. Cada pessoa entra com um e-mail só; use outro e-mail (ex.: o corporativo).' : 'Erro: '+upd.error.message); return; }
+    const link = (()=>{ const base = location.origin + location.pathname.replace(/[^/]*$/, ''); try{ const s = localStorage.getItem('tc_slug'); return s ? base + s : base; }catch(e){ return base; } })();   // link próprio da corretora
     dlgOpen(`<h3 style="margin-top:0">Primeiro acesso liberado por 48 horas</h3><div class="hint">Envie para a pessoa: ela abre o link, clica em <b>Primeiro acesso</b>, digita o e-mail e cria a própria senha.</div>
       <div style="margin:12px 0;padding:12px;background:#f4f5fb;border-radius:10px;font-size:14px"><div><b>Link:</b> ${escapeHtml(link)}</div><div style="margin-top:6px"><b>E-mail:</b> ${escapeHtml(lib ? document.getElementById('pa-n-email').value.trim() : ren.dataset.e)}</div></div>
       <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end"><button class="adm-b pri" id="pa-copiar">Copiar mensagem</button><button class="adm-b" onclick="dlgClose()">Fechar</button></div>`);
@@ -10950,9 +10983,9 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610292200"></script>
-<script src="painel.js?v=202610292200"></script>
-<script src="cobranca.js?v=202610292200"></script>
-<script src="cadastro.js?v=202610292200"></script>
+<script src="plataforma.js?v=202610292213"></script>
+<script src="painel.js?v=202610292213"></script>
+<script src="cobranca.js?v=202610292213"></script>
+<script src="cadastro.js?v=202610292213"></script>
 </body>
 </html>

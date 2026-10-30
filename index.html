@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202610292112">
+<meta name="app-build" content="202610292128">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -9333,7 +9333,7 @@ async function ctLoad(file){
     CT_FIELDS.forEach(([k,,re])=>{ const i = heads.findIndex((h,ix)=>!used.has(ix) && re.test(h) && !/label|r[óo]tulo/i.test(h)); CT.map[k] = i; if(i>=0) used.add(i); });
     step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.rows.length} linhas. Confira as colunas (o que não tiver, deixe “não importar”):</div>
       <div class="fgrid" style="margin-top:10px">${CT_FIELDS.map(([k,l])=>`<label class="fl"><span>${l}</span><select data-ct="${k}"><option value="-1">— não importar —</option>${heads.map((h,i)=>`<option value="${i}" ${CT.map[k]===i?'selected':''}>${escapeHtml(h||('coluna '+(i+1)))}</option>`).join('')}</select></label>`).join('')}
-      <label class="fl"><span>Perfil dos contatos novos</span><select id="ct-tipo">${tipoOptions(CT.mode==='celular'?'outro':'medico')}</select></label></div>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
+      <label class="fl"><span>Perfil dos contatos novos</span><select id="ct-tipo">${tipoOptions((CT.mode==='celular' || !tcModulo('premium')) ? 'outro' : 'medico')}</select></label></div>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="ct-upd" checked> Contato já existente: preencher só os campos que estão vazios no cadastro (recomendado)</label>
       <div class="es-box" style="margin-top:10px"><label class="chk"><input type="checkbox" id="ct-prosp" ${['p_status','p_data','p_canal','p_hist'].some(k=>CT.map[k]>=0 && CT.rows.some(r=>String(r[CT.map[k]]||'').trim()!==''))?'checked':''}> <b>Enviar para a Prospecção (Vendas)</b>: cada pessoa da planilha vira uma linha para prospectar</label>
         <label class="fl" style="margin-top:6px"><span>Nome da lista (fica como origem na Prospecção)</span><input id="ct-lista" placeholder="Ex.: Lista da assessoria, outubro"></label>
@@ -10950,8 +10950,8 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202610292112"></script>
-<script src="painel.js?v=202610292112"></script>
-<script src="cobranca.js?v=202610292112"></script>
+<script src="plataforma.js?v=202610292128"></script>
+<script src="painel.js?v=202610292128"></script>
+<script src="cobranca.js?v=202610292128"></script>
 </body>
 </html>

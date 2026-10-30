@@ -101,7 +101,8 @@
       if (data.slug && cAtual !== data.slug && !/[?&]painel=1/.test(location.search) && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash);
       aplicarMarca();
       carregarEtapas();
-      if (data.sou_admin) primeirosPassos();
+      if (data.sou_admin && data.precisa_cadastro) abrirCadastro(0);
+      else if (data.sou_admin) primeirosPassos();
     } catch (e) { console.warn('marca da corretora:', e); }
   }
   // tela de entrada: a marca do link próprio da corretora (…/crm-alianca/<link> ou ?c=<link>); sem link, a última marca vista neste navegador
@@ -119,6 +120,12 @@
     } catch (e) { /* sem rede: fica a marca padrão */ }
   }
   marcaDoLink();
+
+  // corretora contratante que ainda não completou o cadastro: o cadastro guiado (cadastro.js) vem antes de tudo
+  function abrirCadastro(tentativa) {
+    if (window.TorreCadastro) { window.TorreCadastro.abrir().then((abriu) => { if (!abriu) primeirosPassos(); }); return; }
+    if (tentativa < 40) setTimeout(() => abrirCadastro(tentativa + 1), 150);
+  }
 
   /* ---------- primeiros passos do administrador (corretora nova) ---------- */
   async function primeirosPassos() {

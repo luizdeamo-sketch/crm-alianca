@@ -126,7 +126,7 @@
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
         <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
-        <td>${sit} ${pagto(c)}</td>
+        <td>${sit} ${pagto(c)} ${cadastro(c)}</td>
         <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas ativas na equipe (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">${c.usuarios_ativos} de ${c.usuarios}</button></td>
         <td>${c.slug ? `<button class="b" data-copiar-link="${esc(linkCorretora(c.slug))}" title="Copiar o link próprio da corretora">🔗 /${esc(c.slug)}</button>` : '—'}</td>
         <td>${quando(c.ultimo_acesso)}</td>
@@ -137,7 +137,7 @@
     }).join('');
     return `
       <div class="card"><h3>Nova corretora</h3>
-        <p class="sub">Cria a corretora e libera o administrador dela por 48 horas para criar a senha em "Primeiro acesso". Depois ele sobe o logo e cadastra a equipe.</p>
+        <p class="sub">Cria a corretora e libera o administrador dela por 48 horas para criar a senha em "Primeiro acesso". No primeiro acesso ele completa o cadastro (empresa, CNPJ, logo, plano e aceite do contrato) e a degustação começa.</p>
         <form class="lin" id="pp-nova">
           <label class="f">Nome da corretora<input name="nome" required maxlength="60" placeholder="Ex.: Bravita"></label>
           <label class="f">Plano<select name="plano">${Object.entries(PLANOS).map(([k, v]) => `<option value="${k}" ${k === 'completo' ? 'selected' : ''}>${v} · ${brl(preco(k))}</option>`).join('')}</select></label>
@@ -185,6 +185,7 @@
     const plano = PLANOS[c.plano] ? c.plano : 'completo';
     const tr = document.createElement('tr'); tr.className = 'pp-mod'; tr.id = 'pp-mod-' + id;
     tr.innerHTML = `<td colspan="9"><div class="modbox"><b>Plano, cobrança e link de ${esc(nome)}</b>
+      ${blocoCadastro(c)}
       <form class="lin" onsubmit="return false"><label class="f" style="grid-column:1/-1">Link próprio da corretora<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="color:#5d6871">${esc(link())}</span><input data-slug value="${esc(c.slug || '')}" maxlength="40" style="max-width:260px"><button type="button" class="b" data-salvar-slug>Salvar link</button></div></label></form>
       <div style="display:grid;gap:8px">${Object.entries(PLANOS).map(([k, v]) => `<label class="chk"><input type="radio" name="pl-${id}" value="${k}" ${plano === k ? 'checked' : ''}> <b>${esc(v)}</b> · ${brl(preco(k))} <span style="color:#5d6871">· ${esc(DESC_PLANO[k])}</span></label>`).join('')}</div>
       <p class="sub" style="margin:4px 0 0">Extras (só para quem tem a base de plantões, como a CallMed):</p>
@@ -196,7 +197,7 @@
       </div>
       <form class="lin" onsubmit="return false">
         <label class="f" data-so="mensal">Preço especial por mês (vazio = preço do plano)<input data-especial type="number" min="0" step="0.01" value="${c.preco_especial != null ? c.preco_especial : ''}"></label>
-        <label class="f" data-so="mensal">Início da degustação (vazio = no primeiro acesso)<input data-degust type="date" value="${c.degustacao_inicio || ''}"></label>
+        <label class="f" data-so="mensal">Início da degustação (vazio = ao concluir o cadastro)<input data-degust type="date" value="${c.degustacao_inicio || ''}"></label>
         <label class="f" data-so="permuta" style="grid-column:1/-1">Contrapartida da permuta (o que a corretora dá em troca)<input data-contra maxlength="200" placeholder="Ex.: indica 5 clientes por mês; divulgação no Instagram" value="${esc(c.permuta_contrapartida || '')}"></label>
       </form>
       <div class="acoes"><button class="b pri" data-s>Salvar</button><button class="b" data-f>Fechar</button></div></div></td>`;
@@ -224,9 +225,27 @@
     if (c.gratuita || !c.ativo) return '';
     if (c.maior_atraso > 0) return `<span class="pill susp">${c.maior_atraso} dias em atraso</span>`;
     if (c.faturas_abertas > 0) return '<span class="pill pend">Fatura em aberto</span>';
-    if (!c.degustacao_inicio) return '<span class="pill neu">Degustação começa no 1º acesso</span>';
+    if (!c.degustacao_inicio) return '<span class="pill neu">Degustação começa ao concluir o cadastro</span>';
     const fim = new Date(c.degustacao_inicio + 'T12:00:00'); fim.setDate(fim.getDate() + Number((EST.config.regua || {}).degustacao_dias || 15));
     return fim > new Date() ? `<span class="pill neu">Degustação até ${fim.toLocaleDateString('pt-BR')}</span>` : '<span class="pill ok">Em dia</span>';
+  }
+
+  // cadastro guiado do 1º acesso: empresa, CNPJ, plano e aceite dos termos (corretora em permuta não passa por ele)
+  function cadastro(c) {
+    if (c.gratuita) return '';
+    if (!c.cadastro_completo_em) return '<span class="pill pend" title="O administrador completa empresa, logo, plano e aceite no primeiro acesso">Cadastro pendente</span>';
+    return `<span class="pill ok" title="${esc(c.razao_social || '')} · CNPJ ${esc(c.cnpj || '')}">Cadastro ✓</span>`;
+  }
+  function blocoCadastro(c) {
+    if (!c.cadastro_completo_em) return c.gratuita ? '' : '<p class="sub" style="margin:0">Cadastro ainda não concluído pelo administrador: os dados da empresa e o aceite aparecem aqui depois.</p>';
+    const e = c.empresa || {};
+    const end = [e.logradouro, e.numero, e.complemento, e.bairro, [e.cidade, e.uf].filter(Boolean).join('/'), e.cep].filter(Boolean).join(', ');
+    return `<div style="border:1px solid #e4e6e2;border-radius:10px;padding:10px 12px;background:#fafaf8;display:grid;gap:2px">
+      <b>Dados do cadastro</b>
+      <span>${esc(c.razao_social || '')} · CNPJ ${esc(c.cnpj || '')}</span>
+      ${end ? `<span>${esc(end)}</span>` : ''}
+      <span>Responsável: ${esc(e.responsavel || '—')}${e.telefone ? ' · ' + esc(e.telefone) : ''} · Financeiro: ${esc(e.email_financeiro || '—')}</span>
+      <span style="color:#5d6871">Termos de Uso e Acordo LGPD versão ${esc(c.termos_versao || '—')} aceitos por ${esc(c.termos_aceite_por || '—')} em ${c.termos_aceite_em ? new Date(c.termos_aceite_em).toLocaleString('pt-BR') : '—'}</span></div>`;
   }
 
   /* ---------- pagamentos ---------- */
@@ -418,8 +437,8 @@
   function convite(corr, email, admin) {
     const nome = corr ? 'Torre de Controle - ' + (corr.nome_exibicao || corr.nome) : 'Torre de Controle';
     const url = corr && corr.slug ? linkCorretora(corr.slug) : link();
-    const passos = admin ? `\n\nAo entrar, o quadro "Comece por aqui" mostra os próximos passos: cadastrar a sua equipe, baixar a planilha padrão, subir os seus clientes e colocar o logo e as cores.` : '';
-    const txt = `Olá! O acesso à ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie sua senha e ative a confirmação em 2 etapas\n\nO link para criar a senha vale por 48 horas. Salve o endereço nos favoritos: é o link próprio da sua corretora.${passos}`;
+    const passos = admin ? `\n\nNo primeiro acesso, você completa o cadastro da empresa em 5 passos (dados e CNPJ, logo e cores, plano e aceite do contrato). A degustação gratuita de 15 dias começa ao concluir. Depois, o quadro "Comece por aqui" mostra como cadastrar a sua equipe e subir os seus clientes pela planilha padrão.` : '';
+    const txt = `${admin ? 'Bem-vindo ao CRM Aliança by Capacity Case! Complete o seu cadastro aqui.\n\n' : 'Olá! '}O acesso à ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie sua senha e ative a confirmação em 2 etapas\n\nO link para criar a senha vale por 48 horas. Salve o endereço nos favoritos: é o link próprio da sua corretora.${passos}`;
     return `<div class="aviso"><b>Pronto. Mande esta mensagem para a pessoa:</b><pre class="convite">${esc(txt)}</pre>
       <div class="acoes"><button class="b" type="button" onclick="navigator.clipboard.writeText(${esc(JSON.stringify(txt))}).then(()=>this.textContent='Copiado ✓')">Copiar mensagem</button>
       <a href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener"><button class="b" type="button">Enviar pelo WhatsApp</button></a></div></div>`;

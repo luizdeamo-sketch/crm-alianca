@@ -387,6 +387,7 @@
   }
   // dados do cliente + condições do dia = o que vai no contrato (fica gravado junto, como fotografia)
   function condicoes(d, corr) {
+    d = Object.assign({}, d, { limite_pessoas: limite({ gratuita: d.plano === 'permuta', plano: d.plano }) });   // limite de pessoas do plano vai no contrato
     const r = EST.config.regua || {}, esp = d.preco_especial !== '' && d.preco_especial != null;
     if (d.plano === 'permuta') return Object.assign({}, d, { gratuita: true, plano_nome: 'Permuta', plano_desc: 'todos os módulos liberados, inclusive os extras', valor: 0, preco_especial: false,
       degustacao_dias: Number(r.degustacao_dias || 15), aviso_dias: Number(r.aviso_dias || 5), bloqueio_dias: Number(r.bloqueio_dias || 10), data_emissao: new Date().toISOString(), modelo: window.TorreContrato.MODELO });

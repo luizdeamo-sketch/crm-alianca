@@ -4,10 +4,12 @@
    Ao mudar uma cláusula, troque MODELO: contratos já emitidos não mudam, só os próximos. */
 (function () {
   'use strict';
-  const MODELO = '2026-11-02.2';
+  const MODELO = '2026-11-02.3';   // .3: limite de pessoas do plano no lugar de "sem limite de usuários"
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const extenso = (n) => ({ 5: 'cinco', 7: 'sete', 10: 'dez', 14: 'quatorze', 15: 'quinze', 30: 'trinta' }[n] || String(n));
+  const extenso = (n) => ({ 3: 'três', 5: 'cinco', 7: 'sete', 10: 'dez', 14: 'quatorze', 15: 'quinze', 30: 'trinta' }[n] || String(n));
+  // limite de pessoas com acesso por plano (padrão; o banco manda o valor de cada empresa em d.limite_pessoas)
+  const LIMITE_PADRAO = { vendas: 3, vendas_carteira: 5, completo: 10, permuta: 10 };
   const dataBr = (d) => new Date(d || Date.now()).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
   function endereco(e) {
@@ -20,6 +22,7 @@
   function gerar(d, ct) {
     const e = d.empresa || {}, pj = d.tipo_pessoa !== 'PF';
     const dias = Number(d.degustacao_dias || 15), aviso = Number(d.aviso_dias || 5), bloqueio = Number(d.bloqueio_dias || 10);
+    const pessoas = Number(d.limite_pessoas || LIMITE_PADRAO[d.gratuita ? 'permuta' : d.plano] || 10);
     const contratante = pj
       ? `<b>${esc(d.razao_social)}</b>, pessoa jurídica inscrita no CNPJ sob o nº <b>${esc(d.documento)}</b>, com sede em ${esc(endereco(e) || '—')}, neste ato representada por <b>${esc(e.responsavel || '—')}</b>${e.responsavel_cargo ? ', ' + esc(e.responsavel_cargo) : ''}${e.responsavel_cpf ? ', CPF ' + esc(e.responsavel_cpf) : ''}`
       : `<b>${esc(d.razao_social)}</b>, pessoa física inscrita no CPF sob o nº <b>${esc(d.documento)}</b>, residente e domiciliada em ${esc(endereco(e) || '—')}`;
@@ -33,6 +36,7 @@
     clausula('Objeto', [
       `Este contrato concede à CONTRATANTE uma licença de uso, não exclusiva e intransferível, do sistema <b>CRM Aliança</b> ("Sistema"), na modalidade de software como serviço, acessado pela internet no endereço próprio da CONTRATANTE, sob a marca "Torre de Controle - ${esc(d.nome_exibicao || d.razao_social)}".`,
       `Plano contratado: <b>${esc(d.plano_nome)}</b> (${esc(d.plano_desc)}). A carteira de clientes, a agenda, as sugestões e a administração da equipe vêm em todos os planos.`,
+      `O plano contratado permite até <b>${pessoas} (${extenso(pessoas)}) pessoas com acesso</b> ao Sistema, contando o administrador. Para incluir mais pessoas, a CONTRATANTE sobe para um plano com limite maior, como no item seguinte.`,
       'A CONTRATANTE pode subir para um plano superior a qualquer momento, pelo próprio Sistema. Durante a degustação, a troca não tem custo. Depois dela, a CONTRATANTE paga apenas a diferença proporcional aos dias que faltam para o próximo vencimento, e o plano novo passa a valer na hora; as mensalidades seguintes já vêm pelo valor do plano novo. A troca para um plano inferior é pedida à CONTRATADA e vale a partir da mensalidade seguinte.',
       'O Sistema é oferecido como está na data do aceite e recebe melhorias contínuas, avisadas dentro do próprio Sistema. Recursos novos podem ser incluídos no plano ou oferecidos à parte, sempre com aviso prévio.']);
     if (d.gratuita) {
@@ -47,7 +51,7 @@
       `<b>Terminada a degustação sem pedido de cancelamento, a contratação passa a ser paga automaticamente</b>, pelo valor e na forma da Cláusula 3ª: no dia seguinte ao último dia da degustação a CONTRATANTE passa a ser assinante, e a primeira mensalidade vence nesse dia.`,
       'A CONTRATANTE pode encerrar a degustação antes, pagando a primeira mensalidade pelo Sistema. Nesse caso a assinatura fica ativa no mesmo dia e as mensalidades seguintes vencem nesse mesmo dia de cada mês.']);
     clausula('Preço e pagamento', [
-      `Mensalidade: <b>${brl(d.valor)}</b> (${d.preco_especial ? 'preço especial combinado para a CONTRATANTE' : 'preço do plano na data do aceite'}), cobrada por empresa contratante, sem limite de usuários.`,
+      `Mensalidade: <b>${brl(d.valor)}</b> (${d.preco_especial ? 'preço especial combinado para a CONTRATANTE' : 'preço do plano na data do aceite'}), cobrada por empresa contratante, para até ${pessoas} (${extenso(pessoas)}) pessoas com acesso.`,
       `A fatura de cada mês é gerada pelo próprio Sistema ${aviso} (${extenso(aviso)}) dias antes do vencimento, com QR Code e código Pix copia e cola. Depois de pagar, a CONTRATANTE informa o pagamento no Sistema ("Já paguei") e a CONTRATADA confirma o recebimento.`,
       `Com ${bloqueio} (${extenso(bloqueio)}) dias de atraso, o acesso da CONTRATANTE fica limitado à tela de pagamento até a quitação. Os dados não são apagados por atraso e ficam disponíveis assim que o pagamento é confirmado.`,
       'O valor pode ser reajustado uma vez a cada 12 (doze) meses pelo IPCA/IBGE, ou outro índice que o substitua, com aviso de 30 (trinta) dias. Mudanças de preço fora disso só valem com novo aceite.',
@@ -99,6 +103,7 @@
     const resumo = [
       ['Contratante', `${d.razao_social} · ${pj ? 'CNPJ' : 'CPF'} ${d.documento}`],
       ['Plano', d.gratuita ? 'Permuta · sem mensalidade, todos os módulos liberados' : `${d.plano_nome} · ${brl(d.valor)} por mês`],
+      ['Pessoas com acesso', `até ${pessoas}, contando o administrador`],
       d.gratuita ? ['Contrapartida', d.contrapartida || 'a definir entre as partes'] : ['Degustação', `${dias} dias grátis a partir do aceite; depois, cobrança mensal automática por Pix`],
       ['Administrador', `${d.admin_nome ? d.admin_nome + ' · ' : ''}${d.admin_email}`],
       ['Financeiro', e.email_financeiro || '—']];

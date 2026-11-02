@@ -371,7 +371,8 @@
   function iniciar() {
     if (typeof sb === 'undefined') return setTimeout(iniciar, 300);
     sb.auth.getSession().then(({ data }) => { if (data && data.session) carregar(); });
-    sb.auth.onAuthStateChange((ev, session) => { if (session && (ev === 'SIGNED_IN' || ev === 'TOKEN_REFRESHED' || ev === 'INITIAL_SESSION')) { if (!MARCA || !MARCA.id) carregar(); } });
+    sb.auth.onAuthStateChange((ev, session) => { if (session && (ev === 'SIGNED_IN' || ev === 'TOKEN_REFRESHED' || ev === 'INITIAL_SESSION')) { if (!MARCA || !MARCA.id) carregar(); }
+      if (session && ev === 'MFA_CHALLENGE_VERIFIED') carregar(); });   // com a 2ª etapa confirmada o botão Plataforma aparece sem recarregar a página
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })();

@@ -792,8 +792,8 @@
   // convite com o link próprio da corretora; o administrador também recebe os primeiros passos
   // o que cada plano entrega, na mensagem de boas-vindas (mesmo conteúdo do botão 📦 Planos, plataforma.js)
   const ITENS_PLANO = {
-    vendas: ['🎯 Vendas: prospecção com funil por etapas e Consultoria com as fases da proteção patrimonial', '🤝 Reuniões que se confirmam sozinhas, com lembretes prontos para o WhatsApp', '📚 Base de conhecimento (produtos, argumentos, objeções)', '📅 Agenda no Outlook, Teams e Google'],
-    vendas_carteira: ['Tudo do plano Vendas, mais:', '📄 Central de Apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda'],
+    vendas: ['🎯 Vendas: prospecção com funil por etapas e Consultoria com as fases da proteção patrimonial', '🤝 Reuniões que se confirmam sozinhas, com lembretes prontos para o WhatsApp', '📚 Base de conhecimento (produtos, argumentos, objeções)', '📅 Agenda no Outlook, Teams e Google', '✨ IA de vendas: resumo do cliente, análise da reunião e próximo passo sugerido'],
+    vendas_carteira: ['Tudo do plano Vendas, mais:', '📄 Central de Apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda', '✨ IA de carteira: lê a apólice, a cotação ou o documento e preenche os dados'],
     completo: ['Tudo dos planos Vendas e Carteira, mais:', '📊 Indicadores da corretora e de cada corretor', '💼 Comercial: metas, orçamento, funil com taxas e indicações', '📝 Ata da semana']
   };
   function convite(corr, email, admin) {
@@ -813,7 +813,7 @@ O que você tem:
 • 🛡️ Aliança: todos os seus clientes num lugar só, com histórico, família, documentos e importação da sua planilha
 ${itens.map((x) => '• ' + x).join('\n')}
 • Agenda, Sugestões e Admin (sua equipe e os acessos)
-(A inteligência artificial do sistema chega em breve.)
+• ✨ Ao importar a sua planilha, a IA ajuda a organizar as colunas (ela vê só os títulos, nunca os dados dos seus clientes)
 
 *Seu link (salve nos favoritos):*
 ${url}

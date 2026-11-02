@@ -184,11 +184,11 @@
       ['🤝 Reuniões', 'Reunião marcada que se confirma sozinha: lembretes prontos para o WhatsApp e o botão Hoje.'],
       ['📚 Base', 'Base de conhecimento com produtos, argumentos e respostas para objeções.'],
       ['📅 Agenda no Outlook, Teams e Google', 'A agenda do sistema aparece no calendário que você já usa.'],
-      ['✨ IA de vendas (em breve)', 'Resumo do cliente, análise da reunião e sugestões do próximo passo.']] },
+      ['✨ IA de vendas', 'Resumo do cliente, análise da reunião e sugestões do próximo passo.']] },
     { k: 'vendas_carteira', nome: 'Vendas + Carteira', para: 'Para quem também cuida das apólices e das renovações.', itens: [
       ['➕ Tudo do Vendas', ''],
       ['📄 Apólices', 'Central de apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda.'],
-      ['✨ IA de carteira (em breve)', 'Lê a apólice, a cotação ou o documento e preenche os dados para você.']] },
+      ['✨ IA de carteira', 'Lê a apólice, a cotação ou o documento e preenche os dados para você.']] },
     { k: 'completo', nome: 'Completo', para: 'Para quem gerencia uma equipe e quer números.', itens: [
       ['➕ Tudo do Vendas + Carteira', ''],
       ['📊 Indicadores', 'Painel com os números da corretora e de cada corretor.'],

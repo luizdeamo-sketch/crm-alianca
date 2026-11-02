@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611021822">
+<meta name="app-build" content="202611021851">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -24,7 +24,7 @@ window.ALIANCA = {
   modulos: null,          // sistema inteiro; o master escolhe os módulos de cada pessoa na Admin
   inicio: 'vendas',
   primeiroAcesso: true,   // a pessoa liberada pelo master cria a própria senha na tela de login
-  ia: false               // sem chave da Anthropic por enquanto: botões de IA avisam "em breve"
+  ia: true                // chave da Anthropic no Supabase do produto desde 02/11/2026; cada função confere plano e acesso em dia
 };
 /*ALIANCA_CONFIG_FIM*/
 (function(){ var c = window.ALIANCA || {}; if(c.titulo) document.title = c.titulo;
@@ -9375,13 +9375,16 @@ async function ctLoad(file){
       const wb = XLSX.read(await file.arrayBuffer(), {type:'array', cellNF:true}); rows = xlsxLinhas(wb); }
     else rows = impCsv(await file.text());
     rows = rows.filter(r=>r.some(x=>String(x).trim()!==''));
-    if(rows.length<2) throw new Error(vcf ? 'Não encontrei contatos com nome neste arquivo .vcf.' : 'A planilha precisa ter os títulos na primeira linha e ao menos um contato.');
-    const heads = rows[0].map(h=>String(h||'').replace(/\*/g,'').trim());
+    // a linha de títulos nem sempre é a primeira (relatório com cabeçalho em cima): acha a linha que mais parece título
+    const tit = vcf ? 0 : ctAcharTitulo(rows);
+    if(rows.length - tit < 2) throw new Error(vcf ? 'Não encontrei contatos com nome neste arquivo .vcf.' : 'A planilha precisa ter uma linha de títulos e ao menos um contato.');
+    const heads = rows[tit].map(h=>String(h||'').replace(/\*/g,'').trim());
     const google = heads.some(h=>/^(first name|last name|phone 1 - value|e-?mail 1 - value|telefone 1 - valor)$/i.test(h));
-    CT = { file:file.name, heads, rows:rows.slice(1), map:{}, mode: (vcf || google || window.CT_MODE==='celular') ? 'celular' : 'planilha' };
+    CT = { file:file.name, heads, base:rows.slice(tit+1), rows:rows.slice(tit+1), map:{}, extras:[], linhaTitulo:tit, mode: (vcf || google || window.CT_MODE==='celular') ? 'celular' : 'planilha' };
     const used = new Set();
     CT_FIELDS.forEach(([k,,re])=>{ const i = heads.findIndex((h,ix)=>!used.has(ix) && re.test(h) && !/label|r[óo]tulo/i.test(h)); CT.map[k] = i; if(i>=0) used.add(i); });
-    step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.rows.length} linhas. Confira as colunas (o que não tiver, deixe “não importar”):</div>
+    const padrao = heads.filter(h=>CT_TEMPLATE_HEADS.some(t=>t.replace(/\*/g,'').trim().toLowerCase()===h.toLowerCase())).length >= Math.max(3, heads.length*0.6);
+    step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.base.length} linhas${tit?` (títulos encontrados na linha ${tit+1})`:''}. Confira as colunas (o que não tiver, deixe “não importar”):</div><div id="ct-ia"></div>
       <div class="fgrid" style="margin-top:10px">${CT_FIELDS.map(([k,l])=>`<label class="fl"><span>${l}</span><select data-ct="${k}"><option value="-1">— não importar —</option>${heads.map((h,i)=>`<option value="${i}" ${CT.map[k]===i?'selected':''}>${escapeHtml(h||('coluna '+(i+1)))}</option>`).join('')}</select></label>`).join('')}
       <label class="fl"><span>Profissão dos contatos novos</span><select id="ct-tipo">${tipoOptions((CT.mode==='celular' || !tcModulo('premium')) ? 'outro' : 'medico')}</select></label></div>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="ct-upd" checked> Contato já existente: preencher só os campos que estão vazios no cadastro (recomendado)</label>
@@ -9390,8 +9393,87 @@ async function ctLoad(file){
         <div class="hint">Se a planilha tiver as colunas "Prospecção: status, data, canal e o que aconteceu", elas registram o que você já fez com cada pessoa. Quem já está na Prospecção não é duplicado.</div></div>
       <div style="margin-top:12px"><button class="om-save" id="ct-prev">Conferir antes de importar</button></div><div id="ct-result"></div>`;
     step.querySelector('#ct-prev').addEventListener('click', ctPreview);
+    if(!vcf && CT.mode==='planilha' && !padrao) ctIaMapear();   // planilha fora do padrão: a IA sugere as colunas
   }catch(e){ step.innerHTML = '<div class="om-err">Erro: '+escapeHtml(e.message||e)+'</div>'; }
 }
+// ---- IA da importação (02/11/2026): a IA vê SÓ os títulos e o formato de cada coluna, nunca os dados dos clientes ----
+// Ela diz qual coluna é qual campo; quem copia os dados, linha por linha e sem mudar a ordem, é este código. Assim não há como
+// os dados de um cliente irem para o cadastro de outro.
+function ctAcharTitulo(rows){
+  let melhor = 0, nota = -1;
+  rows.slice(0,10).forEach((r,i)=>{ const cel = r.map(x=>String(x||'').trim()).filter(Boolean); if(cel.length<2) return;
+    const tit = cel.filter(x=>x.length<=40 && !/\d{4,}|@/.test(x) && !impDate(x) && isNaN(Number(x.replace(',','.')))).length;
+    const n = tit*10 - (cel.length-tit)*15 + cel.length; if(tit>=2 && tit>=cel.length*0.6 && n>nota){ nota = n; melhor = i; } });
+  return melhor;
+}
+function ctFormato(v){
+  const t = String(v).trim(), d = dOnly(t);
+  if(/@/.test(t)) return 'email';
+  if(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(t)) return 'cpf';
+  if(/^\d{11}$/.test(t)) return cpfDvOk(t) ? 'cpf' : 'telefone';   // 11 números seguidos: CPF só se os dígitos verificadores conferem
+  if(d.length===14 && /\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}/.test(t)) return 'cnpj';
+  if(impDate(t)) return 'data';
+  if(/^\(?\d{2}\)?\s?9?\d{4}-?\d{4}$/.test(t) || /^\+?55/.test(t) && d.length>=12) return 'telefone';
+  if(/%$/.test(t)) return 'percentual';
+  if(/^R\$|^-?\d{1,3}(\.\d{3})*,\d{2}$/.test(t)) return 'dinheiro';
+  if(/^-?\d+([.,]\d+)?$/.test(t)) return 'numero';
+  if(/^(sim|não|nao|s|n|x)$/i.test(t)) return 'sim/não';
+  return t.length>40 ? 'texto longo' : 'texto curto';
+}
+function ctPerfilColunas(){
+  const amostra = CT.base.slice(0, 200);
+  return CT.heads.map((h,i)=>{
+    const vals = amostra.map(r=>String(r[i]==null?'':r[i]).trim()).filter(Boolean);
+    const cont = {}; vals.forEach(v=>{ const f = ctFormato(v); cont[f] = (cont[f]||0)+1; });
+    const fmt = Object.entries(cont).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([f,n])=>f+' '+Math.round(n*100/vals.length)+'%').join(', ');
+    const preenchido = amostra.length ? Math.round(vals.length*100/amostra.length) : 0;
+    // exemplos só de colunas de categoria (seguradora, status, produto): poucos valores distintos, repetidos muitas vezes,
+    // sem número longo nem e-mail. Coluna de nome, CPF, telefone etc. nunca manda exemplo.
+    const dist = [...new Set(vals.map(v=>v.toLowerCase()))];
+    const categoria = dist.length && dist.length<=6 && vals.length>=dist.length*3 && dist.every(v=>v.length<=30 && !/\d{3,}|@/.test(v));
+    return { titulo:h, formato:(fmt||'vazio')+' · preenchida em '+preenchido+'% das linhas'+(categoria?' · poucos valores repetidos':''), exemplos: categoria ? [...new Set(vals)].slice(0,5) : [] };
+  });
+}
+async function ctIaMapear(){
+  const box = document.getElementById('ct-ia'); if(!box) return;
+  if(window.ALIANCA && window.ALIANCA.ia === false) return;   // IA desligada nesta versão: fica a escolha manual
+  box.innerHTML = '<div class="hint" style="margin:8px 0">✨ A IA está lendo os <b>títulos</b> das colunas para sugerir onde vai cada uma. Os dados dos seus clientes não saem daqui.</div>';
+  try{
+    const { data, error } = await sb.functions.invoke('mapear-planilha', { body:{ colunas: ctPerfilColunas(), campos: CT_FIELDS.map(([k,l])=>({k,l})) } });
+    if(error || !data || data.error) throw new Error((data && data.error) || 'sem resposta');
+    const antes = {...CT.map}, mapa = data.mapa || {}, usadas = new Set(Object.values(mapa));
+    CT_FIELDS.forEach(([k])=>{ if(mapa[k]!=null) CT.map[k] = mapa[k]; else if(CT.map[k]>=0 && usadas.has(CT.map[k])) CT.map[k] = -1; });
+    CT.extras = Array.isArray(data.apolices_extras) ? data.apolices_extras : [];
+    document.querySelectorAll('[data-ct]').forEach(s=>{ const k = s.dataset.ct; s.value = String(CT.map[k]); if(CT.map[k]!==antes[k]) s.style.outline = '2px solid var(--brand,#9c7518)'; });
+    const nomeCol = i=>escapeHtml(CT.heads[i]||('coluna '+(i+1)));
+    const lab = Object.fromEntries(CT_FIELDS.map(([k,l])=>[k,l.replace(/\s*\*$/,'')]));
+    const extrasTxt = CT.extras.length ? `<br>• Cada linha tem até <b>${CT.extras.length+1} apólices</b> lado a lado. Na importação, cada apólice vira uma linha do mesmo cliente (${CT.extras.map((g,j)=>'apólice '+(j+2)+': '+Object.entries(g).map(([k,i])=>lab[k]+' ← '+nomeCol(i)).join(', ')).join('; ')}).
+      <label class="chk" style="margin-top:4px"><input type="checkbox" id="ct-extras" checked> Separar as apólices lado a lado</label>` : '';
+    box.innerHTML = `<div class="reco" style="margin:8px 0">✨ <b>Sugestão da IA</b>${data.observacao?': '+escapeHtml(data.observacao):''}<br>• As colunas marcadas em dourado foram escolhidas pela IA. Confira e troque o que quiser.${extrasTxt}
+      <br>• Em "Conferir antes de importar" você vê as primeiras linhas já no padrão antes de gravar qualquer coisa.</div>`;
+  }catch(e){
+    box.innerHTML = '<div class="hint" style="margin:8px 0">A IA não conseguiu sugerir as colunas agora ('+escapeHtml(e.message||e)+'). Escolha as colunas abaixo; o resto funciona igual.</div>';
+  }
+}
+// apólices lado a lado: cada linha vira uma linha por apólice, com os dados do mesmo cliente (a ordem e os dados das pessoas não mudam)
+function ctExpandir(){
+  CT.linhaOrig = null; CT.rawPor = null; CT.rows = CT.base;
+  const usar = CT.extras && CT.extras.length && (!document.getElementById('ct-extras') || document.getElementById('ct-extras').checked);
+  if(!usar) return;
+  const APO = ['seguradora','tipo_seguro','numero_apolice','emissao','vencimento','a_status','premio','capital','comissao','forma_pagamento'];
+  const larg = CT.heads.length; let extra = 0;
+  APO.forEach(k=>{ if(CT.map[k]<0 && CT.extras.some(g=>g[k]!=null)) CT.map[k] = larg + (extra++); });   // coluna só nas apólices extras
+  const rows = [], orig = [], raw = {};
+  CT.base.forEach((r,li)=>{ const linha = li + CT.linhaTitulo + 2; raw[linha] = r;
+    rows.push(r); orig.push(linha);
+    CT.extras.forEach(g=>{ if(!Object.values(g).some(i=>String(r[i]||'').trim()!=='')) return;
+      const nr = r.slice(); for(let j=0;j<extra;j++) nr[larg+j] = '';
+      APO.forEach(k=>{ if(CT.map[k]>=0) nr[CT.map[k]] = g[k]!=null ? r[g[k]] : ''; });
+      Object.values(g).forEach(i=>{ if(!APO.some(k=>CT.map[k]===i)) nr[i] = ''; });
+      rows.push(nr); orig.push(linha); }); });
+  CT.rows = rows; CT.linhaOrig = orig; CT.rawPor = raw;
+}
+function ctRaw(linha){ return (CT.rawPor && CT.rawPor[linha]) || CT.base[linha - CT.linhaTitulo - 2] || []; }
 function ctTipoSeguro(t){
   const x = String(t||'').trim(); if(!x) return '';
   const n = x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
@@ -9461,11 +9543,12 @@ async function ctPreview(){
   document.querySelectorAll('[data-ct]').forEach(s=>{ CT.map[s.dataset.ct] = parseInt(s.value,10); });
   const res = document.getElementById('ct-result');
   if(CT.map.nome<0){ res.innerHTML = '<div class="om-err">Indique qual coluna é o nome.</div>'; return; }
+  ctExpandir();   // apólices lado a lado viram uma linha por apólice (só se a IA encontrou e a caixa está marcada)
   res.innerHTML = '<div class="op-more">Cruzando com os cadastros...</div>'; await ensurePessoas();
   const novos = [], existentes = [], revisar = [], problemas = [], leves = []; const seenKey = new Set(), porChave = new Map();
   for(let li=0; li<CT.rows.length; li++){
-    const r = CT.rows[li], linha = li+2, n = ctNormRow(r), o = n.o;
-    if(!o.nome){ problemas.push({linha, nome:'', motivo:'linha sem nome', raw:r}); continue; }
+    const r = CT.rows[li], linha = CT.linhaOrig ? CT.linhaOrig[li] : li + CT.linhaTitulo + 2, n = ctNormRow(r), o = n.o;
+    if(!o.nome){ problemas.push({linha, nome:'', motivo:'linha sem nome', raw:ctRaw(linha)}); continue; }
     n.avisos.forEach(a=>leves.push({linha, nome:o.nome, motivo:a}));
     const temCpf = !!o.cpf, tel = dOnly(o.telefone).slice(-9);
     const found = await findPessoas({cpf:o.cpf, crm:o.crm, nome:o.nome, telefone:o.telefone});
@@ -9478,11 +9561,11 @@ async function ctPreview(){
     // a mesma pessoa em outra linha: é mais uma apólice dela (uma linha por apólice)
     if(seenKey.has(key)){ const ent = porChave.get(key);
       if(ent && n.apo){ ent.apos.push({apo:n.apo, linha}); Object.keys(o).forEach(k=>{ if(ent.o[k]==null || ent.o[k]==='') ent.o[k] = o[k]; }); continue; }
-      problemas.push({linha, nome:o.nome, motivo:'repetida na própria planilha (mesmo '+(temCpf?'CPF':(tel.length>=8?'telefone':'nome'))+') e sem apólice', raw:r}); continue; } seenKey.add(key);
+      problemas.push({linha, nome:o.nome, motivo:'repetida na própria planilha (mesmo '+(temCpf?'CPF':(tel.length>=8?'telefone':'nome'))+') e sem apólice', raw:ctRaw(linha)}); continue; } seenKey.add(key);
     const apos = n.apo ? [{apo:n.apo, linha}] : [];
     let ent = null;
     if(forte){ ent = {o, apos, pr:n.pr, id:forte.id, nome:forte.nome, via, linha}; existentes.push(ent); }
-    else if(fraco){ revisar.push({o, fraco, linha}); problemas.push({linha, nome:o.nome, motivo:'nome parecido com um cadastro existente ('+fraco.nome+'): revise e importe à mão', raw:r}); }
+    else if(fraco){ revisar.push({o, fraco, linha}); problemas.push({linha, nome:o.nome, motivo:'nome parecido com um cadastro existente ('+fraco.nome+'): revise e importe à mão', raw:ctRaw(linha)}); }
     else { ent = {o, apos, pr:n.pr, linha}; novos.push(ent); }
     if(ent) porChave.set(key, ent);
   }
@@ -9516,7 +9599,7 @@ async function ctRun(){
       if(!error){ data.forEach((d,j)=>{ OP.pessoas.push(d); rel.novos++; alvosProsp.push({p:d, pr:chunk[j].pr}); (chunk[j].apos||[]).forEach(a=>comApolice.push({pessoa_id:d.id, apo:a.apo, linha:a.linha, nome:d.nome})); }); continue; }
       // o lote falhou: tenta uma a uma para saber exatamente quais linhas têm problema
       for(const x of chunk){ const r1 = await sb.from('crm_pessoas').insert({...x.o, tipo}).select(COLS).single();
-        if(r1.error) rel.problemas.push({linha:x.linha, nome:x.o.nome, motivo:'não foi possível cadastrar: '+r1.error.message, raw:CT.rows[x.linha-2]});
+        if(r1.error) rel.problemas.push({linha:x.linha, nome:x.o.nome, motivo:'não foi possível cadastrar: '+r1.error.message, raw:ctRaw(x.linha)});
         else { OP.pessoas.push(r1.data); rel.novos++; alvosProsp.push({p:r1.data, pr:x.pr}); (x.apos||[]).forEach(a=>comApolice.push({pessoa_id:r1.data.id, apo:a.apo, linha:a.linha, nome:r1.data.nome})); } }
     }
     for(let i=0;i<CT.existentes.length;i++){
@@ -9528,7 +9611,7 @@ async function ctRun(){
       const patch = {}; Object.keys(o).forEach(k=>{ if(k==='nome'||k==='tags') return; if(full[k]===null || full[k]===undefined || full[k]==='') patch[k] = o[k]; });
       if(o.tags && o.tags.length){ const merged = [...new Set([...(full.tags||[]), ...o.tags])]; if(merged.length!==(full.tags||[]).length) patch.tags = merged; }
       if(Object.keys(patch).length){ btn.textContent = `Atualizando cadastros ${i+1}/${CT.existentes.length}...`; const { error } = await sb.from('crm_pessoas').update(patch).eq('id', id);
-        if(error) rel.problemas.push({linha, nome, motivo:'não foi possível atualizar: '+error.message, raw:CT.rows[linha-2]}); else { rel.atualizados++; Object.assign(cur, patch); } }
+        if(error) rel.problemas.push({linha, nome, motivo:'não foi possível atualizar: '+error.message, raw:ctRaw(linha)}); else { rel.atualizados++; Object.assign(cur, patch); } }
     }
     if(enviarProsp){
       btn.textContent = 'Enviando para a Prospecção...';
@@ -9548,11 +9631,11 @@ async function ctRun(){
         if(ex){
           const patch = {}; if(!ex.numero_apolice && a.numero_apolice) patch.numero_apolice = a.numero_apolice; if(!ex.seguradora && a.seguradora) patch.seguradora = a.seguradora; if(!ex.tipo_seguro && a.tipo_seguro) patch.tipo_seguro = a.tipo_seguro; if(!ex.data_vencimento && a.vencimento) patch.data_vencimento = a.vencimento;
           if(!ex.data_emissao && a.emissao) patch.data_emissao = a.emissao; if(ex.valor_premio==null && a.premio!=null) patch.valor_premio = a.premio; if(ex.valor_cobertura==null && a.capital!=null) patch.valor_cobertura = a.capital; if(ex.comissao_pct==null && a.comissao!=null) patch.comissao_pct = a.comissao; if(!ex.forma_pagamento && a.forma_pagamento) patch.forma_pagamento = a.forma_pagamento; if(a.a_status && a.a_status!==ex.status) patch.status = a.a_status;
-          if(ex.id && Object.keys(patch).length){ const { error } = await sb.from('crm_apolices').update(patch).eq('id', ex.id); if(error) rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não atualizada: '+error.message, raw:CT.rows[x.linha-2]}); else rel.apoAtualizadas++; }
+          if(ex.id && Object.keys(patch).length){ const { error } = await sb.from('crm_apolices').update(patch).eq('id', ex.id); if(error) rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não atualizada: '+error.message, raw:ctRaw(x.linha)}); else rel.apoAtualizadas++; }
           continue; }
         const status = a.a_status || (a.vencimento && a.vencimento < hoje ? 'encerrada' : 'ativa');
         const { error } = await sb.from('crm_apolices').insert({ pessoa_id:x.pessoa_id, numero_apolice:a.numero_apolice||null, seguradora:a.seguradora||null, tipo_seguro:a.tipo_seguro||null, data_emissao:a.emissao||null, data_vencimento:a.vencimento||null, valor_premio:a.premio==null?null:a.premio, valor_cobertura:a.capital==null?null:a.capital, comissao_pct:a.comissao==null?null:a.comissao, forma_pagamento:a.forma_pagamento||null, status, origem_apolice:'importada', dados_extraidos:{importado_de:CT.file} });
-        if(error){ rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não criada: '+error.message, raw:CT.rows[x.linha-2]}); continue; }
+        if(error){ rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não criada: '+error.message, raw:ctRaw(x.linha)}); continue; }
         rel.apoNovas++;
         if(!jaTem.has(x.pessoa_id)) jaTem.set(x.pessoa_id, lista);   // linha repetida mais abaixo na planilha encontra esta apólice
         lista.push({id:null, numero_apolice:a.numero_apolice||null, seguradora:a.seguradora||null, tipo_seguro:a.tipo_seguro||null, data_vencimento:a.vencimento||null});
@@ -10967,11 +11050,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611021822"></script>
-<script src="painel.js?v=202611021822"></script>
-<script src="cobranca.js?v=202611021822"></script>
-<script src="cadastro.js?v=202611021822"></script>
-<script src="contrato.js?v=202611021822"></script>
-<script src="guarda.js?v=202611021822"></script>
+<script src="plataforma.js?v=202611021851"></script>
+<script src="painel.js?v=202611021851"></script>
+<script src="cobranca.js?v=202611021851"></script>
+<script src="cadastro.js?v=202611021851"></script>
+<script src="contrato.js?v=202611021851"></script>
+<script src="guarda.js?v=202611021851"></script>
 </body>
 </html>

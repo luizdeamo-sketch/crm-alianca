@@ -397,7 +397,19 @@
   const gerarTexto = (d, corr) => window.TorreContrato.gerar(condicoes(d, corr), EST.config.contratada || {});
   async function emitir(id, d, corr) { const dados = condicoes(d, corr); return rpc('crm_plataforma_contrato_emitir', { p_corretor: id, p_dados: dados, p_texto: window.TorreContrato.gerar(dados, EST.config.contratada || {}) }); }
 
+  // contrato gravado no banco: só formatação simples (auditoria 02/11/2026: nada de script, evento ou link javascript no Painel)
+  function limparContrato(html) {
+    const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+    const ok = new Set(['DIV', 'H2', 'H3', 'P', 'B', 'STRONG', 'I', 'EM', 'BR', 'TABLE', 'TBODY', 'TR', 'TH', 'TD', 'UL', 'OL', 'LI', 'SPAN']);
+    doc.body.querySelectorAll('*').forEach((el) => {
+      if (!ok.has(el.tagName)) { el.replaceWith(doc.createTextNode(el.textContent || '')); return; }
+      [...el.attributes].forEach((a) => { if (a.name !== 'class') el.removeAttribute(a.name); });
+    });
+    return doc.body.innerHTML;
+  }
+
   function verContrato(html, rodape) {
+    html = limparContrato(html);
     window.TorreContrato.estilo();
     const m = document.createElement('div');
     m.style.cssText = 'position:fixed;inset:0;z-index:99995;background:rgba(17,24,39,.6);overflow:auto;padding:24px 16px';

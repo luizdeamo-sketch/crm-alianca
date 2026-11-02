@@ -12,6 +12,16 @@
     ['vendas_carteira', 'Vendas + Carteira', 'Tudo do Vendas, mais as apólices: Central de Apólices, renovações com avisos de 30, 15 e 7 dias, pós-venda e IA que lê apólices e documentos.'],
     ['completo', 'Completo', 'Vendas + Carteira, mais a Gestão: indicadores, metas, orçamento, funil com taxas, indicações (Mais Carlas) e Ata da semana.']];
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // contrato gravado no banco: só formatação simples (auditoria 02/11/2026)
+  function limparContrato(html) {
+    const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+    const ok = new Set(['DIV', 'H2', 'H3', 'P', 'B', 'STRONG', 'I', 'EM', 'BR', 'TABLE', 'TBODY', 'TR', 'TH', 'TD', 'UL', 'OL', 'LI', 'SPAN']);
+    doc.body.querySelectorAll('*').forEach((el) => {
+      if (!ok.has(el.tagName)) { el.replaceWith(doc.createTextNode(el.textContent || '')); return; }
+      [...el.attributes].forEach((a) => { if (a.name !== 'class') el.removeAttribute(a.name); });
+    });
+    return doc.body.innerHTML;
+  }
   const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const so = (s) => String(s || '').replace(/\D/g, '');
   let INFO = null, passo = 1, raiz = null, logoUrl = '', fimDegust = null, MODO = 'cadastro';
@@ -280,17 +290,12 @@
       };
     }
     async function gerarContrato() {
-      if (!window.TorreContrato) throw new Error('O modelo do contrato não carregou. Atualize a página e tente de novo.');
-      const r = await sb.rpc('crm_contrato_condicoes'); if (r.error) throw new Error(r.error.message);
-      const cond = r.data, c = cond.corretora || {}, rg = cond.regua || {}, perm = cond.plano === 'permuta';
-      const nomes = { vendas: 'Vendas', vendas_carteira: 'Vendas + Carteira', completo: 'Completo' };
-      const desc = { vendas: 'módulo Vendas e a carteira de clientes', vendas_carteira: 'módulos Vendas e Carteira', completo: 'Vendas, Carteira e Gestão' };
-      const d = Object.assign({}, c, { plano: cond.plano, gratuita: perm, contrapartida: cond.contrapartida || '', plano_nome: perm ? 'Permuta' : (nomes[cond.plano] || cond.plano),
-        plano_desc: perm ? 'todos os módulos liberados, inclusive os extras' : (desc[cond.plano] || ''), valor: Number(cond.valor || 0), preco_especial: !!cond.preco_especial,
-        degustacao_dias: Number(rg.degustacao_dias || 15), aviso_dias: Number(rg.aviso_dias || 5), bloqueio_dias: Number(rg.bloqueio_dias || 10),
-        data_emissao: new Date().toISOString(), modelo: window.TorreContrato.MODELO });
-      const texto = window.TorreContrato.gerar(d, cond.contratada || {});
-      const e = await sb.rpc('crm_contrato_auto_emitir', { p_dados: d, p_texto: texto }); if (e.error) throw new Error(e.error.message);
+      // auditoria 02/11/2026: o contrato é montado no servidor (função contrato-emitir, mesmo contrato.js) com os dados do banco;
+      // o navegador não escreve mais o texto
+      const e = await sb.functions.invoke('contrato-emitir', { body: {} });
+      let falha = e.data && e.data.error;
+      if (!falha && e.error) { try { falha = (await e.error.context.json()).error; } catch (_) {} falha = falha || e.error.message; }
+      if (falha) throw new Error(falha);
       const m = await sb.rpc('crm_contrato_meu'); if (m.error || !m.data || !m.data.contrato) throw new Error('O contrato foi gerado, mas não abriu. Atualize a página.');
       k = m.data.contrato;
     }
@@ -300,7 +305,7 @@
       raiz.innerHTML = `<div class="cx"><div class="tp"><h2>${data.aceito_antes ? 'Versão nova do seu contrato' : 'Bem-vindo ao CRM Aliança by Capacity Case'}</h2>
         <p>${data.aceito_antes ? 'A Capacity Case atualizou o contrato. Leia e aceite a versão nova ou peça revisão.' : `${rotulo(1)} · Leia o contrato com os dados da sua empresa. A degustação gratuita de ${esc(dias())} dias começa quando você aceitar.`}</p>
         <div class="barra">${ORDEM().map((n) => `<span class="${n <= 1 ? 'on' : ''}"></span>`).join('')}</div></div>
-        <div class="cp"><div class="ct-box" id="c-ct">${k.texto}</div>
+        <div class="cp"><div class="ct-box" id="c-ct">${limparContrato(k.texto)}</div>
           <p style="color:#5d6871;font-size:13px;margin:0">Versão ${esc(k.versao)} · código de verificação ${esc(String(k.hash).slice(0, 16))}… · O aceite fica registrado com data, hora, o seu e-mail, o IP e o navegador.</p>
           <label class="chk"><input type="checkbox" id="c-li"> <span>Li o contrato inteiro e aceito em nome da empresa contratante, e declaro ter poderes para isso.</span></label>
           <div class="msg" id="cad-msg"></div></div>

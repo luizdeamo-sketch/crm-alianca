@@ -10,7 +10,7 @@
   // Cadastro, Agenda, Sugestões e Admin vêm em todos. Sem lista = tudo liberado (inclusive os extras).
   const MODULOS = [
     ['vendas', 'Vendas', 'Prospecção, Consultoria, Reuniões, Base de conhecimento, agenda no Outlook/Teams e IA de vendas'],
-    ['carteira', 'Carteira', 'Operação, Central de Apólices, renovações, pós-venda e IA de carteira (apólice e documento)'],
+    ['carteira', 'Carteira', 'Central de Apólices, renovações, pós-venda e IA de carteira (apólice e documento). A lista de clientes vem em todos os planos'],
     ['gestao', 'Gestão', 'Indicadores, metas, orçamento, funil, Mais Carlas e Ata']];
   const EXTRAS = [['analitico', 'Analítico (base de plantões)'], ['premium', 'Premium / COPA / fidelizados']];
   // escada de planos (decisão do Luiz, 29/10/2026); os preços ficam na configuração da plataforma (aba Pagamentos)
@@ -18,6 +18,8 @@
   const DESC_PLANO = { vendas: 'módulo Vendas', vendas_carteira: 'módulos Vendas e Carteira', completo: 'Vendas, Carteira e Gestão' };
   const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const preco = (k) => Number(((EST.config || {}).precos || {})[k] || 0);
+  const LIM_PADRAO = { vendas: 3, vendas_carteira: 5, completo: 10, permuta: 10 };   // pessoas com acesso por plano (decisão do Luiz, 02/11/2026)
+  const limite = (c) => { const l = Object.assign({}, LIM_PADRAO, (EST.config || {}).limites || {}); return Number(l[c.gratuita ? 'permuta' : c.plano] || 10); };
   const nomeMod = (k) => (MODULOS.concat(EXTRAS).find(([x]) => x === k) || [k, k])[1];
   const resumoMods = (m) => !Array.isArray(m) ? 'Tudo liberado' : (m.filter((k) => MODULOS.some(([x]) => x === k)).map(nomeMod).join(' · ') || 'Nenhum módulo') + (m.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : '');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -133,7 +135,7 @@
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
         <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
         <td>${sit} ${pagto(c)} ${c.slug === 'demonstracao' ? '<span class="pill neu" title="Corretora de demonstração, com dados fictícios: não tem contrato">Demonstração</span>' : c.encerrado_em ? (c.contrato ? contratoPill(c) : '') : contratoPill(c)}<br><button class="b" data-contrato="${c.id}" style="margin-top:4px" title="Dados do cliente, contrato, revisões e convite">📄 Cliente e contrato</button></td>
-        <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas ativas na equipe (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">${c.usuarios_ativos} de ${c.usuarios}</button></td>
+        <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas com acesso / limite do plano (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">👥 ${c.usuarios_ativos} de ${limite(c)}</button></td>
         <td>${c.slug ? `<button class="b" data-copiar-link="${esc(linkCorretora(c.slug))}" title="Copiar o link próprio da corretora">🔗 /${esc(c.slug)}</button>` : '—'}</td>
         <td>${quando(c.ultimo_acesso)}</td>
         <td>${esc(c.admin_email || '—')}</td>
@@ -554,7 +556,7 @@
         <div class="acoes" style="margin-bottom:10px"><button class="b" id="pp-gerar">Gerar faturas agora</button></div>
         <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th>Ações</th></tr></thead>
         <tbody>${linhas || '<tr><td colspan="6">Nenhuma fatura ainda. A primeira nasce quando terminar a degustação de uma corretora paga.</td></tr>'}</tbody></table></div></div>
-      <div class="card"><h3>Preços, Pix e régua</h3>
+      <div class="card"><h3>Preços, Pix, régua e pessoas por plano</h3>
         <form class="lin" id="pp-cfg">
           <label class="f">Vendas (R$/mês)<input name="vendas" type="number" min="0" step="0.01" value="${esc(p.vendas)}"></label>
           <label class="f">Vendas + Carteira (R$/mês)<input name="vendas_carteira" type="number" min="0" step="0.01" value="${esc(p.vendas_carteira)}"></label>
@@ -565,6 +567,10 @@
           <label class="f">Degustação (dias)<input name="degustacao_dias" type="number" min="0" value="${esc(r.degustacao_dias)}"></label>
           <label class="f">Aviso antes do vencimento (dias)<input name="aviso_dias" type="number" min="0" value="${esc(r.aviso_dias)}"></label>
           <label class="f">Bloqueio após atraso (dias)<input name="bloqueio_dias" type="number" min="1" value="${esc(r.bloqueio_dias)}"></label>
+          <label class="f">Pessoas no Vendas<input name="lim_vendas" type="number" min="1" value="${esc((EST.config.limites || LIM_PADRAO).vendas)}"></label>
+          <label class="f">Pessoas no Vendas + Carteira<input name="lim_vendas_carteira" type="number" min="1" value="${esc((EST.config.limites || LIM_PADRAO).vendas_carteira)}"></label>
+          <label class="f">Pessoas no Completo<input name="lim_completo" type="number" min="1" value="${esc((EST.config.limites || LIM_PADRAO).completo)}"></label>
+          <label class="f">Pessoas na Permuta<input name="lim_permuta" type="number" min="1" value="${esc((EST.config.limites || LIM_PADRAO).permuta)}"></label>
           <button class="b pri" type="submit">Salvar</button>
         </form><div class="msg" id="pp-msg-cfg">Faturas já abertas mantêm o valor; as próximas usam o preço novo.</div></div>`;
   }
@@ -595,6 +601,7 @@
         await rpc('crm_plataforma_config_salvar', { p_chave: 'precos', p_valor: { vendas: num('vendas'), vendas_carteira: num('vendas_carteira'), completo: num('completo') } });
         await rpc('crm_plataforma_config_salvar', { p_chave: 'pix', p_valor: { chave, nome: String(f.get('nome')).trim(), cidade: String(f.get('cidade')).trim() } });
         await rpc('crm_plataforma_config_salvar', { p_chave: 'regua', p_valor: { degustacao_dias: num('degustacao_dias'), aviso_dias: num('aviso_dias'), bloqueio_dias: Math.max(1, num('bloqueio_dias')) } });
+        await rpc('crm_plataforma_config_salvar', { p_chave: 'limites', p_valor: { vendas: Math.max(1, num('lim_vendas')), vendas_carteira: Math.max(1, num('lim_vendas_carteira')), completo: Math.max(1, num('lim_completo')), permuta: Math.max(1, num('lim_permuta')) } });
       } catch (err) { raiz.querySelector('#pp-msg-cfg').textContent = 'Não foi possível salvar: ' + err.message; return; }
       recarregar('<div class="aviso">Preços, Pix e régua salvos.</div>');
     };

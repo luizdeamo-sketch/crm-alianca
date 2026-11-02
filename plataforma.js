@@ -176,6 +176,50 @@
     });
   }
 
+  /* ---------- Planos: o que cada plano entrega (todos veem; o plano da corretora vem marcado) ---------- */
+  // telas de cada módulo = crm_recursos_dos_modulos no banco (Vendas, Carteira, Gestão); mude os dois juntos
+  const PLANOS_INFO = [
+    { k: 'vendas', nome: 'Vendas', para: 'Para quem quer organizar a prospecção e vender mais.', itens: [
+      ['🎯 Vendas', 'Prospecção com funil por etapas e Consultoria com as fases da proteção patrimonial do cliente.'],
+      ['🤝 Reuniões', 'Reunião marcada que se confirma sozinha: lembretes prontos para o WhatsApp e o botão Hoje.'],
+      ['📚 Base', 'Base de conhecimento com produtos, argumentos e respostas para objeções.'],
+      ['📅 Agenda no Outlook, Teams e Google', 'A agenda do sistema aparece no calendário que você já usa.'],
+      ['✨ IA de vendas (em breve)', 'Resumo do cliente, análise da reunião e sugestões do próximo passo.']] },
+    { k: 'vendas_carteira', nome: 'Vendas + Carteira', para: 'Para quem também cuida das apólices e das renovações.', itens: [
+      ['➕ Tudo do Vendas', ''],
+      ['📄 Apólices', 'Central de apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda.'],
+      ['✨ IA de carteira (em breve)', 'Lê a apólice, a cotação ou o documento e preenche os dados para você.']] },
+    { k: 'completo', nome: 'Completo', para: 'Para quem gerencia uma equipe e quer números.', itens: [
+      ['➕ Tudo do Vendas + Carteira', ''],
+      ['📊 Indicadores', 'Painel com os números da corretora e de cada corretor.'],
+      ['💼 Comercial', 'Metas, orçamento, funil com taxas de conversão e indicações (Mais Carlas).'],
+      ['📝 Ata', 'Ata da semana com entregáveis e responsáveis.']] }];
+  async function abrirPlanos() {
+    let info = {};
+    try { const r = await sb.rpc('crm_planos_info'); if (!r.error && r.data) info = r.data; } catch (e) { /* mostra sem preço */ }
+    const precos = info.precos || {}, lim = info.limites || { vendas: 3, vendas_carteira: 5, completo: 10, permuta: 10 }, atual = info.plano || '';
+    const brl = (v) => v == null ? '' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fundo = document.createElement('div'); fundo.id = 'tc-planos';
+    fundo.style.cssText = 'position:fixed;inset:0;z-index:99994;background:rgba(17,24,39,.6);overflow:auto;padding:24px 16px;font:15px/1.5 "Segoe UI",system-ui,sans-serif';
+    const cartao = (p) => `<div style="border:2px solid ${atual === p.k ? 'var(--brand,#9c7518)' : '#e4e6e2'};border-radius:14px;padding:16px 18px;background:${atual === p.k ? '#fbf8f1' : '#fff'};display:grid;gap:8px;align-content:start">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap"><b style="font-size:19px;color:#111827">${p.nome}</b>${atual === p.k ? '<span style="background:var(--brand,#9c7518);color:#fff;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:600">Seu plano</span>' : ''}</div>
+        <div style="font-size:26px;font-weight:700;color:#111827">${brl(precos[p.k])}<small style="font-size:13px;font-weight:400;color:#5d6871"> /mês</small></div>
+        <div style="color:#5d6871;font-size:14px">${p.para}<br><b>Até ${lim[p.k] || '—'} pessoas</b> com acesso (contando o administrador).</div>
+        <ul style="margin:4px 0 0;padding:0;list-style:none;display:grid;gap:8px">${p.itens.map(([t, d]) => `<li><b>${t}</b>${d ? `<br><span style="color:#5d6871;font-size:14px">${d}</span>` : ''}</li>`).join('')}</ul></div>`;
+    fundo.innerHTML = `<div role="dialog" aria-modal="true" aria-label="Planos" style="background:#fff;border-radius:18px;padding:22px 24px;margin:0 auto;display:grid;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:start"><div><h2 style="margin:0;font-size:22px;color:#111827">Planos do CRM Aliança</h2>
+        <p style="margin:4px 0 0;color:#5d6871">Todos os planos têm a <b>Aliança</b> (todos os clientes num lugar só, com histórico, família, documentos e importação da sua planilha), Agenda, Sugestões, Admin (equipe e acessos), a marca da sua corretora e o link próprio. Os ${info.degustacao_dias || 15} primeiros dias são de degustação gratuita, e a mensalidade é paga por Pix no sistema.</p></div>
+        <button type="button" data-x style="font:inherit;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid #d5d8d2;background:#fff;cursor:pointer">✕ Fechar</button></div>
+      ${atual === 'permuta' ? '<div style="background:#e3f1e8;color:#1f5a37;border-radius:12px;padding:12px 14px"><b>A sua corretora está em permuta:</b> todos os módulos liberados, sem mensalidade.</div>' : ''}
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">${PLANOS_INFO.map(cartao).join('')}</div>
+      <p style="margin:0;color:#5d6871;font-size:14px">${info.sou_admin ? 'Quer mudar de plano ou incluir mais pessoas? Peça na tela <b>Sugestões</b> que a Capacity Case responde por lá.' : 'Para mudar de plano, fale com o administrador da sua corretora.'} Extras sob consulta: Analítico da base de plantões e grupos Premium.</p></div>`;
+    document.body.appendChild(fundo);
+    const fechar = () => fundo.remove();
+    fundo.querySelector('[data-x]').onclick = fechar;
+    fundo.onclick = (ev) => { if (ev.target === fundo) fechar(); };
+    document.addEventListener('keydown', function esc(ev) { if (ev.key === 'Escape') { fechar(); document.removeEventListener('keydown', esc); } });
+  }
+
   /* ---------- botões no topo ---------- */
   function botoes() {
     const who = document.querySelector('header .who'); if (!who || !MARCA) return;
@@ -183,8 +227,8 @@
     // somem. Os da plataforma têm fundo sólido para ficar legíveis em qualquer ponto.
     if (!document.getElementById('tc-estilo-botoes')) {
       const st = document.createElement('style'); st.id = 'tc-estilo-botoes';
-      st.textContent = '#btn-minha-corretora,#btn-funil,#btn-plataforma{background:var(--navy,#111827)!important;border:1px solid rgba(255,255,255,.35)!important;color:#fff!important;box-shadow:0 1px 3px rgba(0,0,0,.25);white-space:nowrap}' +
-        '#btn-minha-corretora:hover,#btn-funil:hover,#btn-plataforma:hover{background:var(--brand,#9c7518)!important;border-color:var(--brand,#9c7518)!important}';
+      st.textContent = '#btn-minha-corretora,#btn-funil,#btn-plataforma,#btn-planos{background:var(--navy,#111827)!important;border:1px solid rgba(255,255,255,.35)!important;color:#fff!important;box-shadow:0 1px 3px rgba(0,0,0,.25);white-space:nowrap}' +
+        '#btn-minha-corretora:hover,#btn-funil:hover,#btn-plataforma:hover,#btn-planos:hover{background:var(--brand,#9c7518)!important;border-color:var(--brand,#9c7518)!important}';
       document.head.appendChild(st);
     }
     if (MARCA.sou_admin && !document.getElementById('btn-minha-corretora')) {
@@ -196,6 +240,11 @@
       const f = document.createElement('button'); f.id = 'btn-funil'; f.type = 'button'; f.textContent = '⚙️ Funil';
       f.title = 'Nome, cor e ordem das etapas do funil de vendas da sua corretora'; f.addEventListener('click', abrirFunil);
       who.insertBefore(f, who.firstChild.nextSibling);
+    }
+    if (!document.getElementById('btn-planos')) {   // todos os usuários, em todos os planos
+      const p = document.createElement('button'); p.id = 'btn-planos'; p.type = 'button'; p.textContent = '📦 Planos';
+      p.title = 'O que cada plano entrega e qual é o seu'; p.addEventListener('click', abrirPlanos);
+      who.insertBefore(p, who.firstChild.nextSibling);
     }
     if (MARCA.dono_plataforma && !document.getElementById('btn-plataforma')) {
       const a = document.createElement('button'); a.id = 'btn-plataforma'; a.type = 'button'; a.textContent = '🏢 Plataforma';

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611021642">
+<meta name="app-build" content="202611021702">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -330,7 +330,7 @@ window.ALIANCA = {
           </select>
         </div>
       </div>
-      <div id="op-scroll"><div class="op-more">Carregando médicos...</div></div>
+      <div id="op-scroll"><div class="op-more">Carregando...</div></div>
     </div>
 
     <div id="op-modal"></div>
@@ -1603,7 +1603,7 @@ function vdIniHtml(){
       <div class="es-box"><div class="ql">Cliente novo <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— Fase 1 · Upload e cadastro</small></div>
         <div class="dz" id="vi-dz" data-act="ini-dz" style="margin-top:8px">Arraste aqui as apólices e documentos do cliente (PDF) ou clique. O sistema lê o básico, mostra o resumo para você conferir e abre o fluxo do cliente.<input type="file" id="vi-file" accept=".pdf,application/pdf,image/*" multiple hidden></div>
         <div class="hint" style="margin:8px 0">Ou crie o cadastro manualmente: só o nome é obrigatório.</div>
-        <div class="vp-grid"><label>Nome completo<input id="vi-nome" placeholder="Nome"></label><label>CPF<input id="vi-cpf" placeholder="000.000.000-00"></label><label>Telefone<input id="vi-tel" placeholder="(11) 90000-0000"></label><label>Data de nascimento<input id="vi-nasc" type="date"></label><label>Perfil<select id="vi-tipo">${tipoOptions('medico')}</select></label></div>
+        <div class="vp-grid"><label>Nome completo<input id="vi-nome" placeholder="Nome"></label><label>CPF<input id="vi-cpf" placeholder="000.000.000-00"></label><label>Telefone<input id="vi-tel" placeholder="(11) 90000-0000"></label><label>Data de nascimento<input id="vi-nasc" type="date"></label><label>Perfil<select id="vi-tipo">${tipoOptions(tcPerfilPadrao())}</select></label></div>
         <div style="margin-top:10px"><button class="om-save" data-act="ini-novo">Criar cadastro e iniciar o fluxo</button></div></div>
       <div class="es-box"><div class="ql">Cliente que já está no sistema</div>
         <div class="vp-grid" style="margin-top:8px"><label style="grid-column:1/-1">Buscar pelo nome<input id="vi-busca" list="vd-cli" placeholder="Digite o nome do cliente"></label></div>
@@ -2763,7 +2763,7 @@ function pvRender(){
   const wa = waLink(p.telefone);
   view.innerHTML = `<div class="person-header"><div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn-ghost" id="btn-op-back">← Aliança</button><h2 style="margin:0">${escapeHtml(p.nome)}</h2></div>
-      <div class="tags" style="margin-top:8px"><span class="tag">${TIPOS_PESSOA[p.tipo||'medico']||p.tipo}</span>${p.crm?`<span class="tag">CRM ${escapeHtml(p.crm)}</span>`:''}${p.especialidade?`<span class="tag">${escapeHtml(p.especialidade)}</span>`:''}${pvClassChip(p)}${pvDadosChips(p)}${(p.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+      <div class="tags" style="margin-top:8px"><span class="tag">${escapeHtml(perfilRotulo(p))}</span>${p.crm?`<span class="tag">CRM ${escapeHtml(p.crm)}</span>`:''}${p.especialidade?`<span class="tag">${escapeHtml(p.especialidade)}</span>`:''}${pvClassChip(p)}${pvDadosChips(p)}${(p.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
       <div class="person-actions"><button class="om-cancel" id="pa-editar">Editar cadastro</button><button class="om-save" id="pa-prosp" title="Cria a linha em Vendas > Prospecção, já com os dados desta pessoa, e abre">🎯 Prospectar</button><button class="om-save" id="pa-fluxo">Fluxo de proteção</button><button class="om-cancel" id="pa-apolice">Anexar apólice</button><button class="om-cancel" id="pa-wa">WhatsApp com script</button><button class="om-cancel" id="pa-audit" title="Quem alterou o quê, e quando">Histórico de alterações</button><button class="om-save" id="pa-intel" title="Pesquisa pública e perguntas personalizadas para a abordagem">Inteligência</button><button class="om-cancel" id="pa-reuniao" title="Gravar/enviar uma reunião com esta pessoa">Nova reunião</button><button class="om-cancel" id="pa-del" style="color:var(--red)" title="Apaga o cadastro e tudo ligado a ele">Excluir cadastro</button></div>
       <div id="pv-next">${pvNextHtml(p)}</div>
       <div id="pv-redes"></div>
@@ -5284,7 +5284,27 @@ const OP = { fid:new Map(), morno:new Map(), pessoas:[], funil:new Map(), apo:ne
 const OP_PAGE = 120;
 const TIPOS_PESSOA = {medico:'Médico', profissional_saude:'Outro profissional de saúde', empresa:'Empresa / PJ', outro:'Outro (não médico)'};
 const isMedico = (p)=> (p.tipo||'medico')==='medico';
-const tipoOptions = (sel)=> Object.entries(TIPOS_PESSOA).map(([k,l])=>`<option value="${k}" ${sel===k?'selected':''}>${l}</option>`).join('');
+// perfil do cliente = profissão, numa lista ampla (02/11/2026). O valor "p|<tipo>|<profissão>" vira, no banco, tipo + crm_pessoas.profissao
+// (gatilho crm_pessoas_profissao); o tipo (médico, saúde, empresa, outro) continua servindo aos filtros da Aliança.
+const PROFISSOES = [
+  ['Saúde', 'medico', ['Médico(a)']],
+  ['Saúde', 'profissional_saude', ['Dentista','Enfermeiro(a)','Técnico(a) de enfermagem','Fisioterapeuta','Psicólogo(a)','Nutricionista','Farmacêutico(a)','Fonoaudiólogo(a)','Biomédico(a)','Veterinário(a)','Terapeuta ocupacional','Outro profissional de saúde']],
+  ['Direito e finanças', 'outro', ['Advogado(a)','Contador(a)','Economista','Bancário(a)','Corretor(a) de seguros','Corretor(a) de imóveis']],
+  ['Engenharia e tecnologia', 'outro', ['Engenheiro(a)','Arquiteto(a)','Profissional de TI','Técnico(a) industrial']],
+  ['Negócios e comércio', 'outro', ['Empresário(a)','Sócio(a) de empresa','Comerciante','Administrador(a)','Executivo(a) / Gestor(a)','Representante comercial','Vendedor(a)','Autônomo(a)','Microempreendedor(a) (MEI)']],
+  ['Setor público e segurança', 'outro', ['Servidor(a) público(a)','Juiz(a) / Promotor(a)','Militar','Policial','Bombeiro(a)']],
+  ['Educação, transporte e outros', 'outro', ['Professor(a)','Pesquisador(a)','Motorista / Caminhoneiro(a)','Produtor(a) rural','Piloto / Aeronauta','Atleta','Artista / Comunicação','Estudante','Aposentado(a)','Do lar']],
+  ['Empresa', 'empresa', ['Empresa / PJ']]];
+const tcPerfilPadrao = ()=> tcModulo('premium') ? 'medico' : 'outro';   // Aliança (base de plantões) começa em Médico; as outras, em Outra profissão
+const tipoOptions = (sel, prof)=>{
+  const todas = PROFISSOES.flatMap(([,t,ls])=>ls.map(l=>[t,l]));
+  const norm = s=> String(s||'').toLowerCase().replace(/\((a|as)\)/g,'').trim().replace(/[ao]$/,'');   // "Advogada", "advogado" e "Advogado(a)" são a mesma
+  const achou = prof && todas.find(([,l])=>norm(l)===norm(prof));
+  const marcado = achou ? achou[1] : sel==='medico' ? 'Médico(a)' : sel==='profissional_saude' ? 'Outro profissional de saúde' : sel==='empresa' ? 'Empresa / PJ' : '';
+  const grupos = []; PROFISSOES.forEach(([g,t,ls])=>{ let gr = grupos.find(x=>x.g===g); if(!gr){ gr = {g, op:[]}; grupos.push(gr); } ls.forEach(l=>gr.op.push(`<option value="p|${t}|${escapeHtml(l)}" ${marcado===l?'selected':''}>${escapeHtml(l)}</option>`)); });
+  return grupos.map(x=>`<optgroup label="${escapeHtml(x.g)}">${x.op.join('')}</optgroup>`).join('') + `<option value="outro" ${!marcado?'selected':''}>Outra profissão${prof && !achou ? ' ('+escapeHtml(prof)+')' : ''}</option>`;
+};
+const perfilRotulo = (p)=> p.profissao || TIPOS_PESSOA[p.tipo||'medico'] || p.tipo;
 const DAY = 86400000;
 const opEnd = ()=> new Date(OP.start.getFullYear(), OP.start.getMonth()+OP.monthsCount, 1);
 const opMKey = (d)=> d.getFullYear()+'-'+d.getMonth();
@@ -5421,7 +5441,7 @@ async function renderOperacao(force){
   if(OP.loaded){
     if(!force && !OP.dirty) return opApplyFilters(true);
   } else {
-    host.innerHTML = '<div class="op-more">Carregando médicos, funil e apólices...</div>';
+    host.innerHTML = '<div class="op-more">Carregando '+(tcModulo('premium')?'médicos':'clientes')+', funil e apólices...</div>';
   }
   OP.loading = true;
   try{
@@ -5645,7 +5665,7 @@ function opRenderKpis(){
   let med = 0, nao = 0, cli = 0, fun = 0;
   OP.pessoas.forEach(p=>{ if(isMedico(p)) med++; else nao++; if(opIsCliente(p.id)) cli++; else if(opCurEtapaIdx(p.id)>=0) fun++; });
   document.getElementById('op-kpis').innerHTML =
-    `<span class="op-kpi"><b>${med}</b> médicos</span>${nao?`<span class="op-kpi" style="background:var(--amber-soft)"><b style="color:var(--amber-ink)">${nao}</b> não médicos</span>`:''}<span class="op-kpi"><b>${fun}</b> em funil</span><span class="op-kpi"><b>${cli}</b> clientes</span><span class="op-kpi">exibindo <b>${OP.filtered.length}</b></span>${(()=>{ const h = opHojeCounts(); return (h.late||h.semAcao) ? `${h.late?`<button class="op-kpi" data-fnext="atrasada" style="border:none;cursor:pointer;background:var(--red-soft)"><b style="color:var(--red)">${h.late}</b> atrasadas</button>`:''}${h.semAcao?`<button class="op-kpi" data-fnext="sem" style="border:none;cursor:pointer;background:var(--amber-soft)"><b style="color:var(--amber-ink)">${h.semAcao}</b> sem próxima ação</button>`:''}` : ''; })()}${OP.pessoas.length && opDupGroups().length ? `<button class="op-kpi" id="op-dups" style="border:none;cursor:pointer;background:var(--amber-soft)"><b style="color:var(--amber-ink)">${opDupGroups().length}</b> possíveis duplicados</button>` : ''}`;
+    (tcModulo('premium') ? `<span class="op-kpi"><b>${med}</b> médicos</span>${nao?`<span class="op-kpi" style="background:var(--amber-soft)"><b style="color:var(--amber-ink)">${nao}</b> não médicos</span>`:''}` : `<span class="op-kpi"><b>${med+nao}</b> pessoas</span>`) + `<span class="op-kpi"><b>${fun}</b> em funil</span><span class="op-kpi"><b>${cli}</b> clientes</span><span class="op-kpi">exibindo <b>${OP.filtered.length}</b></span>${(()=>{ const h = opHojeCounts(); return (h.late||h.semAcao) ? `${h.late?`<button class="op-kpi" data-fnext="atrasada" style="border:none;cursor:pointer;background:var(--red-soft)"><b style="color:var(--red)">${h.late}</b> atrasadas</button>`:''}${h.semAcao?`<button class="op-kpi" data-fnext="sem" style="border:none;cursor:pointer;background:var(--amber-soft)"><b style="color:var(--amber-ink)">${h.semAcao}</b> sem próxima ação</button>`:''}` : ''; })()}${OP.pessoas.length && opDupGroups().length ? `<button class="op-kpi" id="op-dups" style="border:none;cursor:pointer;background:var(--amber-soft)"><b style="color:var(--amber-ink)">${opDupGroups().length}</b> possíveis duplicados</button>` : ''}`;
 }
 
 // Feriados nacionais fixos + móveis (calculados via Páscoa) — usados para sombrear fins de semana/feriados no grid.
@@ -7387,7 +7407,7 @@ function openNovoCliente(prefill, onSaved){
       <div id="nc-banner"></div>
       <div class="fgrid">
         ${NC_FIELDS.map(([k,l,t])=>fld('nc-'+k,l,prefill[k],t,k==='nome')).join('')}
-        <label class="fl"><span>Perfil do cliente *</span><select id="nc-tipo">${tipoOptions(prefill.tipo||'medico')}</select></label>
+        <label class="fl"><span>Profissão *</span><select id="nc-tipo">${tipoOptions(prefill.tipo||tcPerfilPadrao(), prefill.profissao)}</select></label>
         <label class="fl"><span>Sexo</span><select id="nc-sexo"><option value="">—</option><option value="M">Masculino</option><option value="F">Feminino</option></select></label>
         <label class="fl"><span>Estado civil</span><select id="nc-estado_civil"><option value="">—</option><option>solteiro</option><option>casado</option><option>união estável</option><option>divorciado</option><option>viúvo</option></select></label>
         <label class="fl"><span>Origem do cliente</span><select id="nc-origem"><option value="">—</option><option>Aliança Plantões</option><option>Indicação</option><option>Instagram</option><option>Evento</option><option>Outro</option></select></label>
@@ -7900,7 +7920,7 @@ async function impLoad(file){
     IMP = { file:file.name, heads, rows:rows.slice(1), map:{} };
     IMP_FIELDS.forEach(([k,,re])=>{ const i = heads.findIndex(h=>re.test(h)); IMP.map[k] = i; });
     step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${IMP.rows.length} linhas. Confira quais colunas correspondem a cada campo:</div><div class="fgrid" style="margin-top:10px">${IMP_FIELDS.map(([k,l])=>`<label class="fl"><span>${l}</span><select data-imp="${k}"><option value="-1">— não importar —</option>${heads.map((h,i)=>`<option value="${i}" ${IMP.map[k]===i?'selected':''}>${escapeHtml(h||('coluna '+(i+1)))}</option>`).join('')}</select></label>`).join('')}
-      <label class="fl"><span>Perfil dos clientes novos</span><select id="imp-tipo">${tipoOptions('medico')}</select></label></div>
+      <label class="fl"><span>Profissão dos clientes novos</span><select id="imp-tipo">${tipoOptions(tcPerfilPadrao())}</select></label></div>
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="imp-sim" checked> Nome parecido: vincular ao cadastro existente (recomendado)</label>
       <div style="margin-top:12px"><button class="om-save" id="imp-prev">Conferir antes de importar</button></div><div id="imp-result"></div>`;
     step.querySelector('#imp-prev').addEventListener('click', impPreview);
@@ -8056,7 +8076,7 @@ async function caFase1(files, fixed, opts){
   box.querySelector('.dlg-card').innerHTML = `<div class="om-title"><div><h3>Resumo da leitura — ${docs.length} documento(s), ${G.length} pessoa(s)</h3><div class="om-sub">Confira. Campo que não foi lido fica vazio — o sistema não inventa nem trava o salvamento. Cada pessoa tem o CPF buscado no cadastro antes de anexar.</div></div><button data-close>✕</button></div>
     <div class="dlg-body">
       <div class="hint" style="margin-bottom:8px">Resumo: ${docs.map((d,i)=>`Documento ${i+1} é ${/^[AEIOU]/i.test(d.tipo.l)?'uma':'um'} <b>${escapeHtml(d.tipo.l)}</b>${d.pessoas[0].nome||d.pessoas[0].cpf?` — ${escapeHtml(d.multi?d.pessoas.length+' pessoas':[d.pessoas[0].nome,d.pessoas[0].cpf].filter(Boolean).join(' · '))}`:''}`).join(' · ')}</div>
-      <label class="fl" style="max-width:320px"><span>Perfil padrão para cadastros novos</span><select id="f1-tipo">${tipoOptions('medico')}</select></label>
+      <label class="fl" style="max-width:320px"><span>Profissão padrão para cadastros novos</span><select id="f1-tipo">${tipoOptions(tcPerfilPadrao())}</select></label>
       <div style="margin-top:10px">${html}</div>
       <div class="hint">Leitura das coberturas da apólice (cobertura, capital segurado, prêmio) fica para a próxima fase. "Quem indicou" não é obrigatório.</div>
       <div class="om-err" id="f1-err"></div></div>
@@ -8156,7 +8176,7 @@ async function caFormMulti(file, f){
         <label class="fl"><span>Status</span><select id="cm-status"><option value="ativa">Ativa</option><option value="proposta">Proposta em análise</option><option value="aguardando_emissao">Aguardando emissão</option></select></label>
         <label class="fl"><span>Origem</span><select id="cm-origem"><option value="nova">Nova Aliança</option><option value="carteira">Existente / carteira</option><option value="estudo">Existente p/ análise</option><option value="importada">Importada</option></select></label>
         <label class="fl"><span>Vínculo comercial *</span><select id="cm-vinc"><option value="Aliança">Aliança</option><option value="Outra corretora">Outra corretora</option><option value="Direto com seguradora">Direto com seguradora</option><option value="Não identificado">Não identificado</option></select></label>
-        <label class="fl"><span>Perfil padrão p/ cadastros novos</span><select id="cm-tipo">${tipoOptions('medico')}</select></label>
+        <label class="fl"><span>Profissão padrão p/ cadastros novos</span><select id="cm-tipo">${tipoOptions(tcPerfilPadrao())}</select></label>
       </div><div class="ql" style="margin-top:8px">Coberturas identificadas (aplicadas a todas)</div><div class="cv-grid">${covs}</div></div>
       <div class="q"><div class="ql">2. Pessoas encontradas no documento (${rows.length})</div>
         <table class="ca-table"><thead><tr><th></th><th>Nome (extraído do documento)</th><th>CPF</th><th>Cadastro</th></tr></thead><tbody>
@@ -9237,7 +9257,7 @@ function openEditPessoa(p){
       ${fld('pe-nome','Nome completo *',p.nome,'text',true)}${fld('pe-cpf','CPF',p.cpf)}${fld('pe-crm','CRM',p.crm)}${fld('pe-crm_uf','UF do CRM',p.crm_uf)}
       ${fld('pe-data_nascimento','Data de nascimento',p.data_nascimento,'date')}${fld('pe-telefone','Telefone',p.telefone)}${fld('pe-email','E-mail',p.email)}${fld('pe-especialidade','Especialidade',p.especialidade)}
       ${fld('pe-cnpj','CNPJ (PJ)',p.cnpj)}${fld('pe-razao_social','Razão social',p.razao_social)}
-      <label class="fl"><span>Perfil do cliente</span><select id="pe-tipo">${tipoOptions(p.tipo||'medico')}</select></label>
+      <label class="fl"><span>Profissão</span><select id="pe-tipo">${tipoOptions(p.tipo||'medico', p.profissao)}</select></label>
       <label class="fl"><span>Gênero</span><select id="pe-sexo"><option value="">—</option><option value="M" ${p.sexo==='M'?'selected':''}>Masculino</option><option value="F" ${p.sexo==='F'?'selected':''}>Feminino</option></select></label>
       <label class="fl"><span>Estado civil</span><select id="pe-estado_civil"><option value="">—</option>${['solteiro','casado','união estável','divorciado','viúvo'].map(o=>`<option ${p.estado_civil===o?'selected':''}>${o}</option>`).join('')}</select></label>
       ${fld('pe-origem','Origem',p.origem)}${fld('pe-quem_indicou','Quem indicou',p.quem_indicou)}
@@ -9363,7 +9383,7 @@ async function ctLoad(file){
     CT_FIELDS.forEach(([k,,re])=>{ const i = heads.findIndex((h,ix)=>!used.has(ix) && re.test(h) && !/label|r[óo]tulo/i.test(h)); CT.map[k] = i; if(i>=0) used.add(i); });
     step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.rows.length} linhas. Confira as colunas (o que não tiver, deixe “não importar”):</div>
       <div class="fgrid" style="margin-top:10px">${CT_FIELDS.map(([k,l])=>`<label class="fl"><span>${l}</span><select data-ct="${k}"><option value="-1">— não importar —</option>${heads.map((h,i)=>`<option value="${i}" ${CT.map[k]===i?'selected':''}>${escapeHtml(h||('coluna '+(i+1)))}</option>`).join('')}</select></label>`).join('')}
-      <label class="fl"><span>Perfil dos contatos novos</span><select id="ct-tipo">${tipoOptions((CT.mode==='celular' || !tcModulo('premium')) ? 'outro' : 'medico')}</select></label></div>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
+      <label class="fl"><span>Profissão dos contatos novos</span><select id="ct-tipo">${tipoOptions((CT.mode==='celular' || !tcModulo('premium')) ? 'outro' : 'medico')}</select></label></div>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="ct-upd" checked> Contato já existente: preencher só os campos que estão vazios no cadastro (recomendado)</label>
       <div class="es-box" style="margin-top:10px"><label class="chk"><input type="checkbox" id="ct-prosp" ${['p_status','p_data','p_canal','p_hist'].some(k=>CT.map[k]>=0 && CT.rows.some(r=>String(r[CT.map[k]]||'').trim()!==''))?'checked':''}> <b>Enviar para a Prospecção (Vendas)</b>: cada pessoa da planilha vira uma linha para prospectar</label>
         <label class="fl" style="margin-top:6px"><span>Nome da lista (fica como origem na Prospecção)</span><input id="ct-lista" placeholder="Ex.: Lista da assessoria, outubro"></label>
@@ -10830,7 +10850,11 @@ async function admUsrHtml(){
   const comLogin = new Set(ADM.usr.map(u=>String(u.email).toLowerCase()));
   const modsTxt = em=>{ const r = ADM.ext.get(String(em).toLowerCase()), m = (r && r.modulos) || []; return m.length ? m.length+' módulo(s)' : 'Todos'; };
   const pendentes = [...ADM.ext.values()].filter(r=>!comLogin.has(String(r.email).toLowerCase()));
-  const blocoPA = !window.ALIANCA.primeiroAcesso ? '' : `<div class="es-box" style="margin:0 0 14px"><div class="ql">➕ Liberar primeiro acesso</div><div class="hint" style="margin:2px 0 8px">A pessoa entra no link do sistema, clica em <b>Primeiro acesso</b> e cria a própria senha. A liberação vale 48 horas.</div>
+  // vagas do plano (produto): quantas pessoas com acesso a corretora usa e pode ter
+  let vagas = ''; try{ const li = await sb.rpc('crm_limite_info'); if(!li.error && li.data){ const d = li.data, cheio = d.ativos >= d.limite, nomes = {vendas:'Vendas', vendas_carteira:'Vendas + Carteira', completo:'Completo', permuta:'Permuta'};
+    vagas = `<div class="es-box" style="margin:0 0 14px;${cheio?'border-color:#e7b9b3;background:#fdf3f1':''}"><b>👥 ${d.ativos} de ${d.limite} pessoas com acesso</b> <span class="hint" style="margin:0">· plano ${escapeHtml(nomes[d.plano]||d.plano)} (o administrador conta)${cheio?' · <b>limite atingido</b>: desative quem não usa mais para liberar uma vaga, ou peça para mudar de plano em Sugestões.':''}</span>
+      <div class="hint" style="margin:6px 0 0">A senha de cada pessoa fica guardada de forma criptografada e ninguém consegue ver, nem você nem a Capacity Case. Se alguém esqueceu, use <b>Definir senha temporária</b> na tabela: você escolhe a senha nova, passa para a pessoa e ela troca no primeiro acesso.</div></div>`; } }catch(e){}
+  const blocoPA = !window.ALIANCA.primeiroAcesso ? '' : `${vagas}<div class="es-box" style="margin:0 0 14px"><div class="ql">➕ Liberar primeiro acesso</div><div class="hint" style="margin:2px 0 8px">A pessoa entra no link do sistema, clica em <b>Primeiro acesso</b> e cria a própria senha. A liberação vale 48 horas.</div>
     <div class="adm-filtros" style="margin:0"><label style="flex:1;min-width:220px">E-mail<input id="pa-n-email" type="email" placeholder="nome@suacorretora.com.br"></label><label style="min-width:180px">Nome<input id="pa-n-nome" placeholder="Nome completo"></label>
     <label>Papel<select id="pa-n-papel"><option value="especialista">Especialista</option><option value="leitura">Somente leitura</option><option value="master">Master (tudo)</option></select></label>
     <button class="adm-b pri" id="pa-liberar" type="button">Liberar primeiro acesso</button></div>
@@ -10989,10 +11013,10 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611021642"></script>
-<script src="painel.js?v=202611021642"></script>
-<script src="cobranca.js?v=202611021642"></script>
-<script src="cadastro.js?v=202611021642"></script>
-<script src="contrato.js?v=202611021642"></script>
+<script src="plataforma.js?v=202611021702"></script>
+<script src="painel.js?v=202611021702"></script>
+<script src="cobranca.js?v=202611021702"></script>
+<script src="cadastro.js?v=202611021702"></script>
+<script src="contrato.js?v=202611021702"></script>
 </body>
 </html>

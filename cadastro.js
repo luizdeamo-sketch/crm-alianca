@@ -9,7 +9,7 @@
   'use strict';
   const PLANOS = [
     ['vendas', 'Vendas', 'Prospecção, Consultoria com as fases de proteção, Reuniões, Base de conhecimento, agenda no Outlook/Teams e IA de vendas.'],
-    ['vendas_carteira', 'Vendas + Carteira', 'Tudo do Vendas, mais a carteira: Central de Apólices, renovações com avisos de 30, 15 e 7 dias, pós-venda e IA que lê apólices e documentos.'],
+    ['vendas_carteira', 'Vendas + Carteira', 'Tudo do Vendas, mais as apólices: Central de Apólices, renovações com avisos de 30, 15 e 7 dias, pós-venda e IA que lê apólices e documentos.'],
     ['completo', 'Completo', 'Vendas + Carteira, mais a Gestão: indicadores, metas, orçamento, funil com taxas, indicações (Mais Carlas) e Ata da semana.']];
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

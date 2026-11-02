@@ -1,7 +1,10 @@
 /* Cadastro guiado do primeiro acesso (só na versão produto; montar_demo.py injeta este arquivo).
    O administrador de uma corretora contratante, ao entrar pela primeira vez, completa 5 passos antes de usar o sistema:
    1) dados da empresa, 2) logo e cores, 3) plano, 4) aceite dos Termos de Uso e do Acordo de Tratamento de Dados,
-   5) pronto: começa a degustação de 15 dias. Corretora em permuta não passa por aqui. Quem chama é o plataforma.js. */
+   5) pronto: começa a degustação de 15 dias. Corretora em permuta não passa por aqui. Quem chama é o plataforma.js.
+   Desde 02/11/2026 o cliente novo já vem cadastrado pela gestora, com o contrato gerado (contrato.js): no primeiro acesso o
+   administrador lê o contrato e aceita ou pede revisão (abrirContrato), escolhe logo e cores e pronto. Sem o aceite o banco
+   não libera nada para a empresa (crm_acesso_ok). */
 (function () {
   'use strict';
   const PLANOS = [
@@ -11,7 +14,9 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const so = (s) => String(s || '').replace(/\D/g, '');
-  let INFO = null, passo = 1, raiz = null, logoUrl = '', fimDegust = null;
+  let INFO = null, passo = 1, raiz = null, logoUrl = '', fimDegust = null, MODO = 'cadastro';
+  const ORDEM = () => MODO === 'contrato' ? [1, 2, 5] : [1, 2, 3, 4, 5];   // passos de cada caminho
+  const rotulo = (p) => `Passo ${ORDEM().indexOf(p) + 1} de ${ORDEM().length}`;
 
   function estilo() {
     if (document.getElementById('tc-cad-css')) return;
@@ -36,7 +41,11 @@
       #tc-cad .doc{border:1px solid #e4e6e2;border-radius:12px;padding:12px 14px;background:#fafaf8}
       #tc-cad label.chk{display:flex;gap:10px;align-items:flex-start;font-size:15px}#tc-cad label.chk input{width:20px;min-height:20px;height:20px;margin-top:2px}
       #tc-cad .ok{background:#e3f1e8;color:#1f5a37;border-radius:12px;padding:14px 16px}
-      #tc-cad .prev{border-radius:12px;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:12px}`;
+      #tc-cad .prev{border-radius:12px;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:12px}
+      #tc-cad .ct-box{border:1px solid #e4e6e2;border-radius:12px;padding:18px 22px;max-height:58vh;overflow:auto;background:#fff}
+      #tc-cad textarea{font:inherit;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d5d8d2;border-radius:8px}
+      #tc-cad button:disabled{opacity:.45;cursor:not-allowed}
+      #tc-cad .rev{background:#f6ebd2;border-radius:12px;padding:14px 16px}`;
     document.head.appendChild(st);
   }
 
@@ -55,7 +64,7 @@
 
   function moldura(titulo, sub, corpo, botoes) {
     raiz.innerHTML = `<div class="cx"><div class="tp"><h2>${titulo}</h2><p>${sub}</p>
-      <div class="barra">${[1, 2, 3, 4, 5].map((n) => `<span class="${n <= passo ? 'on' : ''}"></span>`).join('')}</div></div>
+      <div class="barra">${ORDEM().map((n) => `<span class="${n <= passo ? 'on' : ''}"></span>`).join('')}</div></div>
       <div class="cp">${corpo}<div class="msg" id="cad-msg"></div></div><div class="rp">${botoes}</div></div>`;
     raiz.scrollTop = 0;
   }
@@ -101,7 +110,7 @@
       };
     } else if (passo === 2) {
       const c = INFO.cores || {};
-      moldura('A cara da sua corretora', 'Passo 2 de 5 · Logo e cores. Aparecem para toda a equipe, no link próprio, nos relatórios e nas propostas. Dá para trocar depois em "Minha corretora".', `
+      moldura('A cara da sua corretora', `${rotulo(2)} · Logo e cores. Aparecem para toda a equipe, no link próprio, nos relatórios e nas propostas. Dá para trocar depois em "Minha corretora".`, `
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
           <img id="c-logo-prev" src="${esc(logoUrl || 'assets/logo-icone.png')}" alt="Logo" style="width:84px;height:84px;object-fit:contain;border:1px solid #e4e6e2;border-radius:12px;background:#fff">
           <label class="f" style="flex:1;min-width:240px">Logo (PNG, JPG, SVG ou WEBP, até 1 MB)<input id="c-logo" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
@@ -125,13 +134,15 @@
         logoUrl = sb.storage.from('marcas').getPublicUrl(caminho).data.publicUrl;
         raiz.querySelector('#c-logo-prev').src = logoUrl; msg(''); prev();
       });
+      const depois = MODO === 'contrato' ? 5 : 3;
+      if (MODO === 'contrato') raiz.querySelector('#c-volta').style.visibility = 'hidden';
       raiz.querySelector('#c-volta').onclick = () => { passo = 1; desenhar(); };
-      raiz.querySelector('#c-pular').onclick = () => { passo = 3; desenhar(); };
+      raiz.querySelector('#c-pular').onclick = () => { passo = depois; desenhar(); };
       raiz.querySelector('#c-ir').onclick = async () => {
         const cores = { principal: raiz.querySelector('#c-cor1').value, escura: raiz.querySelector('#c-cor2').value };
         const { error } = await sb.rpc('crm_minha_corretora_salvar', { p_nome: INFO.nome_exibicao, p_logo_url: logoUrl, p_cores: cores });
         if (error) { msg('Não foi possível salvar: ' + error.message); return; }
-        INFO.cores = cores; passo = 3; desenhar();
+        INFO.cores = cores; passo = depois; desenhar();
       };
     } else if (passo === 3) {
       const p = INFO.precos || {};
@@ -168,8 +179,8 @@
       };
     } else {
       const fim = fimDegust ? new Date(fimDegust + 'T12:00:00').toLocaleDateString('pt-BR') : '';
-      moldura('Tudo pronto!', 'Passo 5 de 5 · O seu cadastro está concluído.', `
-        <div class="ok"><b>A sua degustação gratuita vai até ${esc(fim)}.</b> Até lá, use à vontade. Alguns dias antes do fim, aparece aqui no sistema a primeira fatura com o QR Code do Pix; é só pagar e clicar em "Já paguei".</div>
+      moldura('Tudo pronto!', `${rotulo(5)} · O seu cadastro está concluído.`, `
+        ${fim ? `<div class="ok"><b>A sua degustação gratuita vai até ${esc(fim)}.</b> Até lá, use à vontade. Alguns dias antes do fim, aparece aqui no sistema a primeira fatura com o QR Code do Pix; é só pagar e clicar em "Já paguei".</div>` : '<div class="ok"><b>Contrato aceito.</b> O sistema está liberado para a sua equipe.</div>'}
         <div><b>Próximos passos</b><ol style="margin:6px 0 0 18px">
           <li><b>Cadastre a sua equipe</b> em Admin: inclua o e-mail de cada pessoa e libere o primeiro acesso.</li>
           <li><b>Baixe a planilha padrão</b>, preencha com os seus clientes e apólices e <b>suba a carteira</b>; o sistema mostra uma prévia antes de gravar.</li>
@@ -180,7 +191,71 @@
     }
   }
 
+  /* ---------- contrato gerado pela gestora: ler e aceitar, ou pedir revisão ---------- */
+  async function abrirContrato() {
+    const { data, error } = await sb.rpc('crm_contrato_meu');
+    if (error || !data || !data.exigido) return false;
+    const k = data.contrato;
+    if (k && k.status === 'aceito') return false;
+    if (!data.sou_admin && data.aceito_antes) return false;   // versão nova é com o administrador; a equipe segue usando
+    MODO = 'contrato'; estilo();
+    raiz = document.getElementById('tc-cad') || document.createElement('div');
+    raiz.id = 'tc-cad'; raiz.setAttribute('role', 'dialog'); raiz.setAttribute('aria-modal', 'true'); raiz.setAttribute('aria-label', 'Contrato');
+    document.body.appendChild(raiz);
+    const simples = (titulo, texto, botoes) => { raiz.innerHTML = `<div class="cx"><div class="tp"><h2>${titulo}</h2></div><div class="cp">${texto}</div><div class="rp">${botoes}</div></div>`;
+      const s = raiz.querySelector('#c-sair'); if (s) s.onclick = sair; const v = raiz.querySelector('#c-seguir'); if (v) v.onclick = () => raiz.remove(); };
+    const botaoSair = '<button type="button" id="c-sair">Sair</button>';
+    const seguir = data.aceito_antes ? '<button type="button" class="pri" id="c-seguir">Continuar usando o sistema</button>' : '<span></span>';
+    if (!k) { simples('Contrato em preparação', `<p>O contrato da <b>${esc(data.corretora)}</b> está sendo preparado pela Capacity Case. Assim que estiver pronto, ele aparece aqui para o administrador ler e aceitar.</p>`, botaoSair + seguir); return true; }
+    if (!data.sou_admin) { simples('Aguardando o aceite do contrato', `<p>Para liberar o sistema para a equipe da <b>${esc(data.corretora)}</b>, o administrador (<b>${esc(data.admin_email || '')}</b>) precisa entrar e aceitar o contrato. Avise-o e entre de novo depois.</p>`, botaoSair + '<span></span>'); return true; }
+    if (k.status === 'revisao') {
+      simples('Pedido de revisão enviado', `<div class="rev"><b>Você pediu em ${new Date(k.revisao_em).toLocaleString('pt-BR')}:</b><br>${esc(k.revisao_texto || '').replace(/\n/g, '<br>')}</div>
+        <p>A Capacity Case vai corrigir e gerar a versão nova do contrato. Ela aparece aqui no seu próximo acesso, para você conferir e aceitar.</p>`, botaoSair + seguir);
+      return true;
+    }
+    const dias = (k.dados && k.dados.degustacao_dias) || data.degustacao_dias;
+    const tela = () => {
+      if (window.TorreContrato) window.TorreContrato.estilo();
+      raiz.innerHTML = `<div class="cx"><div class="tp"><h2>${data.aceito_antes ? 'Versão nova do seu contrato' : 'Bem-vindo ao CRM Aliança by Capacity Case'}</h2>
+        <p>${data.aceito_antes ? 'A Capacity Case atualizou o contrato. Leia e aceite a versão nova ou peça revisão.' : `${rotulo(1)} · Leia o contrato com os dados da sua empresa. A degustação gratuita de ${esc(dias)} dias começa quando você aceitar.`}</p>
+        <div class="barra">${ORDEM().map((n) => `<span class="${n <= 1 ? 'on' : ''}"></span>`).join('')}</div></div>
+        <div class="cp"><div class="ct-box" id="c-ct">${k.texto}</div>
+          <p style="color:#5d6871;font-size:13px;margin:0">Versão ${esc(k.versao)} · código de verificação ${esc(String(k.hash).slice(0, 16))}… · O aceite fica registrado com data, hora, o seu e-mail, o IP e o navegador.</p>
+          <label class="chk"><input type="checkbox" id="c-li"> <span>Li o contrato inteiro e aceito em nome da empresa contratante, e declaro ter poderes para isso.</span></label>
+          <div class="msg" id="cad-msg"></div></div>
+        <div class="rp"><button type="button" id="c-sair">Sair</button><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="c-rev">Pedir revisão</button><button type="button" class="pri" id="c-ok" disabled>Aceitar o contrato</button></div></div></div>`;
+      raiz.scrollTop = 0;
+      raiz.querySelector('#c-sair').onclick = sair;
+      const li = raiz.querySelector('#c-li'), ok = raiz.querySelector('#c-ok');
+      li.onchange = () => { ok.disabled = !li.checked; };
+      ok.onclick = async () => {
+        ok.disabled = true; msg('Registrando o aceite…');
+        const r = await sb.rpc('crm_contrato_aceitar', { p_id: k.id, p_navegador: navigator.userAgent });
+        if (r.error) { msg(r.error.message); ok.disabled = false; return; }
+        if (data.aceito_antes) { location.reload(); return; }
+        fimDegust = r.data && !r.data.gratuita ? r.data.degustacao_fim : null;
+        const ci = await sb.rpc('crm_cadastro_info'); INFO = ci.data || {}; logoUrl = INFO.logo_url || '';
+        passo = 2; desenhar();
+      };
+      raiz.querySelector('#c-rev').onclick = () => {
+        raiz.innerHTML = `<div class="cx"><div class="tp"><h2>Pedir revisão do contrato</h2><p>Conte o que está errado ou faltando (por exemplo: endereço, razão social, representante, preço combinado). A Capacity Case corrige e manda a versão nova para você aceitar.</p></div>
+          <div class="cp"><textarea id="c-txt" rows="6" maxlength="2000" placeholder="O que precisa ser corrigido ou completado?"></textarea><div class="msg" id="cad-msg"></div></div>
+          <div class="rp"><button type="button" id="c-volta">Voltar ao contrato</button><button type="button" class="pri" id="c-env">Enviar pedido de revisão</button></div></div>`;
+        raiz.querySelector('#c-volta').onclick = tela;
+        raiz.querySelector('#c-env').onclick = async () => {
+          const txt = raiz.querySelector('#c-txt').value.trim();
+          if (txt.length < 5) { msg('Escreva o que precisa ser corrigido.'); return; }
+          const r = await sb.rpc('crm_contrato_pedir_revisao', { p_id: k.id, p_texto: txt });
+          if (r.error) { msg(r.error.message); return; }
+          simples('Pedido de revisão enviado', `<div class="rev"><b>Seu pedido:</b><br>${esc(txt).replace(/\n/g, '<br>')}</div><p>A Capacity Case vai corrigir e gerar a versão nova do contrato. Ela aparece aqui no seu próximo acesso.</p>`, botaoSair + seguir);
+        };
+      };
+    };
+    tela();
+    return true;
+  }
+
   async function sair() { try { await sb.auth.signOut({ scope: 'local' }); } catch (e) { /* nada */ } location.reload(); }
 
-  window.TorreCadastro = { abrir };
+  window.TorreCadastro = { abrir, abrirContrato };
 })();

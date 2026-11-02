@@ -99,22 +99,25 @@
     const ativas = lista.filter((c) => c.ativo).length;
     const usuAtivos = lista.reduce((a, c) => a + Number(c.usuarios_ativos || 0), 0);
     const pend = lista.filter((c) => c.primeiro_acesso_pendente).length;
+    const revisao = lista.filter((c) => c.contrato && c.contrato.status === 'revisao').length, aguardando = lista.filter((c) => c.contrato && c.contrato.status === 'pendente').length;
     raiz.innerHTML = `
-      <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Corretoras, planos, módulos e usuários. Nenhum dado de cliente aparece aqui.</small></div>
-        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
+      <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Clientes, contratos, planos e administradores. Nenhum dado dos clientes deles aparece aqui.</small></div>
+        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
       <main>
         <div class="kpis">
           <div class="kpi"><b>${ativas}</b><span>corretoras ativas</span></div>
           <div class="kpi"><b>${lista.length - ativas}</b><span>suspensas</span></div>
           <div class="kpi"><b>${usuAtivos}</b><span>usuários ativos</span></div>
           <div class="kpi"><b>${pend}</b><span>corretora(s) com acesso liberado aguardando a senha</span></div>
+          <div class="kpi"><b>${aguardando}</b><span>contrato(s) aguardando aceite</span></div>
+          <div class="kpi" style="${revisao ? 'border-color:#e7b9b3;background:#fdf3f1' : ''}"><b>${revisao}</b><span>pedido(s) de revisão do contrato</span></div>
         </div>
         ${EST.aviso || ''}
-        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : telaUsuarios()}
+        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : telaUsuarios()}
       </main>`;
     raiz.querySelector('#pp-fechar').onclick = fechar;
     raiz.querySelectorAll('[data-aba]').forEach((b) => b.onclick = () => { EST.aba = b.dataset.aba; EST.aviso = ''; desenhar(); });
-    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else ligarUsuarios();
+    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else ligarUsuarios();
   }
 
   /* ---------- corretoras ---------- */
@@ -126,7 +129,7 @@
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
         <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
-        <td>${sit} ${pagto(c)} ${cadastro(c)}</td>
+        <td>${sit} ${pagto(c)} ${c.contrato_exigido || c.contrato ? contratoPill(c) : cadastro(c)}<br><button class="b" data-contrato="${c.id}" style="margin-top:4px" title="Dados do cliente, contrato, revisões e convite">📄 Cliente e contrato</button></td>
         <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas ativas na equipe (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">${c.usuarios_ativos} de ${c.usuarios}</button></td>
         <td>${c.slug ? `<button class="b" data-copiar-link="${esc(linkCorretora(c.slug))}" title="Copiar o link próprio da corretora">🔗 /${esc(c.slug)}</button>` : '—'}</td>
         <td>${quando(c.ultimo_acesso)}</td>
@@ -135,15 +138,13 @@
           ${c.ativo ? `<button class="b warn" data-suspender="${c.id}" data-nome="${esc(nome)}">Suspender</button>` : `<button class="b" data-reativar="${c.id}">Reativar</button>`}
         </div></td></tr>`;
     }).join('');
+    const semContratada = !contratadaOk();
     return `
-      <div class="card"><h3>Nova corretora</h3>
-        <p class="sub">Cria a corretora e libera o administrador dela por 48 horas para criar a senha em "Primeiro acesso". No primeiro acesso ele completa o cadastro (empresa, CNPJ, logo, plano e aceite do contrato) e a degustação começa.</p>
-        <form class="lin" id="pp-nova">
-          <label class="f">Nome da corretora<input name="nome" required maxlength="60" placeholder="Ex.: Bravita"></label>
-          <label class="f">Plano<select name="plano">${Object.entries(PLANOS).map(([k, v]) => `<option value="${k}" ${k === 'completo' ? 'selected' : ''}>${v} · ${brl(preco(k))}</option>`).join('')}</select></label>
-          <label class="f">Nome do administrador<input name="admin_nome" maxlength="80"></label>
-          <label class="f">E-mail do administrador<input name="admin_email" type="email" required></label>
-          <button class="b pri" type="submit">Criar corretora</button>
+      <div class="card"><h3>Novo cliente</h3>
+        <p class="sub">Preencha os dados do cliente: eles entram no contrato. Ao criar, o sistema gera o contrato e o convite. No primeiro acesso, o administrador do cliente lê o contrato e aceita ou pede revisão; sem o aceite, ninguém da empresa usa o sistema. A degustação de ${esc((EST.config.regua || {}).degustacao_dias || 15)} dias começa no aceite e, depois dela, a cobrança mensal começa sozinha.</p>
+        ${semContratada ? '<div class="aviso" style="margin-bottom:10px">Antes do primeiro contrato, preencha os <b>dados da Capacity Case</b> na aba <b>Contrato</b> (razão social e CNPJ).</div>' : ''}
+        <form id="pp-nova">${formCliente(null)}
+          <div class="acoes" style="margin-top:12px"><button class="b" type="button" data-previa>Ver o contrato antes</button><button class="b pri" type="submit">Criar cliente e gerar contrato</button></div>
         </form><div class="msg" id="pp-msg"></div></div>
       <div class="card"><h3>Corretoras</h3>
         <p class="sub">Suspender corta o acesso de toda a equipe da corretora; os dados ficam guardados e voltam ao reativar. Clique nos usuários para administrar a equipe.</p>
@@ -152,18 +153,24 @@
   }
 
   function ligarCorretoras() {
-    raiz.querySelector('#pp-nova').onsubmit = async (e) => {
+    const nova = raiz.querySelector('#pp-nova');
+    ligarFormCliente(nova);
+    nova.querySelector('[data-previa]').onclick = () => { const d = lerCliente(nova); const erro = conferirCliente(d); if (erro) { raiz.querySelector('#pp-msg').textContent = erro; return; } verContrato(gerarTexto(d)); };
+    nova.onsubmit = async (e) => {
       e.preventDefault();
-      const f = new FormData(e.target), nome = String(f.get('nome')).trim(), email = String(f.get('admin_email')).trim().toLowerCase();
-      const plano = String(f.get('plano'));
-      raiz.querySelector('#pp-msg').textContent = 'Criando…';
-      try {
-        var novoId = await rpc('crm_plataforma_criar', { p_nome: nome, p_plano: plano, p_admin_email: email, p_admin_nome: f.get('admin_nome') });
-        await rpc('crm_plataforma_cobranca_corretora', { p_id: novoId, p_plano: plano, p_extras: [], p_gratuita: false, p_preco_especial: null, p_degustacao_inicio: null });
-        EST.corretoras = await rpc('crm_plataforma_corretoras');
-      } catch (err) { raiz.querySelector('#pp-msg').textContent = 'Não foi possível criar: ' + err.message; return; }
-      recarregar(convite(EST.corretoras.find((x) => x.id === novoId) || { nome }, email, true));
+      const d = lerCliente(nova), msg = raiz.querySelector('#pp-msg'), erro = conferirCliente(d);
+      if (erro) { msg.textContent = erro; return; }
+      if (!contratadaOk()) { msg.textContent = 'Preencha antes os dados da Capacity Case na aba Contrato.'; return; }
+      msg.textContent = 'Criando…';
+      let novoId;
+      try { novoId = await rpc('crm_plataforma_cliente_salvar', { p_id: null, p_dados: d }); }
+      catch (err) { msg.textContent = 'Não foi possível criar: ' + err.message; return; }
+      try { await emitir(novoId, d); }
+      catch (err) { recarregar(`<div class="aviso">O cliente foi criado, mas o contrato não foi gerado: ${esc(err.message)}. Abra "📄 Cliente e contrato" na linha dele para gerar.</div>`); return; }
+      EST.corretoras = await rpc('crm_plataforma_corretoras');
+      recarregar(convite(EST.corretoras.find((x) => x.id === novoId) || { nome: d.nome_exibicao }, d.admin_email, true));
     };
+    raiz.querySelectorAll('[data-contrato]').forEach((b) => b.onclick = () => painelCliente(b));
     raiz.querySelectorAll('[data-suspender]').forEach((b) => b.onclick = async () => {
       if (!confirm(`Suspender ${b.dataset.nome}? Toda a equipe perde o acesso até você reativar. Os dados ficam guardados.`)) return;
       try { await rpc('crm_plataforma_atualizar', { p_id: b.dataset.suspender, p_plano: null, p_ativo: false, p_observacao: null }); recarregar(''); } catch (err) { alert(err.message); }
@@ -246,6 +253,197 @@
       ${end ? `<span>${esc(end)}</span>` : ''}
       <span>Responsável: ${esc(e.responsavel || '—')}${e.telefone ? ' · ' + esc(e.telefone) : ''} · Financeiro: ${esc(e.email_financeiro || '—')}</span>
       <span style="color:#5d6871">Termos de Uso e Acordo LGPD versão ${esc(c.termos_versao || '—')} aceitos por ${esc(c.termos_aceite_por || '—')} em ${c.termos_aceite_em ? new Date(c.termos_aceite_em).toLocaleString('pt-BR') : '—'}</span></div>`;
+  }
+
+  /* ---------- cliente e contrato ---------- */
+  const contratadaOk = () => { const ct = EST.config.contratada || {}; return !!(ct.razao_social && String(ct.cnpj || '').replace(/\D/g, '').length === 14); };
+  const so = (s) => String(s || '').replace(/\D/g, '');
+  const mascaraDoc = (v, pj) => { const d = so(v).slice(0, pj ? 14 : 11);
+    return pj ? d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d)/, '$1-$2')
+      : d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2'); };
+
+  // formulário do cliente (novo: c nulo). Os dados entram no contrato.
+  function formCliente(c) {
+    const e = (c && c.empresa) || {}, pj = !c || c.tipo_pessoa !== 'PF', v = (x) => esc(x == null ? '' : x);
+    const plano = c && PLANOS[c.plano] ? c.plano : 'completo';
+    return `<div class="lin" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end">
+      <label class="f">Tipo de cliente<select name="tipo_pessoa"><option value="PJ" ${pj ? 'selected' : ''}>Empresa (CNPJ)</option><option value="PF" ${pj ? '' : 'selected'}>Pessoa física (CPF)</option></select></label>
+      <label class="f"><span data-rot-doc>${pj ? 'CNPJ' : 'CPF'}</span>*<input name="documento" required inputmode="numeric" value="${v(c ? (pj ? c.cnpj : c.cpf) : '')}"></label>
+      <label class="f" style="grid-column:span 2"><span data-rot-razao>${pj ? 'Razão social' : 'Nome completo'}</span>*<input name="razao_social" required maxlength="160" value="${v(c && c.razao_social)}"></label>
+      <label class="f">Nome que aparece no sistema<input name="nome_exibicao" maxlength="40" placeholder="Ex.: Bravita" value="${v(c && c.nome_exibicao)}"></label>
+      <label class="f">Telefone / WhatsApp<input name="telefone" inputmode="tel" value="${v(e.telefone)}"></label>
+      <label class="f">CEP<input name="cep" inputmode="numeric" placeholder="00000-000" value="${v(e.cep)}"></label>
+      <label class="f" style="grid-column:span 2">Endereço*<input name="logradouro" required value="${v(e.logradouro)}"></label>
+      <label class="f">Número*<input name="numero" required value="${v(e.numero)}"></label>
+      <label class="f">Complemento<input name="complemento" value="${v(e.complemento)}"></label>
+      <label class="f">Bairro<input name="bairro" value="${v(e.bairro)}"></label>
+      <label class="f">Cidade*<input name="cidade" required value="${v(e.cidade)}"></label>
+      <label class="f">UF*<input name="uf" required maxlength="2" value="${v(e.uf)}"></label>
+      <label class="f" data-so-pj>Representante legal (assina)*<input name="responsavel" value="${v(e.responsavel)}"></label>
+      <label class="f" data-so-pj>CPF do representante<input name="responsavel_cpf" inputmode="numeric" value="${v(e.responsavel_cpf)}"></label>
+      <label class="f" data-so-pj>Cargo<input name="responsavel_cargo" placeholder="Ex.: sócio-administrador" value="${v(e.responsavel_cargo)}"></label>
+      <label class="f">Nome do administrador do sistema<input name="admin_nome" maxlength="80" value="${v(c && c.admin_nome)}"></label>
+      <label class="f">E-mail do administrador*<input name="admin_email" type="email" required ${c ? 'readonly title="Para trocar o administrador, use a aba Administradores"' : ''} value="${v(c && c.admin_email)}"></label>
+      <label class="f">E-mail financeiro (faturas e notas)*<input name="email_financeiro" type="email" required value="${v(e.email_financeiro)}"></label>
+      <label class="f">Plano<select name="plano">${Object.entries(PLANOS).map(([k, n]) => `<option value="${k}" ${k === plano ? 'selected' : ''}>${n} · ${brl(preco(k))}</option>`).join('')}</select></label>
+      <label class="f">Preço especial por mês (vazio = do plano)<input name="preco_especial" type="number" min="0" step="0.01" value="${c && c.preco_especial != null ? c.preco_especial : ''}"></label>
+      <label class="f" style="grid-column:1/-1">Condições especiais combinadas (entram no contrato; deixe vazio se não houver)<textarea name="condicoes" rows="2" maxlength="1500" style="font:inherit;padding:8px 10px;border:1px solid #d5d8d2;border-radius:8px">${v(e.condicoes)}</textarea></label>
+    </div>`;
+  }
+
+  function ligarFormCliente(form) {
+    const tipo = form.querySelector('[name="tipo_pessoa"]'), doc = form.querySelector('[name="documento"]');
+    const ajustar = () => { const pj = tipo.value === 'PJ';
+      form.querySelector('[data-rot-doc]').textContent = pj ? 'CNPJ' : 'CPF'; form.querySelector('[data-rot-razao]').textContent = pj ? 'Razão social' : 'Nome completo';
+      form.querySelectorAll('[data-so-pj]').forEach((el) => { el.style.display = pj ? '' : 'none'; }); doc.value = mascaraDoc(doc.value, pj); };
+    tipo.onchange = ajustar; ajustar();
+    doc.addEventListener('input', () => { doc.value = mascaraDoc(doc.value, tipo.value === 'PJ'); });
+    const cpfR = form.querySelector('[name="responsavel_cpf"]'); cpfR.addEventListener('input', () => { cpfR.value = mascaraDoc(cpfR.value, false); });
+    form.querySelector('[name="cep"]').addEventListener('blur', async (ev) => {
+      const d = so(ev.target.value); if (d.length !== 8) return;
+      ev.target.value = d.replace(/(\d{5})(\d{3})/, '$1-$2');
+      try { const r = await (await fetch('https://viacep.com.br/ws/' + d + '/json/')).json(); if (r && !r.erro) {
+        const set = (n, val) => { const i = form.querySelector(`[name="${n}"]`); if (i && !i.value) i.value = val || ''; };
+        set('logradouro', r.logradouro); set('bairro', r.bairro); set('cidade', r.localidade); set('uf', r.uf); } } catch (er) { /* sem CEP automático */ }
+    });
+  }
+
+  function lerCliente(form) {
+    const g = (n) => String((form.querySelector(`[name="${n}"]`) || {}).value || '').trim();
+    const pj = g('tipo_pessoa') !== 'PF';
+    return { tipo_pessoa: pj ? 'PJ' : 'PF', documento: mascaraDoc(g('documento'), pj), razao_social: g('razao_social'), nome_exibicao: g('nome_exibicao'),
+      admin_nome: g('admin_nome'), admin_email: g('admin_email').toLowerCase(), plano: g('plano'), preco_especial: g('preco_especial'),
+      empresa: { telefone: g('telefone'), cep: g('cep'), logradouro: g('logradouro'), numero: g('numero'), complemento: g('complemento'), bairro: g('bairro'),
+        cidade: g('cidade'), uf: g('uf').toUpperCase(), responsavel: pj ? g('responsavel') : g('razao_social'), responsavel_cpf: pj ? g('responsavel_cpf') : '',
+        responsavel_cargo: pj ? g('responsavel_cargo') : '', email_financeiro: g('email_financeiro').toLowerCase(), condicoes: g('condicoes') } };
+  }
+  function conferirCliente(d) {
+    const pj = d.tipo_pessoa === 'PJ', e = d.empresa;
+    if (so(d.documento).length !== (pj ? 14 : 11)) return pj ? 'Informe o CNPJ completo.' : 'Informe o CPF completo.';
+    if (!d.razao_social) return pj ? 'Informe a razão social.' : 'Informe o nome completo.';
+    if (!e.logradouro || !e.numero || !e.cidade || e.uf.length !== 2) return 'Preencha o endereço (rua, número, cidade e UF).';
+    if (pj && !e.responsavel) return 'Informe o representante legal que assina pela empresa.';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.admin_email)) return 'Informe o e-mail do administrador.';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e.email_financeiro)) return 'Informe o e-mail financeiro.';
+    return '';
+  }
+  // dados do cliente + condições do dia = o que vai no contrato (fica gravado junto, como fotografia)
+  function condicoes(d) {
+    const r = EST.config.regua || {}, esp = d.preco_especial !== '' && d.preco_especial != null;
+    return Object.assign({}, d, { plano_nome: PLANOS[d.plano] || d.plano, plano_desc: DESC_PLANO[d.plano] || '', valor: esp ? Number(d.preco_especial) : preco(d.plano),
+      preco_especial: esp, degustacao_dias: Number(r.degustacao_dias || 15), aviso_dias: Number(r.aviso_dias || 5), bloqueio_dias: Number(r.bloqueio_dias || 10),
+      data_emissao: new Date().toISOString(), modelo: window.TorreContrato.MODELO });
+  }
+  const gerarTexto = (d) => window.TorreContrato.gerar(condicoes(d), EST.config.contratada || {});
+  async function emitir(id, d) { const dados = condicoes(d); return rpc('crm_plataforma_contrato_emitir', { p_corretor: id, p_dados: dados, p_texto: window.TorreContrato.gerar(dados, EST.config.contratada || {}) }); }
+
+  function verContrato(html, rodape) {
+    window.TorreContrato.estilo();
+    const m = document.createElement('div');
+    m.style.cssText = 'position:fixed;inset:0;z-index:99995;background:rgba(17,24,39,.6);overflow:auto;padding:24px 16px';
+    m.innerHTML = `<div style="background:#fff;border-radius:14px;padding:22px 26px;margin:0 auto">${html}${rodape ? `<p style="color:#5d6871;font-size:13px;margin-top:16px">${rodape}</p>` : ''}
+      <div class="acoes" style="margin-top:14px"><button class="b" type="button" data-imp>Imprimir / PDF</button><button class="b pri" type="button" data-x>Fechar</button></div></div>`;
+    raiz.appendChild(m);
+    m.querySelector('[data-x]').onclick = () => m.remove();
+    m.onclick = (ev) => { if (ev.target === m) m.remove(); };
+    m.querySelector('[data-imp]').onclick = () => { const w = window.open('', '_blank'); if (!w) return;
+      w.document.write(`<!doctype html><meta charset="utf-8"><title>Contrato</title><style>body{margin:32px}${document.getElementById('tc-contrato-css').textContent}</style>${html}${rodape ? '<p style="color:#5d6871;font-size:12px">' + rodape + '</p>' : ''}`);
+      w.document.close(); w.focus(); w.print(); };
+  }
+
+  function contratoPill(c) {
+    const k = c.contrato;
+    if (!k) return '<span class="pill pend">Contrato não gerado</span>';
+    if (k.status === 'revisao') return `<span class="pill susp" title="${esc(k.revisao_texto || '')}">Pediu revisão do contrato</span>`;
+    if (k.status === 'pendente') return `<span class="pill pend">Contrato v${k.versao} aguardando aceite</span>`;
+    return `<span class="pill ok" title="Aceito por ${esc(k.aceito_por || '')} em ${quando(k.aceito_em)}">Contrato v${k.versao} aceito</span>`;
+  }
+
+  function painelCliente(botao) {
+    const id = botao.dataset.contrato, aberta = raiz.querySelector('#pp-cli-' + id);
+    raiz.querySelectorAll('tr.pp-mod').forEach((t) => t.remove());
+    if (aberta) return;
+    const c = EST.corretoras.find((x) => x.id === id), nome = c.nome_exibicao || c.nome, k = c.contrato;
+    const tr = document.createElement('tr'); tr.className = 'pp-mod'; tr.id = 'pp-cli-' + id;
+    const situ = !k ? `<div class="aviso">Ainda não há contrato para ${esc(nome)}. Confira os dados abaixo e clique em "Salvar e gerar contrato".</div>`
+      : k.status === 'revisao' ? `<div class="aviso" style="background:#f8e3e0"><b>${esc(k.revisao_por || 'O cliente')} pediu revisão em ${quando(k.revisao_em)}:</b><br>${esc(k.revisao_texto || '').replace(/\n/g, '<br>')}<br><br>Corrija os dados abaixo e clique em "Salvar e gerar nova versão". O cliente vê a versão nova no próximo acesso.</div>`
+      : k.status === 'pendente' ? `<div class="aviso">Contrato v${k.versao} emitido em ${quando(k.emitido_em)}, aguardando o aceite do administrador.</div>`
+      : `<div class="aviso" style="background:#e3f1e8">Contrato v${k.versao} <b>aceito</b> por ${esc(k.aceito_por || '')} em ${quando(k.aceito_em)}${k.aceite_ip ? ' · IP ' + esc(k.aceite_ip) : ''} · código ${esc(String(k.hash || '').slice(0, 16))}</div>`;
+    tr.innerHTML = `<td colspan="9"><div class="modbox"><b>Cliente e contrato · ${esc(nome)}</b>${situ}
+      <div class="acoes">${k ? '<button class="b" data-ver>Ver contrato atual</button><button class="b" data-hist>Histórico de versões</button>' : ''}<button class="b" data-conv>Convite do administrador</button></div>
+      <div id="pp-hist-${id}"></div>
+      <form data-cli>${formCliente(c)}</form>
+      <div class="acoes"><button class="b pri" data-salvar>${k ? 'Salvar e gerar nova versão do contrato' : 'Salvar e gerar contrato'}</button><button class="b" data-previa>Ver como fica</button><button class="b" data-f>Fechar</button></div>
+      <div class="msg" data-msg></div></div></td>`;
+    botao.closest('tr').after(tr);
+    const form = tr.querySelector('[data-cli]'), msg = tr.querySelector('[data-msg]');
+    ligarFormCliente(form);
+    const versoes = async () => rpc('crm_plataforma_contratos', { p_corretor: id });
+    if (k) {
+      tr.querySelector('[data-ver]').onclick = async () => { try { const v = (await versoes())[0]; verContrato(v.texto, rodapeAceite(v)); } catch (err) { alert(err.message); } };
+      tr.querySelector('[data-hist]').onclick = async () => {
+        try { const vs = await versoes(); const box = tr.querySelector('#pp-hist-' + id);
+          box.innerHTML = `<div class="tbl"><table style="min-width:600px"><thead><tr><th>Versão</th><th>Situação</th><th>Emitido</th><th>Aceite / revisão</th><th></th></tr></thead><tbody>${vs.map((v, i) => `<tr>
+            <td>v${v.versao}</td><td>${({ pendente: 'Aguardando aceite', aceito: 'Aceito', revisao: 'Revisão pedida', substituido: 'Substituído' })[v.status] || v.status}</td><td>${quando(v.emitido_em)}</td>
+            <td>${v.aceito_em ? esc(v.aceito_por) + ' · ' + quando(v.aceito_em) : v.revisao_em ? esc(v.revisao_texto || '') : '—'}</td><td><button class="b" data-v="${i}">Ver</button></td></tr>`).join('')}</tbody></table></div>`;
+          box.querySelectorAll('[data-v]').forEach((b) => b.onclick = () => { const v = vs[Number(b.dataset.v)]; verContrato(v.texto, rodapeAceite(v)); });
+        } catch (err) { alert(err.message); }
+      };
+    }
+    tr.querySelector('[data-conv]').onclick = () => { EST.aviso = convite(c, c.admin_email, true); desenhar(); };
+    tr.querySelector('[data-previa]').onclick = () => { const d = lerCliente(form); const erro = conferirCliente(d); if (erro) { msg.textContent = erro; return; } verContrato(gerarTexto(d)); };
+    tr.querySelector('[data-f]').onclick = () => tr.remove();
+    tr.querySelector('[data-salvar]').onclick = async () => {
+      const d = lerCliente(form), erro = conferirCliente(d);
+      if (erro) { msg.textContent = erro; return; }
+      if (!contratadaOk()) { msg.textContent = 'Preencha antes os dados da Capacity Case na aba Contrato.'; return; }
+      if (k && k.status === 'aceito' && !confirm(`O contrato atual de ${nome} já foi aceito. A nova versão aparece para o administrador aceitar no próximo acesso (a equipe continua usando o sistema). Continuar?`)) return;
+      msg.textContent = 'Salvando…';
+      try { await rpc('crm_plataforma_cliente_salvar', { p_id: id, p_dados: d }); const r = await emitir(id, d);
+        recarregar(`<div class="aviso">Dados de <b>${esc(nome)}</b> salvos e contrato v${r.versao} gerado. O administrador vê no próximo acesso.</div>`); }
+      catch (err) { msg.textContent = 'Não foi possível salvar: ' + err.message; }
+    };
+  }
+  function rodapeAceite(v) {
+    const base = `Versão ${v.versao} · código de verificação (SHA-256) ${esc(v.hash)}`;
+    return v.aceito_em ? `${base}<br>Aceito eletronicamente por ${esc(v.aceito_por)} em ${new Date(v.aceito_em).toLocaleString('pt-BR')}${v.aceite_ip ? ' · IP ' + esc(v.aceite_ip) : ''}${v.aceite_navegador ? ' · ' + esc(v.aceite_navegador) : ''}` : base;
+  }
+
+  /* ---------- dados da Capacity Case no contrato ---------- */
+  function telaContrato() {
+    const ct = EST.config.contratada || {}, v = (x) => esc(x == null ? '' : x);
+    return `<div class="card"><h3>Dados da Capacity Case no contrato</h3>
+      <p class="sub">Entram como CONTRATADA em todos os contratos gerados daqui em diante. Contratos já emitidos não mudam. Antes de usar com clientes, peça ao advogado para revisar o modelo (botão abaixo).</p>
+      <form class="lin" id="pp-ct">
+        <label class="f" style="grid-column:span 2">Razão social*<input name="razao_social" required value="${v(ct.razao_social)}"></label>
+        <label class="f">CNPJ*<input name="cnpj" required inputmode="numeric" value="${v(ct.cnpj)}"></label>
+        <label class="f" style="grid-column:span 2">Endereço (rua, número, bairro, CEP)<input name="endereco" value="${v(ct.endereco)}"></label>
+        <label class="f">Cidade<input name="cidade" value="${v(ct.cidade)}"></label>
+        <label class="f">UF<input name="uf" maxlength="2" value="${v(ct.uf)}"></label>
+        <label class="f">E-mail de contato<input name="email" type="email" value="${v(ct.email)}"></label>
+        <label class="f">Encarregado de dados (LGPD)<input name="encarregado_nome" value="${v(ct.encarregado_nome)}"></label>
+        <label class="f">E-mail do encarregado<input name="encarregado_email" type="email" value="${v(ct.encarregado_email)}"></label>
+        <label class="f">Foro (cidade/UF)<input name="foro" placeholder="Ex.: São Paulo/SP" value="${v(ct.foro)}"></label>
+        <button class="b pri" type="submit">Salvar</button>
+      </form>
+      <div class="acoes" style="margin-top:10px"><button class="b" type="button" id="pp-ct-modelo">Ver o modelo com um cliente de exemplo</button></div>
+      <div class="msg" id="pp-msg-ct">${contratadaOk() ? 'Dados completos: os contratos podem ser gerados.' : 'Falta preencher razão social e CNPJ para gerar contratos.'}</div></div>`;
+  }
+  function ligarContrato() {
+    const f = raiz.querySelector('#pp-ct'), cnpj = f.querySelector('[name="cnpj"]');
+    cnpj.addEventListener('input', () => { cnpj.value = mascaraDoc(cnpj.value, true); });
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const g = (n) => String(f.querySelector(`[name="${n}"]`).value || '').trim();
+      const val = { razao_social: g('razao_social'), cnpj: mascaraDoc(g('cnpj'), true), endereco: g('endereco'), cidade: g('cidade'), uf: g('uf').toUpperCase(), email: g('email'),
+        encarregado_nome: g('encarregado_nome'), encarregado_email: g('encarregado_email'), foro: g('foro') };
+      try { await rpc('crm_plataforma_config_salvar', { p_chave: 'contratada', p_valor: val }); }
+      catch (err) { raiz.querySelector('#pp-msg-ct').textContent = 'Não foi possível salvar: ' + err.message; return; }
+      recarregar('<div class="aviso">Dados da Capacity Case salvos. Os próximos contratos já saem com eles.</div>');
+    };
+    raiz.querySelector('#pp-ct-modelo').onclick = () => verContrato(gerarTexto({ tipo_pessoa: 'PJ', documento: '00.000.000/0001-91', razao_social: 'Corretora Exemplo Ltda', nome_exibicao: 'Exemplo',
+      admin_nome: 'Maria Exemplo', admin_email: 'maria@exemplo.com.br', plano: 'completo', preco_especial: '',
+      empresa: { telefone: '(11) 90000-0000', cep: '01000-000', logradouro: 'Rua Exemplo', numero: '100', bairro: 'Centro', cidade: 'São Paulo', uf: 'SP', responsavel: 'Maria Exemplo', responsavel_cargo: 'sócia-administradora', email_financeiro: 'financeiro@exemplo.com.br' } }), 'Exemplo para revisão do modelo. Não é um contrato emitido.');
   }
 
   /* ---------- pagamentos ---------- */
@@ -437,7 +635,7 @@
   function convite(corr, email, admin) {
     const nome = corr ? 'Torre de Controle - ' + (corr.nome_exibicao || corr.nome) : 'Torre de Controle';
     const url = corr && corr.slug ? linkCorretora(corr.slug) : link();
-    const passos = admin ? `\n\nNo primeiro acesso, você completa o cadastro da empresa em 5 passos (dados e CNPJ, logo e cores, plano e aceite do contrato). A degustação gratuita de 15 dias começa ao concluir. Depois, o quadro "Comece por aqui" mostra como cadastrar a sua equipe e subir os seus clientes pela planilha padrão.` : '';
+    const passos = admin ? `\n\nNo primeiro acesso, você lê o contrato com os dados da sua empresa e aceita, ou pede revisão se algo estiver errado ou faltando. A degustação gratuita de ${(EST.config.regua || {}).degustacao_dias || 15} dias começa no aceite. Depois, o quadro "Comece por aqui" mostra como cadastrar a sua equipe e subir os seus clientes pela planilha padrão.` : '';
     const txt = `${admin ? 'Bem-vindo ao CRM Aliança by Capacity Case! Complete o seu cadastro aqui.\n\n' : 'Olá! '}O acesso à ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie sua senha e ative a confirmação em 2 etapas\n\nO link para criar a senha vale por 48 horas. Salve o endereço nos favoritos: é o link próprio da sua corretora.${passos}`;
     return `<div class="aviso"><b>Pronto. Mande esta mensagem para a pessoa:</b><pre class="convite">${esc(txt)}</pre>
       <div class="acoes"><button class="b" type="button" onclick="navigator.clipboard.writeText(${esc(JSON.stringify(txt))}).then(()=>this.textContent='Copiado ✓')">Copiar mensagem</button>

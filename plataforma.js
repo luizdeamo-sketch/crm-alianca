@@ -101,7 +101,8 @@
       if (data.slug && cAtual !== data.slug && !/[?&]painel=1/.test(location.search) && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash);
       aplicarMarca();
       carregarEtapas();
-      if (data.sou_admin && data.precisa_cadastro) abrirCadastro(0);
+      if (data.contrato_pendente || data.contrato_bloqueia) abrirContrato(0, data.sou_admin);   // contrato gerado pela gestora: aceitar antes de usar
+      else if (data.sou_admin && data.precisa_cadastro) abrirCadastro(0);
       else if (data.sou_admin) primeirosPassos();
     } catch (e) { console.warn('marca da corretora:', e); }
   }
@@ -125,6 +126,11 @@
   function abrirCadastro(tentativa) {
     if (window.TorreCadastro) { window.TorreCadastro.abrir().then((abriu) => { if (!abriu) primeirosPassos(); }); return; }
     if (tentativa < 40) setTimeout(() => abrirCadastro(tentativa + 1), 150);
+  }
+
+  function abrirContrato(tentativa, admin) {
+    if (window.TorreCadastro && window.TorreCadastro.abrirContrato) { window.TorreCadastro.abrirContrato().then((abriu) => { if (!abriu && admin) primeirosPassos(); }); return; }
+    if (tentativa < 40) setTimeout(() => abrirContrato(tentativa + 1, admin), 150);
   }
 
   /* ---------- primeiros passos do administrador (corretora nova) ---------- */

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611021702">
+<meta name="app-build" content="202611021713">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -10362,7 +10362,7 @@ checkSession();
     const f = document.createElement('div'); f.id = 'ac-versao'; f.setAttribute('role','status');
     f.innerHTML = '<span>Saiu uma versão nova do sistema, com novidades. Salve o que estiver fazendo e clique em Atualizar.</span><button type="button" id="ac-versao-nov">✨ Ver as novidades</button><button type="button" id="ac-versao-btn">Atualizar</button>';
     document.body.appendChild(f);
-    document.getElementById('ac-versao-btn').addEventListener('click', ()=> location.reload());   // nunca recarrega sozinho
+    document.getElementById('ac-versao-btn').addEventListener('click', ()=>{ if(window.TorreGuarda) window.TorreGuarda.antesDeAtualizar(); else location.reload(); });   // nunca recarrega sozinho; com algo digitado, oferece salvar antes (produto/guarda.js)
     document.getElementById('ac-versao-nov').addEventListener('click', ()=>{ if(window.novidadesAbrir) window.novidadesAbrir(); });
   }
   A.verificarVersao = verificarVersao;
@@ -11013,10 +11013,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611021702"></script>
-<script src="painel.js?v=202611021702"></script>
-<script src="cobranca.js?v=202611021702"></script>
-<script src="cadastro.js?v=202611021702"></script>
-<script src="contrato.js?v=202611021702"></script>
+<script src="plataforma.js?v=202611021713"></script>
+<script src="painel.js?v=202611021713"></script>
+<script src="cobranca.js?v=202611021713"></script>
+<script src="cadastro.js?v=202611021713"></script>
+<script src="contrato.js?v=202611021713"></script>
+<script src="guarda.js?v=202611021713"></script>
 </body>
 </html>

@@ -88,7 +88,12 @@
     d.querySelector('#tc-barreira-sair').focus();
   }
 
+  // telas que vêm antes de tudo: criar a senha nova (link de "Esqueci a senha"), 2 etapas e login. Enquanto uma delas estiver
+  // aberta, contrato, cadastro e barreiras esperam (antes o "Contrato em preparação" cobria a tela de senha nova e só tinha "Sair")
+  const telaDeEntrada = () => ['reset-screen', 'mfa-screen', 'login-screen'].some((id) => { const e = document.getElementById(id); return e && getComputedStyle(e).display !== 'none'; });
+  let esperando = false;
   async function carregar() {
+    if (telaDeEntrada()) { if (!esperando) { esperando = true; setTimeout(() => { esperando = false; carregar(); }, 1000); } return; }
     try {
       const { data, error } = await sb.rpc('crm_minha_corretora');
       if (error) return;   // falha de rede: não barra por engano

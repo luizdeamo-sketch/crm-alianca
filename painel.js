@@ -96,50 +96,56 @@
 
   function desenhar() {
     const lista = EST.corretoras;
-    const ativas = lista.filter((c) => c.ativo).length;
+    const ativas = lista.filter((c) => c.ativo).length, excluidas = lista.filter((c) => c.encerrado_em).length;
     const usuAtivos = lista.reduce((a, c) => a + Number(c.usuarios_ativos || 0), 0);
     const pend = lista.filter((c) => c.primeiro_acesso_pendente).length;
     const revisao = lista.filter((c) => c.contrato && c.contrato.status === 'revisao').length, aguardando = lista.filter((c) => c.contrato && c.contrato.status === 'pendente').length;
     raiz.innerHTML = `
       <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Clientes, contratos, planos e administradores. Nenhum dado dos clientes deles aparece aqui.</small></div>
-        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
+        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button data-aba="historico" class="${EST.aba === 'historico' ? 'on' : ''}">Histórico</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
       <main>
         <div class="kpis">
           <div class="kpi"><b>${ativas}</b><span>corretoras ativas</span></div>
-          <div class="kpi"><b>${lista.length - ativas}</b><span>suspensas</span></div>
+          <div class="kpi"><b>${lista.length - ativas - excluidas}</b><span>suspensas</span></div>
+          <div class="kpi"><b>${excluidas}</b><span>excluídas (dados guardados)</span></div>
           <div class="kpi"><b>${usuAtivos}</b><span>usuários ativos</span></div>
           <div class="kpi"><b>${pend}</b><span>corretora(s) com acesso liberado aguardando a senha</span></div>
           <div class="kpi"><b>${aguardando}</b><span>contrato(s) aguardando aceite</span></div>
           <div class="kpi" style="${revisao ? 'border-color:#e7b9b3;background:#fdf3f1' : ''}"><b>${revisao}</b><span>pedido(s) de revisão do contrato</span></div>
         </div>
         ${EST.aviso || ''}
-        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : telaUsuarios()}
+        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : EST.aba === 'historico' ? telaHistorico() : telaUsuarios()}
       </main>`;
     raiz.querySelector('#pp-fechar').onclick = fechar;
-    raiz.querySelectorAll('[data-aba]').forEach((b) => b.onclick = () => { EST.aba = b.dataset.aba; EST.aviso = ''; desenhar(); });
-    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else ligarUsuarios();
+    raiz.querySelectorAll('[data-aba]').forEach((b) => b.onclick = async () => { EST.aba = b.dataset.aba; EST.aviso = '';
+      if (EST.aba === 'historico') { try { EST.historico = await rpc('crm_plataforma_historico', { p_corretor: EST.histFiltro || null, p_limite: 500 }); } catch (err) { alert(err.message); return; } }
+      desenhar(); });
+    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else if (EST.aba === 'historico') ligarHistorico(); else ligarUsuarios();
   }
 
   /* ---------- corretoras ---------- */
   function telaCorretoras() {
     const linhas = EST.corretoras.map((c) => {
-      const sit = !c.ativo ? '<span class="pill susp">Suspensa</span>' : c.primeiro_acesso_pendente ? '<span class="pill pend">Aguardando 1º acesso</span>' : '<span class="pill ok">Ativa</span>';
+      const sit = c.encerrado_em ? `<span class="pill susp" title="${esc(c.encerrado_motivo || '')}">Excluída em ${quando(c.encerrado_em)} por ${esc(c.encerrado_por || '')}</span>` : !c.ativo ? '<span class="pill susp">Suspensa</span>' : c.primeiro_acesso_pendente ? '<span class="pill pend">Aguardando 1º acesso</span>' : '<span class="pill ok">Ativa</span>';
       const nome = c.nome_exibicao || c.nome;
       return `<tr>
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
         <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
-        <td>${sit} ${pagto(c)} ${c.slug === 'demonstracao' ? '<span class="pill neu" title="Corretora de demonstração, com dados fictícios: não tem contrato">Demonstração</span>' : contratoPill(c)}<br><button class="b" data-contrato="${c.id}" style="margin-top:4px" title="Dados do cliente, contrato, revisões e convite">📄 Cliente e contrato</button></td>
+        <td>${sit} ${pagto(c)} ${c.slug === 'demonstracao' ? '<span class="pill neu" title="Corretora de demonstração, com dados fictícios: não tem contrato">Demonstração</span>' : c.encerrado_em ? (c.contrato ? contratoPill(c) : '') : contratoPill(c)}<br><button class="b" data-contrato="${c.id}" style="margin-top:4px" title="Dados do cliente, contrato, revisões e convite">📄 Cliente e contrato</button></td>
         <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas ativas na equipe (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">${c.usuarios_ativos} de ${c.usuarios}</button></td>
         <td>${c.slug ? `<button class="b" data-copiar-link="${esc(linkCorretora(c.slug))}" title="Copiar o link próprio da corretora">🔗 /${esc(c.slug)}</button>` : '—'}</td>
         <td>${quando(c.ultimo_acesso)}</td>
         <td>${esc(c.admin_email || '—')}</td>
         <td><div class="acoes">
-          ${c.ativo ? `<button class="b warn" data-suspender="${c.id}" data-nome="${esc(nome)}">Suspender</button>` : `<button class="b" data-reativar="${c.id}">Reativar</button>`}
+          ${c.encerrado_em ? `<button class="b" data-reincluir="${c.id}" data-nome="${esc(nome)}">Reincluir cliente</button>`
+            : c.ativo ? `<button class="b warn" data-suspender="${c.id}" data-nome="${esc(nome)}">Suspender</button>` : `<button class="b" data-reativar="${c.id}">Reativar</button>`}
+          ${c.encerrado_em || c.slug === 'demonstracao' ? '' : `<button class="b warn" data-excluir="${c.id}" data-nome="${esc(nome)}">Excluir cliente</button>`}
+          <button class="b" data-hist-de="${c.id}" title="Tudo o que foi feito com este cliente">Histórico</button>
         </div></td></tr>`;
     }).join('');
     const semContratada = !contratadaOk();
-    const semContrato = EST.corretoras.filter((c) => c.slug !== 'demonstracao' && !c.contrato);
+    const semContrato = EST.corretoras.filter((c) => c.slug !== 'demonstracao' && !c.contrato && !c.encerrado_em);
     return `
       <div class="card"><h3>Novo cliente</h3>
         <p class="sub">Preencha os dados do cliente: eles entram no contrato. Ao criar, o sistema gera o contrato e o convite. No primeiro acesso, o administrador do cliente lê o contrato e aceita ou pede revisão; sem o aceite, ninguém da empresa usa o sistema. A degustação de ${esc((EST.config.regua || {}).degustacao_dias || 15)} dias começa no aceite e, depois dela, a cobrança mensal começa sozinha.</p>
@@ -179,6 +185,27 @@
     });
     raiz.querySelectorAll('[data-reativar]').forEach((b) => b.onclick = async () => {
       try { await rpc('crm_plataforma_atualizar', { p_id: b.dataset.reativar, p_plano: null, p_ativo: true, p_observacao: null }); recarregar(''); } catch (err) { alert(err.message); }
+    });
+    raiz.querySelectorAll('[data-excluir]').forEach((b) => b.onclick = async () => {
+      const nome = b.dataset.nome;
+      const motivo = prompt(`Excluir ${nome}?\n\nToda a equipe perde o acesso e as faturas em aberto são canceladas. Os dados ficam guardados (o contrato dá 30 dias para o cliente exportar) e tudo fica registrado no Histórico. Dá para reincluir depois.\n\nEscreva o motivo da exclusão:`);
+      if (motivo == null) return;
+      if (motivo.trim().length < 3) { alert('Escreva o motivo da exclusão.'); return; }
+      const conf = prompt(`Para confirmar, digite o nome do cliente: ${nome}`);
+      if (conf == null) return;
+      if (conf.trim().toLowerCase() !== nome.trim().toLowerCase()) { alert('O nome não confere. Nada foi excluído.'); return; }
+      try { await rpc('crm_plataforma_cliente_encerrar', { p_id: b.dataset.excluir, p_motivo: motivo.trim() }); } catch (err) { alert(err.message); return; }
+      recarregar(`<div class="aviso"><b>${esc(nome)}</b> excluída. O acesso da equipe foi cortado e o registro ficou no Histórico.</div>`);
+    });
+    raiz.querySelectorAll('[data-reincluir]').forEach((b) => b.onclick = async () => {
+      if (!confirm(`Reincluir ${b.dataset.nome}? O acesso da equipe volta (quem estava ativo) e os dados aparecem como antes.`)) return;
+      try { await rpc('crm_plataforma_cliente_reativar', { p_id: b.dataset.reincluir }); } catch (err) { alert(err.message); return; }
+      recarregar(`<div class="aviso"><b>${esc(b.dataset.nome)}</b> reincluída.</div>`);
+    });
+    raiz.querySelectorAll('[data-hist-de]').forEach((b) => b.onclick = async () => {
+      EST.histFiltro = b.dataset.histDe; EST.aba = 'historico'; EST.aviso = '';
+      try { EST.historico = await rpc('crm_plataforma_historico', { p_corretor: EST.histFiltro, p_limite: 500 }); } catch (err) { alert(err.message); return; }
+      desenhar();
     });
     raiz.querySelectorAll('[data-ver-usuarios]').forEach((b) => b.onclick = () => { EST.aba = 'usuarios'; EST.filtro = b.dataset.verUsuarios; EST.aviso = ''; desenhar(); });
     raiz.querySelectorAll('[data-modulos]').forEach((b) => b.onclick = () => modulos(b));
@@ -448,6 +475,35 @@
     raiz.querySelector('#pp-ct-modelo').onclick = () => verContrato(gerarTexto({ tipo_pessoa: 'PJ', documento: '00.000.000/0001-91', razao_social: 'Corretora Exemplo Ltda', nome_exibicao: 'Exemplo',
       admin_nome: 'Maria Exemplo', admin_email: 'maria@exemplo.com.br', plano: 'completo', preco_especial: '',
       empresa: { telefone: '(11) 90000-0000', cep: '01000-000', logradouro: 'Rua Exemplo', numero: '100', bairro: 'Centro', cidade: 'São Paulo', uf: 'SP', responsavel: 'Maria Exemplo', responsavel_cargo: 'sócia-administradora', email_financeiro: 'financeiro@exemplo.com.br' } }), 'Exemplo para revisão do modelo. Não é um contrato emitido.');
+  }
+
+  /* ---------- histórico: tudo o que os gestores (e o sistema) fizeram com clientes, contratos, faturas e acessos ---------- */
+  const ROT_TABELA = { crm_corretores: 'Cliente', crm_contratos: 'Contrato', crm_plataforma_config: 'Configuração', crm_faturas: 'Fatura', crm_usuarios: 'Acesso', crm_plataforma_donos: 'Gestor master' };
+  const ROT_ACAO = { INSERT: 'incluiu', UPDATE: 'alterou', DELETE: 'apagou' };
+  const ROT_CAMPO = { ativo: 'ativo', encerrado_em: 'excluído em', encerrado_motivo: 'motivo', plano: 'plano', status: 'situação', preco_especial: 'preço especial', gratuita: 'permuta',
+    razao_social: 'razão social', cnpj: 'CNPJ', cpf: 'CPF', empresa: 'dados da empresa', contrato_exigido: 'exige contrato', aceito_em: 'aceito em', aceito_por: 'aceito por',
+    revisao_texto: 'pedido de revisão', papel: 'papel', primeiro_acesso_ate: 'acesso liberado até', modulos: 'módulos', valor: 'valor', degustacao_inicio: 'início da degustação' };
+  function resumoMud(h) {
+    const m = h.mudancas || {};
+    if (m.obs) return esc(m.obs);
+    if (h.acao !== 'UPDATE') { const k = ['nome', 'email', 'versao', 'codigo', 'chave', 'status', 'plano'].filter((x) => m[x] != null).map((x) => `${x}: ${esc(typeof m[x] === 'object' ? JSON.stringify(m[x]) : m[x])}`); return k.join(' · '); }
+    const curto = (v) => { const s = v == null ? '—' : typeof v === 'object' ? JSON.stringify(v) : String(v); return esc(s.length > 60 ? s.slice(0, 60) + '…' : s); };
+    return Object.entries(m).filter(([k]) => !/^(id|corretor_id|criado_em|dados)$/.test(k)).map(([k, [a, b]]) => `<b>${esc(ROT_CAMPO[k] || k)}</b>: ${curto(a)} → ${curto(b)}`).join('<br>');
+  }
+  function telaHistorico() {
+    const H = EST.historico || [];
+    const opts = EST.corretoras.map((c) => `<option value="${c.id}" ${EST.histFiltro === c.id ? 'selected' : ''}>${esc(c.nome_exibicao || c.nome)}</option>`).join('');
+    return `<div class="card"><h3>Histórico</h3>
+      <p class="sub">Tudo o que foi feito com clientes, contratos, faturas, acessos de administradores e gestores master fica registrado aqui: quem fez, quando e o que mudou. Ninguém apaga este registro pelo sistema.</p>
+      <form class="lin" id="pp-hist-f" onsubmit="return false" style="margin-bottom:10px"><label class="f">Cliente<select name="c"><option value="">Todos</option>${opts}</select></label></form>
+      <div class="tbl"><table><thead><tr><th>Quando</th><th>Quem</th><th>Cliente</th><th>O quê</th><th>Detalhe</th></tr></thead>
+      <tbody>${H.map((h) => `<tr><td style="white-space:nowrap">${quando(h.quando)}</td><td>${esc(h.quem)}</td><td>${esc(h.corretora || '—')}</td>
+        <td>${esc(ROT_TABELA[h.tabela] || h.tabela)} · ${esc(ROT_ACAO[h.acao] || h.acao)}${h.registro && h.tabela !== 'crm_corretores' && h.tabela !== 'crm_faturas' && h.tabela !== 'crm_contratos' ? '<br><span style="color:#5d6871;font-size:12px">' + esc(h.registro) + '</span>' : ''}</td>
+        <td style="font-size:13px">${resumoMud(h)}</td></tr>`).join('') || '<tr><td colspan="5">Nada registrado ainda.</td></tr>'}</tbody></table></div></div>`;
+  }
+  function ligarHistorico() {
+    const f = raiz.querySelector('#pp-hist-f');
+    f.c.onchange = async () => { EST.histFiltro = f.c.value || ''; try { EST.historico = await rpc('crm_plataforma_historico', { p_corretor: EST.histFiltro || null, p_limite: 500 }); } catch (err) { alert(err.message); return; } desenhar(); };
   }
 
   /* ---------- pagamentos ---------- */

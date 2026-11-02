@@ -29,13 +29,21 @@
   }
 
   /* ---------- nome e logo em toda a página (inclusive relatórios abertos em outra janela) ---------- */
+  // a troca parte sempre do texto ORIGINAL (antes era em cima do texto já trocado: um nome com "Aliança" se repetia,
+  // "Aliança Luiz Luiz", e ao mudar o nome sobrava pedaço do antigo, "Demonstração Luiz")
+  const ORIGINAL = new WeakMap();
   function trocarNaArvore(raiz) {
     if (!personalizada() || !raiz) return;
     const novo = nomeSistema();
     const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
-    let n; while ((n = w.nextNode())) { if (n.nodeValue && n.nodeValue.indexOf(NOME_BASE) >= 0) n.nodeValue = n.nodeValue.split(NOME_BASE).join(novo); }
+    let n; while ((n = w.nextNode())) {
+      let orig = ORIGINAL.get(n);
+      if (orig === undefined) { if (!n.nodeValue || n.nodeValue.indexOf(NOME_BASE) < 0) continue; orig = n.nodeValue; ORIGINAL.set(n, orig); }
+      const v = orig.split(NOME_BASE).join(novo); if (n.nodeValue !== v) n.nodeValue = v;
+    }
     raiz.querySelectorAll && raiz.querySelectorAll('img').forEach((img) => {
-      if (img.alt && img.alt.indexOf(NOME_BASE) >= 0) img.alt = img.alt.split(NOME_BASE).join(novo);
+      if (img.alt && img.alt.indexOf(NOME_BASE) >= 0 && !img.dataset.altOriginal) img.dataset.altOriginal = img.alt;
+      if (img.dataset.altOriginal) img.alt = img.dataset.altOriginal.split(NOME_BASE).join(novo);
       const src = img.getAttribute('src') || '';
       // logo branco fica nas faixas escuras (capas e PDFs): usa a versão da corretora para fundo escuro, se houver
       if (/assets\/logo-branco\.png/.test(src) && MARCA.cores && MARCA.cores.logo_fundo_escuro) img.src = MARCA.cores.logo_fundo_escuro;
@@ -44,7 +52,7 @@
   }
   function aplicarNoDocumento(doc) {
     if (!doc || !doc.body) return;
-    if (doc.title && doc.title.indexOf(NOME_BASE) >= 0 && personalizada()) doc.title = doc.title.split(NOME_BASE).join(nomeSistema());
+    if (doc !== document && doc.title && doc.title.indexOf(NOME_BASE) >= 0 && personalizada()) doc.title = doc.title.split(NOME_BASE).join(nomeSistema());   // a aba principal recebe o título direto em aplicarMarca
     trocarNaArvore(doc.body);
   }
   function aplicarMarca() {

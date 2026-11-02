@@ -4,7 +4,9 @@
    2) Botão 💾 Salvar flutuante sempre que houver alteração não salva, e Ctrl+S em qualquer tela: redundância do Salvar de cada janela.
    3) Rascunho de segurança neste navegador a cada 10 segundos enquanto houver algo não salvo; depois de atualizar, fechar a aba ou cair a
       internet, o sistema oferece ver e copiar o que foi digitado. O rascunho some sozinho quando a tela é salva.
-   O dado de verdade continua indo para o banco pelo Salvar de cada tela; o rascunho é só uma rede de segurança local. */
+   4) O rascunho também vai para o banco (crm_rascunhos, só da pessoa, separado dos dados oficiais): ao abrir a mesma janela, em qualquer
+      computador, aparece "Continuar de onde parei". Salvou a tela, o rascunho some.
+   O dado de verdade continua indo para o banco pelo Salvar de cada tela. */
 (function () {
   'use strict';
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -57,13 +59,67 @@
   function guardarRascunho() {
     const campos = pendentes();
     try {
-      if (!campos.length) { localStorage.removeItem(chave()); return campos; }
+      if (!campos.length) return campos;   // janela fechada sem salvar: o rascunho fica (só some quando a tela é salva)
       localStorage.setItem(chave(), JSON.stringify({ em: Date.now(), tela: contexto(campos[0]), campos: campos.map((el) => ({ rotulo: rotulo(el), valor: valor(el) })).filter((c) => String(c.valor).trim()) }));
     } catch (e) { /* sem armazenamento: segue sem rascunho */ }
+    enviarBanco(campos);
     return campos;
   }
   function lerRascunho() { try { const r = JSON.parse(localStorage.getItem(chave()) || 'null'); return r && Date.now() - r.em < 3 * 86400000 && r.campos && r.campos.length ? r : null; } catch (e) { return null; } }
-  function apagarRascunho() { try { localStorage.removeItem(chave()); } catch (e) { /* nada */ } }
+  function apagarRascunho() { try { localStorage.removeItem(chave()); } catch (e) { /* nada */ } if (telaNoBanco) apagarBanco(telaNoBanco); }
+  /* ---------- rascunho no banco (crm_rascunhos): separado dos dados oficiais, em nome da pessoa e da corretora ---------- */
+  let telaNoBanco = null, ultimoEnvio = '';
+  const chaveCampo = (el) => el.id ? '#' + el.id : (el.name ? '[name="' + el.name + '"]' : '');
+  async function enviarBanco(campos) {
+    if (typeof sb === 'undefined' || !window._userEmail) return;
+    try {
+      if (!campos.length) return;   // fechou sem salvar: o rascunho fica no banco
+      const tela = contexto(campos[0]);
+      const lista = campos.map((el) => ({ chave: chaveCampo(el), rotulo: rotulo(el), valor: (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value })).filter((c) => c.chave);
+      if (!lista.length) return;
+      const sig = tela + JSON.stringify(lista);
+      if (sig === ultimoEnvio) return;
+      ultimoEnvio = sig; telaNoBanco = tela;
+      await sb.from('crm_rascunhos').upsert({ tela, campos: lista, atualizado_em: new Date().toISOString(), usuario_email: String(window._userEmail).toLowerCase() }, { onConflict: 'usuario_email,tela' });
+    } catch (e) { /* sem rede: o rascunho local continua */ }
+  }
+  async function apagarBanco(tela) {
+    if (typeof sb === 'undefined' || !tela) return;
+    try { await sb.from('crm_rascunhos').delete().eq('tela', tela); } catch (e) { /* nada */ }
+    if (tela === telaNoBanco) { telaNoBanco = null; ultimoEnvio = ''; }
+  }
+  // janela aberta de novo (em qualquer computador): oferece continuar de onde parou
+  let olhando = false;
+  async function procurarRascunhoNaTela() {
+    if (olhando || typeof sb === 'undefined' || !window._userEmail) return;
+    const card = [...document.querySelectorAll('.dlg-card, #tc-cad .cx')].find((c) => visivel(c) && !c.querySelector('.tc-continuar') && c.querySelector('input, textarea, select'));
+    if (!card) return;
+    olhando = true;
+    try {
+      const tela = contexto(card.querySelector('input, textarea, select'));
+      const { data } = await sb.from('crm_rascunhos').select('tela,campos,atualizado_em').eq('tela', tela).maybeSingle();
+      if (!data || !Array.isArray(data.campos) || !data.campos.length || card.querySelector('.tc-continuar')) return;
+      const achados = data.campos.filter((c) => { try { return card.querySelector(c.chave); } catch (e) { return false; } });
+      if (!achados.length) return;
+      const faixa = document.createElement('div'); faixa.className = 'tc-continuar';
+      faixa.style.cssText = 'background:#f6ebd2;color:#111827;border-radius:10px;padding:10px 12px;margin:0 0 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font:14px "Segoe UI",system-ui,sans-serif';
+      faixa.innerHTML = `<span style="flex:1;min-width:200px">📝 Você começou a preencher isto em ${new Date(data.atualizado_em).toLocaleString('pt-BR')} e não salvou.</span>
+        <button type="button" data-sim style="${BTN};min-height:34px;background:var(--navy,#111827);color:#fff">Continuar de onde parei</button><button type="button" data-nao style="${BTN};min-height:34px">Descartar</button>`;
+      card.insertBefore(faixa, card.firstChild);
+      faixa.querySelector('[data-nao]').onclick = async () => { await apagarBanco(tela); faixa.remove(); };
+      faixa.querySelector('[data-sim]').onclick = () => {
+        telaNoBanco = tela;   // ao salvar esta janela, este rascunho sai do banco
+        achados.forEach((c) => { const el = card.querySelector(c.chave); if (!el) return;
+          if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!c.valor; else el.value = c.valor;
+          tocados.add(el); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); });
+        faixa.innerHTML = '<span>✔ Preenchido de onde você parou. Confira e clique em Salvar.</span>';
+        setTimeout(() => faixa.remove(), 5000); atualizarPill();
+      };
+    } catch (e) { /* sem rede: segue */ } finally { olhando = false; }
+  }
+  new MutationObserver(() => { clearTimeout(procurarRascunhoNaTela.t); procurarRascunhoNaTela.t = setTimeout(procurarRascunhoNaTela, 500); })
+    .observe(document.documentElement, { childList: true, subtree: true });
+
 
   function janela(html) {
     const d = document.createElement('div'); d.id = 'tc-guarda';
@@ -140,7 +196,7 @@
       const base = b.closest('.dlg-card, #tc-cad, .modbox, form, section, .view') || document.body;
       setTimeout(() => {
         const err = [...document.querySelectorAll('.om-err, .msg, #cad-msg')].find((x) => visivel(x) && /erro|não|preencha|inválid|inform|falt/i.test(x.textContent));
-        if (!err) { base.querySelectorAll('input, textarea, select').forEach((el) => tocados.delete(el)); guardarRascunho(); atualizarPill(); }
+        if (!err) { base.querySelectorAll('input, textarea, select').forEach((el) => tocados.delete(el)); apagarRascunho(); atualizarPill(); }
       }, 1500);
     }
     setTimeout(atualizarPill, 400);

@@ -89,7 +89,7 @@
       corpo = `${situ}
         <div class="pix"><div class="qr" id="tc-cob-qr">Gerando o QR Code…</div>
           <div style="display:grid;gap:10px">
-            <div class="mu">Assinatura ${esc(PLANOS[f.plano] || f.plano)} · ${esc(EST.corretora)}</div>
+            <div class="mu">${f.diferenca ? 'Diferença da troca para o plano' : 'Assinatura'} ${esc(PLANOS[f.plano] || f.plano)} · ${esc(EST.corretora)}</div>
             <div class="val">${brl(f.valor)}</div>
             <div class="mu">Abra o app do seu banco, escolha Pix › Ler QR Code, ou use o Pix copia e cola:</div>
             <textarea readonly id="tc-cob-copia">${esc(copia)}</textarea>
@@ -99,7 +99,10 @@
             <div class="mu">Recebedor: ${esc(pix.nome || '')} · Identificador ${esc(f.codigo)}</div>
           </div></div>`;
     } else if (EST.em_degustacao) {
-      corpo = `<div class="ok">Sua corretora está na degustação gratuita${EST.degustacao_fim ? ` até ${dataBR(EST.degustacao_fim)}` : ' (os 15 dias começam no primeiro acesso)'}. Depois dela, a assinatura ${esc(PLANOS[EST.plano] || EST.plano)} fica em ${brl(EST.valor_plano)} por mês, paga por Pix aqui no sistema.</div>`;
+      const falta = EST.degustacao_fim ? diasAte(EST.degustacao_fim) : null;
+      corpo = `<div class="ok">${falta != null ? `<b>Degustação gratuita: ${falta === 1 ? 'falta 1 dia' : `faltam ${falta} dias`}.</b> Em ${dataBR(EST.degustacao_fim)} ela vira assinatura sozinha` : '<b>Degustação gratuita.</b> Os 15 dias começam quando você aceita o contrato'}: plano ${esc(PLANOS[EST.plano] || EST.plano)} por ${brl(EST.valor_plano)} por mês, pago por Pix aqui no sistema.</div>
+        ${EST.pode_pagar_agora && EST.sou_admin ? `<div class="mu">Quer ativar já? Pagando agora, a degustação termina hoje, a assinatura fica ativa na hora e as próximas mensalidades vencem neste mesmo dia de cada mês.</div>
+        <div class="ac"><button class="pri" id="tc-cob-agora">Pagar agora e ativar o plano</button></div>` : ''}`;
     } else {
       corpo = `<div class="ok">Nenhuma cobrança em aberto. A próxima fatura aparece aqui ${EST.aviso_dias} dias antes do vencimento.</div>`;
     }
@@ -121,6 +124,14 @@
         f.informou = true; abrir(modo);
       };
     }
+    const ag = d.querySelector('#tc-cob-agora');
+    if (ag) ag.onclick = async () => {
+      if (!confirm(`Ativar a assinatura agora? A degustação termina hoje e a primeira mensalidade (${brl(EST.valor_plano)}) já aparece para pagar com Pix.`)) return;
+      ag.disabled = true;
+      const { error } = await sb.rpc('crm_cobranca_pagar_agora');
+      if (error) { alert(error.message); ag.disabled = false; return; }
+      await carregar(); abrir(modo);
+    };
     if (EST.sou_admin) {
       const { data } = await sb.rpc('crm_minhas_faturas');
       const linhas = (data || []).map((x) => `<tr><td>${dataBR(x.vencimento)}</td><td>${esc(PLANOS[x.plano] || x.plano)}</td><td>${brl(x.valor)}</td><td>${x.status === 'paga' ? 'Paga em ' + new Date(x.paga_em).toLocaleDateString('pt-BR') : x.cliente_informou_em ? 'Aguardando confirmação' : 'Em aberto'}</td></tr>`).join('');
@@ -133,7 +144,7 @@
     let b = document.getElementById('tc-cob-faixa');
     if (!b) { b = document.createElement('div'); b.id = 'tc-cob-faixa'; document.body.insertBefore(b, document.body.firstChild); }
     b.className = atraso ? 'atraso' : '';
-    b.innerHTML = `<span>${texto}</span><button type="button">Pagar com Pix</button>`;
+    b.innerHTML = `<span>${texto}</span><button type="button">${EST && EST.em_degustacao && !EST.fatura ? 'Ver e pagar antes' : 'Pagar com Pix'}</button>`;
     b.querySelector('button').onclick = () => abrir('normal');
   }
 
@@ -157,6 +168,10 @@
     if (EST.sou_admin) {
       let n = 0; const t = setInterval(() => { botao(); if (document.getElementById('btn-pagamento') || ++n > 20) clearInterval(t); }, 500);
       const f = EST.fatura;
+      if (!f && EST.em_degustacao && EST.degustacao_fim) {   // contador da degustação com atalho para pagar antes
+        const falta = diasAte(EST.degustacao_fim);
+        if (falta >= 0 && falta <= 15) faixa(`Degustação gratuita: ${falta === 1 ? 'falta 1 dia' : `faltam ${falta} dias`}. Em ${dataBR(EST.degustacao_fim)} vira assinatura (${brl(EST.valor_plano)}/mês). Se quiser, pague antes e ative o plano na hora.`, false);
+      }
       if (f && !f.informou) {
         const falta = diasAte(f.vencimento);
         if (f.dias_atraso > 0) {

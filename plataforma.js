@@ -205,16 +205,34 @@
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap"><b style="font-size:19px;color:#111827">${p.nome}</b>${atual === p.k ? '<span style="background:var(--brand,#9c7518);color:#fff;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:600">Seu plano</span>' : ''}</div>
         <div style="font-size:26px;font-weight:700;color:#111827">${brl(precos[p.k])}<small style="font-size:13px;font-weight:400;color:#5d6871"> /mês</small></div>
         <div style="color:#5d6871;font-size:14px">${p.para}<br><b>Até ${lim[p.k] || '—'} pessoas</b> com acesso (contando o administrador).</div>
-        <ul style="margin:4px 0 0;padding:0;list-style:none;display:grid;gap:8px">${p.itens.map(([t, d]) => `<li><b>${t}</b>${d ? `<br><span style="color:#5d6871;font-size:14px">${d}</span>` : ''}</li>`).join('')}</ul></div>`;
+        <ul style="margin:4px 0 0;padding:0;list-style:none;display:grid;gap:8px">${p.itens.map(([t, d]) => `<li><b>${t}</b>${d ? `<br><span style="color:#5d6871;font-size:14px">${d}</span>` : ''}</li>`).join('')}</ul>
+        ${botaoTroca(p)}</div>`;
+    // subir de plano sozinho (decisão do Luiz, 02/11/2026): na degustação sem custo; depois, paga a diferença proporcional e vale na hora
+    function botaoTroca(p) {
+      const u = (info.upgrade || {})[p.k];
+      if (!info.sou_admin || !u || !u.pode) return '';
+      const custo = u.em_degustacao ? `Sem custo agora (você está na degustação). Depois, ${brl(u.novo_valor)} por mês.`
+        : `Hoje você paga ${brl(u.diferenca)} de diferença (proporcional a ${u.dias_restantes} dias até ${new Date(u.proximo_vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}). Depois, ${brl(u.novo_valor)} por mês.`;
+      return `<div style="border-top:1px solid #eceee9;padding-top:10px;display:grid;gap:6px"><span style="color:#5d6871;font-size:13px">${custo}</span>
+        <button type="button" data-troca="${p.k}" data-nome="${p.nome}" data-custo="${esc(custo)}" style="font:inherit;font-weight:600;min-height:42px;border-radius:8px;border:0;background:var(--navy,#111827);color:#fff;cursor:pointer">Mudar para o ${p.nome}</button></div>`;
+    }
     fundo.innerHTML = `<div role="dialog" aria-modal="true" aria-label="Planos" style="background:#fff;border-radius:18px;padding:22px 24px;margin:0 auto;display:grid;gap:14px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:start"><div><h2 style="margin:0;font-size:22px;color:#111827">Planos do CRM Aliança</h2>
         <p style="margin:4px 0 0;color:#5d6871">Todos os planos têm a <b>Aliança</b> (todos os clientes num lugar só, com histórico, família, documentos e importação da sua planilha), Agenda, Sugestões, Admin (equipe e acessos), a marca da sua corretora e o link próprio. Os ${info.degustacao_dias || 15} primeiros dias são de degustação gratuita, e a mensalidade é paga por Pix no sistema.</p></div>
         <button type="button" data-x style="font:inherit;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid #d5d8d2;background:#fff;cursor:pointer">✕ Fechar</button></div>
       ${atual === 'permuta' ? '<div style="background:#e3f1e8;color:#1f5a37;border-radius:12px;padding:12px 14px"><b>A sua corretora está em permuta:</b> todos os módulos liberados, sem mensalidade.</div>' : ''}
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">${PLANOS_INFO.map(cartao).join('')}</div>
-      <p style="margin:0;color:#5d6871;font-size:14px">${info.sou_admin ? 'Quer mudar de plano ou incluir mais pessoas? Peça na tela <b>Sugestões</b> que a Capacity Case responde por lá.' : 'Para mudar de plano, fale com o administrador da sua corretora.'} Extras sob consulta: Analítico da base de plantões e grupos Premium.</p></div>`;
+      <p style="margin:0;color:#5d6871;font-size:14px">${info.sou_admin ? 'Para subir de plano, use o botão do plano escolhido. Para descer de plano ou pedir mais pessoas, use a tela <b>Sugestões</b>.' : 'Para mudar de plano, fale com o administrador da sua corretora.'} Extras sob consulta: Analítico da base de plantões e grupos Premium.</p></div>`;
     document.body.appendChild(fundo);
     const fechar = () => fundo.remove();
+    fundo.querySelectorAll('[data-troca]').forEach((b) => b.onclick = async () => {
+      if (!confirm(`Mudar para o plano ${b.dataset.nome}?\n\n${b.dataset.custo}\n\nAs telas novas aparecem assim que o sistema recarregar.`)) return;
+      b.disabled = true; b.textContent = 'Mudando…';
+      const r = await sb.rpc('crm_plano_upgrade', { p_plano: b.dataset.troca });
+      if (r.error) { alert(r.error.message); b.disabled = false; b.textContent = 'Mudar para o ' + b.dataset.nome; return; }
+      alert(r.data && r.data.diferenca >= 1 ? `Pronto, você está no plano ${b.dataset.nome}. A diferença de ${brl(r.data.diferenca)} aparece no botão 💳 Pagamento para pagar com Pix.` : `Pronto, você está no plano ${b.dataset.nome}.`);
+      location.reload();
+    });
     fundo.querySelector('[data-x]').onclick = fechar;
     fundo.onclick = (ev) => { if (ev.target === fundo) fechar(); };
     document.addEventListener('keydown', function esc(ev) { if (ev.key === 'Escape') { fechar(); document.removeEventListener('keydown', esc); } });

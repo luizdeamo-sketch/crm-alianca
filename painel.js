@@ -92,6 +92,7 @@
       [EST.corretoras, EST.usuarios, EST.faturas, EST.config] = await Promise.all([rpc('crm_plataforma_corretoras'), rpc('crm_plataforma_administradores'),
         rpc('crm_plataforma_faturas'), rpc('crm_plataforma_config_ler')]);
       EST.faturas = EST.faturas || []; EST.config = EST.config || {};
+      try { await carregarSugestoes(); } catch (e) { EST.sugestoes = []; }
     } catch (e) { raiz.innerHTML = `<div style="padding:40px">Erro ao carregar o painel: ${esc(e.message)} <button class="b" id="pp-x">Fechar</button></div>`; raiz.querySelector('#pp-x').onclick = fechar; return; }
     desenhar();
   }
@@ -104,7 +105,7 @@
     const revisao = lista.filter((c) => c.contrato && c.contrato.status === 'revisao').length, aguardando = lista.filter((c) => c.contrato && c.contrato.status === 'pendente').length;
     raiz.innerHTML = `
       <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Clientes, contratos, planos e administradores. Nenhum dado dos clientes deles aparece aqui.</small></div>
-        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button data-aba="historico" class="${EST.aba === 'historico' ? 'on' : ''}">Histórico</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
+        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button data-aba="sugestoes" class="${EST.aba === 'sugestoes' ? 'on' : ''}">Sugestões${(EST.sugPend || 0) ? ' (' + EST.sugPend + ')' : ''}</button><button data-aba="historico" class="${EST.aba === 'historico' ? 'on' : ''}">Histórico</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
       <main>
         <div class="kpis">
           <div class="kpi"><b>${ativas}</b><span>corretoras ativas</span></div>
@@ -116,13 +117,14 @@
           <div class="kpi" style="${revisao ? 'border-color:#e7b9b3;background:#fdf3f1' : ''}"><b>${revisao}</b><span>pedido(s) de revisão do contrato</span></div>
         </div>
         ${EST.aviso || ''}
-        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : EST.aba === 'historico' ? telaHistorico() : telaUsuarios()}
+        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : EST.aba === 'historico' ? telaHistorico() : EST.aba === 'sugestoes' ? telaSugestoes() : telaUsuarios()}
       </main>`;
     raiz.querySelector('#pp-fechar').onclick = fechar;
     raiz.querySelectorAll('[data-aba]').forEach((b) => b.onclick = async () => { EST.aba = b.dataset.aba; EST.aviso = '';
       if (EST.aba === 'historico') { try { EST.historico = await rpc('crm_plataforma_historico', { p_corretor: EST.histFiltro || null, p_limite: 500 }); } catch (err) { alert(err.message); return; } }
+      if (EST.aba === 'sugestoes') { try { await carregarSugestoes(); } catch (err) { alert(err.message); return; } }
       desenhar(); });
-    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else if (EST.aba === 'historico') ligarHistorico(); else ligarUsuarios();
+    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else if (EST.aba === 'historico') ligarHistorico(); else if (EST.aba === 'sugestoes') ligarSugestoes(); else ligarUsuarios();
   }
 
   /* ---------- corretoras ---------- */
@@ -150,11 +152,18 @@
     const semContrato = EST.corretoras.filter((c) => c.slug !== 'demonstracao' && !c.contrato && !c.encerrado_em);
     return `
       <div class="card"><h3>Novo cliente</h3>
-        <p class="sub">Preencha os dados do cliente: eles entram no contrato. Ao criar, o sistema gera o contrato e o convite. No primeiro acesso, o administrador do cliente lê o contrato e aceita ou pede revisão; sem o aceite, ninguém da empresa usa o sistema. A degustação de ${esc((EST.config.regua || {}).degustacao_dias || 15)} dias começa no aceite e, depois dela, a cobrança mensal começa sozinha.</p>
+        <p class="sub">Só o nome, o e-mail de acesso e o plano. Ao criar, sai a mensagem de boas-vindas pronta para o WhatsApp. No primeiro acesso o cliente cria a senha, completa os dados da empresa (CNPJ ou CPF, endereço, representante, e-mail financeiro, redes sociais), o sistema gera o contrato com esses dados e ele aceita; sem o aceite, ninguém da empresa usa o sistema. A degustação de ${esc((EST.config.regua || {}).degustacao_dias || 15)} dias começa no aceite e, depois dela, a cobrança mensal começa sozinha.</p>
         ${semContrato.length ? `<div class="aviso" style="margin-bottom:10px;background:#f8e3e0">Sem cadastro completo e contrato: <b>${semContrato.map((c) => esc(c.nome_exibicao || c.nome)).join(', ')}</b>. Todos os clientes, inclusive os que já usam o sistema, precisam dos dados completos e do contrato aceito. Abra <b>📄 Cliente e contrato</b> na linha de cada um.</div>` : ''}
         ${semContratada ? '<div class="aviso" style="margin-bottom:10px">Antes do primeiro contrato, preencha os <b>dados da Capacity Case</b> na aba <b>Contrato</b> (razão social e CNPJ).</div>' : ''}
-        <form id="pp-nova">${formCliente(null)}
-          <div class="acoes" style="margin-top:12px"><button class="b" type="button" data-previa>Ver o contrato antes</button><button class="b pri" type="submit">Criar cliente e gerar contrato</button></div>
+        <form id="pp-nova"><div class="lin" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end">
+          <label class="f" style="grid-column:span 2">Nome do cliente (corretora ou pessoa)*<input name="razao_social" required maxlength="160" placeholder="Ex.: Rafaela Jesuino Corretora"></label>
+          <label class="f">Nome do administrador<input name="admin_nome" maxlength="80" placeholder="Quem vai usar e administrar"></label>
+          <label class="f">E-mail de acesso do administrador*<input name="admin_email" type="email" required placeholder="é o login dele no sistema"></label>
+          <label class="f">Plano*<select name="plano">${Object.entries(PLANOS).map(([k, n]) => `<option value="${k}" ${k === 'completo' ? 'selected' : ''}>${n} · ${brl(preco(k))} · até ${limite({ plano: k })} pessoas</option>`).join('')}<option value="permuta">Permuta · sem mensalidade, todos os módulos</option></select></label>
+          <label class="f" data-so-pago>Preço especial por mês (opcional)<input name="preco_especial" type="number" min="0" step="0.01"></label>
+          <label class="f" data-so-permuta style="grid-column:span 2;display:none">Contrapartida da permuta*<input name="contrapartida" maxlength="200" placeholder="Ex.: indica 5 clientes por mês"></label>
+        </div>
+          <div class="acoes" style="margin-top:12px"><button class="b pri" type="submit">Criar cliente e gerar a mensagem de boas-vindas</button></div>
         </form><div class="msg" id="pp-msg"></div></div>
       <div class="card"><h3>Corretoras</h3>
         <p class="sub">Suspender corta o acesso de toda a equipe da corretora; os dados ficam guardados e voltam ao reativar. Clique nos usuários para administrar a equipe.</p>
@@ -164,21 +173,25 @@
 
   function ligarCorretoras() {
     const nova = raiz.querySelector('#pp-nova');
-    ligarFormCliente(nova);
-    nova.querySelector('[data-previa]').onclick = () => { const d = lerCliente(nova); const erro = conferirCliente(d); if (erro) { raiz.querySelector('#pp-msg').textContent = erro; return; } verContrato(gerarTexto(d)); };
+    const plSel = nova.querySelector('[name="plano"]');
+    plSel.onchange = () => { const perm = plSel.value === 'permuta';
+      nova.querySelector('[data-so-permuta]').style.display = perm ? '' : 'none'; nova.querySelector('[data-so-pago]').style.display = perm ? 'none' : ''; };
     nova.onsubmit = async (e) => {
       e.preventDefault();
-      const d = lerCliente(nova), msg = raiz.querySelector('#pp-msg'), erro = conferirCliente(d);
-      if (erro) { msg.textContent = erro; return; }
-      if (!contratadaOk()) { msg.textContent = 'Preencha antes os dados da Capacity Case na aba Contrato.'; return; }
+      const g = (n) => String(nova.querySelector(`[name="${n}"]`).value || '').trim(), msg = raiz.querySelector('#pp-msg');
+      // cadastro mínimo (decisão do Luiz, 02/11/2026): o cliente completa os dados e gera o contrato no primeiro acesso
+      const d = { tipo_pessoa: 'PJ', razao_social: g('razao_social'), admin_nome: g('admin_nome'), admin_email: g('admin_email').toLowerCase(), plano: g('plano'),
+        preco_especial: g('plano') === 'permuta' ? '' : g('preco_especial'), contrapartida: g('plano') === 'permuta' ? g('contrapartida') : '', empresa: {} };
+      if (!d.razao_social) { msg.textContent = 'Informe o nome do cliente.'; return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.admin_email)) { msg.textContent = 'Informe o e-mail de acesso do administrador.'; return; }
+      if (d.plano === 'permuta' && !d.contrapartida) { msg.textContent = 'Na permuta, informe a contrapartida.'; return; }
+      if (!contratadaOk()) { msg.textContent = 'Preencha antes os dados da Capacity Case na aba Contrato (o contrato do cliente sai com eles).'; return; }
       msg.textContent = 'Criando…';
       let novoId;
       try { novoId = await rpc('crm_plataforma_cliente_salvar', { p_id: null, p_dados: d }); }
       catch (err) { msg.textContent = 'Não foi possível criar: ' + err.message; return; }
-      try { await emitir(novoId, d); }
-      catch (err) { recarregar(`<div class="aviso">O cliente foi criado, mas o contrato não foi gerado: ${esc(err.message)}. Abra "📄 Cliente e contrato" na linha dele para gerar.</div>`); return; }
       EST.corretoras = await rpc('crm_plataforma_corretoras');
-      recarregar(convite(EST.corretoras.find((x) => x.id === novoId) || { nome: d.nome_exibicao }, d.admin_email, true));
+      recarregar(convite(EST.corretoras.find((x) => x.id === novoId) || { nome: d.razao_social, plano: d.plano === 'permuta' ? 'completo' : d.plano, gratuita: d.plano === 'permuta' }, d.admin_email, true));
     };
     raiz.querySelectorAll('[data-contrato]').forEach((b) => b.onclick = () => painelCliente(b));
     raiz.querySelectorAll('[data-suspender]').forEach((b) => b.onclick = async () => {
@@ -523,6 +536,57 @@
     f.c.onchange = async () => { EST.histFiltro = f.c.value || ''; try { EST.historico = await rpc('crm_plataforma_historico', { p_corretor: EST.histFiltro || null, p_limite: 500 }); } catch (err) { alert(err.message); return; } desenhar(); };
   }
 
+  /* ---------- sugestões: a Amanda decide primeiro, o Luiz executa só o que ela liberar (decisão do Luiz, 02/11/2026) ---------- */
+  async function carregarSugestoes() {
+    const [lista, cur, dev] = await Promise.all([rpc('crm_plataforma_sugestoes'), rpc('crm_papel', { p_papel: 'curadoria' }), rpc('crm_papel', { p_papel: 'desenvolvimento' })]);
+    EST.sugestoes = lista || []; EST.souCuradoria = cur === true; EST.souDev = dev === true;
+    EST.sugPend = EST.sugestoes.filter((s) => s.curadoria === 'pendente').length;
+  }
+  const ST_DEV = { aprovada: 'Liberada, aguardando', em_analise: 'Em desenvolvimento', concluida: 'Concluída', nova: 'Nova', depois: 'Depois' };
+  function cartaoSug(s) {
+    const cab = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${esc(s.corretora)}</b><span style="color:#5d6871;font-size:13px">${esc(s.autor || '')} · ${quando(s.criada)}${s.tela ? ' · tela ' + esc(s.tela) : ''}${s.anexos ? ' · 📎 ' + s.anexos : ''}</span></div>
+      <div style="white-space:pre-wrap;margin:6px 0">${esc(s.texto || '')}</div>`;
+    const nota = s.curadoria_nota ? `<div style="background:#f6ebd2;border-radius:8px;padding:6px 10px;font-size:13px"><b>Recado da Amanda:</b> ${esc(s.curadoria_nota)}</div>` : '';
+    const resp = s.resposta ? `<div style="background:#eef0f5;border-radius:8px;padding:6px 10px;font-size:13px"><b>Resposta ao cliente:</b> ${esc(s.resposta)}</div>` : '';
+    let acoes = '';
+    if (s.curadoria === 'pendente' && EST.souCuradoria) acoes = `<div class="lin" style="display:grid;gap:6px;margin-top:6px">
+        <input data-nota="${s.id}" placeholder="Recado para o Luiz (o cliente não vê)"><input data-resp="${s.id}" placeholder="Resposta para quem sugeriu (aparece para ele)">
+        <div class="acoes"><button class="b pri" data-cur="liberada" data-id="${s.id}">✅ Liberar para o Luiz</button><button class="b" data-cur="depois" data-id="${s.id}">⏸ Depois</button><button class="b warn" data-cur="recusada" data-id="${s.id}">✖ Recusar</button></div></div>`;
+    else if (s.curadoria === 'liberada' && EST.souDev && s.status !== 'concluida') acoes = `<div class="lin" style="display:grid;gap:6px;margin-top:6px">
+        <input data-resp="${s.id}" placeholder="Resposta para quem sugeriu (ex.: o que mudou e onde)">
+        <div class="acoes">${s.status !== 'em_analise' ? `<button class="b" data-dev="em_analise" data-id="${s.id}">🛠 Em desenvolvimento</button>` : ''}<button class="b pri" data-dev="concluida" data-id="${s.id}">✔ Concluída</button></div></div>`;
+    else if ((s.curadoria === 'depois' || s.curadoria === 'recusada') && EST.souCuradoria) acoes = `<div class="acoes" style="margin-top:6px"><button class="b" data-cur="pendente" data-id="${s.id}">↩ Voltar para decidir</button></div>`;
+    const selo = s.curadoria === 'liberada' ? `<span class="pill ok">${esc(ST_DEV[s.status] || s.status)}</span>` : s.curadoria === 'pendente' ? '<span class="pill pend">Aguardando a Amanda</span>'
+      : s.curadoria === 'depois' ? '<span class="pill neu">Depois</span>' : '<span class="pill susp">Recusada</span>';
+    return `<div style="border:1px solid #e4e6e2;border-radius:12px;padding:12px 14px;display:grid;gap:4px">${selo}${cab}${nota}${resp}${s.curadoria_por && s.curadoria_por !== 'histórico' ? `<span style="color:#5d6871;font-size:12px">Decidido por ${esc(s.curadoria_por)} em ${quando(s.curadoria_em)}</span>` : ''}${acoes}</div>`;
+  }
+  function telaSugestoes() {
+    const S = EST.sugestoes || [];
+    const pend = S.filter((s) => s.curadoria === 'pendente'), lib = S.filter((s) => s.curadoria === 'liberada' && s.status !== 'concluida');
+    const feitas = S.filter((s) => s.curadoria === 'liberada' && s.status === 'concluida').slice(0, 30), resto = S.filter((s) => s.curadoria === 'depois' || s.curadoria === 'recusada').slice(0, 30);
+    const bloco = (titulo, sub, l) => `<div class="card"><h3>${titulo} (${l.length})</h3><p class="sub">${sub}</p><div style="display:grid;gap:10px">${l.map(cartaoSug).join('') || '<span class="sub">Nada aqui.</span>'}</div></div>`;
+    return `<div class="aviso">Toda sugestão de qualquer cliente passa primeiro pela <b>Amanda</b>: ela libera, deixa para depois ou recusa, e pode responder a quem sugeriu. Só o que ela <b>liberar</b> vai para o <b>Luiz</b> executar. ${EST.souCuradoria ? 'Você está como <b>curadoria</b>.' : EST.souDev ? 'Você está como <b>desenvolvimento</b>: decide o andamento só do que foi liberado.' : ''}</div>
+      ${bloco('1. Para a Amanda decidir', 'Novas sugestões dos clientes.', pend)}
+      ${bloco('2. Liberadas para o Luiz', 'Aprovadas pela Amanda, na ordem para executar.', lib)}
+      ${bloco('Concluídas', 'As últimas entregues.', feitas)}
+      ${bloco('Depois ou recusadas', 'A Amanda pode voltar qualquer uma para decidir.', resto)}`;
+  }
+  function ligarSugestoes() {
+    const val = (sel) => { const el = raiz.querySelector(sel); return el ? el.value : ''; };
+    raiz.querySelectorAll('[data-cur]').forEach((b) => b.onclick = async () => {
+      const id = b.dataset.id;
+      try { await rpc('crm_plataforma_sugestao_curar', { p_id: id, p_decisao: b.dataset.cur, p_nota: val(`[data-nota="${id}"]`), p_resposta: val(`[data-resp="${id}"]`) }); await carregarSugestoes(); }
+      catch (err) { alert(err.message); return; }
+      desenhar();
+    });
+    raiz.querySelectorAll('[data-dev]').forEach((b) => b.onclick = async () => {
+      const id = b.dataset.id;
+      try { await rpc('crm_plataforma_sugestao_dev', { p_id: id, p_status: b.dataset.dev, p_resposta: val(`[data-resp="${id}"]`) }); await carregarSugestoes(); }
+      catch (err) { alert(err.message); return; }
+      desenhar();
+    });
+  }
+
   /* ---------- pagamentos ---------- */
   function telaPagamentos() {
     const F = EST.faturas, hoje = new Date().toISOString().slice(0, 10), mes = hoje.slice(0, 7);
@@ -714,11 +778,64 @@
   }
 
   // convite com o link próprio da corretora; o administrador também recebe os primeiros passos
+  // o que cada plano entrega, na mensagem de boas-vindas (mesmo conteúdo do botão 📦 Planos, plataforma.js)
+  const ITENS_PLANO = {
+    vendas: ['🎯 Vendas: prospecção com funil por etapas e Consultoria com as fases da proteção patrimonial', '🤝 Reuniões que se confirmam sozinhas, com lembretes prontos para o WhatsApp', '📚 Base de conhecimento (produtos, argumentos, objeções)', '📅 Agenda no Outlook, Teams e Google'],
+    vendas_carteira: ['Tudo do plano Vendas, mais:', '📄 Central de Apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda'],
+    completo: ['Tudo dos planos Vendas e Carteira, mais:', '📊 Indicadores da corretora e de cada corretor', '💼 Comercial: metas, orçamento, funil com taxas e indicações', '📝 Ata da semana']
+  };
   function convite(corr, email, admin) {
     const nome = corr ? 'Torre de Controle - ' + (corr.nome_exibicao || corr.nome) : 'Torre de Controle';
     const url = corr && corr.slug ? linkCorretora(corr.slug) : link();
-    const passos = admin ? `\n\nNo primeiro acesso, você lê o contrato com os dados da sua empresa e aceita, ou pede revisão se algo estiver errado ou faltando. A degustação gratuita de ${(EST.config.regua || {}).degustacao_dias || 15} dias começa no aceite. Depois, o quadro "Comece por aqui" mostra como cadastrar a sua equipe e subir os seus clientes pela planilha padrão.` : '';
-    const txt = `${admin ? 'Bem-vindo ao CRM Aliança by Capacity Case! Complete o seu cadastro aqui.\n\n' : 'Olá! '}O acesso à ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie sua senha e ative a confirmação em 2 etapas\n\nO link para criar a senha vale por 48 horas. Salve o endereço nos favoritos: é o link próprio da sua corretora.${passos}`;
+    let txt;
+    if (admin && corr) {
+      // mensagem padrão de boas-vindas do administrador (decisão do Luiz, 02/11/2026), de acordo com o plano
+      const perm = !!corr.gratuita, pl = PLANOS[corr.plano] ? corr.plano : 'completo', dias = (EST.config.regua || {}).degustacao_dias || 15;
+      const valor = corr.valor_mensal != null && !perm ? Number(corr.valor_mensal) : (corr.preco_especial != null ? Number(corr.preco_especial) : preco(pl));
+      const V = ITENS_PLANO.vendas, VC = ITENS_PLANO.vendas_carteira.slice(1), C = ITENS_PLANO.completo.slice(1);
+      const itens = perm ? ['Todos os módulos liberados: Vendas, Carteira, Gestão e os extras'] : pl === 'vendas' ? V : pl === 'vendas_carteira' ? V.concat(VC) : V.concat(VC, C);
+      txt = `Olá${corr.admin_nome ? ', ' + corr.admin_nome.split(' ')[0] : ''}! 🎉 Seja bem-vindo(a) ao *CRM Aliança by Capacity Case*. A sua *${nome}* está pronta.
+
+*Seu plano: ${perm ? 'Permuta' : PLANOS[pl]}*${perm ? ' · sem mensalidade' : ' · ' + brl(valor) + ' por mês'} · até ${limite(corr)} pessoas com acesso
+O que você tem:
+• 🛡️ Aliança: todos os seus clientes num lugar só, com histórico, família, documentos e importação da sua planilha
+${itens.map((x) => '• ' + x).join('\n')}
+• Agenda, Sugestões e Admin (sua equipe e os acessos)
+(A inteligência artificial do sistema chega em breve.)
+
+*Seu link (salve nos favoritos):*
+${url}
+
+*Primeiro acesso, passo a passo*
+Não chega e-mail para isso: é você quem cria a sua senha.
+1. Abra o link acima
+2. Clique em *"Primeiro acesso: criar minha senha"*
+3. Use este e-mail: ${email} e crie uma senha com pelo menos 10 caracteres (o primeiro acesso fica liberado por 48 horas)
+4. O sistema oferece a confirmação em 2 etapas (código no celular, pelo Google Authenticator). Recomendamos ativar
+5. Complete os dados da sua empresa: CNPJ ou CPF, endereço, quem assina, e-mail financeiro e redes sociais
+6. Leia o contrato e clique em *Aceitar*. ${perm ? 'Pronto, o sistema libera na hora.' : `Pronto: a sua *degustação gratuita de ${dias} dias* começa aí, com tudo do seu plano.`}
+
+${perm ? '' : `*Degustação e assinatura*
+• No topo do sistema aparece um contador com os dias que faltam da degustação
+• No ${Number(dias) + 1}º dia você vira assinante automaticamente, e a primeira mensalidade (${brl(valor)}) vence nesse dia. Paga por Pix, no botão 💳 Pagamento
+• Quer ativar antes? Em 💳 Pagamento, clique em *Pagar agora e ativar o plano*: a assinatura fica ativa na hora
+• Quer um plano maior? Em 📦 Planos, clique em *Mudar para…*. Na degustação não custa nada; depois, você paga só a diferença proporcional e o plano novo vale na hora
+
+`}*Primeiros passos lá dentro*
+• Cadastre a sua equipe em *Admin*
+• Na tela *Aliança*, baixe a planilha padrão, preencha com os seus clientes e clique em *Importar carteira*
+• Coloque o seu logo e as suas cores em *Minha corretora*
+• O quadro "Comece por aqui" guia cada passo, e o botão *📦 Planos* mostra tudo o que o seu plano tem
+
+*Dúvidas e ideias:* use a tela *Sugestões* ou o balão 💬 no canto da tela. A gente responde por lá.
+*O sistema cresce toda semana:* quando sair novidade, aparece a faixa "Saiu uma versão nova". É só clicar em *Atualizar*: se você estiver preenchendo algo, o sistema oferece salvar antes.
+
+Esqueceu a senha depois? Na tela de entrada, *Esqueci a senha* manda um e-mail (confira também o spam).
+
+Qualquer coisa, estou por aqui. Boas vendas! 🚀`;
+    } else {
+      txt = `Olá! O acesso à ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie a sua senha (pelo menos 10 caracteres) e, se o sistema pedir, ative a confirmação em 2 etapas\n\nO primeiro acesso fica liberado por 48 horas. Não chega e-mail para isso. Salve o endereço nos favoritos: é o link próprio da sua corretora.`;
+    }
     return `<div class="aviso"><b>Pronto. Mande esta mensagem para a pessoa:</b><pre class="convite">${esc(txt)}</pre>
       <div class="acoes"><button class="b" type="button" onclick="navigator.clipboard.writeText(${esc(JSON.stringify(txt))}).then(()=>this.textContent='Copiado ✓')">Copiar mensagem</button>
       <a href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener"><button class="b" type="button">Enviar pelo WhatsApp</button></a></div></div>`;

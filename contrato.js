@@ -34,6 +34,12 @@
       `Este contrato concede à CONTRATANTE uma licença de uso, não exclusiva e intransferível, do sistema <b>CRM Aliança</b> ("Sistema"), na modalidade de software como serviço, acessado pela internet no endereço próprio da CONTRATANTE, sob a marca "Torre de Controle - ${esc(d.nome_exibicao || d.razao_social)}".`,
       `Plano contratado: <b>${esc(d.plano_nome)}</b> (${esc(d.plano_desc)}). Telas de cadastro, agenda, sugestões e administração da equipe vêm em todos os planos. A troca de plano pode ser pedida a qualquer momento e passa a valer na fatura seguinte.`,
       'O Sistema é oferecido como está na data do aceite e recebe melhorias contínuas, avisadas dentro do próprio Sistema. Recursos novos podem ser incluídos no plano ou oferecidos à parte, sempre com aviso prévio.']);
+    if (d.gratuita) {
+      clausula('Permuta, sem mensalidade', [
+        `Enquanto vigorar a permuta combinada entre as partes, <b>a CONTRATANTE não paga mensalidade</b> pelo plano contratado. Contrapartida combinada: <b>${esc(d.contrapartida || 'a definir entre as partes')}</b>.`,
+        'Qualquer das partes pode encerrar a permuta com aviso de 30 (trinta) dias. Encerrada a permuta, a CONTRATANTE escolhe entre cancelar sem custo ou passar a pagar a mensalidade do plano vigente, o que só vale com novo aceite deste contrato.',
+        'Todas as demais cláusulas deste contrato, em especial as de sigilo, proteção de dados e segurança, valem integralmente durante a permuta.']);
+    } else {
     clausula('Degustação gratuita', [
       `A CONTRATANTE tem <b>${dias} (${extenso(dias)}) dias corridos de degustação gratuita</b>, contados a partir da data do aceite deste contrato, com todos os recursos do plano contratado.`,
       'Durante a degustação a CONTRATANTE pode desistir a qualquer momento, sem custo e sem multa, avisando a CONTRATADA pelo Sistema (tela Sugestões) ou pelo e-mail de contato.',
@@ -44,10 +50,11 @@
       `Com ${bloqueio} (${extenso(bloqueio)}) dias de atraso, o acesso da CONTRATANTE fica limitado à tela de pagamento até a quitação. Os dados não são apagados por atraso e ficam disponíveis assim que o pagamento é confirmado.`,
       'O valor pode ser reajustado uma vez a cada 12 (doze) meses pelo IPCA/IBGE, ou outro índice que o substitua, com aviso de 30 (trinta) dias. Mudanças de preço fora disso só valem com novo aceite.',
       'A CONTRATADA emite a nota fiscal de serviços correspondente a cada pagamento, enviada ao e-mail financeiro informado.']);
+    }
     if (e.condicoes) clausula('Condições especiais combinadas', [esc(e.condicoes).replace(/\n/g, '<br>')]);
     clausula('Vigência e cancelamento', [
       'Este contrato vale por prazo indeterminado a partir do aceite, sem fidelidade e sem multa de cancelamento.',
-      'Qualquer das partes pode encerrá-lo a qualquer momento, por aviso no Sistema ou por e-mail. O acesso continua até o fim do período já pago; não há devolução proporcional de mensalidade paga.',
+      'Qualquer das partes pode encerrá-lo a qualquer momento, por aviso no Sistema ou por e-mail. O acesso continua até o fim do período já pago (na permuta, até o fim do aviso); não há devolução proporcional de mensalidade paga.',
       'Após o encerramento, a CONTRATANTE tem 30 (trinta) dias para exportar os seus dados pelas próprias ferramentas do Sistema (planilhas e relatórios) ou pedir uma cópia completa à CONTRATADA. Passado esse prazo, os dados são excluídos definitivamente, e das cópias de segurança à medida que elas vencem (no máximo 6 meses), salvo o que a lei obrigar a guardar.',
       'A CONTRATADA pode suspender o acesso em caso de uso ilícito, tentativa de invasão, compartilhamento indevido de login ou violação deste contrato, avisando a CONTRATANTE.']);
     clausula('Sigilo e propriedade dos dados', [
@@ -89,8 +96,8 @@
 
     const resumo = [
       ['Contratante', `${d.razao_social} · ${pj ? 'CNPJ' : 'CPF'} ${d.documento}`],
-      ['Plano', `${d.plano_nome} · ${brl(d.valor)} por mês`],
-      ['Degustação', `${dias} dias grátis a partir do aceite; depois, cobrança mensal automática por Pix`],
+      ['Plano', d.gratuita ? `${d.plano_nome} · permuta, sem mensalidade` : `${d.plano_nome} · ${brl(d.valor)} por mês`],
+      d.gratuita ? ['Contrapartida', d.contrapartida || 'a definir entre as partes'] : ['Degustação', `${dias} dias grátis a partir do aceite; depois, cobrança mensal automática por Pix`],
       ['Administrador', `${d.admin_nome ? d.admin_nome + ' · ' : ''}${d.admin_email}`],
       ['Financeiro', e.email_financeiro || '—']];
     return `<div class="tc-contrato">

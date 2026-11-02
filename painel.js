@@ -129,7 +129,7 @@
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
         <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
-        <td>${sit} ${pagto(c)} ${c.contrato_exigido || c.contrato ? contratoPill(c) : cadastro(c)}<br><button class="b" data-contrato="${c.id}" style="margin-top:4px" title="Dados do cliente, contrato, revisões e convite">📄 Cliente e contrato</button></td>
+        <td>${sit} ${pagto(c)} ${c.slug === 'demonstracao' ? '<span class="pill neu" title="Corretora de demonstração, com dados fictícios: não tem contrato">Demonstração</span>' : contratoPill(c)}<br><button class="b" data-contrato="${c.id}" style="margin-top:4px" title="Dados do cliente, contrato, revisões e convite">📄 Cliente e contrato</button></td>
         <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas ativas na equipe (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">${c.usuarios_ativos} de ${c.usuarios}</button></td>
         <td>${c.slug ? `<button class="b" data-copiar-link="${esc(linkCorretora(c.slug))}" title="Copiar o link próprio da corretora">🔗 /${esc(c.slug)}</button>` : '—'}</td>
         <td>${quando(c.ultimo_acesso)}</td>
@@ -139,9 +139,11 @@
         </div></td></tr>`;
     }).join('');
     const semContratada = !contratadaOk();
+    const semContrato = EST.corretoras.filter((c) => c.slug !== 'demonstracao' && !c.contrato);
     return `
       <div class="card"><h3>Novo cliente</h3>
         <p class="sub">Preencha os dados do cliente: eles entram no contrato. Ao criar, o sistema gera o contrato e o convite. No primeiro acesso, o administrador do cliente lê o contrato e aceita ou pede revisão; sem o aceite, ninguém da empresa usa o sistema. A degustação de ${esc((EST.config.regua || {}).degustacao_dias || 15)} dias começa no aceite e, depois dela, a cobrança mensal começa sozinha.</p>
+        ${semContrato.length ? `<div class="aviso" style="margin-bottom:10px;background:#f8e3e0">Sem cadastro completo e contrato: <b>${semContrato.map((c) => esc(c.nome_exibicao || c.nome)).join(', ')}</b>. Todos os clientes, inclusive os que já usam o sistema, precisam dos dados completos e do contrato aceito. Abra <b>📄 Cliente e contrato</b> na linha de cada um.</div>` : ''}
         ${semContratada ? '<div class="aviso" style="margin-bottom:10px">Antes do primeiro contrato, preencha os <b>dados da Capacity Case</b> na aba <b>Contrato</b> (razão social e CNPJ).</div>' : ''}
         <form id="pp-nova">${formCliente(null)}
           <div class="acoes" style="margin-top:12px"><button class="b" type="button" data-previa>Ver o contrato antes</button><button class="b pri" type="submit">Criar cliente e gerar contrato</button></div>
@@ -232,7 +234,7 @@
     if (c.gratuita || !c.ativo) return '';
     if (c.maior_atraso > 0) return `<span class="pill susp">${c.maior_atraso} dias em atraso</span>`;
     if (c.faturas_abertas > 0) return '<span class="pill pend">Fatura em aberto</span>';
-    if (!c.degustacao_inicio) return '<span class="pill neu">Degustação começa ao concluir o cadastro</span>';
+    if (!c.degustacao_inicio) return '<span class="pill neu">Degustação começa no aceite do contrato</span>';
     const fim = new Date(c.degustacao_inicio + 'T12:00:00'); fim.setDate(fim.getDate() + Number((EST.config.regua || {}).degustacao_dias || 15));
     return fim > new Date() ? `<span class="pill neu">Degustação até ${fim.toLocaleDateString('pt-BR')}</span>` : '<span class="pill ok">Em dia</span>';
   }
@@ -328,14 +330,15 @@
     return '';
   }
   // dados do cliente + condições do dia = o que vai no contrato (fica gravado junto, como fotografia)
-  function condicoes(d) {
+  function condicoes(d, corr) {
     const r = EST.config.regua || {}, esp = d.preco_especial !== '' && d.preco_especial != null;
+    if (corr && corr.gratuita) d = Object.assign({}, d, { gratuita: true, contrapartida: corr.permuta_contrapartida || '' });
     return Object.assign({}, d, { plano_nome: PLANOS[d.plano] || d.plano, plano_desc: DESC_PLANO[d.plano] || '', valor: esp ? Number(d.preco_especial) : preco(d.plano),
       preco_especial: esp, degustacao_dias: Number(r.degustacao_dias || 15), aviso_dias: Number(r.aviso_dias || 5), bloqueio_dias: Number(r.bloqueio_dias || 10),
       data_emissao: new Date().toISOString(), modelo: window.TorreContrato.MODELO });
   }
-  const gerarTexto = (d) => window.TorreContrato.gerar(condicoes(d), EST.config.contratada || {});
-  async function emitir(id, d) { const dados = condicoes(d); return rpc('crm_plataforma_contrato_emitir', { p_corretor: id, p_dados: dados, p_texto: window.TorreContrato.gerar(dados, EST.config.contratada || {}) }); }
+  const gerarTexto = (d, corr) => window.TorreContrato.gerar(condicoes(d, corr), EST.config.contratada || {});
+  async function emitir(id, d, corr) { const dados = condicoes(d, corr); return rpc('crm_plataforma_contrato_emitir', { p_corretor: id, p_dados: dados, p_texto: window.TorreContrato.gerar(dados, EST.config.contratada || {}) }); }
 
   function verContrato(html, rodape) {
     window.TorreContrato.estilo();
@@ -353,7 +356,7 @@
 
   function contratoPill(c) {
     const k = c.contrato;
-    if (!k) return '<span class="pill pend">Contrato não gerado</span>';
+    if (!k) return '<span class="pill susp" title="Complete os dados do cliente e gere o contrato em 📄 Cliente e contrato">Falta cadastro e contrato</span>';
     if (k.status === 'revisao') return `<span class="pill susp" title="${esc(k.revisao_texto || '')}">Pediu revisão do contrato</span>`;
     if (k.status === 'pendente') return `<span class="pill pend">Contrato v${k.versao} aguardando aceite</span>`;
     return `<span class="pill ok" title="Aceito por ${esc(k.aceito_por || '')} em ${quando(k.aceito_em)}">Contrato v${k.versao} aceito</span>`;
@@ -391,15 +394,16 @@
       };
     }
     tr.querySelector('[data-conv]').onclick = () => { EST.aviso = convite(c, c.admin_email, true); desenhar(); };
-    tr.querySelector('[data-previa]').onclick = () => { const d = lerCliente(form); const erro = conferirCliente(d); if (erro) { msg.textContent = erro; return; } verContrato(gerarTexto(d)); };
+    tr.querySelector('[data-previa]').onclick = () => { const d = lerCliente(form); const erro = conferirCliente(d); if (erro) { msg.textContent = erro; return; } verContrato(gerarTexto(d, c)); };
     tr.querySelector('[data-f]').onclick = () => tr.remove();
     tr.querySelector('[data-salvar]').onclick = async () => {
       const d = lerCliente(form), erro = conferirCliente(d);
       if (erro) { msg.textContent = erro; return; }
       if (!contratadaOk()) { msg.textContent = 'Preencha antes os dados da Capacity Case na aba Contrato.'; return; }
+      if (!k && c.ultimo_acesso && !confirm(`${nome} já usa o sistema. Ao gerar o contrato, a equipe fica travada até o administrador (${c.admin_email}) entrar e aceitar. Continuar?`)) return;
       if (k && k.status === 'aceito' && !confirm(`O contrato atual de ${nome} já foi aceito. A nova versão aparece para o administrador aceitar no próximo acesso (a equipe continua usando o sistema). Continuar?`)) return;
       msg.textContent = 'Salvando…';
-      try { await rpc('crm_plataforma_cliente_salvar', { p_id: id, p_dados: d }); const r = await emitir(id, d);
+      try { await rpc('crm_plataforma_cliente_salvar', { p_id: id, p_dados: d }); const r = await emitir(id, d, c);
         recarregar(`<div class="aviso">Dados de <b>${esc(nome)}</b> salvos e contrato v${r.versao} gerado. O administrador vê no próximo acesso.</div>`); }
       catch (err) { msg.textContent = 'Não foi possível salvar: ' + err.message; }
     };

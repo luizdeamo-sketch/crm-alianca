@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611021802">
+<meta name="app-build" content="202611021809">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -508,7 +508,7 @@ window.ALIANCA = {
     <div id="view-admin" class="view" style="overflow-y:auto; padding:30px 36px;">
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:4px;">
         <h2 style="margin:0;">Admin</h2>
-        <div id="adm-tabs" class="seg-toggle"><button type="button" class="active" data-at="aud">Auditoria</button><button type="button" data-at="usr">Usuários e acessos</button><button type="button" data-at="mel" id="adm-tab-mel" style="display:none">🧭 Melhorias</button></div>
+        <div id="adm-tabs" class="seg-toggle"><button type="button" class="active" data-at="aud">Auditoria</button><button type="button" data-at="usr">Usuários e acessos</button></div>
       </div>
       <div class="hint" style="margin:0 0 14px">Quem mexeu em quê, quando e com qual valor, e quem pode entrar no sistema. Visível só para o master.</div>
       <div class="hint" id="adm-bkp" style="margin:-6px 0 12px"></div>
@@ -10884,10 +10884,8 @@ async function renderAdmin(){
   document.querySelectorAll('#adm-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.at===ADM.tab));
   sb.from('crm_backup_log').select('em,tabelas,linhas,ok,erro').order('em',{ascending:false}).limit(1).then(({data})=>{ const u = data && data[0], el = document.getElementById('adm-bkp'); if(!el) return;
     el.innerHTML = u ? (u.ok ? `💾 <b>Backup automático em dia:</b> último em ${admDh(u.em)}${u.tabelas?` · ${u.tabelas} tabelas · ${Number(u.linhas).toLocaleString('pt-BR')} linhas`:''}. Roda todo dia às 3h e guarda 10 dias e o dia 1 de cada mês.` : `⚠️ <b>O último backup automático falhou</b> (${admDh(u.em)}): ${escapeHtml(u.erro||'')}`) : '💾 O backup automático ainda não rodou (primeiro às 3h).'; });
-  melVerAba();
   host.innerHTML = '<div class="op-more">Carregando…</div>';
   if(ADM.tab==='usr'){ host.innerHTML = await admUsrHtml(); return; }
-  if(ADM.tab==='mel'){ await melRender(host); return; }
   host.innerHTML = await admAudHtml(); await admCarregarAud();
 }
 document.addEventListener('click', async e=>{
@@ -10961,63 +10959,19 @@ document.addEventListener('click', async e=>{
   }
 });
 
-// ===== Admin › Melhorias: propostas do agente de boas práticas (outros sistemas → Aliança). Só quem está em crm_config 'propostas_aprovadores' vê. =====
-const MEL = { rows:[], f:'proposta', ok:null };
-const MEL_ST = [['proposta','Para decidir','#0018fc'],['aprovada','Aplicar','#1a7f4b'],['depois','Depois','#b7791f'],['recusada','Não aplicar','#c23636'],['em_construcao','Em construção','#6b46c1'],['publicada','No ar','#0f766e']];
-const melSt = s=> MEL_ST.find(x=>x[0]===s) || [s,s,'#666'];
-async function melVerAba(){
-  if(MEL.ok===null){ try{ const { data } = await sb.rpc('crm_propostas_ok'); MEL.ok = data===true; }catch(e){ MEL.ok = false; } }
-  const b = document.getElementById('adm-tab-mel'); if(b) b.style.display = MEL.ok ? '' : 'none';
-  if(!MEL.ok && ADM.tab==='mel') ADM.tab = 'aud';
-}
-async function melRender(host){
-  const { data, error } = await sb.from('crm_propostas_melhoria').select('*').order('ordem').order('criado_em',{ascending:false});
-  if(error){ host.innerHTML = '<div class="es-box"><div class="hint">Não foi possível ler as propostas: '+escapeHtml(error.message)+'</div></div>'; return; }
-  MEL.rows = data||[]; melDraw(host);
-}
-function melDraw(host){
-  host = host || document.getElementById('adm-body'); const cnt = {}; MEL.rows.forEach(r=>cnt[r.status]=(cnt[r.status]||0)+1);
-  const pend = cnt.proposta||0, b = document.getElementById('adm-tab-mel'); if(b) b.textContent = '🧭 Melhorias'+(pend?' ('+pend+')':'');
-  const rows = MEL.rows.filter(r=>!MEL.f || r.status===MEL.f);
-  const lin = (k,v)=> v ? `<div style="margin-top:6px"><span class="hint" style="display:block;margin:0">${k}</span>${escapeHtml(v).replace(/\n/g,'<br>')}</div>` : '';
-  host.innerHTML = `<div class="hint" style="margin:0 0 10px">Boas práticas que já funcionam nos outros sistemas, comparadas com o que o Aliança tem hoje. Você decide: <b>Aplicar</b>, <b>Depois</b> ou <b>Não aplicar</b>. Nada muda no sistema sem a sua decisão.</div>
-    <div class="sg-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"><button class="sg-chip${MEL.f===''?' on':''}" data-mel-f="">Todas <b>${MEL.rows.length}</b></button>${MEL_ST.map(s=>`<button class="sg-chip${MEL.f===s[0]?' on':''}" data-mel-f="${s[0]}" style="--c:${s[2]}">${s[1]} <b>${cnt[s[0]]||0}</b></button>`).join('')}</div>
-    ${rows.length ? rows.map(r=>{ const st = melSt(r.status); return `<div class="sg-card" data-mel="${r.id}">
-      <div class="sg-top" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${escapeHtml(r.codigo)} · ${escapeHtml(r.titulo)}</b><span class="tagx" style="background:${st[2]}1a;color:${st[2]}">${st[1]}</span>${r.origem_sistema?`<span class="tagx">vem de ${escapeHtml(r.origem_sistema)}</span>`:''}${r.tela?`<span class="tagx">${escapeHtml(r.tela)}</span>`:''}${r.esforco?`<span class="tagx">esforço ${escapeHtml(r.esforco)}</span>`:''}${r.impacto?`<span class="tagx${r.impacto==='alto'?' warn':''}">impacto ${escapeHtml(r.impacto)}</span>`:''}</div>
-      ${lin('O que acontece hoje', r.problema)}${lin('O que propomos', r.proposta)}${lin('Como fica para quem usa', r.como_fica)}${lin('Por que achamos que funciona', r.evidencia)}${lin('Resultado depois de publicada', r.resultado)}
-      ${r.decisao_nota?`<div class="sg-resp" style="margin-top:8px"><b>Sua nota:</b> ${escapeHtml(r.decisao_nota)}</div>`:''}
-      <div class="sg-actions" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">${['proposta','depois'].includes(r.status)?`<button class="adm-b pri" data-mel-a="aprovada">✓ Aplicar</button><button class="adm-b" data-mel-a="depois">Depois</button><button class="adm-b" data-mel-a="recusada" style="color:var(--red)">Não aplicar</button>`:`<button class="adm-b" data-mel-a="proposta">Voltar para decidir</button>`}<span style="flex:1"></span><span class="hint" style="margin:0">${r.decidido_em?'decidido em '+fmtDateTime(r.decidido_em):'proposta em '+fmtDateTime(r.criado_em)}</span></div>
-    </div>`; }).join('') : '<div class="op-more">Nenhuma proposta nesta seleção.</div>'}`;
-}
-document.addEventListener('click', e=>{
-  const f = e.target.closest('[data-mel-f]'); if(f){ MEL.f = f.dataset.melF; melDraw(); return; }
-  const a = e.target.closest('[data-mel-a]'); if(!a) return;
-  const r = MEL.rows.find(x=>x.id===a.closest('[data-mel]').dataset.mel); if(!r) return;
-  const para = a.dataset.melA, st = melSt(para);
-  const box = dlgOpen(`<div class="om-title"><div><h3>${escapeHtml(st[1])}: ${escapeHtml(r.codigo)}</h3><div class="om-sub">${escapeHtml(r.titulo)}</div></div><button data-close>✕</button></div>
-    <div class="dlg-body"><label class="fl"><span>Nota (opcional): o que ajustar, por que não, ou quando retomar</span><textarea id="mel-nota" rows="3" style="border:1px solid var(--border);border-radius:6px;padding:8px;font-family:inherit;font-size:13px;text-transform:none">${escapeHtml(r.decisao_nota||'')}</textarea></label></div>
-    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="mel-ok">Confirmar</button></div>`);
-  box.querySelector('#mel-ok').addEventListener('click', async ev=>{
-    ev.target.disabled = true; ev.target.textContent = 'Salvando…';
-    const nota = box.querySelector('#mel-nota').value.trim(), agora = new Date().toISOString();
-    const upd = { status:para, decisao_nota:nota||null, decidido_por:window._userEmail||null, decidido_em:agora, atualizado_em:agora,
-      historico:(r.historico||[]).concat([{ em:agora, por:window._userEmail||null, de:r.status, para, nota:nota||null }]) };
-    const { error } = await sb.from('crm_propostas_melhoria').update(upd).eq('id', r.id);
-    if(error){ showToast('Erro: '+error.message); ev.target.disabled = false; ev.target.textContent = 'Confirmar'; return; }
-    Object.assign(r, upd); dlgClose(); showToast(para==='aprovada' ? 'Anotado: vai para a fila de construção ✓' : 'Salvo ✓'); melDraw();
-  });
-});
+// Admin › Melhorias saiu do produto em 02/11/2026 (pedido do Luiz): as propostas internas do curador (comparações com outros
+// sistemas) ficam só em boas-praticas/propostas.json, fora do sistema dos clientes.
 document.addEventListener('change', async e=>{
   const pa = e.target.closest('.adm-papel'); const no = e.target.closest('.adm-nome'); const el = pa || no; if(!el) return;
   const em = el.dataset.e, u = ADM.usr.find(x=>x.email===em) || {}; const papel = pa ? pa.value : (u.papel && u.papel!=='sem cadastro' ? u.papel : 'especialista'), nome = no ? no.value.trim() : (u.nome||'');
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611021802"></script>
-<script src="painel.js?v=202611021802"></script>
-<script src="cobranca.js?v=202611021802"></script>
-<script src="cadastro.js?v=202611021802"></script>
-<script src="contrato.js?v=202611021802"></script>
-<script src="guarda.js?v=202611021802"></script>
+<script src="plataforma.js?v=202611021809"></script>
+<script src="painel.js?v=202611021809"></script>
+<script src="cobranca.js?v=202611021809"></script>
+<script src="cadastro.js?v=202611021809"></script>
+<script src="contrato.js?v=202611021809"></script>
+<script src="guarda.js?v=202611021809"></script>
 </body>
 </html>

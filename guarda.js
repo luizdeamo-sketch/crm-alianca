@@ -6,6 +6,8 @@
       internet, o sistema oferece ver e copiar o que foi digitado. O rascunho some sozinho quando a tela é salva.
    4) O rascunho também vai para o banco (crm_rascunhos, só da pessoa, separado dos dados oficiais): ao abrir a mesma janela, em qualquer
       computador, aparece "Continuar de onde parei". Salvou a tela, o rascunho some.
+   5) (auditoria 02/11/2026) Cada gravação é conferida: recusa do banco aparece na hora em português e o rascunho só some quando o
+      banco confirma; sessão vencida pede a senha ali mesmo, sem sair da tela; queda de internet avisa.
    O dado de verdade continua indo para o banco pelo Salvar de cada tela. */
 (function () {
   'use strict';
@@ -130,18 +132,132 @@
   const BTN = 'font:inherit;min-height:42px;padding:0 16px;border-radius:8px;border:1px solid #d5d8d2;background:#fff;cursor:pointer';
   const PRI = BTN + ';background:var(--navy,#111827);color:#fff;border-color:var(--navy,#111827);font-weight:600';
 
-  // aperta o Salvar e espera: gravou se a janela fechou (ou os campos sumiram) sem mensagem de erro
+  /* ---------- conferência de cada gravação no banco (auditoria 02/11/2026: o cliente nunca perde o que digitou) ----------
+     Toda gravação (tabela, função que grava ou arquivo) passa por aqui. Se o banco recusar, a pessoa vê na hora, em português, numa faixa
+     que só some quando ela fecha; o rascunho NÃO é apagado. O rascunho só some quando o banco confirma que gravou. Sessão vencida abre
+     um "Entre de novo aqui mesmo", sem sair da tela. */
+  // funções do banco que só LEEM (ou rodam sozinhas ao abrir a tela); todas as outras gravam e são conferidas
+  const SO_LEITURA = /\/rpc\/crm_(is_master|dono_plataforma|corretor_atual|papel|acesso_ok|mfa_ok|mfa_obrigatorio|minha_corretora|minha_cobranca|minhas_faturas|planos_info|limite_info|cadastro_info|contrato_meu|contrato_condicoes|marca_publica|recurso_liberado|config_valor|mensagem_tem_propria|funil_etapas_uso|funil_etapas_padrao|plano_upgrade_previa|agenda_feed_token|gerar_alertas_cadastro|admin_usuarios|admin_acessos|destinatarios|lembretes|backup_exportar|plataforma_(corretoras|faturas|usuarios|contratos|historico|administradores|sugestoes|usuario_buscar|config_ler))(\?|$)/;
+  const NAO_CONTA = /\/rest\/v1\/(uso_eventos|crm_rascunhos)\b/;
+  const GRAV = { ultimoClique: 0, falhas: [], sucessos: [] };
+  document.addEventListener('click', (e) => { if (e.isTrusted) GRAV.ultimoClique = Date.now(); }, true);
+  document.addEventListener('keydown', (e) => { if (e.isTrusted && (e.key === 'Enter' || ((e.ctrlKey || e.metaKey) && /^s$/i.test(e.key)))) GRAV.ultimoClique = Date.now(); }, true);
+
+  function ehGravacao(url, opt) {
+    const m = String((opt && opt.method) || 'GET').toUpperCase(), u = String(url);
+    if (NAO_CONTA.test(u)) return false;
+    if (/\/storage\/v1\/object\//.test(u)) return m === 'POST' || m === 'PUT';
+    if (/\/rest\/v1\/rpc\//.test(u)) return !SO_LEITURA.test(u);
+    return /\/rest\/v1\//.test(u) && m !== 'GET' && m !== 'HEAD';
+  }
+  function traduzir(st, corpo) {
+    const code = corpo && (corpo.code || corpo.error_code) || '', msg = String((corpo && (corpo.message || corpo.msg || corpo.error)) || '');
+    if (st === 0) return { txt: 'Sem internet no momento.', sessao: false };
+    if (st === 401 || /jwt|token.*expir|invalid claim|not authenticated/i.test(msg)) return { txt: 'A sua sessão expirou.', sessao: true };
+    if (code === '23505') return { txt: 'Já existe um registro igual a este (mesmo CPF, número ou nome). Abra o que já existe em vez de criar outro.' };
+    if (code === '23502') return { txt: 'Falta preencher um campo obrigatório.' };
+    if (/^22/.test(code) || code === '23514') return { txt: 'Algum campo está num formato que o sistema não aceita (data, número ou opção da lista). Confira o que foi digitado.' };
+    if (code === '42501' || st === 403) return { txt: 'O sistema não deixou gravar: sem permissão para isto, ou o acesso da empresa está suspenso.' };
+    if (/[ãçéêíóõúâ]/i.test(msg) && msg.length < 300) return { txt: msg };   // mensagens do próprio banco já vêm em português
+    return { txt: 'O servidor não aceitou a gravação agora. Tente de novo em instantes.', tecnico: (code ? code + ' · ' : '') + msg.slice(0, 160) };
+  }
+  function vigiar(fn) {
+    if (!fn || fn.__guarda) return fn;
+    const w = async (url, opt) => {
+      if (!ehGravacao(url, opt)) return fn(url, opt);
+      let resp;
+      try { resp = await fn(url, opt); } catch (e) { registrarFalha(0, null); throw e; }
+      if (resp.ok) GRAV.sucessos.push(Date.now());
+      else { let corpo = null; try { corpo = await resp.clone().json(); } catch (e) { /* sem corpo */ } registrarFalha(resp.status, corpo); }
+      return resp;
+    };
+    w.__guarda = true; return w;
+  }
+  function instalarVigia() {
+    if (typeof sb === 'undefined') return setTimeout(instalarVigia, 300);
+    try { if (sb.rest) sb.rest.fetch = vigiar(sb.rest.fetch); if (sb.fetch) sb.fetch = vigiar(sb.fetch); } catch (e) { /* segue sem a conferência */ }
+  }
+  instalarVigia();
+
+  function registrarFalha(st, corpo) {
+    const t = traduzir(st, corpo);
+    GRAV.falhas.push(Date.now());
+    guardarRascunho();                                      // o que está na tela fica guardado (navegador e banco)
+    if (Date.now() - GRAV.ultimoClique > 20000) return;     // falha de fundo, sem a pessoa ter pedido nada: não interrompe
+    if (t.sessao) { entrarDeNovo(); return; }
+    faixaFalha(t);
+  }
+  function faixaFalha(t) {
+    let f = document.getElementById('tc-guarda-falha');
+    if (!f) {
+      f = document.createElement('div'); f.id = 'tc-guarda-falha'; f.setAttribute('role', 'alert');
+      f.style.cssText = 'position:fixed;left:16px;right:16px;top:16px;z-index:100001;background:#9e2f24;color:#fff;border-radius:12px;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:14px/1.45 "Segoe UI",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3)';
+      document.body.appendChild(f);
+    }
+    f.innerHTML = `<span style="flex:1;min-width:220px">${t.aviso ? `<b>📶 ${esc(t.txt)}</b>` : `<b>⚠️ Não foi gravado.</b> ${esc(t.txt)} <b>Nada do que você digitou se perdeu</b>: continua na tela e há uma cópia de segurança. Corrija se for o caso e clique em Salvar de novo.`}${t.tecnico ? `<br><small style="opacity:.75">Detalhe para o suporte: ${esc(t.tecnico)}</small>` : ''}</span>
+      <button type="button" data-x style="${BTN};min-height:36px;background:transparent;color:#fff;border-color:rgba(255,255,255,.5)">Entendi</button>`;
+    f.querySelector('[data-x]').onclick = () => f.remove();
+  }
+  // sessão vencida: entra de novo aqui mesmo, sem recarregar a página (o que está digitado continua na tela)
+  function entrarDeNovo() {
+    if (document.getElementById('tc-guarda-login')) return;
+    const d = janela(`<h3 style="margin:0;font-size:19px;color:#111827">A sua sessão expirou</h3>
+      <p style="margin:0">Por segurança o sistema pede a senha de novo. <b>O que você digitou continua na tela</b>; depois de entrar, é só clicar em Salvar outra vez.</p>
+      <label style="display:grid;gap:4px"><span style="font-size:13px;color:#5d6871">E-mail</span><input value="${esc(window._userEmail || '')}" disabled style="font:inherit;padding:10px;border:1px solid #d5d8d2;border-radius:8px;background:#f4f5f3"></label>
+      <label style="display:grid;gap:4px"><span style="font-size:13px;color:#5d6871">Senha</span><input type="password" data-s autocomplete="current-password" style="font:inherit;padding:10px;border:1px solid #d5d8d2;border-radius:8px"></label>
+      <label data-cod style="display:none;gap:4px"><span style="font-size:13px;color:#5d6871">Código de 6 dígitos do aplicativo (2 etapas)</span><input inputmode="numeric" maxlength="6" data-c style="font:inherit;padding:10px;border:1px solid #d5d8d2;border-radius:8px"></label>
+      <div class="m" style="color:#9e2f24;min-height:18px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" data-ok style="${PRI}">Entrar e continuar</button></div>`);
+    d.id = 'tc-guarda-login';
+    const msg = d.querySelector('.m'), btn = d.querySelector('[data-ok]'); let fator = null;
+    const tentar = async () => {
+      btn.disabled = true; msg.textContent = '';
+      try {
+        if (!fator) {
+          const { error } = await sb.auth.signInWithPassword({ email: window._userEmail, password: d.querySelector('[data-s]').value });
+          if (error) throw new Error('E-mail ou senha não conferem.');
+          const n = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (n.data && n.data.nextLevel === 'aal2' && n.data.currentLevel !== 'aal2') {
+            const fs = await sb.auth.mfa.listFactors(); fator = fs.data && fs.data.totp && fs.data.totp.find((x) => x.status === 'verified');
+            if (fator) { d.querySelector('[data-cod]').style.display = 'grid'; d.querySelector('[data-c]').focus(); btn.disabled = false; return; }
+          }
+        } else {
+          const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: fator.id, code: d.querySelector('[data-c]').value.trim() });
+          if (error) throw new Error('Código não confere. Veja o código novo no aplicativo.');
+        }
+        d.remove(); faixaFalha({ aviso: true, txt: 'Você entrou de novo.' });
+        const f = document.getElementById('tc-guarda-falha'); if (f) f.querySelector('span').innerHTML = '<b>✔ Pronto, você entrou de novo.</b> O que estava digitado continua na tela: clique em Salvar para gravar.';
+      } catch (e) { msg.textContent = e.message; btn.disabled = false; }
+    };
+    btn.onclick = tentar;
+    d.querySelectorAll('input').forEach((i) => i.addEventListener('keydown', (e) => { if (e.key === 'Enter') tentar(); }));
+    setTimeout(() => d.querySelector('[data-s]').focus(), 50);
+  }
+  window.addEventListener('offline', () => faixaFalha({ aviso: true, txt: 'A internet caiu. Não feche esta tela: o que você digitar fica guardado aqui e você salva quando a internet voltar.' }));
+  window.addEventListener('online', () => { const f = document.getElementById('tc-guarda-falha'); if (f) f.querySelector('span').innerHTML = '<b>✔ A internet voltou.</b> Se algo não foi salvo, clique em Salvar agora.'; });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && typeof sb !== 'undefined') sb.auth.getSession().catch(() => {}); });   // renova a sessão ao voltar para a aba
+
+  // depois de um clique em Salvar: o banco confirmou? (ok = gravou e nada foi recusado; sem gravação nenhuma não conta como salvo)
+  async function confirmacaoDoBanco(desde, ms) {
+    for (let t = 0; t < ms; t += 250) {
+      await new Promise((r) => setTimeout(r, 250));
+      if (GRAV.falhas.some((x) => x >= desde)) return 'falhou';
+      const err = [...document.querySelectorAll('.om-err, .msg, #cad-msg')].find((e) => visivel(e) && /erro|não|preencha|inválid|inform|falt/i.test(e.textContent));
+      if (err) return 'falhou';
+      if (GRAV.sucessos.some((x) => x >= desde) && t >= 750) return 'gravou';   // espera as gravações em sequência terminarem
+    }
+    return GRAV.sucessos.some((x) => x >= desde) ? 'gravou' : 'nada';
+  }
+
+  // aperta o Salvar e espera a confirmação do banco
   async function salvarAgora(campos) {
     const b = botaoSalvar(campos);
     if (!b) return { ok: false, motivo: 'Não achei o botão Salvar desta tela. Clique em Salvar nela mesma.' };
-    b.click();
-    for (let i = 0; i < 40; i++) {
-      await new Promise((r) => setTimeout(r, 250));
-      const err = [...document.querySelectorAll('.om-err, .msg, #cad-msg')].find((e) => visivel(e) && /erro|não|preencha|inválid|inform|falt/i.test(e.textContent));
-      if (err) return { ok: false, motivo: err.textContent.trim() };
-      if (!pendentes().some((el) => campos.includes(el))) return { ok: true };
-    }
-    return { ok: false, motivo: 'A tela não confirmou que salvou. Confira e clique em Salvar nela.' };
+    const desde = Date.now(); b.click();
+    const r = await confirmacaoDoBanco(desde, 12000);
+    if (r === 'gravou') return { ok: true };
+    const err = [...document.querySelectorAll('.om-err, .msg, #cad-msg')].find((e) => visivel(e) && /erro|não|preencha|inválid|inform|falt/i.test(e.textContent));
+    return { ok: false, motivo: err ? err.textContent.trim() : (r === 'falhou' ? 'O banco não aceitou a gravação.' : 'A tela não confirmou que salvou. Confira e clique em Salvar nela.') };
   }
 
   async function antesDeAtualizar() {
@@ -189,15 +305,18 @@
     if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); salvarPeloAtalho(); }
   });
   ['input', 'change'].forEach((ev) => document.addEventListener(ev, () => setTimeout(atualizarPill, 50), true));
-  // clicou em Salvar de qualquer tela e não apareceu erro: o que estava digitado ali conta como salvo
+  // clicou em Salvar de qualquer tela: só conta como salvo quando o BANCO confirma (antes bastava não aparecer erro em 1,5 s, e um erro
+  // mostrado em aviso rápido apagava a cópia de segurança)
   document.addEventListener('click', (e) => {
     const b = e.target && e.target.closest && e.target.closest('button, input[type="submit"]');
-    if (b && !b.closest('#tc-guarda') && b.id !== 'tc-guarda-pill' && BOTAO_SALVAR.test((b.textContent || b.value || '').trim()) && !NAO.test(b.textContent || '')) {
-      const base = b.closest('.dlg-card, #tc-cad, .modbox, form, section, .view') || document.body;
-      setTimeout(() => {
-        const err = [...document.querySelectorAll('.om-err, .msg, #cad-msg')].find((x) => visivel(x) && /erro|não|preencha|inválid|inform|falt/i.test(x.textContent));
-        if (!err) { base.querySelectorAll('input, textarea, select').forEach((el) => tocados.delete(el)); apagarRascunho(); atualizarPill(); }
-      }, 1500);
+    if (b && !b.closest('#tc-guarda, #tc-guarda-falha, #tc-guarda-login') && b.id !== 'tc-guarda-pill' && BOTAO_SALVAR.test((b.textContent || b.value || '').trim()) && !NAO.test(b.textContent || '')) {
+      const base = b.closest('.dlg-card, #tc-cad, .modbox, form, section, .view') || document.body, desde = Date.now();
+      guardarRascunho();
+      confirmacaoDoBanco(desde, 12000).then((r) => {
+        if (r !== 'gravou') return;   // recusado ou sem gravação: o rascunho fica
+        base.querySelectorAll('input, textarea, select').forEach((el) => tocados.delete(el)); apagarRascunho(); atualizarPill();
+        const f = document.getElementById('tc-guarda-falha'); if (f && /Não foi gravado|entrou de novo|internet voltou/.test(f.textContent)) f.remove();
+      });
     }
     setTimeout(atualizarPill, 400);
   }, true);

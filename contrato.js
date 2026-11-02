@@ -96,7 +96,7 @@
 
     const resumo = [
       ['Contratante', `${d.razao_social} · ${pj ? 'CNPJ' : 'CPF'} ${d.documento}`],
-      ['Plano', d.gratuita ? `${d.plano_nome} · permuta, sem mensalidade` : `${d.plano_nome} · ${brl(d.valor)} por mês`],
+      ['Plano', d.gratuita ? 'Permuta · sem mensalidade, todos os módulos liberados' : `${d.plano_nome} · ${brl(d.valor)} por mês`],
       d.gratuita ? ['Contrapartida', d.contrapartida || 'a definir entre as partes'] : ['Degustação', `${dias} dias grátis a partir do aceite; depois, cobrança mensal automática por Pix`],
       ['Administrador', `${d.admin_nome ? d.admin_nome + ' · ' : ''}${d.admin_email}`],
       ['Financeiro', e.email_financeiro || '—']];
@@ -105,7 +105,7 @@
       <p class="tc-ct-sub">Modelo ${MODELO} · emitido em ${dataBr(d.data_emissao)}</p>
       <table class="tc-ct-res">${resumo.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</table>
       <p><b>CONTRATADA:</b> ${contratada}.</p>
-      <p><b>CONTRATANTE:</b> ${contratante}${e.telefone ? ', telefone ' + esc(e.telefone) : ''}${e.email_financeiro ? ', e-mail financeiro ' + esc(e.email_financeiro) : ''}.</p>
+      <p><b>CONTRATANTE:</b> ${contratante}${e.telefone ? ', telefone ' + esc(e.telefone) : ''}${e.email_financeiro ? ', e-mail financeiro ' + esc(e.email_financeiro) : ''}${e.site ? ', site ' + esc(e.site) : ''}.</p>
       <p>As partes acima ajustam o presente contrato, que se rege pelas cláusulas a seguir.</p>
       ${cl.join('\n')}
     </div>`;

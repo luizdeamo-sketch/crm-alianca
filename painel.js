@@ -294,7 +294,7 @@
   // formulário do cliente (novo: c nulo). Os dados entram no contrato.
   function formCliente(c) {
     const e = (c && c.empresa) || {}, pj = !c || c.tipo_pessoa !== 'PF', v = (x) => esc(x == null ? '' : x);
-    const plano = c && PLANOS[c.plano] ? c.plano : 'completo';
+    const plano = c && c.gratuita ? 'permuta' : c && PLANOS[c.plano] ? c.plano : 'completo';
     return `<div class="lin" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end">
       <label class="f">Tipo de cliente<select name="tipo_pessoa"><option value="PJ" ${pj ? 'selected' : ''}>Empresa (CNPJ)</option><option value="PF" ${pj ? '' : 'selected'}>Pessoa física (CPF)</option></select></label>
       <label class="f"><span data-rot-doc>${pj ? 'CNPJ' : 'CPF'}</span>*<input name="documento" required inputmode="numeric" value="${v(c ? (pj ? c.cnpj : c.cpf) : '')}"></label>
@@ -314,8 +314,14 @@
       <label class="f">Nome do administrador do sistema<input name="admin_nome" maxlength="80" value="${v(c && c.admin_nome)}"></label>
       <label class="f">E-mail do administrador*<input name="admin_email" type="email" required ${c ? 'readonly title="Para trocar o administrador, use a aba Administradores"' : ''} value="${v(c && c.admin_email)}"></label>
       <label class="f">E-mail financeiro (faturas e notas)*<input name="email_financeiro" type="email" required value="${v(e.email_financeiro)}"></label>
-      <label class="f">Plano<select name="plano">${Object.entries(PLANOS).map(([k, n]) => `<option value="${k}" ${k === plano ? 'selected' : ''}>${n} · ${brl(preco(k))}</option>`).join('')}</select></label>
-      <label class="f">Preço especial por mês (vazio = do plano)<input name="preco_especial" type="number" min="0" step="0.01" value="${c && c.preco_especial != null ? c.preco_especial : ''}"></label>
+      <label class="f">Plano<select name="plano">${Object.entries(PLANOS).map(([k, n]) => `<option value="${k}" ${k === plano ? 'selected' : ''}>${n} · ${brl(preco(k))}</option>`).join('')}<option value="permuta" ${plano === 'permuta' ? 'selected' : ''}>Permuta · sem mensalidade, todos os módulos</option></select></label>
+      <label class="f" data-so-pago>Preço especial por mês (vazio = do plano)<input name="preco_especial" type="number" min="0" step="0.01" value="${c && c.preco_especial != null ? c.preco_especial : ''}"></label>
+      <label class="f" data-so-permuta style="grid-column:span 2">Contrapartida da permuta (o que o cliente dá em troca)*<input name="contrapartida" maxlength="200" placeholder="Ex.: indica 5 clientes por mês; divulgação no Instagram" value="${v(c && c.permuta_contrapartida)}"></label>
+      <label class="f">Site<input name="site" type="url" placeholder="https://" value="${v(e.site)}"></label>
+      <label class="f">Instagram<input name="instagram" placeholder="@perfil" value="${v(e.instagram)}"></label>
+      <label class="f">TikTok<input name="tiktok" placeholder="@perfil" value="${v(e.tiktok)}"></label>
+      <label class="f">YouTube<input name="youtube" placeholder="link ou @canal" value="${v(e.youtube)}"></label>
+      <label class="f">Facebook<input name="facebook" placeholder="link da página" value="${v(e.facebook)}"></label>
       <label class="f" style="grid-column:1/-1">Condições especiais combinadas (entram no contrato; deixe vazio se não houver)<textarea name="condicoes" rows="2" maxlength="1500" style="font:inherit;padding:8px 10px;border:1px solid #d5d8d2;border-radius:8px">${v(e.condicoes)}</textarea></label>
     </div>`;
   }
@@ -326,6 +332,11 @@
       form.querySelector('[data-rot-doc]').textContent = pj ? 'CNPJ' : 'CPF'; form.querySelector('[data-rot-razao]').textContent = pj ? 'Razão social' : 'Nome completo';
       form.querySelectorAll('[data-so-pj]').forEach((el) => { el.style.display = pj ? '' : 'none'; }); doc.value = mascaraDoc(doc.value, pj); };
     tipo.onchange = ajustar; ajustar();
+    const pl = form.querySelector('[name="plano"]');
+    const verPlano = () => { const perm = pl.value === 'permuta';
+      form.querySelectorAll('[data-so-permuta]').forEach((el) => { el.style.display = perm ? '' : 'none'; });
+      form.querySelectorAll('[data-so-pago]').forEach((el) => { el.style.display = perm ? 'none' : ''; }); };
+    pl.addEventListener('change', verPlano); verPlano();
     doc.addEventListener('input', () => { doc.value = mascaraDoc(doc.value, tipo.value === 'PJ'); });
     const cpfR = form.querySelector('[name="responsavel_cpf"]'); cpfR.addEventListener('input', () => { cpfR.value = mascaraDoc(cpfR.value, false); });
     form.querySelector('[name="cep"]').addEventListener('blur', async (ev) => {
@@ -341,10 +352,12 @@
     const g = (n) => String((form.querySelector(`[name="${n}"]`) || {}).value || '').trim();
     const pj = g('tipo_pessoa') !== 'PF';
     return { tipo_pessoa: pj ? 'PJ' : 'PF', documento: mascaraDoc(g('documento'), pj), razao_social: g('razao_social'), nome_exibicao: g('nome_exibicao'),
-      admin_nome: g('admin_nome'), admin_email: g('admin_email').toLowerCase(), plano: g('plano'), preco_especial: g('preco_especial'),
+      admin_nome: g('admin_nome'), admin_email: g('admin_email').toLowerCase(), plano: g('plano'), preco_especial: g('plano') === 'permuta' ? '' : g('preco_especial'),
+      contrapartida: g('plano') === 'permuta' ? g('contrapartida') : '',
       empresa: { telefone: g('telefone'), cep: g('cep'), logradouro: g('logradouro'), numero: g('numero'), complemento: g('complemento'), bairro: g('bairro'),
         cidade: g('cidade'), uf: g('uf').toUpperCase(), responsavel: pj ? g('responsavel') : g('razao_social'), responsavel_cpf: pj ? g('responsavel_cpf') : '',
-        responsavel_cargo: pj ? g('responsavel_cargo') : '', email_financeiro: g('email_financeiro').toLowerCase(), condicoes: g('condicoes') } };
+        responsavel_cargo: pj ? g('responsavel_cargo') : '', email_financeiro: g('email_financeiro').toLowerCase(), condicoes: g('condicoes'),
+        site: g('site'), instagram: g('instagram'), tiktok: g('tiktok'), youtube: g('youtube'), facebook: g('facebook') } };
   }
   function conferirCliente(d) {
     const pj = d.tipo_pessoa === 'PJ', e = d.empresa;
@@ -354,13 +367,15 @@
     if (pj && !e.responsavel) return 'Informe o representante legal que assina pela empresa.';
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.admin_email)) return 'Informe o e-mail do administrador.';
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e.email_financeiro)) return 'Informe o e-mail financeiro.';
+    if (d.plano === 'permuta' && !d.contrapartida) return 'Na permuta, informe a contrapartida (o que o cliente dá em troca).';
     return '';
   }
   // dados do cliente + condições do dia = o que vai no contrato (fica gravado junto, como fotografia)
   function condicoes(d, corr) {
     const r = EST.config.regua || {}, esp = d.preco_especial !== '' && d.preco_especial != null;
-    if (corr && corr.gratuita) d = Object.assign({}, d, { gratuita: true, contrapartida: corr.permuta_contrapartida || '' });
-    return Object.assign({}, d, { plano_nome: PLANOS[d.plano] || d.plano, plano_desc: DESC_PLANO[d.plano] || '', valor: esp ? Number(d.preco_especial) : preco(d.plano),
+    if (d.plano === 'permuta') return Object.assign({}, d, { gratuita: true, plano_nome: 'Permuta', plano_desc: 'todos os módulos liberados, inclusive os extras', valor: 0, preco_especial: false,
+      degustacao_dias: Number(r.degustacao_dias || 15), aviso_dias: Number(r.aviso_dias || 5), bloqueio_dias: Number(r.bloqueio_dias || 10), data_emissao: new Date().toISOString(), modelo: window.TorreContrato.MODELO });
+    return Object.assign({}, d, { gratuita: false, plano_nome: PLANOS[d.plano] || d.plano, plano_desc: DESC_PLANO[d.plano] || '', valor: esp ? Number(d.preco_especial) : preco(d.plano),
       preco_especial: esp, degustacao_dias: Number(r.degustacao_dias || 15), aviso_dias: Number(r.aviso_dias || 5), bloqueio_dias: Number(r.bloqueio_dias || 10),
       data_emissao: new Date().toISOString(), modelo: window.TorreContrato.MODELO });
   }

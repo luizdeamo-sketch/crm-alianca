@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611021638">
+<meta name="app-build" content="202611021642">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -9989,10 +9989,16 @@ document.getElementById('who-email').addEventListener('click', ()=>userNameDialo
 // ---- backup ----
 const BACKUP_TABLES = ['crm_demandas','crm_vendas','crm_nao_vendas','crm_prospeccao','crm_acoes','crm_pessoas','crm_apolices','crm_funil','crm_oportunidades','crm_atividades','crm_estudos','crm_documentos','crm_diagnostico','crm_eventos_vida','crm_indicacoes','crm_pos_venda','crm_redes_sociais','crm_relacionamento','crm_agenda','crm_tarefas_diarias','crm_lembretes','crm_base_conhecimento','crm_sugestoes','crm_metas','crm_plantoes_resumo','crm_catalogo_produtos','crm_ata_entregaveis','crm_ata_semanal','crm_indicadores','crm_mais_carlas'];
 async function backupNow(){
-  const btn = document.getElementById('btn-backup'); btn.disabled = true; const out = {exportado_em:new Date().toISOString(), tabelas:{}};
+  const btn = document.getElementById('btn-backup'); btn.disabled = true; let out = {exportado_em:new Date().toISOString(), tabelas:{}};
   try{
-    for(let i=0;i<BACKUP_TABLES.length;i++){ const t = BACKUP_TABLES[i]; btn.textContent = `${i+1}/${BACKUP_TABLES.length}`; out.tabelas[t] = await opFetchAll(t,'*',['id']).catch(async ()=>{ const r = await sb.from(t).select('*'); return r.data||[]; }); }
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'})); a.download = 'backup-crm-callmed-'+ymdToday()+'.json'; a.click();
+    // produto: a cópia completa sai do banco, só para o administrador e registrada (crm_backup_exportar); sem a função, o jeito antigo
+    btn.textContent = 'Preparando…';
+    const r = await sb.rpc('crm_backup_exportar');
+    if(r.error && !/function|404|does not exist/i.test(r.error.message||'')) throw new Error(r.error.message);
+    if(!r.error && r.data) out = r.data;
+    else for(let i=0;i<BACKUP_TABLES.length;i++){ const t = BACKUP_TABLES[i]; btn.textContent = `${i+1}/${BACKUP_TABLES.length}`; out.tabelas[t] = await opFetchAll(t,'*',['id']).catch(async ()=>{ const r = await sb.from(t).select('*'); return r.data||[]; }); }
+    const arq = (()=>{ try{ return localStorage.getItem('tc_slug') || 'crm'; }catch(e){ return 'crm'; } })();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'})); a.download = 'backup-'+arq+'-'+ymdToday()+'.json'; a.click();
     try{ localStorage.setItem('crm_backup_em', String(Date.now())); }catch(e){}
     showToast('Backup baixado ('+Object.values(out.tabelas).reduce((t,l)=>t+l.length,0)+' registros)');
   }catch(e){ showToast('Erro no backup: '+(e.message||e)); }
@@ -10983,10 +10989,10 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611021638"></script>
-<script src="painel.js?v=202611021638"></script>
-<script src="cobranca.js?v=202611021638"></script>
-<script src="cadastro.js?v=202611021638"></script>
-<script src="contrato.js?v=202611021638"></script>
+<script src="plataforma.js?v=202611021642"></script>
+<script src="painel.js?v=202611021642"></script>
+<script src="cobranca.js?v=202611021642"></script>
+<script src="cadastro.js?v=202611021642"></script>
+<script src="contrato.js?v=202611021642"></script>
 </body>
 </html>

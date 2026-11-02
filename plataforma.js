@@ -100,6 +100,7 @@
       if (!data) { barrar('Este e-mail não tem acesso', 'Seu login existe, mas você não está cadastrado em nenhuma corretora deste sistema. Peça ao administrador da sua corretora para liberar o seu acesso.'); return; }
       if (data.ativo === false) { barrar('Acesso suspenso', 'O acesso da sua corretora está suspenso no momento. Fale com o administrador da sua corretora. Os dados continuam guardados.'); return; }
       MARCA = data;
+      const bk = document.getElementById('btn-backup'); if (bk) bk.style.display = data.sou_admin ? '' : 'none';   // cópia completa só para o administrador (o banco também barra)
       try { localStorage.setItem('tc_marca', JSON.stringify({ nome_exibicao: data.nome_exibicao, logo_url: data.logo_url, cores: data.cores })); if (data.slug) localStorage.setItem('tc_slug', data.slug); } catch (e) { /* sem armazenamento */ }
       // o endereço passa a mostrar o link próprio da corretora (fica certo nos favoritos)
       const cAtual = new URLSearchParams(location.search).get('c');
@@ -379,6 +380,7 @@
   window.TorrePlataforma = { abrirFunil, abrirMinhaCorretora, aplicarEtapas, recarregar: carregar, sessao: () => sb.auth.getSession() };   // sessao: o Painel da Plataforma (outra aba) usa o login desta
 
   /* ---------- liga ---------- */
+  { const bk = document.getElementById('btn-backup'); if (bk) bk.style.display = 'none'; }   // aparece quando o sistema confirma que é administrador
   function iniciar() {
     if (typeof sb === 'undefined') return setTimeout(iniciar, 300);
     sb.auth.getSession().then(({ data }) => { if (data && data.session) carregar(); });

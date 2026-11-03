@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611031036">
+<meta name="app-build" content="202611031355">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -216,7 +216,14 @@ window.ALIANCA = {
 
 <style>/* "CRM Aliança - by Capacity Case" (ou o nome da corretora) sem cortar */
   .login-hero h1.tc-h1 small{ display:block; font-size:.42em; letter-spacing:-.01em; color:var(--brand); margin-top:.28em; }
-  @media (max-width:760px){ .hdr-brand .tc-sep{ display:none; } .hdr-brand .tc-nm{ display:block; font-size:.72em; color:var(--brand); margin-top:2px; } }
+  /* cabeçalho: "CRM Aliança" numa linha e a corretora embaixo, menor, com "…" se não couber (vídeo da Amanda, 03/11/2026:
+     o nome longo da corretora quebrava em 4 linhas e saía do cabeçalho) */
+  .hdr-brand{ min-width:0; max-width:clamp(170px,19vw,320px); overflow:hidden; }
+  .hdr-brand b.tc-marca{ white-space:nowrap; font-size:clamp(17px,1.5vw,24px); }
+  .hdr-brand .tc-sep{ display:none; }
+  .hdr-brand .tc-nm{ display:block; font-size:.58em; font-weight:600; letter-spacing:0; color:var(--brand); margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hdr-brand b.tc-marca + small{ display:none; }
+  @media (max-width:760px){ .hdr-brand{ max-width:52vw; } }
 </style>
 </head>
 <body>
@@ -1635,11 +1642,11 @@ async function vdIniAbrir(){
   host.addEventListener('change', e=>{ if(e.target.id!=='vi-file') return; const fs = [...e.target.files]; e.target.value = ''; if(fs.length) caFase1(fs, null, {abrirFluxo:true}); });
 })();
 // ---------- Prospecção ----------
-const VD_ST_PRO = ['Novo','Em contato','Respondeu','Agendou reunião','Desmarcou reunião','Reunião realizada','Retornar','Cotação em andamento','Apresentei cotação','Virou cliente','Sem contato','Sem interesse'];
+const VD_ST_PRO = ['Novo','Em contato','Respondeu','Agendou reunião','Desmarcou reunião','Reunião realizada','Retornar','Cotação em andamento','Apresentei cotação','Interesse futuro','Virou cliente','Sem contato','Sem interesse'];
 const VD_ORIGENS = ['Indicação','Instagram','WhatsApp','Site','Carteira de clientes','Evento','Outro'];
-const VD_ST_ORIG = ['Novo','Em contato','Agendou reunião','Retornar','Cotação em andamento','Virou cliente','Sem contato','Sem interesse'];
+const VD_ST_ORIG = ['Novo','Em contato','Agendou reunião','Retornar','Cotação em andamento','Interesse futuro','Virou cliente','Sem contato','Sem interesse'];
 const vdStVis = c => VD_ST_PRO.filter(s=>VD_ST_ORIG.includes(s) || (c[s]||0)>0);
-const VD_PRO_COR = {'Novo':'#646b89','Em contato':'#0018fc','Respondeu':'#0b7a8a','Agendou reunião':'#0f7a53','Desmarcou reunião':'#c8790b','Reunião realizada':'#0f7a53','Retornar':'#c8790b','Cotação em andamento':'#1b5fc7','Apresentei cotação':'#6a3fc4','Virou cliente':'#0f7a53','Sem contato':'#b36b00','Sem interesse':'#8b90a3'};
+const VD_PRO_COR = {'Novo':'#646b89','Em contato':'#0018fc','Respondeu':'#0b7a8a','Agendou reunião':'#0f7a53','Desmarcou reunião':'#c8790b','Reunião realizada':'#0f7a53','Retornar':'#c8790b','Cotação em andamento':'#1b5fc7','Apresentei cotação':'#6a3fc4','Interesse futuro':'#8a5a00','Virou cliente':'#0f7a53','Sem contato':'#b36b00','Sem interesse':'#8b90a3'};
 const vdHojeIso = ()=> ymd(new Date());
 const vdFechado = x => x.status==='Virou cliente' || x.status==='Sem interesse';
 const vdRetornoTipo = x => { if(vdFechado(x) || !x.retorno_data || x.status==='Agendou reunião' || x.status==='Reunião realizada') return ''; const h = vdHojeIso(); return x.retorno_data < h ? 'atrasado' : x.retorno_data === h ? 'hoje' : ''; };
@@ -1693,11 +1700,15 @@ function vdProCsvTexto(l){
 }
 const vdBaseList = ()=>`<datalist id="vd-cli">${(OP.pessoas||[]).slice(0,8000).map(x=>`<option value="${escapeHtml(x.nome||'')}">${escapeHtml(x.cpf||'')}</option>`).join('')}</datalist>`;
 const vdPessoaDe = pid => (OP.pessoas||[]).find(x=>x.id===pid);
+// etapa atual da pessoa no Funil da Aliança, na ficha da Prospecção (vídeo da Amanda, 03/11/2026)
+const vdEtapaFunil = pid => { try{ if(!OP.funil || !OP.funil.get(pid)) return ''; const i = opCurEtapaIdx(pid); return i>=0 ? 'Etapa no funil: <b>'+escapeHtml(ETAPAS_FUNIL[i].label)+'</b>' : ''; }catch(e){ return ''; } };
 const vdAbrirLink = x => x.pessoa_id ? `<a href="#" data-act="abrir" data-pid="${x.pessoa_id}" style="font-size:11px">abrir cadastro</a>${(vdPessoaDe(x.pessoa_id)||{}).cpf?` <small style="color:var(--ink-faint)">CPF ${escapeHtml(vdPessoaDe(x.pessoa_id).cpf)}</small>`:''}` : (String(x.nome||x.cliente||'').trim() ? `<small style="color:var(--ink-faint)">sem cadastro ligado</small>` : '');
 // ao digitar nome/CPF/telefone, procura na base de contatos e liga a linha ao cadastro (CPF ou nome idêntico liga direto; parecido pergunta)
 // Vendas (dia a dia) alimenta o funil da Aliança (visão gerencial): cada status da Prospecção leva a pessoa à etapa correspondente (só avança, nunca volta)
-const VD_FUNIL = {'Em contato':'contato','Retornar':'contato','Respondeu':'atendimento','Desmarcou reunião':'atendimento','Agendou reunião':'agendamento','Reunião realizada':'reuniao','Cotação em andamento':'diagnostico','Apresentei cotação':'proposta','Virou cliente':'fechamento'};
-async function vdFunilDoStatus(r){ if(!r || !r.pessoa_id) return; const k = VD_FUNIL[r.status]; if(k) await syncFunilComOpp(r.pessoa_id, k, 'Atualizado pela Prospecção (Vendas): '+r.status); }
+const VD_FUNIL = {'Em contato':'contato','Retornar':'contato','Respondeu':'atendimento','Desmarcou reunião':'atendimento','Agendou reunião':'agendamento','Reunião realizada':'reuniao','Cotação em andamento':'diagnostico','Apresentei cotação':'proposta','Interesse futuro':'follow_up','Virou cliente':'fechamento'};
+async function vdFunilDoStatus(r){ if(!r || !r.pessoa_id) return;
+  if(/indica/i.test(String(r.origem||''))) await syncFunilComOpp(r.pessoa_id, 'indicacao', 'Chegou por indicação: '+r.origem);   // Indicação era a única etapa que nunca recebia ninguém
+  const k = VD_FUNIL[r.status]; if(k) await syncFunilComOpp(r.pessoa_id, k, 'Atualizado pela Prospecção (Vendas): '+r.status+(r.status==='Interesse futuro' && r.motivo?' · '+r.motivo:'')); }
 async function vdTentaLigar(tabela, r, nome, cpf, tel){
   if(!r || r.pessoa_id || r._lig) return;
   const nm = String(nome||'').trim(); if(!nm && !String(cpf||'').trim()) return;
@@ -1713,9 +1724,12 @@ async function vdTentaLigar(tabela, r, nome, cpf, tel){
   r.pessoa_id = alvo.id; showToast('Ligado ao cadastro de '+alvo.nome); if(tabela==='crm_prospeccao') vdFunilDoStatus(r); vdDraw();
 }
 const VD_CANAIS = {'WhatsApp':'whatsapp','Ligação':'ligacao','E-mail':'email','Reunião':'reuniao','Instagram':'outro','LinkedIn':'outro','Outro':'outro'};
-const VD_ACAO_ST = {'Novo':'Realizar primeiro contato','Em contato':'Realizar follow-up','Respondeu':'Realizar follow-up','Agendou reunião':'Confirmar reunião','Desmarcou reunião':'Fazer nova tentativa','Reunião realizada':'Preparar proposta','Retornar':'Fazer nova tentativa','Cotação em andamento':'Apresentar proposta','Apresentei cotação':'Realizar follow-up','Sem contato':'Tentar outro canal de contato'};
-const VD_RES_ST = {'Novo':'Outro','Em contato':'Conversou','Respondeu':'Conversou','Agendou reunião':'Agendou','Desmarcou reunião':'Outro','Reunião realizada':'Conversou','Retornar':'Sem resposta','Cotação em andamento':'Enviou material','Apresentei cotação':'Enviou material','Virou cliente':'Demonstrou interesse','Sem contato':'Sem resposta','Sem interesse':'Sem interesse'};
+const VD_ACAO_ST = {'Novo':'Realizar primeiro contato','Em contato':'Realizar follow-up','Respondeu':'Realizar follow-up','Agendou reunião':'Confirmar reunião','Desmarcou reunião':'Fazer nova tentativa','Reunião realizada':'Preparar proposta','Retornar':'Fazer nova tentativa','Cotação em andamento':'Apresentar proposta','Apresentei cotação':'Realizar follow-up','Interesse futuro':'Reativar contato','Sem contato':'Tentar outro canal de contato'};
+const VD_RES_ST = {'Novo':'Outro','Em contato':'Conversou','Respondeu':'Conversou','Agendou reunião':'Agendou','Desmarcou reunião':'Outro','Reunião realizada':'Conversou','Retornar':'Sem resposta','Cotação em andamento':'Enviou material','Apresentei cotação':'Enviou material','Interesse futuro':'Demonstrou interesse','Virou cliente':'Demonstrou interesse','Sem contato':'Sem resposta','Sem interesse':'Sem interesse'};
 const vdAcaoPadrao = x => VD_ACAO_ST[x.status] || '';
+// motivo de quem tem interesse mas não pode agora, e atalhos de quando retomar
+const VD_MOTIVO_FUT = ['Financeiro','Momento de vida (mudança, casamento, filho)','Já tem proteção: rever na renovação','Quer pensar ou falar com a família','Outro'];
+const vdMaisMeses = m => { const d = new Date(); d.setMonth(d.getMonth()+m); return ymd(d); };
 // "Registrar": grava o contato no histórico do cliente (atividade + próxima ação) e, se for "Sem interesse", leva para Vendas não realizadas
 // contatos da Prospecção com texto digitado em "Registrar o que foi feito" que ainda não foi registrado
 const vdRascunhos = ()=> Object.keys(VD.draft||{}).filter(id=>String(VD.draft[id]||'').trim() && (VD.pro||[]).some(x=>x.id===id));
@@ -1740,13 +1754,14 @@ async function vdRegistrar(r){
   const novo = novoDigitado || String(r.historico||'').trim();
   if(!r.canal){ showToast('Escolha o canal do contato (WhatsApp, Ligação, E-mail...) antes de registrar.'); return; }
   if(r.status==='Agendou reunião' && (!r.retorno_data || !vdHora(r.retorno_hora))){ showToast('Para "Agendou reunião", informe a data e a hora da reunião: a Agenda usa esses dados.'); return; }
+  if(r.status==='Interesse futuro' && !r.motivo){ showToast('Para "Interesse futuro", escolha o motivo (por exemplo, Financeiro).'); return; }
   const sem = r.status==='Sem interesse', fim = sem || r.status==='Virou cliente';
   const acao = fim ? null : (r.proxima_acao || vdAcaoPadrao(r) || 'Realizar follow-up');
   if(!fim && !r.retorno_data){ showToast('Informe a data de Retorno — ela é a data da próxima ação ('+acao+').'); return; }
   const agora = new Date().toISOString(), por = curUserName()||null;
   try{
     if(r.pessoa_id){
-      const resumo = ['Prospecção · canal: '+r.canal+(r.origem?' · origem: '+r.origem:'')+' · '+r.status, novo].filter(Boolean).join(String.fromCharCode(10));
+      const resumo = ['Prospecção · canal: '+r.canal+(r.origem?' · origem: '+r.origem:'')+' · '+r.status+(r.status==='Interesse futuro'&&r.motivo?' ('+r.motivo+')':''), novo].filter(Boolean).join(String.fromCharCode(10));
       const { error } = await sb.from('crm_atividades').insert({ pessoa_id:r.pessoa_id, tipo:VD_CANAIS[r.canal]||'outro', data_hora:vdDataAtividade(r, agora), resumo, resultado:VD_RES_ST[r.status]||'Outro', responsavel:por,
         proxima_acao:acao, proxima_data:fim?null:r.retorno_data, proximo_responsavel:fim?null:por, motivo_perda:sem?'Sem interesse':null });
       if(error) throw error;
@@ -1763,7 +1778,7 @@ async function vdRegistrar(r){
       naoMsg = ' e levado para Vendas não realizadas';
     }
     let histNovo = r.historico;
-    if(novoDigitado){ const d = new Date(), nl = String.fromCharCode(10), cab = '['+d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · '+(por||'—')+' · '+r.canal+' · '+r.status+']';
+    if(novoDigitado){ const d = new Date(), nl = String.fromCharCode(10), cab = '['+d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · '+(por||'—')+' · '+r.canal+' · '+r.status+(r.status==='Interesse futuro'&&r.motivo?' · '+r.motivo+(r.retorno_data?' · retomar em '+vdD(r.retorno_data):''):'')+']';
       histNovo = cab+nl+novoDigitado+(r.historico?nl+nl+r.historico:''); }
     const { error: e3 } = await sb.from('crm_prospeccao').update({ historico:histNovo, registrado_em:agora, updated_at:agora }).eq('id', r.id); if(e3) throw e3;
     r.registrado_em = agora; r.historico = histNovo; delete VD.draft[r.id]; await vdFunilDoStatus(r);
@@ -1802,7 +1817,7 @@ function vdProHtml(){
   const entradas = h => String(h||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
   const rows = l.map(x=>{
     const rt = vdRetornoTipo(x), aberto = !!VD.abertos[x.id], tel = waLink(x.telefone), ultimo = x.registrado_em || x.contato_em, nd = diasAtras(ultimo);
-    const reu = x.status==='Agendou reunião', hora = vdHora(x.retorno_hora), semHora = reu && !hora;
+    const reu = x.status==='Agendou reunião', fut = x.status==='Interesse futuro', hora = vdHora(x.retorno_hora), semHora = reu && !hora;
     const chips = (x.estrategia?`<span class="vp-chip vp-est">${escapeHtml(x.estrategia)}</span>`:'')
       + `<span class="vp-chip" style="background:${corSt(x.status)}1f;color:${corSt(x.status)}">${escapeHtml(x.status)}</span>`
       + (rt==='atrasado'?'<span class="vp-chip vp-warn">retorno atrasado</span>':rt==='hoje'?'<span class="vp-chip vp-warn">retorno hoje</span>':'')
@@ -1827,11 +1842,15 @@ function vdProHtml(){
         </div>
         <div class="vp-grid" style="margin-top:8px">
           <label>Data do contato<input type="datetime-local" data-k="contato_em" value="${vdLocalInput(x.contato_em)}"></label>
-          <label>Próxima ação<select data-k="proxima_acao"><option value="">${escapeHtml(vdAcaoPadrao(x)||'—')} (sugerida)</option>${ACOES.map(a=>`<option${a===x.proxima_acao?' selected':''}>${escapeHtml(a)}</option>`).join('')}</select></label>
-          <label style="${semHora?'color:#8a5406;font-weight:700':''}">${reu?'Data e hora da reunião':'Retornar em'}<span style="display:flex;gap:4px"><input type="date" data-k="retorno_data" value="${escapeHtml(x.retorno_data||'')}"><input type="time" data-k="retorno_hora" value="${escapeHtml(x.retorno_hora||'')}" style="max-width:104px"></span></label>
-          <label>Status<select data-k="status" style="color:${corSt(x.status)};font-weight:600">${VD_ST_PRO.map(s=>`<option${s===x.status?' selected':''}>${escapeHtml(s)}</option>`).join('')}</select></label>
+          <label>Status (o que aconteceu)<select data-k="status" style="color:${corSt(x.status)};font-weight:600">${VD_ST_PRO.map(s=>`<option${s===x.status?' selected':''}>${escapeHtml(s)}</option>`).join('')}</select></label>
+          ${fut?`<label style="${x.motivo?'':'color:#8a5406;font-weight:700'}">Motivo<select data-k="motivo"><option value="">Escolha o motivo…</option>${VD_MOTIVO_FUT.map(m=>`<option${m===x.motivo?' selected':''}>${escapeHtml(m)}</option>`).join('')}</select></label>`:''}
         </div>
-        <div style="margin-top:6px;font-size:11px;color:var(--ink-faint)">${x.pessoa_id?'':'sem cadastro ligado'}</div>
+        <div class="vp-grid" style="margin-top:8px">
+          <label>Próxima ação<select data-k="proxima_acao"><option value="">${escapeHtml(vdAcaoPadrao(x)||'—')} (sugerida)</option>${ACOES.map(a=>`<option${a===x.proxima_acao?' selected':''}>${escapeHtml(a)}</option>`).join('')}</select></label>
+          <label style="${semHora?'color:#8a5406;font-weight:700':''}">${reu?'Data e hora da reunião':fut?'Retomar em':'Retornar em'}<span style="display:flex;gap:4px"><input type="date" data-k="retorno_data" value="${escapeHtml(x.retorno_data||'')}"><input type="time" data-k="retorno_hora" value="${escapeHtml(x.retorno_hora||'')}" style="max-width:104px"></span>
+            ${fut?`<span style="display:flex;gap:4px;margin-top:4px">${[3,6,12].map(m=>`<button type="button" class="om-cancel vd-btn" data-act="ret-m" data-m="${m}" data-id="${x.id}" style="padding:2px 8px;font-size:11px">${m===12?'1 ano':m+' meses'}</button>`).join('')}</span>`:''}</label>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:var(--ink-faint)">${x.pessoa_id?vdEtapaFunil(x.pessoa_id):'sem cadastro ligado'}</div>
       </div>`;
     }
     const botoes = `${tel?`<a class="vp-wa" href="${tel}" target="_blank" rel="noopener" title="Abrir WhatsApp">WhatsApp</a>`:'<span class="vp-chip" title="Sem telefone válido">sem WhatsApp</span>'}`
@@ -2485,6 +2504,7 @@ window.addEventListener('beforeunload', e=>{ if(typeof vdRascunhos==='function' 
     else if(a==='ok-n'){ if(VD.nEdit) delete VD.nEdit[id]; vdDraw(); }
     else if(a==='h-edit'){ VD.hEdit = VD.hEdit||{}; VD.hEdit[id] = !VD.hEdit[id]; vdDraw(); }
     else if(a==='cli-abrir'){ vdAbrirConsultoria(t.dataset.pid); }
+    else if(a==='ret-m'){ const r = VD.pro.find(x=>x.id===id); if(r){ r.retorno_data = vdMaisMeses(Number(t.dataset.m)); vdSalvarCampo('crm_prospeccao', r.id, 'retorno_data', r.retorno_data); if(!r.proxima_acao){ r.proxima_acao = 'Reativar contato'; vdSalvarCampo('crm_prospeccao', r.id, 'proxima_acao', r.proxima_acao); } showToast('Retomar em '+vdD(r.retorno_data)+'.'); vdDraw(); } }
     else if(a==='reg-p'){ vdRegistrar(VD.pro.find(x=>x.id===id)); }
     else if(a==='outra-nec'){ const r = VD.pro.find(x=>x.id===id); if(r){ try{ await ensurePessoas(); }catch(e){} demOutraNec(vdPessoaDe(r.pessoa_id), String((VD.draft||{})[id]||'').trim()); } }
     else if(a==='del-p'){ if(!confirm('Excluir este contato da prospecção?')) return; const { error } = await sb.from('crm_prospeccao').delete().eq('id', id); if(error){ showToast('Erro: '+error.message); return; } VD.pro = VD.pro.filter(x=>x.id!==id); vdDraw(); }
@@ -2526,16 +2546,17 @@ window.addEventListener('beforeunload', e=>{ if(typeof vdRascunhos==='function' 
       if(k==='contato_em'){ if(!v) return; v = new Date(v).toISOString(); }
       else if(k==='retorno_data') v = v || null;
       else if(k==='retorno_hora'){ v = v ? vdHora(v) : null; }
-      else if(k==='cpf' || k==='telefone' || k==='origem' || k==='nome' || k==='historico' || k==='proxima_acao' || k==='canal' || k==='estrategia') v = v.trim()===''?null:v;
+      else if(k==='cpf' || k==='telefone' || k==='origem' || k==='nome' || k==='historico' || k==='proxima_acao' || k==='canal' || k==='estrategia' || k==='motivo') v = v.trim()===''?null:v;
       r[k] = v; if(k==='nome' && v==null) r.nome = '';
       vdSalvarCampo('crm_prospeccao', r.id, k, k==='nome'&&v==null ? '' : v);
       if(k==='proxima_acao' && vdAcaoSugereDesmarcar(r, v) && confirm('A reunião não aconteceu?\n\nPara a próxima ação "'+v+'" valer, o status sai de "Agendou reunião" e passa para "Desmarcou reunião". Depois, informe em "Retornar em" a data desta nova ação.\n\nOK = mudar o status   |   Cancelar = manter a reunião marcada')){
         r.status = 'Desmarcou reunião'; vdSalvarCampo('crm_prospeccao', r.id, 'status', r.status);
         showToast('Status mudou para "Desmarcou reunião". Informe a data do retorno desta nova ação.'); vdDraw(); return; }
       if(k==='nome' || k==='cpf' || k==='telefone') vdTentaLigar('crm_prospeccao', r, r.nome, r.cpf, r.telefone);
+      if(k==='status' && v==='Interesse futuro') showToast('Escolha o motivo e quando retomar (3 meses, 6 meses ou 1 ano). No dia, o contato volta para a sua lista.');
       if(k==='status' && v==='Sem interesse') showToast('Escreva o motivo em “Novo registro” e clique em Registrar: o contato vai para Vendas não realizadas.');
       if(k==='status' && v==='Agendou reunião' && (!r.retorno_data || !vdHora(r.retorno_hora))) showToast('Informe a data e a hora da reunião: a Agenda usa esses dados.');
-      if(k==='status' || k==='retorno_data' || k==='retorno_hora'){ vdDraw(); }
+      if(k==='status' || k==='retorno_data' || k==='retorno_hora' || k==='motivo'){ vdDraw(); }
       return;
     }
     const vend = VD.tab==='vend', arr = vend ? VD.vend : VD.nao, r = arr.find(x=>x.id===tr.dataset.id); if(!r) return;
@@ -9035,7 +9056,7 @@ async function ctRun(){
 }
 
 // ===== Prospectar: leva a pessoa da Aliança para Vendas > Prospecção, sem cadastrar de novo =====
-const PROSP_STATUS = ['Novo','Em contato','Respondeu','Agendou reunião','Desmarcou reunião','Reunião realizada','Retornar','Cotação em andamento','Apresentei cotação','Virou cliente','Sem contato','Sem interesse'];
+const PROSP_STATUS = ['Novo','Em contato','Respondeu','Agendou reunião','Desmarcou reunião','Reunião realizada','Retornar','Cotação em andamento','Apresentei cotação','Interesse futuro','Virou cliente','Sem contato','Sem interesse'];
 function prospEstrategiaDe(p){ return (opIsPremium(p) || opIsCliente(p.id)) ? 'Revisitar a carteira' : (p.quem_indicou ? 'Indicação de cliente' : 'Lista para trabalhar'); }
 function prospOrigemDe(p){
   const t = p.tags||[];
@@ -10435,11 +10456,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611031036"></script>
-<script src="painel.js?v=202611031036"></script>
-<script src="cobranca.js?v=202611031036"></script>
-<script src="cadastro.js?v=202611031036"></script>
-<script src="contrato.js?v=202611031036"></script>
-<script src="guarda.js?v=202611031036"></script>
+<script src="plataforma.js?v=202611031355"></script>
+<script src="painel.js?v=202611031355"></script>
+<script src="cobranca.js?v=202611031355"></script>
+<script src="cadastro.js?v=202611031355"></script>
+<script src="contrato.js?v=202611031355"></script>
+<script src="guarda.js?v=202611031355"></script>
 </body>
 </html>

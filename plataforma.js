@@ -63,6 +63,7 @@
     const nome = MARCA.nome_exibicao || PADRAO.nome, sub = personalizada() ? nome : 'by Capacity Case';
     document.title = MODO_PAINEL ? 'Painel da Plataforma · CRM Aliança' : nomeSistema();
     document.querySelectorAll('.tc-nm').forEach((el) => { el.textContent = sub; });
+    document.querySelectorAll('.hdr-brand b.tc-marca').forEach((el) => { el.title = nomeSistema(); });   // nome inteiro ao passar o mouse (no cabeçalho ele pode aparecer cortado)
     const h1 = document.querySelector('.login-hero h1.tc-h1 small'); if (h1) h1.textContent = sub;
     const hl = document.querySelector('.hdr-logo'); if (hl) { hl.src = MARCA.logo_url || PADRAO.logo; hl.alt = nomeSistema(); }
     // sem logo próprio, uma corretora com nome próprio usa só o ícone (o logo grande diz "Aliança")

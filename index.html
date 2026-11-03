@@ -4,19 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611030921">
+<meta name="app-build" content="202611030954">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Torre Aliança">
-<title>Torre de Controle - Aliança</title>
+<meta name="apple-mobile-web-app-title" content="CRM Aliança">
+<title>CRM Aliança - by Capacity Case</title>
 <script>
 /* ===== Configuração do cliente — CRM Aliança by Capacity Case =====
-   Um código só para todos os clientes. Este bloco é o padrão: Torre de Controle - Aliança, com tudo ligado.
+   Um código só para todos os clientes. Este bloco é o padrão: CRM Aliança, com tudo ligado.
    A publicação de outro cliente troca apenas o que está entre ALIANCA_CONFIG_INICIO e ALIANCA_CONFIG_FIM
    (e os arquivos de logo em assets/). Não coloque segredo aqui: a chave anon é pública por desenho (a proteção é a RLS). */
 /*ALIANCA_CONFIG_INICIO*/
 window.ALIANCA = {
   cliente: 'capacitycase-demo',
-  titulo: 'Torre de Controle - Aliança',
+  titulo: 'CRM Aliança - by Capacity Case',
   supabaseUrl: 'https://iuotvottnailofxbaynx.supabase.co',
   supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1b3R2b3R0bmFpbG9meGJheW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1Mjg2NjMsImV4cCI6MjEwODEwNDY2M30._0FhywQ4Vq3km5Rl4tHEPtCLBVom4VAGaXG3X3nrUyQ',
   cores: { '--navy': '#111827', '--navy-deep': '#0d1117', '--brand': '#9c7518', '--brand-hover': '#7d5e13',
@@ -36,7 +36,7 @@ window.ALIANCA = {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   :root{
-    /* Design System CRM Aliança v2 — Torre de Controle - Aliança (minimalista e sóbrio) */
+    /* Design System CRM Aliança v2 — CRM Aliança (minimalista e sóbrio) */
     --navy:#00125e; --navy-deep:#000b3d; --on-navy:#ffffff; --on-navy-soft:#aab2d6;
     --bg:#f4f5f9; --surface:#ffffff; --surface-2:#f7f8fb;
     --border:#e3e6ee; --border-soft:#eef0f5; --border-control:#8a90a8;
@@ -214,8 +214,7 @@ window.ALIANCA = {
 </style>
 
 
-<style>/* nome "Torre de Controle - Aliança" sem cortar */
-  .login-hero h1.tc-h1{ font-size:clamp(44px,6.2vw,96px); }
+<style>/* "CRM Aliança - by Capacity Case" (ou o nome da corretora) sem cortar */
   .login-hero h1.tc-h1 small{ display:block; font-size:.42em; letter-spacing:-.01em; color:var(--brand); margin-top:.28em; }
   @media (max-width:760px){ .hdr-brand .tc-sep{ display:none; } .hdr-brand .tc-nm{ display:block; font-size:.72em; color:var(--brand); margin-top:2px; } }
 </style>
@@ -223,11 +222,11 @@ window.ALIANCA = {
 <body>
 
 <div id="login-screen">
-  <div class="login-hero"><div class="acc"><i></i><b></b></div><h1 class="tc-h1">Torre de<br>Controle<small>Aliança</small></h1><p>Carreira, renda, patrimônio e legado.</p></div>
+  <div class="login-hero"><div class="acc"><i></i><b></b></div><h1 class="tc-h1 tc-marca">CRM<br>Aliança<small>by Capacity Case</small></h1><p>Carreira, renda, patrimônio e legado.</p></div>
   <svg class="shield login-shield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg>
   <div class="login-card">
-    <img class="logo" src="assets/logo-marinho.png" alt="Torre de Controle - Aliança">
-    <div class="sub" style="margin-top:-10px;">Torre de Controle - Aliança · by Capacity Case.</div>
+    <img class="logo" src="assets/logo-marinho.png" alt="CRM Aliança">
+    <div class="sub" style="margin-top:-10px;">CRM Aliança - by Capacity Case.</div>
     <div class="field"><label>Email</label><input id="login-email" type="email" autocomplete="username"></div>
     <div class="field"><label>Senha</label><input id="login-pass" type="password" autocomplete="current-password"></div>
     <button class="btn btn-primary" id="btn-login">Entrar</button>
@@ -262,8 +261,8 @@ window.ALIANCA = {
 
 <div id="app">
   <header>
-    <div class="brand"><div class="hdr-brand"><b>Torre de Controle<span class="tc-sep"> - </span><span class="tc-nm">Aliança</span></b><small>Carreira, renda, patrimônio e legado.</small></div><img class="hdr-logo" src="assets/logo-icone.png" alt="Torre de Controle - Aliança"><span class="hdr-title" id="hdr-title" style="display:none">Aliança</span><span class="info-ico" id="hdr-info" tabindex="0" title="Cada cliente é um parceiro — toda a jornada dele numa linha do tempo: faixa do funil comercial + uma linha por produto. Clique na faixa do funil para marcar/desmarcar uma etapa na data; clique no nome para abrir o cadastro completo.">ⓘ</span></div>
-    <div class="hdr-navy"><svg class="shield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg></div><div class="who"><span id="who-email"></span><button id="btn-app" type="button" title="Torre de Controle - Aliança no celular: versão enxuta para a rua (buscar cliente, Hoje, resumo do dia por IA e registrar reunião). Abre em outra aba; no celular, use Adicionar à tela inicial.">📱 App</button><button id="btn-backup" title="Baixar uma cópia de todos os dados">Backup</button><button id="btn-logout">Sair</button></div>
+    <div class="brand"><div class="hdr-brand"><b class="tc-marca">CRM Aliança<span class="tc-sep"> · </span><span class="tc-nm">by Capacity Case</span></b><small>Carreira, renda, patrimônio e legado.</small></div><img class="hdr-logo" src="assets/logo-icone.png" alt="CRM Aliança"><span class="hdr-title" id="hdr-title" style="display:none">Aliança</span><span class="info-ico" id="hdr-info" tabindex="0" title="Cada cliente é um parceiro — toda a jornada dele numa linha do tempo: faixa do funil comercial + uma linha por produto. Clique na faixa do funil para marcar/desmarcar uma etapa na data; clique no nome para abrir o cadastro completo.">ⓘ</span></div>
+    <div class="hdr-navy"><svg class="shield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg></div><div class="who"><span id="who-email"></span><button id="btn-app" type="button" title="CRM Aliança no celular: versão enxuta para a rua (buscar cliente, Hoje, resumo do dia por IA e registrar reunião). Abre em outra aba; no celular, use Adicionar à tela inicial.">📱 App</button><button id="btn-backup" title="Baixar uma cópia de todos os dados">Backup</button><button id="btn-logout">Sair</button></div>
   </header>
 
   <nav id="rail">
@@ -438,7 +437,7 @@ window.ALIANCA = {
       <div class="pg">
         <div class="pg-head"><h2>Indicadores</h2><span class="sub">Funil contra as metas, tempo parado, produção Aliança e oportunidades.</span>
           <span style="margin-left:auto;display:flex;gap:8px"><select id="ind-periodo" class="ca-inp" style="width:170px"><option value="semana">Esta semana</option><option value="mes" selected>Este mês</option><option value="30d">Últimos 30 dias</option><option value="tri">Últimos 3 meses</option><option value="tudo">Todo o período</option></select><button class="om-cancel" id="ind-metas">Metas</button></span></div>
-        <details id="ind-tour" class="es-box" style="margin:0 0 14px" open><summary class="tour-sum"><span class="tour-a">🎬 Visão do gestor: como a Torre de Controle - Aliança funciona <span style="font-weight:500;color:var(--ink-soft);font-size:12.5px">(vídeo de 5 minutos · quem vende vê o vídeo em Vendas)</span></span><span class="tour-x">▲ Recolher</span><span class="tour-b">▶ Rever o vídeo: visão do gestor (5 min)</span></summary>
+        <details id="ind-tour" class="es-box" style="margin:0 0 14px" open><summary class="tour-sum"><span class="tour-a">🎬 Visão do gestor: como o CRM Aliança funciona <span style="font-weight:500;color:var(--ink-soft);font-size:12.5px">(vídeo de 5 minutos · quem vende vê o vídeo em Vendas)</span></span><span class="tour-x">▲ Recolher</span><span class="tour-b">▶ Rever o vídeo: visão do gestor (5 min)</span></summary>
           <div style="margin-top:10px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start"><video controls preload="metadata" style="width:100%;max-width:760px;border-radius:10px;background:#00125e" src="crm-alianca-gestor.mp4"></video>
           <div style="flex:1;min-width:240px;font-size:13px;line-height:1.6;color:var(--ink-soft)"><b style="color:var(--ink)">O caminho, passo a passo</b><br>1. Cadastrar o lead<br>2. Botões de inteligência da ficha<br>3. Registrar cada contato em Vendas<br>4. Mudar o status<br>5. Acompanhar na Aliança<br>6. Dúvida? Botão 💬 com print marcado</div></div></details>
         <script>try{ const d = document.getElementById('ind-tour'), v = d.querySelector('video'); let visto = false; if(localStorage.getItem('ind-tour-fechado')==='1') d.open = false; d.addEventListener('toggle', ()=>{ try{ localStorage.setItem('ind-tour-fechado', d.open?'0':'1'); }catch(e){} if(!d.open && v) v.pause(); }); const fim = ()=>{ if(visto) return; visto = true; d.open = false; }; v.addEventListener('ended', fim); v.addEventListener('timeupdate', ()=>{ if(v.duration && v.currentTime/v.duration > 0.97) fim(); }); }catch(e){}</script>
@@ -960,7 +959,7 @@ async function tcAplicarConfigCorretora(){
   // IA dividida entre os módulos: a de vendas vem com Vendas, a de carteira (apólice e documento) com Carteira
   const IA_FN = { 'chat-cliente':'ia_vendas', 'extrair-cotacao':'ia_vendas', 'inteligencia-pessoa':'ia_vendas', 'analisar-reuniao':'ia_vendas', 'resumo-corretor':'ia_vendas', 'extrair-apolice':'ia_carteira', 'extrair-documento':'ia_carteira' };
   const motivo = nome => {
-    if(IA_FN[nome]){ if(window.ALIANCA.ia === false) return 'Disponível em breve nesta versão da Torre de Controle - Aliança.'; if(!tcModulo(IA_FN[nome])) return IA_FN[nome] === 'ia_carteira' ? 'A IA de carteira faz parte do módulo Carteira, que não está contratado pela sua corretora.' : 'A IA de vendas faz parte do módulo Vendas, que não está contratado pela sua corretora.'; }
+    if(IA_FN[nome]){ if(window.ALIANCA.ia === false) return 'Disponível em breve nesta versão do CRM Aliança.'; if(!tcModulo(IA_FN[nome])) return IA_FN[nome] === 'ia_carteira' ? 'A IA de carteira faz parte do módulo Carteira, que não está contratado pela sua corretora.' : 'A IA de vendas faz parte do módulo Vendas, que não está contratado pela sua corretora.'; }
     if(nome === 'agenda-teams' && !tcModulo('agenda_externa')) return 'A integração com Outlook e Teams faz parte do módulo Vendas, que não está contratado pela sua corretora.';
     return null; };
   let proto = Object.getPrototypeOf(sb), desc = null; while(proto && !(desc = Object.getOwnPropertyDescriptor(proto, 'functions'))) proto = Object.getPrototypeOf(proto);
@@ -1069,7 +1068,7 @@ function mfaTela(modo, f){   // modo: 'desafio' | 'cadastro'
 async function mfaCadastro(){
   mfaTela('cadastro');
   try{ const l = await sb.auth.mfa.listFactors(); for(const x of ((l.data&&l.data.all)||[])){ if(x.status!=='verified') await sb.auth.mfa.unenroll({ factorId:x.id }); } }catch(e){}
-  const { data, error } = await sb.auth.mfa.enroll({ factorType:'totp', friendlyName:'Torre de Controle - Aliança '+new Date().toISOString().slice(0,10) });
+  const { data, error } = await sb.auth.mfa.enroll({ factorType:'totp', friendlyName:'CRM Aliança '+new Date().toISOString().slice(0,10) });
   if(error){ document.getElementById('mfa-err').textContent = 'Não consegui gerar o QR code: '+error.message; return; }
   document.getElementById('mfa-screen').dataset.fid = data.id;
   const q = document.getElementById('mfa-qr'); q.textContent = '';
@@ -1563,7 +1562,7 @@ function vdDraw(){
   const w = host.querySelector('.vd-wrap'); if(w) w.scrollLeft = y;
   if(VD.foco){ const el = host.querySelector('[data-id="'+VD.foco+'"] input, [data-id="'+VD.foco+'"] textarea'); if(el){ el.focus(); const r = el.closest('tr,.vp-row'); if(r) r.scrollIntoView({block:'center'}); } VD.foco = null; }
 }
-// ---------- layout único dos relatórios (identidade Torre de Controle - Aliança, modelo da Amanda) ----------
+// ---------- layout único dos relatórios (identidade CRM Aliança, modelo da Amanda) ----------
 const VD_CSS2 = `<style>
 .dk2{ font-family:'Poppins','Inter',Arial,sans-serif; color:#0b1433; }
 .dk2 .dk-p{ padding:0 12mm 0; }
@@ -1589,10 +1588,10 @@ const VD_CSS2 = `<style>
 .dk2 .v2c b{ display:block; font-size:19pt; line-height:1.15; font-weight:700; } .dk2 .v2c span{ font-size:6.8pt; color:#4a5270; }
 </style>`;
 function vdPage2(title, sub, body){
-  return `<div class="dk-p"><div class="v2h"><img src="assets/logo-branco.png" alt="Torre de Controle - Aliança"><div><div class="eb">Torre de Controle - Aliança</div><h1>${escapeHtml(title)}</h1>${sub?`<p>${escapeHtml(sub)}</p>`:''}</div></div>${body}@@FOOT@@</div>`;
+  return `<div class="dk-p"><div class="v2h"><img src="assets/logo-branco.png" alt="CRM Aliança"><div><div class="eb">CRM Aliança</div><h1>${escapeHtml(title)}</h1>${sub?`<p>${escapeHtml(sub)}</p>`:''}</div></div>${body}@@FOOT@@</div>`;
 }
 function vdWrap2(pages){
-  return F5_CSS + VD_CSS2 + `<div class="dk dk2 rep">${pages.map((h,i)=>h.replace('@@FOOT@@',`<div class="v2f"><span><b>Torre de Controle - Aliança</b></span><span class="pg">${i+1} / ${pages.length}<img src="data:image/jpeg;base64,${F5_LOGO}" alt=""></span></div>`)).join('')}</div>`;
+  return F5_CSS + VD_CSS2 + `<div class="dk dk2 rep">${pages.map((h,i)=>h.replace('@@FOOT@@',`<div class="v2f"><span><b>CRM Aliança</b></span><span class="pg">${i+1} / ${pages.length}<img src="data:image/jpeg;base64,${F5_LOGO}" alt=""></span></div>`)).join('')}</div>`;
 }
 // ---------- Comece por aqui: porta de entrada do atendimento (conceito do protótipo da Amanda) ----------
 function vdIniHtml(){
@@ -2005,7 +2004,7 @@ function dmSdMsg(d){ const sd = dmSd(d), F = dmSdFamilias(sd), R = dmSdResumo(sd
   F.forEach((f,i)=>{ t += '\n'+(f.tit?'Família '+(i+1):'Sem titular definido')+'\n'; [f.tit].concat(f.deps).filter(Boolean).forEach(x=>{ t += '- '+dmSdLinha(x)+'\n'; }); });
   t += '\nTotal: '+R.tot+' vida(s), sendo '+R.tit+' titular(es) e '+R.dep+' dependente(s).\n';
   if(sd.atual) t += 'Plano atual: '+sd.atual+'\n'; if(sd.necessidade) t += 'Maior necessidade hoje: '+sd.necessidade+'\n';
-  return t+'\nEstá tudo certo? Se faltar alguém ou algo estiver diferente, me avise que eu ajusto.\n\nTorre de Controle - Aliança'; }
+  return t+'\nEstá tudo certo? Se faltar alguém ou algo estiver diferente, me avise que eu ajusto.\n\nCRM Aliança'; }
 // ---------- cotações, possibilidades e proposta (Saúde) ----------
 function dmBlocoHtml(d, b, bi){
   const ops = (b.opcoes||[]).map((o,oi)=>{ const c = dmOpCalc(b,o), P = `${bi},${oi}`;
@@ -3490,11 +3489,11 @@ function f5Deck(m, X, opt){
   return F5_CSS + VD_CSS2 + `<div class="dk dk2">${pages.map((h,i)=>h.replace('@@FOOT@@', f5Rodape(i, pages.length))).join('')}</div>`;
 }
 // Baixa o PDF direto (sem janela de impressão): renderiza cada página do deck fora da tela, fotografa com html2canvas e monta o PDF A4 paisagem com jsPDF.
-// ---- PDFs por fase (mesmo molde da apresentação, identidade Torre de Controle - Aliança) ----
+// ---- PDFs por fase (mesmo molde da apresentação, identidade CRM Aliança) ----
 // nome do cliente que sai no rodapé dos PDFs das fases (os relatórios não levam nome de cliente)
 let F5_CLI = '';
-const f5Cabeca = (title, sub, right)=>`<div class="v2h"><img src="assets/logo-branco.png" alt="Torre de Controle - Aliança"><div><div class="eb">Torre de Controle - Aliança</div><h1>${escapeHtml(title)}</h1>${sub?`<p>${escapeHtml(sub)}</p>`:''}</div>${right?`<div class="rt"><small>${escapeHtml(right[0])}</small><b>${escapeHtml(right[1])}</b></div>`:''}</div>`;
-const f5Rodape = (i,n)=>`<div class="v2f"><span><b>Torre de Controle - Aliança</b>${F5_CLI?' · '+escapeHtml(F5_CLI):''}</span><span class="pg">${i+1} / ${n}<img src="data:image/jpeg;base64,${F5_LOGO}" alt=""></span></div>`;
+const f5Cabeca = (title, sub, right)=>`<div class="v2h"><img src="assets/logo-branco.png" alt="CRM Aliança"><div><div class="eb">CRM Aliança</div><h1>${escapeHtml(title)}</h1>${sub?`<p>${escapeHtml(sub)}</p>`:''}</div>${right?`<div class="rt"><small>${escapeHtml(right[0])}</small><b>${escapeHtml(right[1])}</b></div>`:''}</div>`;
+const f5Rodape = (i,n)=>`<div class="v2f"><span><b>CRM Aliança</b>${F5_CLI?' · '+escapeHtml(F5_CLI):''}</span><span class="pg">${i+1} / ${n}<img src="data:image/jpeg;base64,${F5_LOGO}" alt=""></span></div>`;
 function f5Page(title, sub, body, right){
   return `<div class="dk-p">${f5Cabeca(title, sub, right)}<div class="v2b">${body}</div>@@FOOT@@</div>`;
 }
@@ -4889,8 +4888,8 @@ function anaCenas(S){
     fala:`O plano é simples. Primeiro, ${anaN(S.alvo.length)} médicos que atuam bastante, com renda em plantões de cento e cinquenta mil reais ou mais, e nenhuma apólice ativa, destacados agora: ${anaN(S.alvoJovem.length)} têm menos de cinquenta anos. Segundo, abrir a conversa pela responsabilidade civil em anestesia e terapia intensiva, e levar a vida em seguida. Terceiro, trabalhar por hospital, para ganhar indicações dentro do mesmo grupo. E em cada conversa, adaptar a mensagem à idade: patrimônio para os mais jovens, sucessão e legado para os mais experientes.`,
     kpis:[[anaN(S.alvo.length),'fila principal'],[anaN(S.alvoJovem.length),'menos de 50 anos'],[anaPct(S.alvo.length, S.nAtivos)+'%','dos que atuam']]});
   c.forEach((q,i)=>{ if(q.k) q.k = (i+1)+' · '+q.k.replace(/^\d+ · /,''); });
-  c.push({fim:true, limpo:true, k:'', t:'Torre de Controle - Aliança', s:'Dados da própria base, atualizados quando o Analítico é recarregado', layout:'todos', color:'protecao', dur:8000,
-    fala:`Resumindo: uma base jovem, concentrada em poucos hospitais, com muita gente que trabalha bastante e ainda não tem proteção. Uma oferta clara, uma meta definida e um caminho para chegar lá. Torre de Controle - Aliança.`, kpis:[[anaN(N),'médicos'],[anaN(S.alvo.length),'na fila principal'],[anaPct(S.nProt,N)+'%','já protegidos']]});
+  c.push({fim:true, limpo:true, k:'', t:'CRM Aliança', s:'Dados da própria base, atualizados quando o Analítico é recarregado', layout:'todos', color:'protecao', dur:8000,
+    fala:`Resumindo: uma base jovem, concentrada em poucos hospitais, com muita gente que trabalha bastante e ainda não tem proteção. Uma oferta clara, uma meta definida e um caminho para chegar lá. CRM Aliança.`, kpis:[[anaN(N),'médicos'],[anaN(S.alvo.length),'na fila principal'],[anaPct(S.nProt,N)+'%','já protegidos']]});
   return c;
 }
 const ANA_AUDIO = { ctx:null, on:true, musica:true, nodes:null, fala:null, rate:0.93, arq:null };
@@ -5217,7 +5216,7 @@ async function exportMarcosPDF(dias){
       ${(ult.comercial&&ult.comercial.nota)?`<p class="pr-sub" style="margin-top:6px">${escapeHtml(ult.comercial.nota)}</p>`:''}` : '';
   document.getElementById('print-report').innerHTML = `
     <div class="pr-page">
-      <div class="pr-header"><img src="assets/logo-azul.png" alt="Torre de Controle - Aliança"><span class="pr-tag">Marcos · ${escapeHtml(fmtDDMM(ini))} a ${escapeHtml(fmtDDMM(fim))}</span></div>
+      <div class="pr-header"><img src="assets/logo-azul.png" alt="CRM Aliança"><span class="pr-tag">Marcos · ${escapeHtml(fmtDDMM(ini))} a ${escapeHtml(fmtDDMM(fim))}</span></div>
       <h1 class="pr-title">Marcos da evolução do negócio</h1>
       <p class="pr-sub">${escapeHtml(resumo)}</p>
       ${tabCom}
@@ -5226,7 +5225,7 @@ async function exportMarcosPDF(dias){
         <p class="pr-tl-text"><b>${escapeHtml((d.marco_icone||'')+' '+(d.marco_titulo||''))}</b><br>${escapeHtml(d.marco_texto||'')}${d.comercial&&d.comercial.kpis?`<br><span style="color:#4a5270">${escapeHtml(mcLinhaCom(d.comercial))}</span>`:''}</p></div>`).join('')}</div>
       ${(pend||[]).length?`<p class="pr-section-title">Ações que dependem do CEO</p><div class="pr-box open" style="border-left:4px solid #0018FC"><ul>${pend.map(r=>`<li><b>${escapeHtml(r.titulo)}</b>${r.area?' ('+escapeHtml(r.area)+')':''}${r.detalhe?' — '+escapeHtml(r.detalhe):''}</li>`).join('')}</ul></div>`:''}
       ${abertos.length?`<p class="pr-section-title">Próximos passos e decisões</p><div class="pr-box open"><ul>${abertos.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}</ul></div>`:''}
-      <div class="pr-footer"><span>Detalhes de cada dia na Ata diária do CRM · Torre de Controle - Aliança</span><span>Gerado em ${hoje}</span></div>
+      <div class="pr-footer"><span>Detalhes de cada dia na Ata diária do CRM · CRM Aliança</span><span>Gerado em ${hoje}</span></div>
     </div>`;
   setTimeout(()=> window.print(), 80);
 }
@@ -6860,8 +6859,8 @@ function exportDiagnostico2pPDF(e, calc){
     ['Afastamento temporário','Doença, cirurgia ou internação podem interromper temporariamente o trabalho e a geração de renda.'],
     ['Invalidez','Uma invalidez pode comprometer a capacidade de produzir renda por período prolongado ou de forma permanente.'],
     ['Morte prematura e sucessão','A família pode precisar de liquidez para manter sua estrutura financeira e organizar a transmissão do patrimônio.']];
-  const head = pg => `<div class="d2-top"><img src="assets/logo-azul.png" alt="Torre de Controle - Aliança"><div class="t">Estudo personalizado<br>Proteção patrimonial</div></div>`;
-  const foot = pg => `<div class="d2-foot"><span>Torre de Controle - Aliança · Diagnóstico de proteção ${pg}/2</span><span>${hoje}</span></div>`;
+  const head = pg => `<div class="d2-top"><img src="assets/logo-azul.png" alt="CRM Aliança"><div class="t">Estudo personalizado<br>Proteção patrimonial</div></div>`;
+  const foot = pg => `<div class="d2-foot"><span>CRM Aliança · Diagnóstico de proteção ${pg}/2</span><span>${hoje}</span></div>`;
   const html = PDF2_CSS + `<div class="d2">
     <div class="d2-page">${head(1)}
       <h1>Diagnóstico de Proteção</h1>
@@ -6930,12 +6929,12 @@ async function fichaTecnicaPDF(p){
     .ft-sec{margin-bottom:12px;break-inside:avoid}.ft-sec h3{font-family:'Poppins',sans-serif;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#0018FC;border-bottom:1px solid #dfe3f2;padding-bottom:3px;margin:0 0 6px}
     .ft-g{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}.ft-i span{display:block;font-size:9.5px;color:#646b89;text-transform:uppercase;letter-spacing:.04em}.ft-i b{font-size:12px;font-weight:600}
     .ft-foot{font-size:9.5px;color:#646b89;border-top:1px solid #e6e9f7;padding-top:6px;margin-top:10px;display:flex;justify-content:space-between}
-  </style><div class="ft"><div class="ft-top"><img src="assets/logo-azul.png" alt="Torre de Controle - Aliança"><span style="font-family:'Inter',sans-serif;font-size:9.5px;letter-spacing:.1em;color:#4a5270">FICHA TÉCNICA · DIAGNÓSTICO DE PROTEÇÃO</span></div>
+  </style><div class="ft"><div class="ft-top"><img src="assets/logo-azul.png" alt="CRM Aliança"><span style="font-family:'Inter',sans-serif;font-size:9.5px;letter-spacing:.1em;color:#4a5270">FICHA TÉCNICA · DIAGNÓSTICO DE PROTEÇÃO</span></div>
     <h1>${escapeHtml(p.nome)}</h1><div class="s">Tudo o que foi preenchido em Proteção → Diagnóstico de Proteção · gerado em ${hoje}${row.preenchido_por?' · última edição por '+escapeHtml(row.preenchido_por):''}</div>
     ${box('Identificação', ident)}${box('Diagnóstico essencial', items(ess))}${box('ADN — análise da necessidade', adn)}
     ${jorn.map(([l,ks])=>box('Processo evolutivo · '+escapeHtml(l), items(ks))).join('')}
     ${box('Saúde e subscrição (dado sensível — uso restrito)', items(saude))}
-    <div class="ft-foot"><span>Torre de Controle - Aliança · documento interno e confidencial</span><span>${hoje}</span></div></div>`;
+    <div class="ft-foot"><span>CRM Aliança · documento interno e confidencial</span><span>${hoje}</span></div></div>`;
   setTimeout(()=>window.print(), 80);
 }
 
@@ -6946,12 +6945,12 @@ const agLocalHtml = l => !l ? '' : (/^https?:\/\//i.test(l) ? ` · <a href="${es
 function agGcalUrl(ev){
   const z = d => new Date(d).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
   const ini = new Date(ev.data_inicio), fim = ev.data_fim ? new Date(ev.data_fim) : new Date(ini.getTime()+3600000);
-  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(ev.titulo||'Compromisso')+'&dates='+z(ini)+'/'+z(fim)+'&details='+encodeURIComponent((ev.notas||'')+'\n\nAgendado pela Torre de Controle - Aliança')+'&location='+encodeURIComponent(ev.local||'')+'&add='+encodeURIComponent((ev.participantes||[]).join(','));
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(ev.titulo||'Compromisso')+'&dates='+z(ini)+'/'+z(fim)+'&details='+encodeURIComponent((ev.notas||'')+'\n\nAgendado pelo CRM Aliança')+'&location='+encodeURIComponent(ev.local||'')+'&add='+encodeURIComponent((ev.participantes||[]).join(','));
 }
 function agOutlookUrl(ev){
   const ini = new Date(ev.data_inicio), fim = ev.data_fim ? new Date(ev.data_fim) : new Date(ini.getTime()+3600000);
   const q = { path:'/calendar/action/compose', rru:'addevent', subject: ev.titulo||'Compromisso', startdt: ini.toISOString(), enddt: fim.toISOString(),
-    body: (ev.notas||'')+(ev.notas?'\n\n':'')+'Agendado pela Torre de Controle - Aliança', location: ev.local||'' };
+    body: (ev.notas||'')+(ev.notas?'\n\n':'')+'Agendado pelo CRM Aliança', location: ev.local||'' };
   const to = (ev.participantes||[]).join(';');
   return 'https://outlook.office.com/calendar/0/deeplink/compose?'+Object.entries(q).map(([k,v])=>k+'='+encodeURIComponent(v)).join('&')+(to?'&to='+encodeURIComponent(to):'');
 }
@@ -7081,7 +7080,7 @@ const proMoney2 = v => v==null ? '—' : 'R$ '+Number(v).toLocaleString('pt-BR',
 const proFileB64 = f => new Promise((ok,ko)=>{ const r = new FileReader(); r.onload = ()=>ok(String(r.result).split(',')[1]); r.onerror = ko; r.readAsDataURL(f); });
 function esPropostaBoxHtml(){
   return `<div class="es-box" id="pro-box"><div class="ql">Proposta comercial a partir das cotações</div>
-    <div class="hint" style="margin-bottom:8px">Envie as cotações das seguradoras (PDF). O sistema lê <b>cobertura · capital segurado · prêmio</b> de cada uma e monta a proposta da Torre de Controle - Aliança, agrupada em Proteção Familiar e Proteção de Renda. Confira e ajuste a tabela antes de gerar.</div>
+    <div class="hint" style="margin-bottom:8px">Envie as cotações das seguradoras (PDF). O sistema lê <b>cobertura · capital segurado · prêmio</b> de cada uma e monta a proposta do CRM Aliança, agrupada em Proteção Familiar e Proteção de Renda. Confira e ajuste a tabela antes de gerar.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="file" id="pro-files" accept="application/pdf" multiple><button class="om-save" id="pro-ler">Ler cotações</button><button class="om-cancel" id="pro-add">＋ Linha manual</button></div>
     <div id="pro-msg" class="hint" style="margin-top:6px"></div><div id="pro-tab"></div></div>`;
 }
@@ -7136,7 +7135,7 @@ function exportPropostaPDF(e, P){
   const cap = i => i.capital_texto || (i.capital!=null ? proMoney2(i.capital) : '—');
   const nome = e.cliente_nome || 'Cliente';
   document.getElementById('print-report').innerHTML = PDF2_CSS + `<div class="d2">
-    <div class="d2-page"><div class="d2-top"><img src="assets/logo-azul.png" alt="Torre de Controle - Aliança"><div class="t">Estudo personalizado de proteção<br>Torre de Controle - Aliança</div></div>
+    <div class="d2-page"><div class="d2-top"><img src="assets/logo-azul.png" alt="CRM Aliança"><div class="t">Estudo personalizado de proteção<br>CRM Aliança</div></div>
       <h1>${escapeHtml(nome)}</h1>
       <div class="sub">Proposta de proteção — estrutura consolidada por objetivo${segs.length?' · '+escapeHtml(segs.join(' + ')):''} · ${hoje}</div>
       <h2><span class="n">01</span> Visão executiva</h2>
@@ -7149,8 +7148,8 @@ function exportPropostaPDF(e, P){
       <table><thead><tr><th>Frente</th><th>Cobertura</th><th>Seguradora</th><th>Capital / benefício</th><th class="r">Mensalidade</th></tr></thead><tbody>
         ${it.map(i=>`<tr><td>${escapeHtml(i.frente||'')}</td><td>${escapeHtml(i.cobertura)}</td><td>${escapeHtml(i.seguradora||'')}</td><td>${escapeHtml(cap(i))}</td><td class="r">${proMoney2(i.premio_mensal)}</td></tr>`).join('')}
         <tr><td colspan="4"><b>TOTAL</b></td><td class="r"><b>${proMoney2(tot())}</b></td></tr></tbody></table>
-      <div class="d2-foot"><span>Torre de Controle - Aliança · Proposta 1/2</span><span>${hoje}</span></div></div>
-    <div class="d2-page"><div class="d2-top"><img src="assets/logo-azul.png" alt="Torre de Controle - Aliança"><div class="t">Estudo personalizado de proteção<br>Torre de Controle - Aliança</div></div>
+      <div class="d2-foot"><span>CRM Aliança · Proposta 1/2</span><span>${hoje}</span></div></div>
+    <div class="d2-page"><div class="d2-top"><img src="assets/logo-azul.png" alt="CRM Aliança"><div class="t">Estudo personalizado de proteção<br>CRM Aliança</div></div>
       <h2><span class="n">03</span> Como a proteção se complementa</h2>
       <div class="d2-risk" style="grid-template-columns:1fr">
         <div><b>Proteção Familiar</b><p>Garante liquidez para a família em caso de morte, incluindo a cobertura específica de sucessão.</p></div>
@@ -7158,7 +7157,7 @@ function exportPropostaPDF(e, P){
       <h2><span class="n">04</span> Investimento mensal</h2>
       <div class="d2-end" style="text-align:center"><b style="font-size:30px;font-family:Poppins,sans-serif">${proMoney2(tot())}</b><br>prêmio mensal consolidado</div>
       <div class="d2-note">Proposta indicativa baseada nas cotações das seguradoras, sujeita à aceitação de risco e às condições gerais de cada produto. Valores mensais; capital e benefícios conforme apólice.</div>
-      <div class="d2-foot"><span>Torre de Controle - Aliança · Proposta 2/2</span><span>${hoje}</span></div></div></div>`;
+      <div class="d2-foot"><span>CRM Aliança · Proposta 2/2</span><span>${hoje}</span></div></div></div>`;
   setTimeout(()=>window.print(), 80);
 }
 
@@ -9012,7 +9011,7 @@ function exportAnaliseCompletaPDF(e, calc){
     .ex-foot{display:flex;justify-content:space-between;font-size:10.5px;color:#646b89;margin-top:6px}
   </style>
   <div class="ex">
-    <div class="ex-cover"><img src="assets/logo-azul.png" alt="Torre de Controle - Aliança">
+    <div class="ex-cover"><img src="assets/logo-azul.png" alt="CRM Aliança">
       <h1>Análise Completa da Necessidade</h1>
       <p>Um diagnóstico da sua proteção: do que você constrói e sustenta hoje, aos riscos que podem interromper esse projeto — e quanto de proteção faz sentido para cada um.</p>
       <div class="who">Preparado para <b>${escapeHtml(e.cliente_nome||'cliente')}</b> · ${hoje}</div></div>
@@ -9025,7 +9024,7 @@ function exportAnaliseCompletaPDF(e, calc){
     ${sec('07','Por que esses valores?',`<b style="color:#00125e">Morte — ${fmtCompact(morte?morte.valor:0)}</b><div class="ex-why">${kpi(inv||'—','Inventário')}${kpi(edu||'—','Educação dos filhos')}${kpi(res||'—','Padrão de vida (reserva)')}</div><div class="ex-note">${morte?escapeHtml(morte.texto):''}</div>`,'A lógica utilizada para chegar aos valores sugeridos.')}
     ${sec('08','O que estamos protegendo?','<div class="ex-pyr"><div style="width:44%;background:#4a5cff">Continuidade</div><div style="width:58%;background:#2a3cff">Família</div><div style="width:72%;background:#0018fc">Patrimônio</div><div style="width:86%;background:#0018fc">Renda</div><div style="width:100%;background:#00125e">Carreira / capacidade de produção</div></div><div class="ex-note" style="text-align:center">Mais do que um seguro: uma estratégia para garantir continuidade financeira, estabilidade e tranquilidade.</div>')}
     ${sec('09','Visão consolidada da solução',`<div class="ex-total"><b>${fmtMoney(calc.total)}</b>Complemento total de proteção sugerido</div><div class="ex-grid" style="grid-template-columns:repeat(3,1fr)">${kpi(fmtCompact(somaNec),'Necessidade total')}${kpi(fmtCompact(somaTem),'Já possui')}${kpi(fmtCompact(calc.total),'Complemento sugerido')}</div><div class="ex-note">Análise indicativa, baseada nas informações prestadas; sujeita à subscrição de cada seguradora. O complemento já desconta o que o cliente possui em apólices atuais.</div>`)}
-    <div class="ex-foot"><span>Gerado pela Torre de Controle - Aliança</span><span>${hoje}</span></div>
+    <div class="ex-foot"><span>Gerado pelo CRM Aliança</span><span>${hoje}</span></div>
   </div>`;
   document.getElementById('print-report').innerHTML = html;
   setTimeout(()=>window.print(), 80);
@@ -10214,11 +10213,11 @@ function exportSemanaPDF(w){
   const html = `
     <div class="pr-page">
       <div class="pr-header">
-        <img src="assets/logo-azul.png" alt="Torre de Controle - Aliança">
+        <img src="assets/logo-azul.png" alt="CRM Aliança">
         <span class="pr-tag">Relatório semanal · ${escapeHtml(fmtDDMM(w.semana_inicio))} a ${escapeHtml(fmtDDMM(w.semana_fim))}</span>
       </div>
       <h1 class="pr-title">Relatório de Entregáveis da Semana</h1>
-      <p class="pr-sub">Torre de Controle - Aliança — semana de ${escapeHtml(fmtDateLong(w.semana_inicio))} a ${escapeHtml(fmtDateLong(w.semana_fim))}. ${diasComAtividade} de ${dias.length} dias com atividade registrada, totalizando ${totalEntregas} entregas/decisões.</p>
+      <p class="pr-sub">CRM Aliança — semana de ${escapeHtml(fmtDateLong(w.semana_inicio))} a ${escapeHtml(fmtDateLong(w.semana_fim))}. ${diasComAtividade} de ${dias.length} dias com atividade registrada, totalizando ${totalEntregas} entregas/decisões.</p>
 
       <p class="pr-section-title">Linha do tempo da semana</p>
       <div class="pr-timeline">
@@ -10244,7 +10243,7 @@ function exportSemanaPDF(w){
       </div>
 
       <div class="pr-footer">
-        <span>Torre de Controle - Aliança — relatório gerado automaticamente pelo CRM</span>
+        <span>CRM Aliança — relatório gerado automaticamente pelo CRM</span>
         <span>Gerado em ${hoje}</span>
       </div>
     </div>`;
@@ -11075,7 +11074,7 @@ document.addEventListener('click', async e=>{
     dlgOpen(`<h3 style="margin-top:0">Primeiro acesso liberado por 48 horas</h3><div class="hint">Envie para a pessoa: ela abre o link, clica em <b>Primeiro acesso</b>, digita o e-mail e cria a própria senha.</div>
       <div style="margin:12px 0;padding:12px;background:#f4f5fb;border-radius:10px;font-size:14px"><div><b>Link:</b> ${escapeHtml(link)}</div><div style="margin-top:6px"><b>E-mail:</b> ${escapeHtml(lib ? document.getElementById('pa-n-email').value.trim() : ren.dataset.e)}</div></div>
       <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end"><button class="adm-b pri" id="pa-copiar">Copiar mensagem</button><button class="adm-b" onclick="dlgClose()">Fechar</button></div>`);
-    const msg = 'Seu acesso à Torre de Controle - Aliança está liberado. Abra '+link+' , clique em "Primeiro acesso", use este e-mail e crie a sua senha (vale por 48 horas).';
+    const msg = 'Seu acesso ao CRM Aliança está liberado. Abra '+link+' , clique em "Primeiro acesso", use este e-mail e crie a sua senha (vale por 48 horas).';
     document.getElementById('pa-copiar').addEventListener('click', async ev=>{ try{ await navigator.clipboard.writeText(msg); ev.target.textContent = 'Copiado ✓'; }catch(x){ showToast('Não consegui copiar; selecione e copie à mão.'); } });
     renderAdmin();
   }
@@ -11089,11 +11088,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611030921"></script>
-<script src="painel.js?v=202611030921"></script>
-<script src="cobranca.js?v=202611030921"></script>
-<script src="cadastro.js?v=202611030921"></script>
-<script src="contrato.js?v=202611030921"></script>
-<script src="guarda.js?v=202611030921"></script>
+<script src="plataforma.js?v=202611030954"></script>
+<script src="painel.js?v=202611030954"></script>
+<script src="cobranca.js?v=202611030954"></script>
+<script src="cadastro.js?v=202611030954"></script>
+<script src="contrato.js?v=202611030954"></script>
+<script src="guarda.js?v=202611030954"></script>
 </body>
 </html>

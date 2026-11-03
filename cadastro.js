@@ -132,7 +132,7 @@
         </div>
         <div class="prev" id="c-prev"></div>`, `<button type="button" id="c-volta">Voltar</button><div style="display:flex;gap:8px"><button type="button" id="c-pular">Fazer depois</button><button type="button" class="pri" id="c-ir">Continuar</button></div>`);
       const prev = () => { const p = raiz.querySelector('#c-prev'); p.style.background = raiz.querySelector('#c-cor2').value;
-        p.innerHTML = `<img src="${esc(logoUrl || 'assets/logo-icone.png')}" alt="" style="width:36px;height:36px;object-fit:contain;background:#fff;border-radius:6px"><b>Torre de Controle - ${esc(INFO.nome_exibicao || '')}</b><span style="margin-left:auto;background:${esc(raiz.querySelector('#c-cor1').value)};padding:6px 12px;border-radius:8px;font-size:13px">Botão</span>`; };
+        p.innerHTML = `<img src="${esc(logoUrl || 'assets/logo-icone.png')}" alt="" style="width:36px;height:36px;object-fit:contain;background:#fff;border-radius:6px"><b>CRM Aliança · ${esc(INFO.nome_exibicao || '')}</b><span style="margin-left:auto;background:${esc(raiz.querySelector('#c-cor1').value)};padding:6px 12px;border-radius:8px;font-size:13px">Botão</span>`; };
       ['#c-cor1', '#c-cor2'].forEach((id) => raiz.querySelector(id).addEventListener('input', prev)); prev();
       raiz.querySelector('#c-logo').addEventListener('change', async (ev) => {
         const f = ev.target.files && ev.target.files[0]; if (!f) return;

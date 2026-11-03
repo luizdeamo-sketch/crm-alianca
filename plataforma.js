@@ -1,18 +1,19 @@
 /* Plataforma multi-corretora — só na versão produto (montar_demo.py injeta este arquivo; a CallMed não usa).
-   1) Marca da corretora: nome "Torre de Controle - <corretora>", logo e cores, aplicados depois do login
+   1) Marca da corretora: nome "CRM Aliança · <corretora>" (sem corretora: "CRM Aliança - by Capacity Case"), logo e cores, aplicados depois do login
       (e lembrados neste navegador para a tela de entrada da próxima vez).
    2) "Minha corretora": o administrador da corretora troca nome, logo e cores.
    3) "Plataforma": abre o Painel da Plataforma dentro do sistema (painel.js), só para o dono. */
 (function () {
   'use strict';
   const PADRAO = { nome: 'Aliança', logo: 'assets/logo-icone.png', logoGrande: 'assets/logo-marinho.png' };
-  const NOME_BASE = 'Torre de Controle - Aliança';
+  const NOME_BASE = 'CRM Aliança';   // nos textos vira "CRM Aliança · <corretora>" (decisão do Luiz, 03/11/2026: nada de "Torre de Controle")
+  const RE_NOME = /CRM Aliança( - by Capacity Case)?/g;   // com a corretora, "by Capacity Case" sai junto: "CRM Aliança · <corretora>"
   const MODO_PAINEL = /[?&]painel=1/.test(location.search);   // endereço dos gestores da plataforma (plataforma.html)
   let MARCA = null;          // {id, nome_exibicao, logo_url, cores, sou_admin, dono_plataforma}
   let observador = null;
 
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const nomeSistema = () => 'Torre de Controle - ' + ((MARCA && MARCA.nome_exibicao) || PADRAO.nome);
+  const nomeSistema = () => personalizada() ? 'CRM Aliança · ' + MARCA.nome_exibicao : 'CRM Aliança - by Capacity Case';
   const personalizada = () => MARCA && (MARCA.nome_exibicao || PADRAO.nome) !== PADRAO.nome;
 
   /* ---------- cores ---------- */
@@ -39,12 +40,12 @@
     const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
     let n; while ((n = w.nextNode())) {
       let orig = ORIGINAL.get(n);
-      if (orig === undefined) { if (!n.nodeValue || n.nodeValue.indexOf(NOME_BASE) < 0) continue; orig = n.nodeValue; ORIGINAL.set(n, orig); }
-      const v = orig.split(NOME_BASE).join(novo); if (n.nodeValue !== v) n.nodeValue = v;
+      if (orig === undefined) { if (!n.nodeValue || n.nodeValue.indexOf(NOME_BASE) < 0 || (n.parentNode && n.parentNode.closest && n.parentNode.closest('.tc-marca'))) continue; orig = n.nodeValue; ORIGINAL.set(n, orig); }   // cabeçalho e login já mostram a corretora ao lado
+      const v = orig.replace(RE_NOME, novo); if (n.nodeValue !== v) n.nodeValue = v;
     }
     raiz.querySelectorAll && raiz.querySelectorAll('img').forEach((img) => {
       if (img.alt && img.alt.indexOf(NOME_BASE) >= 0 && !img.dataset.altOriginal) img.dataset.altOriginal = img.alt;
-      if (img.dataset.altOriginal) img.alt = img.dataset.altOriginal.split(NOME_BASE).join(novo);
+      if (img.dataset.altOriginal) img.alt = img.dataset.altOriginal.replace(RE_NOME, novo);
       const src = img.getAttribute('src') || '';
       // logo branco fica nas faixas escuras (capas e PDFs): usa a versão da corretora para fundo escuro, se houver
       if (/assets\/logo-branco\.png/.test(src) && MARCA.cores && MARCA.cores.logo_fundo_escuro) img.src = MARCA.cores.logo_fundo_escuro;
@@ -53,16 +54,16 @@
   }
   function aplicarNoDocumento(doc) {
     if (!doc || !doc.body) return;
-    if (doc !== document && doc.title && doc.title.indexOf(NOME_BASE) >= 0 && personalizada()) doc.title = doc.title.split(NOME_BASE).join(nomeSistema());   // a aba principal recebe o título direto em aplicarMarca
+    if (doc !== document && doc.title && doc.title.indexOf(NOME_BASE) >= 0 && personalizada()) doc.title = doc.title.replace(RE_NOME, nomeSistema());   // a aba principal recebe o título direto em aplicarMarca
     trocarNaArvore(doc.body);
   }
   function aplicarMarca() {
     if (!MARCA) return;
     aplicarCores(MARCA.cores);
-    const nome = MARCA.nome_exibicao || PADRAO.nome;
+    const nome = MARCA.nome_exibicao || PADRAO.nome, sub = personalizada() ? nome : 'by Capacity Case';
     document.title = MODO_PAINEL ? 'Painel da Plataforma · CRM Aliança' : nomeSistema();
-    document.querySelectorAll('.tc-nm, .hdr-title').forEach((el) => { el.textContent = nome; });
-    const h1 = document.querySelector('.login-hero h1.tc-h1 small'); if (h1) h1.textContent = nome;
+    document.querySelectorAll('.tc-nm').forEach((el) => { el.textContent = sub; });
+    const h1 = document.querySelector('.login-hero h1.tc-h1 small'); if (h1) h1.textContent = sub;
     const hl = document.querySelector('.hdr-logo'); if (hl) { hl.src = MARCA.logo_url || PADRAO.logo; hl.alt = nomeSistema(); }
     // sem logo próprio, uma corretora com nome próprio usa só o ícone (o logo grande diz "Aliança")
     const ll = document.querySelector('.login-card .logo'); if (ll) { ll.src = MARCA.logo_url || (personalizada() ? PADRAO.logo : PADRAO.logoGrande); ll.alt = nomeSistema(); if (!MARCA.logo_url && personalizada()) ll.style.maxHeight = '64px'; }
@@ -172,7 +173,7 @@
     c.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:9500;width:min(380px,calc(100vw - 32px));max-height:calc(100vh - 120px);overflow:auto;background:#fff;border:1px solid #e4e6e2;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:14px 16px;font:14px/1.45 "Segoe UI",system-ui,sans-serif;color:#2a3540';
     c.innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:16px;color:#111827">Comece por aqui</b>
       <button type="button" data-pp="fechar" aria-label="Fechar" style="border:0;background:none;font-size:18px;cursor:pointer">✕</button></div>
-      <div style="color:#5d6871;font-size:13px;margin:4px 0 6px">Quatro passos para deixar a ${esc(nomeSistema())} pronta para a sua equipe.</div>
+      <div style="color:#5d6871;font-size:13px;margin:4px 0 6px">Quatro passos para deixar o ${esc(nomeSistema())} pronto para a sua equipe.</div>
       <ol style="list-style:none;margin:0;padding:0">
         ${passo(temEquipe, '1. Cadastre a sua equipe', 'Em Admin, inclua o e-mail de cada pessoa e libere o primeiro acesso.', 'Abrir Admin', 'equipe')}
         ${passo(temClientes, '2. Baixe a planilha padrão', 'Uma linha por apólice; o mesmo cliente com duas apólices ocupa duas linhas.', 'Baixar planilha', 'modelo')}
@@ -330,7 +331,7 @@
     const prev = () => {
       const nome = $('mc-nome').value.trim() || PADRAO.nome;
       $('mc-prev').style.background = $('mc-cor2').value;
-      $('mc-prev').innerHTML = `<img src="${esc(logoUrl || PADRAO.logo)}" alt="" style="width:34px;height:34px;object-fit:contain;background:#fff;border-radius:6px;"><b>Torre de Controle - ${esc(nome)}</b><span style="margin-left:auto;background:${esc($('mc-cor1').value)};padding:6px 12px;border-radius:8px;font-size:13px;">Botão</span>`;
+      $('mc-prev').innerHTML = `<img src="${esc(logoUrl || PADRAO.logo)}" alt="" style="width:34px;height:34px;object-fit:contain;background:#fff;border-radius:6px;"><b>CRM Aliança · ${esc(nome)}</b><span style="margin-left:auto;background:${esc($('mc-cor1').value)};padding:6px 12px;border-radius:8px;font-size:13px;">Botão</span>`;
     };
     ['mc-nome', 'mc-cor1', 'mc-cor2'].forEach((id) => $(id).addEventListener('input', prev)); prev();
     $('mc-logo').addEventListener('change', async (e) => {

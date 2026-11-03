@@ -676,7 +676,7 @@
       const f = fat(b.dataset.cobrar), pix = EST.config.pix || {};
       const copia = window.TorreCobranca ? window.TorreCobranca.pixPayload(pix, f.valor, f.codigo) : '';
       const venc = new Date(f.vencimento + 'T12:00:00').toLocaleDateString('pt-BR');
-      const txt = `Olá! A mensalidade da Torre de Controle - ${f.corretora} (${PLANOS[f.plano] || f.plano}), no valor de ${brl(f.valor)}, ${f.dias_atraso > 0 ? `venceu em ${venc}` : `vence em ${venc}`}.\n\nO QR Code está no sistema, no botão 💳 Pagamento. Se preferir, use o Pix copia e cola:\n\n${copia}\n\nDepois de pagar, clique em "Já paguei" no sistema. Obrigado!`;
+      const txt = `Olá! A mensalidade do CRM Aliança da ${f.corretora} (${PLANOS[f.plano] || f.plano}), no valor de ${brl(f.valor)}, ${f.dias_atraso > 0 ? `venceu em ${venc}` : `vence em ${venc}`}.\n\nO QR Code está no sistema, no botão 💳 Pagamento. Se preferir, use o Pix copia e cola:\n\n${copia}\n\nDepois de pagar, clique em "Já paguei" no sistema. Obrigado!`;
       window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener');
     });
     raiz.querySelector('#pp-gerar').onclick = async () => { try { const n = await rpc('crm_plataforma_cobranca_gerar'); recarregar(`<div class="aviso">${n} fatura(s) nova(s) gerada(s).</div>`); } catch (err) { alert(err.message); } };
@@ -810,7 +810,7 @@
     completo: ['Tudo dos módulos Vendas e Carteira, mais a Equipe:', '📊 Indicadores da corretora e de cada corretor', '💼 Comercial: metas, orçamento, funil com taxas e indicações', '📝 Ata da semana']
   };
   function convite(corr, email, admin) {
-    const nome = corr ? 'Torre de Controle - ' + (corr.nome_exibicao || corr.nome) : 'Torre de Controle';
+    const nome = corr ? 'CRM Aliança · ' + (corr.nome_exibicao || corr.nome) : 'CRM Aliança';
     const url = corr && corr.slug ? linkCorretora(corr.slug) : link();
     let txt;
     if (admin && corr) {
@@ -819,7 +819,7 @@
       const valor = corr.valor_mensal != null && !perm ? Number(corr.valor_mensal) : (corr.preco_especial != null ? Number(corr.preco_especial) : preco(pl));
       const V = ITENS_PLANO.vendas, VC = ITENS_PLANO.vendas_carteira.slice(1), C = ITENS_PLANO.completo.slice(1);
       const itens = perm ? ['Todos os módulos liberados: Vendas, Carteira, Gestão e os extras'] : pl === 'vendas' ? V : pl === 'carteira' ? ITENS_PLANO.carteira : pl === 'vendas_carteira' ? V.concat(VC) : V.concat(VC, C);
-      txt = `Olá${corr.admin_nome ? ', ' + corr.admin_nome.split(' ')[0] : ''}! 🎉 Seja bem-vindo(a) ao *CRM Aliança by Capacity Case*. A sua *${nome}* está pronta.
+      txt = `Olá${corr.admin_nome ? ', ' + corr.admin_nome.split(' ')[0] : ''}! 🎉 Seja bem-vindo(a) ao *CRM Aliança - by Capacity Case*. O *${nome}* está pronto.
 
 *Seu plano: ${perm ? 'Permuta' : PLANOS[pl]}*${perm ? ' · sem mensalidade' : ' · ' + brl(valor) + ' por mês'} · até ${limite(corr)} pessoas com acesso
 O que você tem:
@@ -859,7 +859,7 @@ Esqueceu a senha depois? Na tela de entrada, *Esqueci a senha* manda um e-mail (
 
 Qualquer coisa, estou por aqui. Boas vendas! 🚀`;
     } else {
-      txt = `Olá! O acesso à ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie a sua senha (pelo menos 10 caracteres) e, se o sistema pedir, ative a confirmação em 2 etapas\n\nO primeiro acesso fica liberado por 48 horas. Não chega e-mail para isso. Salve o endereço nos favoritos: é o link próprio da sua corretora.`;
+      txt = `Olá! O acesso ao ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie a sua senha (pelo menos 10 caracteres) e, se o sistema pedir, ative a confirmação em 2 etapas\n\nO primeiro acesso fica liberado por 48 horas. Não chega e-mail para isso. Salve o endereço nos favoritos: é o link próprio da sua corretora.`;
     }
     return `<div class="aviso"><b>Pronto. Mande esta mensagem para a pessoa:</b><pre class="convite">${esc(txt)}</pre>
       <div class="acoes"><button class="b" type="button" onclick="navigator.clipboard.writeText(${esc(JSON.stringify(txt))}).then(()=>this.textContent='Copiado ✓')">Copiar mensagem</button>

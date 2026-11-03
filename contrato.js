@@ -4,12 +4,12 @@
    Ao mudar uma cláusula, troque MODELO: contratos já emitidos não mudam, só os próximos. */
 (function () {
   'use strict';
-  const MODELO = '2026-11-02.3';   // .3: limite de pessoas do plano no lugar de "sem limite de usuários"
+  const MODELO = '2026-11-03.1';   // 03/11: marca "CRM Aliança - by Capacity Case" (sem "Torre de Controle"); 02/11.3: limite de pessoas do plano
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const extenso = (n) => ({ 3: 'três', 5: 'cinco', 7: 'sete', 10: 'dez', 14: 'quatorze', 15: 'quinze', 30: 'trinta' }[n] || String(n));
   // limite de pessoas com acesso por plano (padrão; o banco manda o valor de cada empresa em d.limite_pessoas)
-  const LIMITE_PADRAO = { vendas: 3, vendas_carteira: 5, completo: 10, permuta: 10 };
+  const LIMITE_PADRAO = { vendas: 3, carteira: 3, vendas_carteira: 5, completo: 10, permuta: 10 };
   const dataBr = (d) => new Date(d || Date.now()).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
   function endereco(e) {
@@ -34,7 +34,7 @@
     const clausula = (titulo, itens) => { n++; cl.push(`<h3>Cláusula ${n}ª · ${titulo}</h3>` + itens.map((t, i) => `<p><b>${n}.${i + 1}.</b> ${t}</p>`).join('')); };
 
     clausula('Objeto', [
-      `Este contrato concede à CONTRATANTE uma licença de uso, não exclusiva e intransferível, do sistema <b>CRM Aliança</b> ("Sistema"), na modalidade de software como serviço, acessado pela internet no endereço próprio da CONTRATANTE, sob a marca "Torre de Controle - ${esc(d.nome_exibicao || d.razao_social)}".`,
+      `Este contrato concede à CONTRATANTE uma licença de uso, não exclusiva e intransferível, do sistema <b>CRM Aliança - by Capacity Case</b> ("Sistema"), na modalidade de software como serviço, acessado pela internet no endereço próprio da CONTRATANTE, com o nome e a identidade visual da CONTRATANTE ("${esc(d.nome_exibicao || d.razao_social)}").`,
       `Plano contratado: <b>${esc(d.plano_nome)}</b> (${esc(d.plano_desc)}). A carteira de clientes, a agenda, as sugestões e a administração da equipe vêm em todos os planos.`,
       `O plano contratado permite até <b>${pessoas} (${extenso(pessoas)}) pessoas com acesso</b> ao Sistema, contando o administrador. Para incluir mais pessoas, a CONTRATANTE sobe para um plano com limite maior, como no item seguinte.`,
       'A CONTRATANTE pode subir para um plano superior a qualquer momento, pelo próprio Sistema. Durante a degustação, a troca não tem custo. Depois dela, a CONTRATANTE paga apenas a diferença proporcional aos dias que faltam para o próximo vencimento, e o plano novo passa a valer na hora; as mensalidades seguintes já vêm pelo valor do plano novo. A troca para um plano inferior é pedida à CONTRATADA e vale a partir da mensalidade seguinte.',
@@ -91,7 +91,7 @@
       'A responsabilidade total da CONTRATADA por danos ligados a este contrato fica limitada ao valor pago pela CONTRATANTE nos 12 (doze) meses anteriores ao fato, salvo dolo ou culpa grave.',
       'A CONTRATADA não responde por decisões comerciais tomadas com base nas informações do Sistema, nem por lucros cessantes, perda de negócios ou danos indiretos.']);
     clausula('Propriedade intelectual', [
-      'O Sistema, o seu código, o método Torre de Controle, as marcas, telas e materiais são da CONTRATADA. Este contrato não transfere nenhum desses direitos; a CONTRATANTE recebe apenas o direito de uso descrito na Cláusula 1ª.',
+      'O Sistema, o seu código, a metodologia de trabalho, as marcas, telas e materiais são da CONTRATADA. Este contrato não transfere nenhum desses direitos; a CONTRATANTE recebe apenas o direito de uso descrito na Cláusula 1ª.',
       'Sugestões de melhoria enviadas pela CONTRATANTE podem ser incorporadas ao Sistema livremente, sem custo para nenhuma das partes.']);
     clausula('Alterações deste contrato', [
       'Mudanças nestas condições são avisadas no Sistema com pelo menos 30 (trinta) dias de antecedência. Mudanças que reduzam direitos da CONTRATANTE ou alterem preço só valem com novo aceite; sem ele, a CONTRATANTE pode cancelar sem custo.']);

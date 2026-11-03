@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611022011">
+<meta name="app-build" content="202611022100">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -6473,7 +6473,8 @@ function normNome(x){
   return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(t=>t && !NOME_STOP.has(t));
 }
 async function ensurePessoas(){
-  if(!OP.pessoas.length){ OP.pessoas = await opFetchAll('crm_pessoas','id,nome,crm,crm_uf,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026',['nome','id']); }
+  // corretora sem nenhum cliente (1ª importação): sem esta trava, cada linha da planilha buscava o cadastro de novo (320 linhas = 20 s)
+  if(!OP.pessoas.length && !(OP._vazioAte > Date.now())){ OP.pessoas = await opFetchAll('crm_pessoas','id,nome,crm,crm_uf,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026',['nome','id']); if(!OP.pessoas.length) OP._vazioAte = Date.now() + 60000; }
 }
 async function findPessoas({cpf, crm, crm_uf, nome, telefone}){
   await ensurePessoas();
@@ -9328,7 +9329,7 @@ let CT = null;
 document.getElementById('op-import').addEventListener('click', ()=>{
   const box = dlgOpen(`<div class="om-title"><div><h3>Importar carteira: clientes e apólices</h3><div class="om-sub">Traga todos os seus clientes e as apólices ativas de uma vez. Só o nome é obrigatório; colunas que você não tiver podem ficar de fora. O sistema cruza cada linha com o cadastro pelo CPF e, sem CPF, pelo telefone (também CRM e nome idêntico) e atualiza em vez de duplicar. Cada apólice ativa com vencimento gera os avisos de renovação de 30, 15 e 7 dias.</div></div><button data-close>✕</button></div>
     <div class="dlg-body"><div class="sg-row" style="margin-bottom:10px"><button class="om-save" id="ct-t-pl" type="button">📄 Planilha de clientes</button><button class="om-cancel" id="ct-t-cel" type="button">📱 Contatos do celular (WhatsApp)</button></div>
-    <div id="ct-pl"><div class="es-box" style="margin:0 0 10px"><div class="ql">Em 3 passos</div><div style="font-size:12.5px;line-height:1.6"><b>1.</b> Baixe a planilha padrão. <b>2.</b> Preencha uma linha por apólice (cliente com 2 apólices = 2 linhas com o mesmo CPF; lead sem apólice = 1 linha). <b>3.</b> Envie o arquivo abaixo, confira a prévia e clique em Importar.</div>
+    <div id="ct-pl"><div class="es-box" style="margin:0 0 10px"><div class="ql">Em 3 passos</div><div style="font-size:12.5px;line-height:1.6"><b>1.</b> Baixe a planilha padrão. <b>2.</b> Preencha uma linha por apólice (cliente com 2 apólices = 2 linhas com o mesmo CPF; lead sem apólice = 1 linha). <b>3.</b> Envie o arquivo abaixo, confira a prévia e clique em Importar.<br><b>O mínimo da planilha:</b> o <b>nome</b> e o <b>telefone ou CPF</b> de cada pessoa. Quem tem apólice: <b>seguradora, tipo e vencimento</b>, para o sistema avisar a renovação. Sua planilha pode ter outro formato: a IA lê os títulos das colunas e sugere onde vai cada uma.</div>
       <div style="margin-top:8px"><button class="om-save" id="ct-modelo">📥 Baixar planilha padrão (Excel)</button></div></div>
       <div class="hint" style="margin:0 0 10px">Sua planilha é só de <b>apólices</b>, com prêmio, capital, comissão ou vendedor? Use <a href="#" id="ct-ir-apo">Importar apólices (Central de Apólices)</a>.</div></div>
     <div id="ct-guia" hidden class="es-box" style="margin:0 0 10px"><div class="ql">Como exportar os contatos do celular</div>
@@ -9355,7 +9356,8 @@ document.getElementById('op-import').addEventListener('click', ()=>{
       const como = XLSX.utils.aoa_to_sheet([['Como preencher a planilha padrão'],[''],
         ['1. Uma linha por apólice. Cliente com 2 apólices ocupa 2 linhas, com o mesmo CPF (os dados da pessoa podem ficar só na primeira).'],
         ['2. Lead ou cliente sem apólice: uma linha, com as colunas da apólice em branco.'],
-        ['3. Só o nome é obrigatório. O CPF evita duplicar quem já está no sistema; sem CPF, o sistema usa o telefone.'],
+        ['3. O mínimo: o nome e o telefone ou CPF de cada pessoa. O CPF evita duplicar quem já está no sistema; sem CPF, o sistema usa o telefone.'],
+        ['3a. Quem tem apólice: seguradora, tipo e vencimento. Sem vencimento, a apólice entra, mas o sistema não consegue avisar a renovação.'],
         ['4. Datas no formato dd/mm/aaaa. Valores em reais como 1.850,00. Comissão em %, por exemplo 20.'],
         ['5. Status da apólice: Ativa, Cancelada, Encerrada ou Proposta. Em branco: ativa se o vencimento ainda não passou.'],
         ['6. Apólice ativa com vencimento gera sozinha os avisos de renovação de 30, 15 e 7 dias.'],
@@ -9474,6 +9476,17 @@ function ctExpandir(){
   CT.rows = rows; CT.linhaOrig = orig; CT.rawPor = raw;
 }
 function ctRaw(linha){ return (CT.rawPor && CT.rawPor[linha]) || CT.base[linha - CT.linhaTitulo - 2] || []; }
+// nome da seguradora padronizado para os relatórios e a Central de Apólices ("PORTO" e "porto seguro" viram "Porto Seguro");
+// só nomes conhecidos mudam, o resto fica exatamente como veio na planilha
+const CT_SEGURADORAS = [[/^porto/,'Porto Seguro'],[/^azul\b/,'Azul Seguros'],[/bradesco/,'Bradesco Seguros'],[/sul ?am[eé]rica/,'SulAmérica'],[/^mag\b|mongeral/,'MAG Seguros'],
+  [/prudential/,'Prudential'],[/met ?life/,'MetLife'],[/icatu/,'Icatu Seguros'],[/mapfre/,'Mapfre'],[/allianz/,'Allianz'],[/tokio/,'Tokio Marine'],[/^hdi\b/,'HDI Seguros'],
+  [/zurich/,'Zurich'],[/^unimed/,'Unimed'],[/^azos/,'Azos'],[/omint/,'Omint'],[/^caixa/,'Caixa Seguradora'],[/brasilseg|^bb\b/,'Brasilseg (BB Seguros)'],[/^ita[uú]/,'Itaú Seguros'],
+  [/sompo/,'Sompo'],[/generali/,'Generali'],[/^amil/,'Amil'],[/hapvida/,'Hapvida'],[/notre ?dame|intermedica/,'NotreDame Intermédica'],[/^alfa\b/,'Alfa Seguros'],[/^yelum|liberty/,'Yelum (Liberty)']];
+function ctSeguradora(t){
+  const x = String(t||'').trim(); if(!x) return '';
+  const n = x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+(s\.?a\.?|seguros?|seguradora|cia\.?|companhia)\b.*$/,'').trim();
+  const hit = CT_SEGURADORAS.find(([re])=>re.test(n) || re.test(x.toLowerCase())); return hit ? hit[1] : x;
+}
 function ctTipoSeguro(t){
   const x = String(t||'').trim(); if(!x) return '';
   const n = x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
@@ -9527,6 +9540,7 @@ function ctNormRow(r){
   // apólice (opcional): sai de dentro do cadastro da pessoa
   const apo = {}; ['seguradora','tipo_seguro','numero_apolice','vencimento','emissao','a_status','premio','capital','comissao','forma_pagamento'].forEach(k=>{ if(o[k]){ apo[k] = o[k]; } delete o[k]; });
   if(apo.tipo_seguro) apo.tipo_seguro = ctTipoSeguro(apo.tipo_seguro);
+  if(apo.seguradora) apo.seguradora = ctSeguradora(apo.seguradora);
   if(apo.vencimento){ const d = impDate(apo.vencimento); if(d) apo.vencimento = d; else { avisos.push('vencimento inválido ('+apo.vencimento+'): apólice sem vencimento, sem avisos de renovação'); delete apo.vencimento; } }
   if(apo.emissao){ const d = impDate(apo.emissao); if(d) apo.emissao = d; else { avisos.push('início da vigência inválido ('+apo.emissao+'): ignorado'); delete apo.emissao; } }
   if(apo.a_status){ apo.a_status = impStatus(apo.a_status); }
@@ -9546,9 +9560,12 @@ async function ctPreview(){
   ctExpandir();   // apólices lado a lado viram uma linha por apólice (só se a IA encontrou e a caixa está marcada)
   res.innerHTML = '<div class="op-more">Cruzando com os cadastros...</div>'; await ensurePessoas();
   const novos = [], existentes = [], revisar = [], problemas = [], leves = []; const seenKey = new Set(), porChave = new Map();
+  const conf = { linhas:0, comNome:0, semContato:0, comApo:0, apoSemVenc:0 };   // o que a planilha tem (quadro da prévia)
   for(let li=0; li<CT.rows.length; li++){
     const r = CT.rows[li], linha = CT.linhaOrig ? CT.linhaOrig[li] : li + CT.linhaTitulo + 2, n = ctNormRow(r), o = n.o;
+    conf.linhas++;
     if(!o.nome){ problemas.push({linha, nome:'', motivo:'linha sem nome', raw:ctRaw(linha)}); continue; }
+    conf.comNome++; if(!o.telefone && !o.cpf) conf.semContato++; if(n.apo){ conf.comApo++; if(!n.apo.vencimento) conf.apoSemVenc++; }
     n.avisos.forEach(a=>leves.push({linha, nome:o.nome, motivo:a}));
     const temCpf = !!o.cpf, tel = dOnly(o.telefone).slice(-9);
     const found = await findPessoas({cpf:o.cpf, crm:o.crm, nome:o.nome, telefone:o.telefone});
@@ -9573,7 +9590,13 @@ async function ctPreview(){
   const nApo = [...novos, ...existentes].reduce((s,x)=>s+x.apos.length, 0);
   [...novos, ...existentes].forEach(x=>{ x.apo = x.apos[0] ? x.apos[0].apo : null; });   // primeira apólice aparece na prévia
   const amostra = [...novos.slice(0,6).map(x=>({...x, st:'novo'})), ...existentes.slice(0,6).map(x=>({...x, st:'atualiza ('+x.via+')'}))];
-  res.innerHTML = `<div class="reco" style="margin-top:12px"><b>Prévia: nada foi gravado ainda</b><br>• <b>${novos.length}</b> cliente(s) novo(s)<br>• <b>${existentes.length}</b> já existem: serão atualizados (${document.getElementById('ct-upd').checked?'só campos vazios':'ignorados'})<br>• <b>${nApo}</b> linha(s) com apólice<br>• <b>${problemas.length}</b> com problema (ficam de fora)${leves.length?`<br>• ${leves.length} aviso(s) leve(s) (a linha entra, o dado ruim é ignorado)`:''}</div>
+  const leads = [...novos, ...existentes].filter(x=>!x.apos.length).length, ok = (v)=>v?'⚠️':'✅';
+  const quadro = `<div class="es-box" style="margin-top:12px"><div class="ql">O que a sua planilha tem</div><div style="font-size:13px;line-height:1.7">
+    ${ok(conf.comNome<conf.linhas)} <b>${conf.comNome}</b> de ${conf.linhas} linhas com nome${conf.comNome<conf.linhas?' (as sem nome ficam de fora)':''}<br>
+    ${ok(conf.semContato)} ${conf.semContato ? `<b>${conf.semContato}</b> pessoa(s) sem telefone nem CPF: entram, mas ficam sem como contatar e podem duplicar numa próxima importação` : 'Todas com telefone ou CPF'}<br>
+    ${conf.comApo ? `${ok(conf.apoSemVenc)} <b>${conf.comApo}</b> linha(s) com apólice${conf.apoSemVenc?`, <b>${conf.apoSemVenc}</b> sem vencimento (entram, mas sem aviso de renovação)`:', todas com vencimento'}` : 'ℹ️ Nenhuma linha com apólice: todos entram como contatos'}<br>
+    ℹ️ <b>${leads}</b> pessoa(s) sem apólice: entram como leads${leads?' (você pode mandar para a Prospecção logo abaixo)':''}</div></div>`;
+  res.innerHTML = quadro + `<div class="reco" style="margin-top:12px"><b>Prévia: nada foi gravado ainda</b><br>• <b>${novos.length}</b> cliente(s) novo(s)<br>• <b>${existentes.length}</b> já existem: serão atualizados (${document.getElementById('ct-upd').checked?'só campos vazios':'ignorados'})<br>• <b>${nApo}</b> linha(s) com apólice<br>• <b>${problemas.length}</b> com problema (ficam de fora)${leves.length?`<br>• ${leves.length} aviso(s) leve(s) (a linha entra, o dado ruim é ignorado)`:''}</div>
     ${amostra.length?`<div class="orc-wrap" style="margin-top:10px;max-height:200px;overflow:auto"><table class="ca-table"><thead><tr><th>Linha</th><th>Nome</th><th>CPF</th><th>Telefone</th><th>Apólice</th><th>O que acontece</th></tr></thead><tbody>${amostra.map(x=>`<tr><td>${x.linha}</td><td>${escapeHtml(x.o.nome)}</td><td>${escapeHtml(x.o.cpf||'—')}</td><td>${escapeHtml(x.o.telefone||'—')}</td><td>${x.apo?escapeHtml([x.apo.tipo_seguro,x.apo.seguradora,x.apo.vencimento?'vence '+fmtDate(x.apo.vencimento):''].filter(Boolean).join(' · ')||'—'):'—'}</td><td>${escapeHtml(x.st)}</td></tr>`).join('')}</tbody></table></div><div class="hint">Mostrando as primeiras linhas.</div>`:''}
     ${problemas.length?`<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">Ver os ${problemas.length} problema(s)</summary><ul style="margin:6px 0 0 18px;font-size:12.5px">${problemas.slice(0,15).map(x=>`<li>Linha ${x.linha}${x.nome?' ('+escapeHtml(x.nome)+')':''}: ${escapeHtml(x.motivo)}</li>`).join('')}${problemas.length>15?`<li>… e mais ${problemas.length-15}</li>`:''}</ul></details>`:''}
     ${(novos.length||existentes.length)?`<div style="margin-top:10px"><button class="om-save" id="ct-go">Importar agora</button></div>`:''}<div class="om-err" id="ct-err"></div>`;
@@ -9625,7 +9648,9 @@ async function ctRun(){
       for(let i=0;i<ids.length;i+=100){ const { data } = await sb.from('crm_apolices').select('id,pessoa_id,numero_apolice,seguradora,tipo_seguro,data_vencimento,data_emissao,valor_premio,valor_cobertura,comissao_pct,forma_pagamento,status').in('pessoa_id', ids.slice(i,i+100)); (data||[]).forEach(a=>{ if(!jaTem.has(a.pessoa_id)) jaTem.set(a.pessoa_id,[]); jaTem.get(a.pessoa_id).push(a); }); }
       const nz = v=>String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
       const hoje = ymdToday();
-      for(const x of comApolice){
+      const fila = [];
+      for(const [ix, x] of comApolice.entries()){
+        if(ix % 25 === 0) btn.textContent = `Conferindo apólices ${ix+1}/${comApolice.length}...`;
         const a = x.apo, lista = jaTem.get(x.pessoa_id)||[];
         const ex = lista.find(e=> (a.numero_apolice && nz(e.numero_apolice)===nz(a.numero_apolice)) || (nz(e.seguradora)===nz(a.seguradora) && nz(e.tipo_seguro)===nz(a.tipo_seguro) && String(e.data_vencimento||'').slice(0,10)===(a.vencimento||'') && (a.seguradora||a.tipo_seguro)) );
         if(ex){
@@ -9634,12 +9659,21 @@ async function ctRun(){
           if(ex.id && Object.keys(patch).length){ const { error } = await sb.from('crm_apolices').update(patch).eq('id', ex.id); if(error) rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não atualizada: '+error.message, raw:ctRaw(x.linha)}); else rel.apoAtualizadas++; }
           continue; }
         const status = a.a_status || (a.vencimento && a.vencimento < hoje ? 'encerrada' : 'ativa');
-        const { error } = await sb.from('crm_apolices').insert({ pessoa_id:x.pessoa_id, numero_apolice:a.numero_apolice||null, seguradora:a.seguradora||null, tipo_seguro:a.tipo_seguro||null, data_emissao:a.emissao||null, data_vencimento:a.vencimento||null, valor_premio:a.premio==null?null:a.premio, valor_cobertura:a.capital==null?null:a.capital, comissao_pct:a.comissao==null?null:a.comissao, forma_pagamento:a.forma_pagamento||null, status, origem_apolice:'importada', dados_extraidos:{importado_de:CT.file} });
-        if(error){ rel.problemas.push({linha:x.linha, nome:x.nome, motivo:'apólice não criada: '+error.message, raw:ctRaw(x.linha)}); continue; }
-        rel.apoNovas++;
+        fila.push({ x, a, status, linhaDb:{ pessoa_id:x.pessoa_id, numero_apolice:a.numero_apolice||null, seguradora:a.seguradora||null, tipo_seguro:a.tipo_seguro||null, data_emissao:a.emissao||null, data_vencimento:a.vencimento||null, valor_premio:a.premio==null?null:a.premio, valor_cobertura:a.capital==null?null:a.capital, comissao_pct:a.comissao==null?null:a.comissao, forma_pagamento:a.forma_pagamento||null, status, origem_apolice:'importada', dados_extraidos:{importado_de:CT.file} } });
         if(!jaTem.has(x.pessoa_id)) jaTem.set(x.pessoa_id, lista);   // linha repetida mais abaixo na planilha encontra esta apólice
         lista.push({id:null, numero_apolice:a.numero_apolice||null, seguradora:a.seguradora||null, tipo_seguro:a.tipo_seguro||null, data_vencimento:a.vencimento||null});
-        if(a.vencimento && status==='ativa'){ [30,15,7].forEach(d=>{ const dt = new Date(a.vencimento+'T12:00:00'); dt.setDate(dt.getDate()-d); if(ymd(dt)>=hoje) rel.avisos++; }); }
+      }
+      // apólices novas gravadas de 100 em 100, com contador (300 apólices: segundos, não minutos); lote recusado vai uma a uma
+      // para dizer exatamente qual linha tem problema
+      const contaAvisos = (f)=>{ if(f.a.vencimento && f.status==='ativa'){ [30,15,7].forEach(d=>{ const dt = new Date(f.a.vencimento+'T12:00:00'); dt.setDate(dt.getDate()-d); if(ymd(dt)>=hoje) rel.avisos++; }); } };
+      for(let i=0;i<fila.length;i+=100){
+        const lote = fila.slice(i,i+100);
+        btn.textContent = `Gravando apólices ${Math.min(i+100,fila.length)}/${fila.length}...`;
+        const { error } = await sb.from('crm_apolices').insert(lote.map(f=>f.linhaDb));
+        if(!error){ lote.forEach(f=>{ rel.apoNovas++; contaAvisos(f); }); continue; }
+        for(const f of lote){ const r1 = await sb.from('crm_apolices').insert(f.linhaDb);
+          if(r1.error) rel.problemas.push({linha:f.x.linha, nome:f.x.nome, motivo:'apólice não criada: '+r1.error.message, raw:ctRaw(f.x.linha)});
+          else { rel.apoNovas++; contaAvisos(f); } }
       }
       OP.dirty = true; CA.loaded = false;
     }
@@ -11050,11 +11084,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611022011"></script>
-<script src="painel.js?v=202611022011"></script>
-<script src="cobranca.js?v=202611022011"></script>
-<script src="cadastro.js?v=202611022011"></script>
-<script src="contrato.js?v=202611022011"></script>
-<script src="guarda.js?v=202611022011"></script>
+<script src="plataforma.js?v=202611022100"></script>
+<script src="painel.js?v=202611022100"></script>
+<script src="cobranca.js?v=202611022100"></script>
+<script src="cadastro.js?v=202611022100"></script>
+<script src="contrato.js?v=202611022100"></script>
+<script src="guarda.js?v=202611022100"></script>
 </body>
 </html>

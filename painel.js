@@ -555,10 +555,13 @@
     EST.sugestoes = lista || []; EST.souCuradoria = cur === true; EST.souDev = dev === true;
     EST.sugPend = EST.sugestoes.filter((s) => s.curadoria === 'pendente').length;
   }
-  const ST_DEV = { aprovada: 'Liberada, aguardando', em_analise: 'Em desenvolvimento', concluida: 'Concluída', nova: 'Nova', depois: 'Depois' };
+  const ST_DEV = { aprovada: 'Liberada, aguardando', em_analise: 'Em desenvolvimento', em_execucao: 'Em desenvolvimento', concluida: 'Concluída', nova: 'Nova', depois: 'Depois', rejeitada: 'Não vai ser feita' };
   function cartaoSug(s) {
-    const cab = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${esc(s.corretora)}</b><span style="color:#5d6871;font-size:13px">${esc(s.autor || '')} · ${quando(s.criada)}${s.tela ? ' · tela ' + esc(s.tela) : ''}${s.anexos ? ' · 📎 ' + s.anexos : ''}</span></div>
-      <div style="white-space:pre-wrap;margin:6px 0">${esc(s.texto || '')}</div>`;
+    // anexos (print, áudio, arquivo) abrem aqui mesmo para a Amanda decidir vendo o que a pessoa mandou
+    const arqs = (s.arquivos || []).filter((a) => a && a.path);
+    const anexos = arqs.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px">${arqs.map((a) => `<button type="button" class="b" data-anexo="${esc(a.path)}" style="min-height:30px;font-size:12.5px">📎 ${esc(a.nome || 'anexo')}</button>`).join('')}</div>` : '';
+    const cab = `<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${esc(s.corretora)}</b><span style="color:#5d6871;font-size:13px">${esc(s.autor || '')} · ${quando(s.criada)}${s.tela ? ' · tela ' + esc(s.tela) : ''}${s.anexos && !arqs.length ? ' · 📎 ' + s.anexos : ''}</span></div>
+      <div style="white-space:pre-wrap;margin:6px 0">${esc(s.texto || '')}</div>${anexos}`;
     const nota = s.curadoria_nota ? `<div style="background:#f6ebd2;border-radius:8px;padding:6px 10px;font-size:13px"><b>Recado da Amanda:</b> ${esc(s.curadoria_nota)}</div>` : '';
     const resp = s.resposta ? `<div style="background:#eef0f5;border-radius:8px;padding:6px 10px;font-size:13px"><b>Resposta ao cliente:</b> ${esc(s.resposta)}</div>` : '';
     let acoes = '';
@@ -586,6 +589,12 @@
   }
   function ligarSugestoes() {
     const val = (sel) => { const el = raiz.querySelector(sel); return el ? el.value : ''; };
+    raiz.querySelectorAll('[data-anexo]').forEach((b) => b.onclick = async () => {
+      const janela = window.open('', '_blank');   // abre já no clique (o navegador bloqueia janela aberta depois de esperar a rede)
+      const { data, error } = await sb.storage.from('crm-docs').createSignedUrl(b.dataset.anexo, 300);
+      if (error || !data) { if (janela) janela.close(); alert('Não foi possível abrir o anexo: ' + ((error && error.message) || 'sem resposta')); return; }
+      if (janela) janela.location = data.signedUrl; else window.location.href = data.signedUrl;
+    });
     raiz.querySelectorAll('[data-cur]').forEach((b) => b.onclick = async () => {
       const id = b.dataset.id;
       try { await rpc('crm_plataforma_sugestao_curar', { p_id: id, p_decisao: b.dataset.cur, p_nota: val(`[data-nota="${id}"]`), p_resposta: val(`[data-resp="${id}"]`) }); await carregarSugestoes(); }

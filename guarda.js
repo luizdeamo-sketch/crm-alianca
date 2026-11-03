@@ -178,6 +178,12 @@
     try { if (sb.rest) sb.rest.fetch = vigiar(sb.rest.fetch); if (sb.fetch) sb.fetch = vigiar(sb.fetch); } catch (e) { /* segue sem a conferência */ }
   }
   instalarVigia();
+  // clicou em Sair: o rascunho de segurança deste navegador vai embora (computador compartilhado não mostra dado de cliente ao
+  // próximo). Só no clique: sessão que vence sozinha mantém o rascunho, que é quando ele mais serve.
+  document.addEventListener('click', (e) => {
+    if (!e.target || !e.target.closest || !e.target.closest('#btn-logout, #mfa-sair')) return;
+    try { Object.keys(localStorage).filter((k) => k.indexOf('tc_rascunho_') === 0).forEach((k) => localStorage.removeItem(k)); } catch (err) { /* nada */ }
+  }, true);
 
   function registrarFalha(st, corpo) {
     const t = traduzir(st, corpo);

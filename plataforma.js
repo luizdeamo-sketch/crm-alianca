@@ -230,7 +230,7 @@
         <button type="button" data-x style="font:inherit;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid #d5d8d2;background:#fff;cursor:pointer">✕ Fechar</button></div>
       ${atual === 'permuta' ? '<div style="background:#e3f1e8;color:#1f5a37;border-radius:12px;padding:12px 14px"><b>A sua corretora está em permuta:</b> todos os módulos liberados, sem mensalidade.</div>' : ''}
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">${PLANOS_INFO.map(cartao).join('')}</div>
-      <p style="margin:0;color:#5d6871;font-size:14px">${info.sou_admin ? 'Para subir de plano, use o botão do plano escolhido. Para descer de plano ou pedir mais pessoas, use a tela <b>Sugestões</b>.' : 'Para mudar de plano, fale com o administrador da sua corretora.'} Extras sob consulta: Analítico da base de plantões e grupos Premium.</p></div>`;
+      <p style="margin:0;color:#5d6871;font-size:14px">${info.sou_admin ? 'Para subir de plano, use o botão do plano escolhido. Para descer de plano ou pedir mais pessoas, use a tela <b>Sugestões</b>.' : 'Para mudar de plano, fale com o administrador da sua corretora.'}</p></div>`;   // extras feitos para um cliente (Analítico, Premium) não aparecem na tela de todos: regra "cada melhoria só no próprio sistema"
     document.body.appendChild(fundo);
     const fechar = () => fundo.remove();
     fundo.querySelectorAll('[data-troca]').forEach((b) => b.onclick = async () => {
@@ -300,7 +300,7 @@
         <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
           <img id="mc-logo-prev" src="${esc(MARCA.logo_url || PADRAO.logo)}" alt="Logo atual" style="width:72px;height:72px;object-fit:contain;border:1px solid #e4e6e2;border-radius:10px;background:#fff;">
           <label style="display:grid;gap:6px;font-size:14px;flex:1;min-width:220px;">Logo (PNG, JPG, SVG ou WEBP, até 1 MB; de preferência quadrado)
-            <input id="mc-logo" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
+            <input id="mc-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
         </div>
         <div style="display:flex;gap:18px;flex-wrap:wrap;">
           <label style="display:flex;gap:8px;align-items:center;font-size:14px;"><input id="mc-cor1" type="color" value="${esc(c.principal || '#9c7518')}" style="width:46px;height:34px;border:0;"> Cor principal (botões e destaques)</label>

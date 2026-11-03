@@ -123,7 +123,7 @@
       moldura('A cara da sua corretora', `${rotulo(2)} · Logo e cores. Aparecem para toda a equipe, no link próprio, nos relatórios e nas propostas. Dá para trocar depois em "Minha corretora".`, `
         <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
           <img id="c-logo-prev" src="${esc(logoUrl || 'assets/logo-icone.png')}" alt="Logo" style="width:84px;height:84px;object-fit:contain;border:1px solid #e4e6e2;border-radius:12px;background:#fff">
-          <label class="f" style="flex:1;min-width:240px">Logo (PNG, JPG, SVG ou WEBP, até 1 MB)<input id="c-logo" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
+          <label class="f" style="flex:1;min-width:240px">Logo (PNG, JPG ou WEBP, até 1 MB)<input id="c-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
         </div>
         <div style="display:flex;gap:20px;flex-wrap:wrap">
           <label class="chk" style="align-items:center"><input id="c-cor1" type="color" value="${esc(c.principal || '#9c7518')}" style="width:52px;height:38px;border:0;padding:0"> Cor principal (botões e destaques)</label>

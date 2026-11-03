@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611030910">
+<meta name="app-build" content="202611030921">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -9804,7 +9804,7 @@ async function lembAbrirLista(r){
 // ===== Confirmação automática da reunião: a Prospecção ("Agendou reunião") ou a Agenda criam o compromisso e o banco monta
 // a régua de lembretes em crm_envios (confirmação, 3/2/1 dia antes às 9h, 1 hora antes e na hora). Sem API de WhatsApp:
 // o Hoje mostra o que está na hora de enviar, com 1 clique para o WhatsApp; o enviado entra na linha do tempo do cliente. =====
-let APRESENTACAO_URL = 'https://luizdeamo-sketch.github.io/crm-alianca/apresentacao.html';   // a corretora pode ter a própria (crm_config.apresentacao_url)
+let APRESENTACAO_URL = 'https://app.crmalianca.com.br/apresentacao.html';   // a corretora pode ter a própria (crm_config.apresentacao_url)
 const REU_MOM = { reuniao_confirmacao:'Confirmação', reuniao_3d:'3 dias antes', reuniao_2d:'2 dias antes', reuniao_1d:'1 dia antes', reuniao_1h:'1 hora antes', reuniao_agora:'Na hora' };
 function reuTexto(modelo, env){
   const a = env.crm_agenda||{}, ini = new Date(a.data_inicio), link = a.link_reuniao || (/^https?:\/\//.test(a.local||'') ? a.local : '');
@@ -11089,11 +11089,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611030910"></script>
-<script src="painel.js?v=202611030910"></script>
-<script src="cobranca.js?v=202611030910"></script>
-<script src="cadastro.js?v=202611030910"></script>
-<script src="contrato.js?v=202611030910"></script>
-<script src="guarda.js?v=202611030910"></script>
+<script src="plataforma.js?v=202611030921"></script>
+<script src="painel.js?v=202611030921"></script>
+<script src="cobranca.js?v=202611030921"></script>
+<script src="cadastro.js?v=202611030921"></script>
+<script src="contrato.js?v=202611030921"></script>
+<script src="guarda.js?v=202611030921"></script>
 </body>
 </html>

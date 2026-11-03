@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611031355">
+<meta name="app-build" content="202611031438">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -4267,7 +4267,10 @@ async function pvDiagnostico(p){
       <div class="fgrid" style="margin-top:8px">${avanc.map(f=>pvDiagField(f.name, row[f.name], [f.name,f.label,f.type,f.options])).join('')}</div></details>`:''}
     <div style="margin-top:10px"><button class="om-save" id="dg-save">Salvar informações</button> <button class="om-cancel" id="dg-prox">Ir para o comparativo (abaixo)</button> <button class="om-cancel" id="dg-ficha" title="Exporta tudo o que está preenchido neste diagnóstico">Ficha técnica (PDF)</button> <small style="color:var(--ink-faint)">${row.preenchido_por?'Última edição por '+escapeHtml(row.preenchido_por):''}</small></div>`;
   pdBindAvancado(host);
-  const dgImcUpd = ()=>{ const pe = Number(host.querySelector('[data-dg="peso"]')?.value)||0, al = Number(host.querySelector('[data-dg="altura"]')?.value)||0; const info = imcInfo(al, pe);
+  // Dados pessoais: guarda o que a tela mostrou ao abrir. Ao salvar, só vai para o cadastro o que a pessoa mudou aqui;
+  // campo vazio que ela não tocou não apaga o que já está no cadastro (a tela pode estar aberta desde antes de outra edição).
+  const dgpIni = {}; ['estado_civil','sexo','data_nascimento','profissao'].forEach(k=>{ dgpIni[k] = document.getElementById('dgp-'+k).value.trim(); });
+  const dgImcUpd =()=>{ const pe = Number(host.querySelector('[data-dg="peso"]')?.value)||0, al = Number(host.querySelector('[data-dg="altura"]')?.value)||0; const info = imcInfo(al, pe);
     host.querySelector('#dg-imc').innerHTML = info ? `IMC: <b>${info.imc}</b> <span class="tagx" style="background:transparent;border:1px solid ${info.color};color:${info.color}">${info.label}</span>` : ''; };
   ['peso','altura'].forEach(k=>{ const el = host.querySelector(`[data-dg="${k}"]`); if(el) el.addEventListener('input', dgImcUpd); }); dgImcUpd();
   host.querySelector('#dg-ficha').addEventListener('click', ()=> fichaTecnicaPDF(p));
@@ -4278,13 +4281,16 @@ async function pvDiagnostico(p){
       if(k==='quais_esportes'){ payload[k] = v.split(',').map(s=>s.trim()).filter(Boolean); return; }
       if(el.tagName==='SELECT' && (v==='true'||v==='false')) v = v==='true'; else if(el.type==='number') v = parseFloat(v); payload[k] = v; });
     const pv = id=>document.getElementById(id).value.trim()||null;
-    const pessoaUpd = { estado_civil:pv('dgp-estado_civil'), sexo:pv('dgp-sexo'), data_nascimento:pv('dgp-data_nascimento'), profissao:pv('dgp-profissao') };
-    const rp = await sb.from('crm_pessoas').update(pessoaUpd).eq('id', p.id);
-    if(rp.error){ showToast('Erro ao salvar dados pessoais: '+rp.error.message); return; }
+    const pessoaUpd = {}; Object.keys(dgpIni).forEach(k=>{ const v = pv('dgp-'+k); if((v||'')!==dgpIni[k]) pessoaUpd[k] = v; });
+    if(Object.keys(pessoaUpd).length){
+      const rp = await sb.from('crm_pessoas').update(pessoaUpd).eq('id', p.id);
+      if(rp.error){ showToast('Erro ao salvar dados pessoais: '+rp.error.message); return; }
+    }
     Object.assign(p, pessoaUpd);
     const res = row.id ? await sb.from('crm_diagnostico').update(payload).eq('id', row.id) : await sb.from('crm_diagnostico').insert({...payload, pessoa_id:p.id});
     if(res.error){ showToast('Erro: '+res.error.message); return; }
-    const sync = await diagPushToADN(p.id, {...payload, ...pessoaUpd});
+    const dgpTela = {}; Object.keys(dgpIni).forEach(k=>{ dgpTela[k] = pv('dgp-'+k); });
+    const sync = await diagPushToADN(p.id, {...payload, ...dgpTela});
     const fam = await diagSyncFamilia(p, { nome:pv('dgp-conjuge_nome'), nasc:pv('dgp-conjuge_nasc') }, payload.dependentes_detalhe);
     showToast((sync.ok ? 'Informações salvas (Diagnóstico)' : 'Informações salvas, mas falhou ao sincronizar com o Estudo: '+(sync.error?.message||'erro desconhecido'))+(fam.ok ? (fam.novos||fam.atualizados ? ' · Família e herdeiros atualizada ('+(fam.novos+fam.atualizados)+' registro(s))' : '') : ' · não consegui atualizar Família e herdeiros: '+(fam.error?.message||'erro')));
     pvDiagnostico(p); pvFase3(p); pvFase5(p); });
@@ -10456,11 +10462,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611031355"></script>
-<script src="painel.js?v=202611031355"></script>
-<script src="cobranca.js?v=202611031355"></script>
-<script src="cadastro.js?v=202611031355"></script>
-<script src="contrato.js?v=202611031355"></script>
-<script src="guarda.js?v=202611031355"></script>
+<script src="plataforma.js?v=202611031438"></script>
+<script src="painel.js?v=202611031438"></script>
+<script src="cobranca.js?v=202611031438"></script>
+<script src="cadastro.js?v=202611031438"></script>
+<script src="contrato.js?v=202611031438"></script>
+<script src="guarda.js?v=202611031438"></script>
 </body>
 </html>

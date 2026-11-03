@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611031438">
+<meta name="app-build" content="202611031441">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -8640,10 +8640,18 @@ function openEditPessoa(p){
     </div><div class="om-err" id="pe-err"></div></div>
     <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="pe-save">Salvar</button></div>`, true);
   box.querySelector('#pe-cep').addEventListener('change', ()=>cepFill('pe-'));
+  // Só vai para o banco o que a pessoa mudou nesta janela: campo vazio que ela não tocou não apaga o que está no cadastro.
+  const peKeys = ['cpf','crm','crm_uf','data_nascimento','telefone','email','especialidade','cnpj','razao_social','sexo','estado_civil','origem','quem_indicou','classificacao','observacoes','base_legal_contato'].concat(PF_EXTRA.map(x=>x[0]));
+  const peVal = id=>document.getElementById('pe-'+id).value.trim();
+  const peIni = {}; ['nome','tipo','tags'].concat(peKeys).forEach(k=>{ peIni[k] = peVal(k); });
   box.querySelector('#pe-save').addEventListener('click', async ()=>{
-    const g = id=>document.getElementById('pe-'+id).value.trim(); if(!g('nome')){ document.getElementById('pe-err').textContent = 'O nome é obrigatório.'; return; }
-    const upd = { nome:g('nome'), tipo:g('tipo')||'medico', tags:pfTags('pe-') };
-    ['cpf','crm','crm_uf','data_nascimento','telefone','email','especialidade','cnpj','razao_social','sexo','estado_civil','origem','quem_indicou','classificacao','observacoes','base_legal_contato'].concat(PF_EXTRA.map(x=>x[0])).forEach(k=>{ upd[k] = g(k)||null; });
+    const g = peVal; if(!g('nome')){ document.getElementById('pe-err').textContent = 'O nome é obrigatório.'; return; }
+    const upd = {};
+    if(g('nome')!==peIni.nome) upd.nome = g('nome');
+    if(g('tipo')!==peIni.tipo) upd.tipo = g('tipo')||'medico';
+    if(g('tags')!==peIni.tags) upd.tags = pfTags('pe-');
+    peKeys.forEach(k=>{ if(g(k)!==peIni[k]) upd[k] = g(k)||null; });
+    if(!Object.keys(upd).length){ dlgClose(); showToast('Nada mudou no cadastro'); return; }
     const { error } = await sb.from('crm_pessoas').update(upd).eq('id', p.id);
     if(error){ document.getElementById('pe-err').textContent = 'Erro: '+error.message; return; }
     const op = OP.pessoas.find(x=>x.id===p.id); if(op) Object.assign(op, upd);
@@ -10462,11 +10470,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611031438"></script>
-<script src="painel.js?v=202611031438"></script>
-<script src="cobranca.js?v=202611031438"></script>
-<script src="cadastro.js?v=202611031438"></script>
-<script src="contrato.js?v=202611031438"></script>
-<script src="guarda.js?v=202611031438"></script>
+<script src="plataforma.js?v=202611031441"></script>
+<script src="painel.js?v=202611031441"></script>
+<script src="cobranca.js?v=202611031441"></script>
+<script src="cadastro.js?v=202611031441"></script>
+<script src="contrato.js?v=202611031441"></script>
+<script src="guarda.js?v=202611031441"></script>
 </body>
 </html>

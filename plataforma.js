@@ -114,7 +114,10 @@
       try { localStorage.setItem('tc_marca', JSON.stringify({ nome_exibicao: data.nome_exibicao, logo_url: data.logo_url, cores: data.cores })); if (data.slug) localStorage.setItem('tc_slug', data.slug); } catch (e) { /* sem armazenamento */ }
       // o endereço passa a mostrar o link próprio da corretora (fica certo nos favoritos)
       const cAtual = new URLSearchParams(location.search).get('c');
-      if (data.slug && cAtual !== data.slug && !/[?&]painel=1/.test(location.search) && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash);
+      // link de OUTRA corretora com alguém já logado neste navegador (ex.: o Luiz abrindo pelo Painel): avisa e oferece trocar,
+      // em vez de cair calado na corretora do login (03/11/2026: "clico na Bravita e me leva para a Demonstração")
+      if (slugDoLink && data.slug && slugDoLink !== data.slug && !MODO_PAINEL) linkDeOutra(data);
+      else if (data.slug && cAtual !== data.slug && !MODO_PAINEL && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash);
       aplicarMarca();
       carregarEtapas();
       if (data.contrato_pendente || data.contrato_bloqueia) abrirContrato(0, data.sou_admin);   // contrato gerado pela gestora: aceitar antes de usar
@@ -132,6 +135,25 @@
     pintar();
   }
   try { const m = JSON.parse(localStorage.getItem('tc_marca') || 'null'); if (!MODO_PAINEL && m && (!slugDoLink || localStorage.getItem('tc_slug') === slugDoLink)) { MARCA = m; aplicarMarca(); MARCA = null; } } catch (e) { /* nada */ }
+  async function linkDeOutra(minha) {
+    let nomeLink = slugDoLink;
+    try { const { data } = await sb.rpc('crm_marca_publica', { p_slug: slugDoLink }); if (data && data.nome_exibicao) nomeLink = data.nome_exibicao; } catch (e) { /* fica o link */ }
+    if (document.getElementById('tc-outra')) return;
+    const f = document.createElement('div'); f.id = 'tc-outra'; f.setAttribute('role', 'alert');
+    f.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9800;background:#fff7e0;border-bottom:2px solid #d7aa42;color:#3d2e05;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font:14px/1.4 "Segoe UI",system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.12)';
+    f.innerHTML = `<span style="flex:1 1 320px">Este link é da <b>${esc(nomeLink)}</b>, mas este navegador está conectado como <b>${esc(minha.nome_exibicao)}</b>. Por isso você está vendo a ${esc(minha.nome_exibicao)}.</span>
+      <button type="button" data-o="trocar" style="border:0;background:#9c7518;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font:inherit;font-weight:600">Sair e abrir a ${esc(nomeLink)}</button>
+      <button type="button" data-o="ficar" style="border:1px solid #d7aa42;background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font:inherit">Continuar na ${esc(minha.nome_exibicao)}</button>`;
+    document.body.appendChild(f);
+    f.addEventListener('click', async (e) => {
+      const o = e.target.closest('[data-o]'); if (!o) return;
+      if (o.dataset.o === 'ficar') { f.remove(); if (minha.slug && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(minha.slug) + location.hash); return; }
+      if (window.TorreGuarda && window.TorreGuarda.pendentes && window.TorreGuarda.pendentes().length && !confirm('Há algo digitado e ainda não salvo. Sair mesmo assim?')) return;
+      try { await sb.auth.signOut({ scope: 'local' }); } catch (err) { /* sai do mesmo jeito */ }
+      try { localStorage.removeItem('tc_marca'); localStorage.removeItem('tc_slug'); } catch (err) { /* nada */ }
+      location.replace(location.pathname + '?c=' + encodeURIComponent(slugDoLink));
+    });
+  }
   async function marcaDoLink() {
     if (!slugDoLink || MODO_PAINEL) return;
     if (typeof sb === 'undefined') return setTimeout(marcaDoLink, 200);

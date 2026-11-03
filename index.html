@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611030954">
+<meta name="app-build" content="202611031036">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -272,7 +272,6 @@ window.ALIANCA = {
     <button class="nav-btn" data-view="comercial" title="Metas comerciais e projeção de vendas"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5h16"/><path d="M5 15.5l4.5-4.5 3.5 3 6-6.5"/><path d="M15 7.5h4v4"/></svg><span>Comercial</span></button>
     <button class="nav-btn" data-view="vendas" title="Demandas, vendas realizadas e não realizadas, com relatórios em PDF"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8.5h12l-1 11H7z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/><path d="M9.5 13.5l1.7 1.7 3.3-3.4"/></svg><span>Vendas</span></button>
     <button class="nav-btn" data-view="reunioes" title="Reuniões gravadas: leitura da conversa e atualização automática do CRM"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h11a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5H9l-3.5 3v-3H4A1.5 1.5 0 0 1 2.5 13V7A1.5 1.5 0 0 1 4 5.5z"/><path d="M19 9.5h1a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1-1.5 1.5h-.5v2.5l-3-2.5h-4"/></svg><span>Reuniões</span></button>
-    <button class="nav-btn" data-view="analitico" title="Analítico: perfil da base médica, onde atuam e onde está a oportunidade"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="15.5" r="2"/><circle cx="11.5" cy="8.5" r="2.5"/><circle cx="17.5" cy="14" r="3"/><circle cx="16" cy="5.5" r="1.25"/><path d="M3.5 20.5h17"/></svg><span>Analítico</span></button>
     <button class="nav-btn" data-view="agenda"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3v4M16 3v4"/><path d="M7.5 13h2M11 13h2M14.5 13h2M7.5 16.5h2M11 16.5h2"/></svg><span>Agenda</span></button>
     <button class="nav-btn" data-view="conhecimento"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="2.75"/><path d="M4.5 6v6c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75V6"/><path d="M4.5 12v6c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75v-6"/></svg><span>Base</span></button>
     <button class="nav-btn" data-view="sugestoes" title="Sugestões de melhoria do sistema"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5h6"/><path d="M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.3 9.9c.5.4.8 1 .8 1.6v.5h5v-.5c0-.6.3-1.2.8-1.6A5.5 5.5 0 0 0 12 3.5z"/></svg><span>Sugestões</span></button>
@@ -305,7 +304,7 @@ window.ALIANCA = {
         </div>
         <div class="op-filters-more" id="op-filters-more">
           <select id="op-f-perfil"><option value="">Todos os perfis</option><option value="medico">Somente médicos</option><option value="nao_medico">Somente não médicos</option></select>
-          <select id="op-f-class" title="Listas de relacionamento: quem já é cliente Aliança, quem faz muitos plantões e as classificações manuais"><option value="">Lista: todas</option><option value="premium">⭐ Aliança Premium</option><option value="fidelizado">🔥 Fidelizados (mais de 20 plantões)</option><option value="morno">🌤️ Mornos de plantão (11 a 20)</option><option value="quente">Quente (manual)</option><option value="frio">Frio (manual)</option></select>
+          <select id="op-f-class" title="Listas de relacionamento: quem já é cliente e as classificações manuais"><option value="">Lista: todas</option><option value="premium">⭐ Aliança Premium</option><option value="quente">Quente (manual)</option><option value="frio">Frio (manual)</option></select>
           <select id="op-f-tag"><option value="">Qualquer tag</option></select>
           <select id="op-f-next"><option value="">Próxima ação: todas</option><option value="atrasada">Atrasadas</option><option value="hoje">Para hoje</option><option value="semana">Nos próximos 7 dias</option><option value="sem">Leads em funil sem ação</option></select>
           <select id="op-f-acao"><option value="">Tipo de ação: qualquer</option></select>
@@ -322,10 +321,8 @@ window.ALIANCA = {
           <button class="om-cancel" id="op-fclear" style="display:none;color:var(--red)">✕ Limpar filtros</button>
           <select id="op-sort">
             <option value="nome">Ordenar: nome</option>
-            <option value="classificacao">Ordenar: Fidelizados primeiro</option>
-            <option value="plantoes">Ordenar: maior valor pago em plantões</option>
+            <option value="classificacao">Ordenar: Lista (Premium, quente, frio)</option>
             <option value="etapa">Ordenar: etapa mais avançada</option>
-            <option value="plantao">Ordenar: plantão mais recente</option>
           </select>
         </div>
       </div>
@@ -498,11 +495,6 @@ window.ALIANCA = {
       </div>
     </div>
 
-    <div id="view-analitico" class="view">
-      <div class="an-head"><h2>Analítico</h2><div id="an-modes" class="seg-toggle"><button type="button" class="active" data-m="painel">Painel</button><button type="button" data-m="pontos">Pontos</button><button type="button" data-m="mapa">Mapa</button><button type="button" data-m="oport">Oportunidades</button></div><span class="sp"></span><button type="button" class="om-save" id="an-play">▶ Apresentar</button><button type="button" class="om-cancel" id="an-reload" title="Recarregar os dados">↻</button></div>
-      <div id="an-body"></div>
-    </div>
-    <div id="an-pres" hidden></div>
 
     <div id="view-admin" class="view" style="overflow-y:auto; padding:30px 36px;">
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:4px;">
@@ -2582,7 +2574,6 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
     if(btn.dataset.view === 'conhecimento') renderConhecimento();
     if(btn.dataset.view === 'ata') renderAta();
     if(btn.dataset.view === 'admin') renderAdmin();
-    if(btn.dataset.view === 'analitico') renderAnalitico();
   });
 });
 function goToPersonView(personId, tab){
@@ -2807,7 +2798,6 @@ function pvShowTab(tab){
   if(tab==='historico') pvHistorico(body, p);
   if(tab==='protecao') pvProtecao(body, p);
   if(tab==='relacionamento') pvRelacionamento(body, p);
-  if(tab==='plantoes') pvPlantoes(body, p);
 }
 document.getElementById('person-view').addEventListener('click', e=>{
   if(e.target.closest('#btn-op-back')){ document.querySelector('.nav-btn[data-view="operacao"]').click(); return; }
@@ -2852,14 +2842,13 @@ async function pvResumo(body, p){
   </div>
   <div class="es-box" id="pv-dem"></div>
   <div class="es-box" id="pv-opps-resumo"></div>
-  <div class="es-box" id="pv-ana" style="display:none"></div>
   <div class="es-box" id="pv-ia">
     <div class="ql">Perguntar à IA sobre este cliente</div>
     <div class="hint" style="margin-bottom:8px">Responde com base só no que já está registrado (cadastro, diagnóstico, apólices, estudos, histórico) — não inventa dado.</div>
     <div class="sg-row"><input id="ia-pergunta" class="ca-inp" style="flex:1;min-width:220px" placeholder="Ex.: quanto de cobertura de vida esse cliente já tem?"><button class="om-save" id="ia-perguntar">Perguntar</button></div>
     <div id="ia-resposta" style="margin-top:10px"></div>
   </div>`;
-  pvLead(p); pvDemandas(p); pvOppsResumo(p); anaCardPessoa(p);
+  pvLead(p); pvDemandas(p); pvOppsResumo(p);
   const iaBtn = document.getElementById('ia-perguntar'), iaInp = document.getElementById('ia-pergunta'), iaOut = document.getElementById('ia-resposta');
   const iaAsk = async ()=>{
     const pergunta = iaInp.value.trim(); if(!pergunta) return;
@@ -4293,22 +4282,6 @@ function pvRelacionamento(body, p){
   });
 }
 
-// ---- CALLMED PLANTÕES ----
-async function pvPlantoes(body, p){
-  body.innerHTML = '<div class="op-more">Carregando...</div>';
-  const { data: r } = await sb.from('crm_plantoes_resumo').select('*').eq('pessoa_id', p.id).maybeSingle();
-  const casa = (ini)=>{ if(!ini) return '—'; const a = new Date(ini), n = new Date(); let m = (n.getFullYear()-a.getFullYear())*12 + n.getMonth()-a.getMonth(); if(n.getDate()<a.getDate()) m--; const y = Math.floor(m/12), mm = m%12; return `${y?y+(y===1?' ano':' anos'):''}${y&&mm?' e ':''}${mm||!y?mm+(mm===1?' mês':' meses'):''}`; };
-  const med12 = r && r.meses_12m ? (r.qtde_12m/r.meses_12m) : null, val12 = r && r.meses_12m ? (Number(r.valor_12m)/r.meses_12m) : null;
-  body.innerHTML = `<div class="es-box"><div class="ql">Atividade na Aliança Plantões</div>${r?`<div class="activity-strip" style="margin-top:0">
-      <div class="astat"><span class="an">${r.ultimo_plantao?fmtDate(r.ultimo_plantao):'—'}</span><span class="al">Último plantão</span></div>
-      <div class="astat"><span class="an">${r.qtde_mes_atual||0} · ${fmtMoney(r.valor_mes_atual)}</span><span class="al">Mês atual (inclui agendados)</span></div>
-      <div class="astat"><span class="an">${r.qtde_mes_ref||0} · ${fmtMoney(r.valor_mes_ref)}</span><span class="al">Último mês fechado</span></div>
-      <div class="astat"><span class="an">${r.qtde_12m||0} · ${fmtMoney(r.valor_12m)}</span><span class="al">Últimos 12 meses</span></div></div>
-    <div class="core-fields" style="margin-top:12px">${pvField('Média de plantões por mês (12 meses)', med12!==null?med12.toFixed(1):'—')}${pvField('Média recebida por mês (12 meses)', val12!==null?fmtMoney(val12):'—')}${pvField('Tempo com a Aliança', casa(r.primeiro_plantao))}${pvField('Primeiro plantão', fmtDate(r.primeiro_plantao))}${pvField('Total histórico', (r.total_qtde||0)+' plantões · '+fmtMoney(r.total_valor))}${pvField('Meses com atividade', r.meses_ativos)}</div>`
-      : `<div class="hint">Sem plantões nos últimos 12 meses no banco carregado (ou este contato não veio da Aliança Plantões).</div>${(p.qtde_plantoes_2026||p.total_pago_plantoes_2026)?`<div class="activity-strip"><div class="astat"><span class="an">${p.qtde_plantoes_2026??'—'}</span><span class="al">Plantões em 2026</span></div><div class="astat"><span class="an">${fmtMoney(p.total_pago_plantoes_2026)}</span><span class="al">Total pago</span></div></div>`:''}`}</div>
-    <div class="es-box"><div class="ql">Dados de pagamento e cadastro (Aliança Plantões)</div><div class="core-fields">${pvField('PIX', escapeHtml(p.pix||''), true)}${pvField('Banco', escapeHtml(p.banco||'')+(p.agencia?' · ag. '+escapeHtml(p.agencia):''))}${pvField('CNPJ', escapeHtml(p.cnpj||''), true)}${pvField('Razão social', escapeHtml(p.razao_social||''))}${pvField('Código interno', escapeHtml(p.codigo_interno_plantoes||''))}${pvField('Cadastro atualizado em', fmtDate(p.cadastro_atualizado_em))}</div></div>`;
-}
-
 async function loadBlockData(block, personId){
   const pk = block.pk || 'pessoa_id';
   const { data, error } = await sb.from(block.table).select('*').eq(pk, personId).order('created_at', {ascending:false});
@@ -4461,627 +4434,7 @@ document.getElementById('conhecimento-form').addEventListener('submit', async (e
 
 // ---------- ATA DE ENTREGÁVEIS ----------
 function fmtDateLong(s){ if(!s) return ''; try{ const d = new Date(s+'T00:00:00'); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}); }catch(e){ return s; } }
-// ============ ANALÍTICO · perfil da base médica, pontinhos, mapa e apresentação ============
-// Fonte: tabela crm_analitico (um registro por médico: idade, área, hospital, faixa de renda em plantões, sexo estimado) cruzada com as apólices do CRM.
-// Renda aparece só em faixas (plantões Aliança nos últimos 12 meses: não é a renda total do médico). Sexo é estimado pelo primeiro nome.
-const ANA = { rows:[], loaded:false, loading:false, err:null, modo:'painel', stage:null, pres:null, nomes:new Map(), geo:null, geoTry:false };
-const ANA_HOSP = {
-  'Vitória':{cid:'São Paulo',lat:-23.5655,lon:-46.5440}, 'Ana Costa':{cid:'Santos',lat:-23.9561,lon:-46.3300}, 'Santa Helena':{cid:'Santo André',lat:-23.6639,lon:-46.5383},
-  'São Bernardo (HSB)':{cid:'São Bernardo do Campo',lat:-23.7075,lon:-46.5527}, 'Santa Saúde':{cid:'Santos',lat:-23.9610,lon:-46.3390}, 'Notre Care ABC':{cid:'São Bernardo do Campo',lat:-23.6930,lon:-46.5600},
-  'Ipiranga Mogi':{cid:'Mogi das Cruzes',lat:-23.5229,lon:-46.1883}, 'Mário Covas':{cid:'Santo André',lat:-23.6700,lon:-46.5200}, 'Amhemed':{cid:'Sorocaba',lat:-23.4969,lon:-47.4577},
-  'Prevent Sênior':{cid:'São Paulo',lat:-23.5629,lon:-46.6544}, 'Intermédica ABC':{cid:'São Bernardo do Campo',lat:-23.6667,lon:-46.5667}, 'Ipiranga Arujá':{cid:'Arujá',lat:-23.3964,lon:-46.3208},
-  'Salvalus':{cid:'São Paulo',lat:-23.5558,lon:-46.5990}, 'Japonês Santa Cruz':{cid:'São Paulo',lat:-23.5967,lon:-46.6370} };
-const ANA_CIDADES_MAPA = [['São Paulo',-23.5505,-46.6333],['Santos',-23.9608,-46.3336],['Sorocaba',-23.5015,-47.4526],['Mogi das Cruzes',-23.5229,-46.1883],['ABC',-23.69,-46.55],['Campinas',-22.9056,-47.0608],['Jundiaí',-23.1857,-46.8978],['São José dos Campos',-23.2237,-45.9009],['Guarulhos',-23.4543,-46.5333],['Baixada Santista',-24.0058,-46.4028]];
-const ANA_AREAS = ['Anestesia','UTI','Enfermaria'], ANA_SEM = 'Sem plantão no período';
-const ANA_IDADE = ['Até 29','30–39','40–49','50–59','60+','Sem idade'];
-const ANA_RENDA = ['Até R$ 50 mil','R$ 50–150 mil','R$ 150–300 mil','R$ 300–500 mil','R$ 500 mil+'];
-const ANA_PROT = ['Vida em grupo / COPA','Só RC Unimed','Sem apólice'];
-const ANA_PAL = ['#32dfb6','#7d8bff','#f2b45a','#ff8a8a','#6cc7ff','#b9a5ff','#bdbdbd','#4fd69c','#ff9fd0','#e8d47a','#8b91b0','#4a5cff','#9ff0dc','#d7c7ff','#ffc58a'];
-const ANA_DIMS = {
-  todos:{t:'Todos os médicos', key:()=>'Médicos da base'},
-  idade:{t:'Idade', ord:ANA_IDADE, key:r=>r.fi},
-  area:{t:'Área de atuação', ord:ANA_AREAS.concat([ANA_SEM]), key:r=>r.area||ANA_SEM},
-  hospital:{t:'Hospital onde atua', key:r=>r.hosp||ANA_SEM},
-  renda:{t:'Renda em plantões (12 meses)', ord:[ANA_SEM].concat(ANA_RENDA), key:r=>r.pl>0?ANA_RENDA[r.rf]:ANA_SEM},
-  protecao:{t:'Proteção hoje', ord:ANA_PROT, key:r=>r.protT},
-  sexo:{t:'Sexo (estimado)', ord:['Feminino','Masculino'], key:r=>r.sx} };
-const anaRgb = h=>[parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
-function anaCor(dim, label){
-  if(dim==='protecao') return {'Vida em grupo / COPA':'#32dfb6','Só RC Unimed':'#f2b45a','Sem apólice':'#ff8a8a'}[label] || '#8b91b0';
-  if(label===ANA_SEM || label==='Sem idade') return '#4a5070';
-  const d = ANA_DIMS[dim]; let i = d && d.ord ? d.ord.indexOf(label) : -1;
-  if(i<0){ const ks = [...new Set(ANA.rows.map(r=>d.key(r)))].sort(); i = ks.indexOf(label); }
-  if(dim==='idade') return ['#4a5cff','#5d8cf0','#4fb8d8','#32dfb6','#a6f2df'][i] || '#8b91b0';
-  if(dim==='renda') return ['#4a5070','#4a5cff','#5d8cf0','#4fb8d8','#32dfb6','#a6f2df'][i] || '#8b91b0';
-  return ANA_PAL[Math.max(0,i) % ANA_PAL.length];
-}
-const anaPct = (a,b)=> b>0 ? Math.round(100*a/b) : 0;
-const anaN = v=> Number(v||0).toLocaleString('pt-BR');
-function anaNorm(r, protMap){
-  const ano = r.ano_nasc ? Number(r.ano_nasc) : null, idade = ano ? (new Date().getFullYear() - ano) : null;
-  const fi = idade==null ? 'Sem idade' : idade<30 ? ANA_IDADE[0] : idade<40 ? ANA_IDADE[1] : idade<50 ? ANA_IDADE[2] : idade<60 ? ANA_IDADE[3] : ANA_IDADE[4];
-  const pr = r.pessoa_id ? protMap.get(r.pessoa_id) : null;
-  return { id:r.id, pid:r.pessoa_id||null, idade, fi, sx:r.sexo_est==='F'?'Feminino':r.sexo_est==='M'?'Masculino':'Sem dado', area:r.area||null, hosp:r.hospital||null, cid:r.cidade||null,
-    pl:Number(r.plantoes_12m)||0, meses:Number(r.meses_ativos)||0, rf:Math.max(0,Math.min(4,Number(r.renda_faixa)||0)),
-    prot:!!pr, temVida:!!(pr&&pr.vida), temRc:!!(pr&&pr.rc), protT: pr ? (pr.vida?ANA_PROT[0]:ANA_PROT[1]) : ANA_PROT[2] };
-}
-// plano financeiro de referência (planilha de custos, cenário Realista, Set/26–Dez/27); não vem do banco
-const ANA_PLANO = { receita:663300, lucro:216007, margem:216007/663300, fonte:'planilha de custos do Grupo, cenário Realista, Set/26 a Dez/27' };
-function anaComercial(basal, prods, metas, mcom, aps){
-  const P = {}; prods.forEach(p=>{ P[p.produto] = p; }); const M = {}; metas.forEach(m=>{ M[m.chave] = Number(m.valor); });
-  const sum = (a,k)=>a.reduce((t,x)=>t+(Number(x[k])||0),0);
-  const bas = { recVida:sum(basal,'vida_receita'), recSaude:sum(basal,'saude_receita'), recInd:sum(basal,'indicacao_receita'), recRx:sum(basal,'rx_receita'), premVida:sum(basal,'vida_premio_novo'), premSaude:sum(basal,'saude_premio') };
-  bas.rec = bas.recVida+bas.recSaude+bas.recInd+bas.recRx; bas.premTot = bas.premVida+bas.premSaude;
-  const cur = new Date().toISOString().slice(0,7);
-  bas.premAteHoje = basal.filter(b=>String(b.mes).slice(0,7)<=cur).reduce((t,b)=>t+(Number(b.vida_premio_novo)||0)+(Number(b.saude_premio)||0),0);
-  const real = (aps||[]).filter(a=>a.origem_apolice==='nova' && a.vinculo_comercial==='Aliança' && a.status!=='cancelada');
-  const realPrem = real.reduce((t,a)=>t+(Number(a.valor_premio)||0)/12,0);
-  const last = mcom.length ? mcom[mcom.length-1] : {};
-  const tk = (k,d)=>{ const v = P[k] && P[k].ticket_medio!=null ? Number(P[k].ticket_medio) : 0; return v>0 ? v : d; };
-  const conv = k=>{ const q = P[k]; if(!q) return 0.03; return (Number(q.pct_agendamento)||0)/100*(Number(q.pct_efetivacao)||0)/100*(Number(q.pct_proposta)||0)/100*(Number(q.pct_fechamento)||0)/100; };
-  const pc = (k,d)=> (P[k] && P[k].comissao_pct!=null ? Number(P[k].comissao_pct) : d)/100;
-  const meses = basal.map(b=>({m:String(b.mes).slice(0,7), rec:(Number(b.vida_receita)||0)+(Number(b.saude_receita)||0)+(Number(b.indicacao_receita)||0)+(Number(b.rx_receita)||0), prem:(Number(b.vida_premio_novo)||0)+(Number(b.saude_premio)||0)}));
-  const pv = P.vida||{}; const funil = {cont:Number(pv.contatos_semana)||100, pAg:Number(pv.pct_agendamento)||40, pEf:Number(pv.pct_efetivacao)||50, pPr:Number(pv.pct_proposta)||50, pFe:Number(pv.pct_fechamento)||30};
-  return { meses, funil, bas, P, M, realN:real.length, realPrem, tkVida:tk('vida',500), tkSaude:Number(M.ticket_saude)||tk('saude',500), tkRc:tk('rc',300), tkRcHip:!(P.rc && Number(P.rc.ticket_medio)>0),
-    pctVida:pc('vida',30), pctSaude:pc('saude',5), pctRc:pc('rc',20), agVida:Number(last.vida_agen)||1, agSaude:Number(last.saude_agen)||2,
-    convVida:conv('vida'), convSaude:conv('saude'), convRc:conv('rc'), contSem:(P.vida?Number(P.vida.contatos_semana):0)||100 };
-}
-async function anaLoad(force){
-  if(ANA.loading || (ANA.loaded && !force)) return; ANA.loading = true; ANA.err = null;
-  try{
-    const [rows, aps, basal, prodR, metasR, mcom] = await Promise.all([ opFetchAll('crm_analitico','id,pessoa_id,ano_nasc,sexo_est,area,hospital,cidade,plantoes_12m,meses_ativos,renda_faixa',['id']),
-      opFetchAll('crm_apolices','id,pessoa_id,tipo_seguro,status,valor_premio,data_emissao,created_at,origem_apolice,vinculo_comercial',['id']),
-      sb.from('crm_meta_basal').select('*').order('mes'), sb.from('crm_comercial_produtos').select('*').order('ordem'), sb.from('crm_metas').select('chave,valor'), sb.from('crm_meta_comercial').select('*').order('mes') ]);
-    const protMap = new Map();
-    (aps||[]).filter(a=>a.status==='ativa' && a.pessoa_id).forEach(a=>{ const o = protMap.get(a.pessoa_id) || {vida:false, rc:false}; const t = a.tipo_seguro||''; if(/vida/i.test(t)) o.vida = true; if(/responsabilidade|\brc\b/i.test(t)) o.rc = true; protMap.set(a.pessoa_id, o); });
-    ANA.rows = (rows||[]).map(r=>anaNorm(r, protMap)); ANA.loaded = true;
-    try{ ANA.com = anaComercial(basal.data||[], prodR.data||[], metasR.data||[], mcom.data||[], aps||[]); }catch(e){ console.warn('analítico: comercial', e); ANA.com = null; }
-    try{ await ensurePessoas(); ANA.nomes = new Map(OP.pessoas.map(p=>[p.id, p.nome])); }catch(e){ console.warn('analítico: nomes', e); }
-  }catch(e){ ANA.err = e.message||String(e); }
-  ANA.loading = false;
-}
-function anaStats(){
-  const R = ANA.rows, N = R.length, S = { N };
-  S.comIdade = R.filter(r=>r.idade!=null).length; S.menos40 = R.filter(r=>r.idade!=null && r.idade<40).length;
-  S.mediana = (()=>{ const a = R.filter(r=>r.idade!=null).map(r=>r.idade).sort((x,y)=>x-y); return a.length ? a[Math.floor(a.length/2)] : null; })();
-  S.ativos = R.filter(r=>r.pl>0); S.nAtivos = S.ativos.length;
-  const cnt = (list, f)=>{ const m = new Map(); list.forEach(r=>{ const k = f(r); if(k!=null) m.set(k,(m.get(k)||0)+1); }); return [...m.entries()].sort((a,b)=>b[1]-a[1]); };
-  S.porArea = cnt(S.ativos, r=>r.area); S.porHosp = cnt(S.ativos, r=>r.hosp); S.porCid = cnt(S.ativos, r=>r.hosp ? (ANA_HOSP[r.hosp]||{}).cid : null);
-  S.porIdade = ANA_IDADE.map(k=>[k, R.filter(r=>r.fi===k).length]); S.porRenda = ANA_RENDA.map((k,i)=>[k, S.ativos.filter(r=>r.rf===i).length]);
-  S.porProt = ANA_PROT.map(k=>[k, R.filter(r=>r.protT===k).length]); S.nProt = R.filter(r=>r.prot).length;
-  S.porSexo = [['Feminino',R.filter(r=>r.sx==='Feminino').length],['Masculino',R.filter(r=>r.sx==='Masculino').length]];
-  S.alvo = R.filter(r=>r.pl>0 && r.rf>=2 && !r.prot); S.alvoJovem = S.alvo.filter(r=>r.idade!=null && r.idade<50);
-  S.altaRenda = S.ativos.filter(r=>r.rf>=3).length; S.totalPl = S.ativos.reduce((t,r)=>t+r.pl,0); S.plAlta = S.ativos.filter(r=>r.rf>=3).reduce((t,r)=>t+r.pl,0);
-  return S;
-}
-// ---- palco de pontos (usado na aba Pontos/Mapa e na apresentação) ----
-function anaStage(host){
-  const cv = document.createElement('canvas'); cv.className = 'an-cv'; host.appendChild(cv); const ctx = cv.getContext('2d');
-  const tip = document.createElement('div'); tip.className = 'an-tip'; tip.hidden = true; host.appendChild(tip);
-  const S = { w:0, h:0, dpr:1, dots:[], labels:[], layout:'todos', color:'area', hi:null, mapa:false, alive:true, raf:0, geoPath:null, proj:null, ro:null, hover:null, fade:1 };
-  const hex = anaRgb;
-  function size(){ const r = host.getBoundingClientRect(); S.dpr = Math.min(2, window.devicePixelRatio||1); S.w = Math.max(200, r.width); S.h = Math.max(200, r.height); cv.width = S.w*S.dpr; cv.height = S.h*S.dpr; cv.style.width = S.w+'px'; cv.style.height = S.h+'px'; }
-  function ensureDots(){
-    if(S.dots.length === ANA.rows.length) return;
-    S.dots = ANA.rows.map(r=>({r, x:S.w/2+(Math.random()-.5)*60, y:S.h/2+(Math.random()-.5)*60, tx:S.w/2, ty:S.h/2, rad:2, trad:2, c:[117,245,210], tc:[117,245,210], a:1, ta:1}));
-  }
-  function project(lat, lon){ const p = S.proj; return [p.x0 + (lon - p.lon0)*p.k, p.y0 + (p.lat0 - lat)*p.k*1.0]; }
-  function setProj(){
-    const lonA = -48.55, lonB = -45.05, latA = -22.35, latB = -24.55, cosL = Math.cos(23.4*Math.PI/180);
-    const wDeg = (lonB-lonA)*cosL, hDeg = (latA-latB), pad = 46, Hu = S.h-(S.reserva||0)-(S.topo||0); const Wu = S.w-(S.direita||0), k = Math.min((Wu-pad*2-170-170)/wDeg, (Hu-pad*2)/hDeg);
-    const kx = k*cosL; S.proj = { lon0:lonA, lat0:latA, k:kx, x0:pad+170+((Wu-pad*2-340)-wDeg*k)/2, y0:pad+((Hu-pad*2)-hDeg*k)/2, ky:k };
-    S.project = (lat, lon)=>[S.proj.x0 + (lon - lonA)*kx, S.proj.y0 + (latA - lat)*k];
-  }
-  function buildGeo(){
-    S.geoPath = null; if(!ANA.geo || !S.proj) return;
-    const path = new Path2D(); const ring = pts=>{ pts.forEach((c,i)=>{ const [x,y] = S.project(c[1], c[0]); if(i) path.lineTo(x,y); else path.moveTo(x,y); }); path.closePath(); };
-    ANA.geo.features.forEach(f=>{ const g = f.geometry; if(!g) return; if(g.type==='Polygon') g.coordinates.forEach(ring); else if(g.type==='MultiPolygon') g.coordinates.forEach(p=>p.forEach(ring)); });
-    S.geoPath = path;
-  }
-  function placeInner(){
-    if(!ANA.rows.length) return; ensureDots(); const W = S.w - (S.direita||0), H = S.h - (S.reserva||0) - (S.topo||0); S.labels = [];
-    // corte do que aparece: quem não tem idade (na visão de idade) ou plantão (nas visões de atuação) fica de fora
-    const L0 = S.layout;
-    const vis = r=>{ if(S.oculto) return false; if(L0==='idade') return r.fi!=='Sem idade'; if(L0==='area'||L0==='hospital'||L0==='renda') return r.pl>0 && (L0!=='hospital' || !!r.hosp); if(L0==='mapa') return r.pl>0 && !!ANA_HOSP[r.hosp]; return r.pl>0 || r.idade!=null; };
-    const vd = S.dots.filter(d=>vis(d.r)), N = Math.max(1, vd.length), fora = S.dots.length - vd.length;
-    S.nota = fora ? anaN(fora)+(L0==='idade' ? ' médicos sem data de nascimento não aparecem neste corte' : (L0==='area'||L0==='hospital'||L0==='renda'||L0==='mapa') ? ' médicos sem plantão nos últimos 12 meses não aparecem neste corte' : ' médicos sem idade nem plantão não aparecem neste corte') : '';
-    const rb0 = Math.max(1.5, Math.min(5.5, Math.sqrt(0.42*W*H/(Math.PI*N))/2.2));
-    const rOf = (r, f)=> rb0*f*(r.pl>0 ? 0.78+0.2*r.rf : 0.66);
-    const colorKey = S.color; const colOf = r=> anaCor(colorKey, (ANA_DIMS[colorKey]||ANA_DIMS.area).key(r));
-    S.dots.forEach(d=>{ d.tc = hex(colOf(d.r)); d.ta = !vis(d.r) ? 0 : S.hi ? (S.hi(d.r)?1:0.14) : 1; });
-    // formas além do agrupamento em círculos: unidades (comparação), pilha (colunas de pontos), pizza de pontos e enxame sobre um eixo
-    const FM = S.forma || 'cluster'; S.eixo = null; S.zonas = null; S.mapa = false;
-    const agrupa = ()=>{ const dim = ANA_DIMS[S.layout] || ANA_DIMS.todos, g = new Map(); vd.forEach(d=>{ const k = dim.key(d.r); if(!g.has(k)) g.set(k, []); g.get(k).push(d); }); let ks = [...g.keys()]; if(dim.ord) ks = dim.ord.filter(k=>g.has(k)).concat(ks.filter(k=>!dim.ord.includes(k))); else ks.sort((a,b)=>g.get(b).length-g.get(a).length); return {g, ks}; };
-    if(FM==='unidades' && S.unid){
-      const U = S.unid, m = U.length, nmax = Math.max(1,...U.map(u=>u.n)), Rmax = Math.min(W/m*0.4, H*0.26), sp = Rmax/Math.sqrt(nmax), dr = Math.max(1.8, sp*0.42); let pos = 0;
-      S.dots.forEach(d=>{ d.ta = 0; });
-      U.forEach((u,k)=>{ const cx = W*(k+0.5)/m, cy = H*0.47, R = sp*Math.sqrt(u.n)+dr*1.5; for(let i=0;i<u.n && pos<S.dots.length;i++,pos++){ const d = S.dots[pos], a = i*2.39996, r2 = sp*Math.sqrt(i+0.5); d.tx = cx+r2*Math.cos(a); d.ty = cy+r2*Math.sin(a); d.trad = dr; d.tc = hex(u.cor); d.ta = 1; }
-        S.labels.push({x:cx, y:cy+R+26, t:u.l, s:u.s||'', big:u.big||anaN(u.n), cor:u.cor, kind:'unid'}); });
-      return;
-    }
-    if(FM==='pilha'){
-      const {g, ks} = agrupa(), ng = ks.length||1, x0 = W*0.05, wt = W*(W>900?0.8:0.9), gap = Math.min(40, wt/ng*0.2), wb = (wt-gap*(ng-1))/ng, base = H-180, hmax = H-180-170, nmax = Math.max(1,...ks.map(k=>g.get(k).length));
-      let best = {sp:0, cc:4}; for(let cc=3; cc<=20; cc++){ const rows = Math.ceil(nmax/cc), sp2 = Math.min(wb/cc, hmax/rows); if(sp2>best.sp) best = {sp:sp2, cc}; }
-      const sp = best.sp, cc = best.cc, dr = Math.max(1.6, sp*0.36);
-      ks.forEach((k,gi)=>{ const list = g.get(k).sort((a,b)=>b.r.rf-a.r.rf), bx = x0+gi*(wb+gap)+(wb-cc*sp)/2;
-        list.forEach((d,i)=>{ const col = i%cc, row = Math.floor(i/cc); d.tx = bx+col*sp+sp/2; d.ty = base-row*sp-sp/2; d.trad = Math.min(rOf(d.r,1)*1.1, dr*1.3); });
-        S.labels.push({x:x0+gi*(wb+gap)+wb/2, y:base+26, t:k, s:anaN(list.length)+' · '+anaPct(list.length,N)+'%', f:1}); });
-      return;
-    }
-    if(FM==='pizza'){
-      const {g, ks} = agrupa(), n = Math.max(1,vd.length), R = Math.min(W*0.3, (H-300)/2), cx = W/2, cy = H/2-10, sp = R/Math.sqrt(n), dr = Math.max(1.7, sp*0.44), pts = [];
-      for(let j=0;j<n;j++){ const a = j*2.39996, r2 = R*Math.sqrt((j+0.5)/n); pts.push({x:cx+r2*Math.cos(a), y:cy+r2*Math.sin(a), ang:(a+Math.PI/2)%(2*Math.PI)}); }
-      pts.sort((a,b)=>a.ang-b.ang); let pos = 0;
-      ks.forEach(k=>{ const list = g.get(k); let sx = 0, sy = 0; list.forEach(d=>{ const q = pts[pos++]; if(!q) return; d.tx = q.x; d.ty = q.y; d.trad = dr; sx += q.x-cx; sy += q.y-cy; });
-        const Ln = Math.hypot(sx,sy)||1, ux = sx/Ln, uy = sy/Ln;
-        S.labels.push({x:cx+ux*(R+46), y:cy+uy*(R+36), t:k, s:anaN(list.length)+' · '+anaPct(list.length,N)+'%', al:ux>0.25?'left':ux<-0.25?'right':'center', f:1.15}); });
-      return;
-    }
-    if(FM==='enxame'){
-      const xa = 22, xb = 70, X0 = W*0.06, X1 = W*(W>900?0.84:0.93), X = v=>X0+(Math.max(xa,Math.min(xb,v))-xa)/(xb-xa)*(X1-X0), cy = H*0.53, dr = Math.max(1.8, Math.min(3.6, W/430)), step = dr*2.15;
-      const L = vd.filter(d=>d.r.idade!=null).sort((a,b)=>a.r.idade-b.r.idade), bk = new Map();
-      L.forEach(d=>{ const jt = (((d.r.id||0)*2654435761)%1000)/1000-0.5, x = X(d.r.idade + jt*0.9); let y = 0, k = 0; const bate = ()=>{ for(let b=Math.floor((x-step)/step); b<=Math.floor((x+step)/step); b++){ const arr = bk.get(b); if(arr) for(const q of arr){ if(Math.hypot(q.x-x, q.y-(cy+y))<step) return true; } } return false; };
-        while(bate() && k<500){ k++; y = (k%2?1:-1)*Math.ceil(k/2)*step; } const b = Math.floor(x/step); if(!bk.has(b)) bk.set(b, []); bk.get(b).push({x, y:cy+y}); d.tx = x; d.ty = cy+y; d.trad = dr; });
-      const cortes = [[xa,35,'Construção','até 35 anos'],[35,50,'Consolidação','35 a 50 anos'],[50,xb,'Legado','50 anos ou mais']];
-      S.zonaTop = 10; S.zonas = cortes.map(([a,b,t,sub])=>{ const lst = L.filter(d=>d.r.idade>=a && (b>=xb ? true : d.r.idade<b)), pr = lst.filter(d=>d.r.prot).length; return {x0:X(a), x1:X(b), t, s:anaN(lst.length)+' médicos · '+anaPct(pr,lst.length)+'% protegidos'}; });
-      S.eixo = {y:H-178, x0:X0, x1:X1, ticks:[25,30,35,40,45,50,55,60,65,70].map(v=>({x:X(v), t:v+(v===70?'+':'')}))};
-      return;
-    }
-    if(S.layout==='mapa'){
-      S.mapa = true; setProj(); buildGeo(); const groups = new Map();
-      vd.forEach(d=>{ const k = d.r.hosp && ANA_HOSP[d.r.hosp] ? d.r.hosp : null; if(!groups.has(k)) groups.set(k, []); groups.get(k).push(d); });
-      const city = new Map();
-      groups.forEach((list, k)=>{ let sp = rb0*1.05, cx, cy, fr = 0.7;
-        if(k){ const h = ANA_HOSP[k]; [cx, cy] = S.project(h.lat, h.lon); } else { cx = 100; cy = H - 118; sp = Math.min(sp, 66/Math.sqrt(list.length)); fr = Math.min(1, sp/(rb0*1.05)+0.25); }
-        list.sort((a,b)=>b.r.rf-a.r.rf).forEach((d,i)=>{ const a = i*2.39996, rr = sp*Math.sqrt(i+0.5); d.tx = cx + rr*Math.cos(a); d.ty = cy + rr*Math.sin(a); d.trad = rOf(d.r,fr); });
-        const R = sp*Math.sqrt(list.length)+rb0;
-        if(!k){ S.labels.push({x:cx, y:cy + R + 14, t:ANA_SEM, s:anaN(list.length)+' médicos', al:'center'}); return; }
-        const cid = ANA_HOSP[k].cid, c = city.get(cid) || {n:0, sx:0, sy:0, R:0, hs:0, lon:ANA_HOSP[k].lon}; c.n += list.length; c.sx += cx*list.length; c.sy += cy*list.length; c.R = Math.max(c.R, R); c.hs++; city.set(cid, c);
-      });
-      const cl = [];
-      city.forEach((c, cid)=>{ const cx = c.sx/c.n, cy = c.sy/c.n, east = c.lon > -46.45; cl.push({x: east ? cx + c.R + 10 : cx - c.R - 10, y:cy, t:cid, s:anaN(c.n)+' médicos · '+c.hs+(c.hs>1?' hospitais':' hospital'), al:east?'left':'right', mapa:true}); });
-      cl.sort((a,b)=>a.y-b.y).forEach((l,i)=>{ for(let j=0;j<i;j++){ const q = cl[j]; if(l.al===q.al && Math.abs(l.x-q.x)<230 && Math.abs(l.y-q.y)<34){ l.y = q.y+34; j = -1; } } l.y = Math.min(l.y, H-26); S.labels.push(l); });
-      return;
-    }
-    S.mapa = false; const dim = ANA_DIMS[S.layout] || ANA_DIMS.todos; const groups = new Map();
-    vd.forEach(d=>{ const k = dim.key(d.r); if(!groups.has(k)) groups.set(k, []); groups.get(k).push(d); });
-    let keys = [...groups.keys()]; if(dim.ord){ keys = dim.ord.filter(k=>groups.has(k)).concat(keys.filter(k=>!dim.ord.includes(k))); } else keys.sort((a,b)=>groups.get(b).length-groups.get(a).length);
-    if(S.layout==='hospital'){ keys = keys.filter(k=>k!==ANA_SEM).concat(keys.includes(ANA_SEM)?[ANA_SEM]:[]); }
-    const sp = rb0*2.2, lab = 40, items = keys.map(k=>{ const n = groups.get(k).length, R = sp*Math.sqrt(n)+rb0*1.4; return {k, n, R, d:R*2}; });
-    const maxW = W*0.92; const rows = []; let cur = {it:[], w:0, h:0};
-    items.slice().sort((a,b)=>b.n-a.n).forEach(it=>{ if(cur.it.length && cur.w + it.d + 28 > maxW){ rows.push(cur); cur = {it:[], w:0, h:0}; } cur.it.push(it); cur.w += it.d + 28; cur.h = Math.max(cur.h, it.d + lab); });
-    rows.push(cur); const totW = Math.max(...rows.map(r=>r.w)), totH = rows.reduce((t,r)=>t+r.h,0);
-    const f = Math.max(0.08, Math.min(W*0.92/totW, (H-30)/totH, 1.12)); let y = (H - totH*f)/2;
-    rows.forEach(row=>{ let x = (W - row.w*f)/2; const rh = row.h*f;
-      row.it.forEach(it=>{ const cx = x + it.R*f, cy = y + it.R*f; x += (it.d+28)*f;
-        groups.get(it.k).sort((a,b)=>b.r.rf-a.r.rf).forEach((d,i)=>{ const a = i*2.39996, rr = sp*f*Math.sqrt(i+0.5); d.tx = cx + rr*Math.cos(a); d.ty = cy + rr*Math.sin(a); d.trad = rOf(d.r,f); });
-        S.labels.push({x:cx, y:cy + it.R*f + 17, t:it.k, s:anaN(it.n)+' · '+anaPct(it.n,N)+'%', dim:S.layout, f}); });
-      y += rh; });
-  }
-  function place(){ const T = S.topo||0; placeInner(); if(T){ S.dots.forEach(d=>{ if(d.ta>0) d.ty += T; }); S.labels.forEach(l=>{ l.y += T; }); if(S.eixo) S.eixo.y += T; if(S.zonas) S.zonaTop += T; } }
-  function paint(){
-    if(!S.w) return; ctx.setTransform(S.dpr,0,0,S.dpr,0,0); ctx.clearRect(0,0,S.w,S.h);
-    if(S.mapa && S.geoPath){ ctx.save(); ctx.translate(0, S.topo||0); ctx.globalAlpha = .9; ctx.fillStyle = '#0d2331'; ctx.fill(S.geoPath); ctx.lineWidth = .9; ctx.strokeStyle = '#2b5a73'; ctx.stroke(S.geoPath); ctx.restore(); }
-    if(S.mapa && S.proj){ ctx.fillStyle = 'rgba(190,215,228,.38)'; ctx.font = '700 11px Inter, sans-serif'; ctx.textAlign = 'left'; ANA_CIDADES_MAPA.forEach(c=>{ const [x,y] = S.project(c[1], c[2]); ctx.fillText(c[0].toUpperCase(), x+8, y-6+(S.topo||0)); }); }
-    for(const d of S.dots){
-      d.x += (d.tx-d.x)*0.13; d.y += (d.ty-d.y)*0.13; d.rad += (d.trad-d.rad)*0.2; d.a += (d.ta-d.a)*0.15;
-      for(let i=0;i<3;i++) d.c[i] += (d.tc[i]-d.c[i])*0.12;
-      ctx.globalAlpha = d.a; ctx.fillStyle = 'rgb('+(d.c[0]|0)+','+(d.c[1]|0)+','+(d.c[2]|0)+')'; ctx.beginPath(); ctx.arc(d.x, d.y, d.rad, 0, 6.2832); ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    if(S.leg){ ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(160,190,205,.78)'; ctx.font = '500 12px "IBM Plex Mono", monospace'; ctx.fillText(S.leg, S.w/2, S.reserva ? S.h-S.reserva+16 : S.h-100); }
-    if(S.eixo){ ctx.strokeStyle = 'rgba(160,190,205,.3)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(S.eixo.x0, S.eixo.y); ctx.lineTo(S.eixo.x1, S.eixo.y); ctx.stroke(); ctx.fillStyle = 'rgba(190,210,222,.82)'; ctx.font = '500 12px Inter, sans-serif'; ctx.textAlign = 'center'; S.eixo.ticks.forEach(t=>{ ctx.beginPath(); ctx.moveTo(t.x, S.eixo.y); ctx.lineTo(t.x, S.eixo.y+5); ctx.stroke(); ctx.fillText(t.t, t.x, S.eixo.y+22); }); ctx.fillText('idade (anos)', (S.eixo.x0+S.eixo.x1)/2, S.eixo.y+44); }
-    if(S.zonas){ S.zonas.forEach((z,i)=>{ if(i){ ctx.setLineDash([4,6]); ctx.strokeStyle = 'rgba(160,190,205,.38)'; ctx.beginPath(); ctx.moveTo(z.x0, S.zonaTop); ctx.lineTo(z.x0, S.eixo.y); ctx.stroke(); ctx.setLineDash([]); } const cxz = (z.x0+z.x1)/2; ctx.textAlign = 'center'; ctx.fillStyle = '#e8f1f6'; ctx.font = '700 18px Inter, sans-serif'; ctx.fillText(z.t, cxz, S.zonaTop+18); ctx.fillStyle = 'rgba(190,210,222,.88)'; ctx.font = '500 13px Inter, sans-serif'; ctx.fillText(z.s, cxz, S.zonaTop+40); }); }
-    if(S.nota && !S.reserva){ ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(160,185,200,.72)'; ctx.font = '500 11px Inter, sans-serif'; ctx.fillText(S.nota, 14, S.h-12); }
-    ctx.textAlign = 'center';
-    S.labels.forEach(l=>{ if(l.kind==='unid'){ ctx.textAlign = 'center'; ctx.fillStyle = l.cor; ctx.font = '800 15px Inter, sans-serif'; ctx.fillText(l.t, l.x, l.y); ctx.fillStyle = '#fff'; ctx.font = '700 44px "Roboto Condensed", Inter, sans-serif'; ctx.fillText(l.big, l.x, l.y+46); ctx.fillStyle = 'rgba(190,210,222,.85)'; ctx.font = '500 13px Inter, sans-serif'; ctx.fillText(l.s, l.x, l.y+68); return; } ctx.textAlign = l.al || 'center'; const big = Math.max(12, Math.min(18, 12.5*(l.f||1)+3)); ctx.fillStyle = '#e8f1f6'; ctx.font = '700 '+big+'px Inter, sans-serif'; ctx.fillText(l.t, l.x, l.y);
-      ctx.fillStyle = 'rgba(190,210,222,.8)'; ctx.font = '500 '+Math.max(11,big-3)+'px Inter, sans-serif'; ctx.fillText(l.s, l.x, l.y + big); });
-    if(S.hover){ ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(S.hover.x, S.hover.y, S.hover.rad+3, 0, 6.2832); ctx.stroke(); }
-  }
-  function frame(){ if(!S.alive) return; S.raf = requestAnimationFrame(frame); paint(); }
-  S.paint = paint;
-  function pick(ev){ const b = cv.getBoundingClientRect(), x = ev.clientX-b.left, y = ev.clientY-b.top; let best = null, bd = 1e9; for(const d of S.dots){ const dd = (d.x-x)*(d.x-x)+(d.y-y)*(d.y-y), lim = (d.rad+4)*(d.rad+4); if(dd<lim && dd<bd){ bd = dd; best = d; } } return {d:best, x, y}; }
-  const descr = r=>{ const nome = r.pid ? (ANA.nomes.get(r.pid)||'Cadastro no CRM') : 'Sem cadastro vinculado'; const L = [];
-    L.push('<b>'+escapeHtml(nome)+'</b>'); L.push([r.idade!=null?r.idade+' anos':'idade não informada', r.sx!=='Sem dado'?r.sx+' (est.)':null].filter(Boolean).join(' · '));
-    L.push((r.area?r.area:ANA_SEM)+(r.hosp?' · '+escapeHtml(r.hosp):'')); L.push(r.pl>0 ? anaN(r.pl)+' plantões em 12 meses · renda '+ANA_RENDA[r.rf] : 'Sem plantão Aliança em 12 meses'); L.push(r.prot ? ''+r.protT : 'Sem apólice ativa'); return L.join('<br>'); };
-  cv.addEventListener('mousemove', ev=>{ if(S.forma==='unidades'){ tip.hidden = true; S.hover = null; return; } const p = pick(ev); S.hover = p.d; if(p.d){ tip.hidden = false; tip.innerHTML = descr(p.d.r); tip.style.left = Math.min(S.w-250, p.x+14)+'px'; tip.style.top = Math.max(6, p.y-10)+'px'; cv.style.cursor = p.d.r.pid ? 'pointer' : 'default'; } else { tip.hidden = true; cv.style.cursor = 'default'; } });
-  cv.addEventListener('mouseleave', ()=>{ S.hover = null; tip.hidden = true; });
-  cv.addEventListener('click', ev=>{ const p = pick(ev); if(p.d && p.d.r.pid && S.onOpen) S.onOpen(p.d.r.pid); });
-  S.set = (o)=>{ if('oculto' in o) S.oculto = !!o.oculto; if('reserva' in o) S.reserva = o.reserva||0; if('topo' in o) S.topo = o.topo||0; if('forma' in o) S.forma = o.forma||'cluster'; if('unid' in o) S.unid = o.unid||null; if('leg' in o) S.leg = o.leg||''; if(o.layout) S.layout = o.layout; if(o.color) S.color = o.color; if('hi' in o) S.hi = o.hi; place(); };
-  S.destroy = ()=>{ S.alive = false; cancelAnimationFrame(S.raf); if(S.ro) S.ro.disconnect(); cv.remove(); tip.remove(); };
-  S.ro = new ResizeObserver(()=>{ size(); place(); }); S.ro.observe(host); size(); place(); frame();
-  return S;
-}
-async function anaGeo(){
-  if(ANA.geo || ANA.geoTry) return; ANA.geoTry = true;
-  try{ const r = await fetch('https://servicodados.ibge.gov.br/api/v3/malhas/estados/35?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio'); if(r.ok) ANA.geo = await r.json(); }catch(e){ console.warn('mapa SP indisponível', e); }
-}
-// ---- aba Analítico ----
-const ANA_SEGMENTOS = [
-  {k:'alvo', t:'Atuam bastante e não têm apólice', d:'Renda em plantões de R$ 150 mil ou mais, sem nenhuma apólice ativa no CRM. É a fila principal do corretor.', f:r=>r.pl>0 && r.rf>=2 && !r.prot, layout:'protecao'},
-  {k:'jovens', t:'Jovens ativos, 30 a 39 anos, sem apólice', d:'Fase de construir patrimônio e proteger a renda. Boa porta de entrada para vida e invalidez.', f:r=>r.pl>0 && r.fi==='30–39' && !r.prot, layout:'idade'},
-  {k:'seniores', t:'50 anos ou mais, ativos', d:'Sucessão, patrimônio e saúde. Conversa de legado e de proteção da renda até a aposentadoria.', f:r=>r.pl>0 && r.idade!=null && r.idade>=50, layout:'idade'},
-  {k:'altarenda', t:'Alta renda em plantões (R$ 300 mil+)', d:'Quem mais depende da própria produção: invalidez e doenças graves pesam mais.', f:r=>r.pl>0 && r.rf>=3, layout:'renda'},
-  {k:'hosp', t:'Concentrados no mesmo hospital', d:'Dá para abordar por hospital: evento, conversa de corredor e indicação entre colegas.', f:r=>!!r.hosp, layout:'hospital'},
-  {k:'inativos', t:'Na base, sem plantão recente', d:'Cadastro antigo ou lead frio. Reativar com o gancho da marca antes de oferecer.', f:r=>r.pl===0, layout:'protecao'} ];
-function anaBar(list, total, dim){ const mx = Math.max(1, ...list.map(x=>x[1])); return list.map(([k,n])=>`<div class="an-bar"><span class="l">${escapeHtml(k)}</span><span class="b"><i style="width:${Math.max(2,100*n/mx)}%;background:${anaCor(dim,k)}"></i></span><span class="v">${anaN(n)} <small>${anaPct(n,total)}%</small></span></div>`).join(''); }
-function anaCardHtml(S){
-  const kp = (v,l,s)=>`<div class="an-kpi"><b>${v}</b><span>${l}</span>${s?`<small>${s}</small>`:''}</div>`;
-  return `<div class="an-kpis">${kp(anaN(S.N),'médicos na base','cadastro de plantões e CRM')}${kp(anaN(S.nAtivos),'com plantão nos últimos 12 meses',anaPct(S.nAtivos,S.N)+'% da base')}${kp(S.mediana!=null?S.mediana+' anos':'—','idade mediana','de '+anaN(S.comIdade)+' com data de nascimento')}${kp(anaN(S.nProt),'com apólice ativa',anaPct(S.nProt,S.N)+'% da base')}${kp(anaN(S.alvo.length),'ativos de renda média/alta sem apólice','fila para a equipe comercial')}</div>`;
-}
-const anaMoney = v=> 'R$ '+Math.round(Number(v)||0).toLocaleString('pt-BR');
-const anaFalaMoney = v=>{ v = Math.round(Number(v)||0); if(v>=1e6) return (v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+(v<2e6?' milhão':' milhões')+' de reais'; if(v>=1e3) return Math.round(v/1e3).toLocaleString('pt-BR')+' mil reais'; return v.toLocaleString('pt-BR')+' reais'; };
-// produtos que vamos oferecer, com quem é elegível na base e o que cada fechamento vale (parâmetros do módulo Comercial)
-function anaProdutos(){
-  const C = ANA.com; if(!C) return []; const R = ANA.rows, n = f=>R.filter(f).length, at = r=>r.pl>0;
-  const rec1 = (t,pct,ag)=> t*12*pct + t*ag;
-  return [
-    {k:'vida', nome:'Seguro de Vida', regra:'Em atividade e sem apólice de vida ativa', el:n(r=>at(r)&&!r.temVida), fila:n(r=>at(r)&&!r.temVida&&r.rf>=2), ticket:C.tkVida, rec:rec1(C.tkVida,C.pctVida,C.agVida), conv:C.convVida, core:true,
-      nota:'Produto-âncora: comissão de '+Math.round(C.pctVida*100)+'% sobre o prêmio mais carregamento de entrada. Guarda-chuva de DIT e prestamista.'},
-    {k:'dit', nome:'DIT (diária por incapacidade)', regra:'Em atividade, renda em plantões de R$ 50 mil+, sem vida ativa', el:n(r=>at(r)&&r.rf>=1&&!r.temVida), fila:n(r=>at(r)&&r.rf>=2&&!r.temVida), nota:'Entra dentro de Vida: mesma conversa, protege a renda em afastamento.'},
-    {k:'prest', nome:'Prestamista', regra:'Menos de 40 anos, em atividade, sem vida ativa', el:n(r=>at(r)&&!r.temVida&&r.idade!=null&&r.idade<40), fila:n(r=>at(r)&&!r.temVida&&r.idade!=null&&r.idade<40&&r.rf>=1), nota:'Quita dívida em morte ou invalidez. Gatilho: toda vez que o médico financia consultório, carro ou formação.'},
-    {k:'rc', nome:'Responsabilidade Civil Profissional', regra:'Em atividade e sem RC ativa', el:n(r=>at(r)&&!r.temRc), fila:n(r=>at(r)&&!r.temRc&&(r.area==='Anestesia'||r.area==='UTI')), ticket:C.tkRc, rec:C.tkRc*12*C.pctRc, conv:C.convRc, hip:C.tkRcHip, core:true,
-      nota:'Porta de entrada: dor imediata do médico, ticket menor. Fila prioritária: anestesia e UTI (maior exposição).'},
-    {k:'saude', nome:'Plano de saúde (com odontológico)', regra:'Todos em atividade (venda a partir de jan/2027)', el:n(at), fila:n(r=>at(r)&&r.rf>=2), ticket:C.tkSaude, rec:rec1(C.tkSaude,C.pctSaude,C.agSaude), conv:C.convSaude, core:true,
-      nota:'Comissão recorrente de '+Math.round(C.pctSaude*100)+'% mais carregamento. O odontológico acompanha como combo.'},
-    {k:'prev', nome:'Previdência privada', regra:'35 anos ou mais e renda em plantões de R$ 150 mil+', el:n(r=>at(r)&&r.rf>=2&&r.idade!=null&&r.idade>=35), fila:n(r=>at(r)&&r.rf>=3&&r.idade!=null&&r.idade>=35), nota:'Bom potencial, ainda não é produto core. Entra na conversa de legado.'},
-    {k:'dno', nome:'RC de sócio-administrador (D&O)', regra:'Donos de clínica ou consultório', el:null, nota:'Sem dado na base. Mapear no Diagnóstico quem tem clínica.'},
-    {k:'parc', nome:'Patrimonial e equipamentos (parceiros)', regra:'Consultório, clínica e equipamentos', el:null, nota:'Distribuição via parceiros, sem estrutura própria.'} ];
-}
-// base × meta: quantas apólices a meta pede, quantas a base entrega com o funil atual, receita, prêmio e lucro
-function anaCruza(){
-  const C = ANA.com; if(!C) return null; const R = ANA.rows, hoje = new Date();
-  const semFim = Math.max(1, Math.ceil((new Date('2027-12-31') - hoje)/(7*864e5)));
-  const vidaNec = C.bas.premVida / C.tkVida, saudeNec = C.bas.premSaude / C.tkSaude;
-  const elVida = R.filter(r=>!r.temVida).length, elVidaAt = R.filter(r=>r.pl>0&&!r.temVida).length, elSaude = R.filter(r=>r.pl>0).length;
-  const expVida = elVida*C.convVida, expVidaAt = elVidaAt*C.convVida, expSaude = elSaude*C.convSaude;
-  const contTot = C.contSem*semFim, semBase = Math.ceil(R.length/C.contSem);
-  const lucroEst = C.bas.rec*ANA_PLANO.margem;
-  return { semFim, vidaNec, saudeNec, elVida, elVidaAt, elSaude, expVida, expVidaAt, expSaude, contTot, semBase, lucroEst, cobVida:vidaNec?expVida/vidaNec:0, cobSaude:saudeNec?expSaude/saudeNec:0 };
-}
-function anaOport(host, S){
-  const C = ANA.com, X = anaCruza(), PR = anaProdutos();
-  if(!C){ host.innerHTML = '<div class="es-box"><div class="hint">Não consegui ler os dados do módulo Comercial. Abra a aba Comercial e volte aqui.</div></div>'; return; }
-  const kp = (v,l,s)=>`<div class="an-kpi"><b>${v}</b><span>${l}</span>${s?`<small>${s}</small>`:''}</div>`;
-  const linhas = PR.map(p=>`<tr><td><b>${escapeHtml(p.nome)}</b>${p.core?' <span class="tagx">core</span>':''}<div class="hint" style="margin:2px 0 0">${escapeHtml(p.nota)}</div></td><td>${escapeHtml(p.regra)}</td><td class="r">${p.el==null?'—':anaN(p.el)}</td><td class="r">${p.fila==null?'—':anaN(p.fila)}</td><td class="r">${p.rec?anaMoney(p.rec)+(p.hip?'<small title="Ticket de RC ainda não definido no Comercial: usamos R$ '+C.tkRc+'/mês como hipótese">*</small>':''):'—'}</td><td class="r">${p.conv&&p.el!=null?anaN(Math.round(p.el*p.conv)):'—'}</td></tr>`).join('');
-  host.innerHTML = `<div class="an-kpis">${kp(anaMoney(C.bas.rec),'meta de receita (travada)','Set/26 a Dez/27 · vida, saúde, indicação e RX')}${kp(anaMoney(C.bas.premTot),'prêmio mensal novo a contratar','vida '+anaMoney(C.bas.premVida)+' · saúde '+anaMoney(C.bas.premSaude))}${kp(anaMoney(ANA_PLANO.lucro),'lucro líquido previsto no plano','margem de '+Math.round(ANA_PLANO.margem*100)+'% · '+ANA_PLANO.fonte)}${kp(anaN(C.realN)+' · '+anaMoney(C.realPrem),'vendas novas já registradas','prêmio mensal · meta até hoje '+anaMoney(C.bas.premAteHoje))}</div>
-    <div class="hint" style="margin:6px 0 14px">Receita e prêmio vêm do módulo Comercial (meta travada e parâmetros por produto). O lucro vem da planilha de custos do Grupo e usa outra base de receita (${anaMoney(ANA_PLANO.receita)} no plano contra ${anaMoney(C.bas.rec)} na meta do CRM). Se a meta do CRM for atingida, o lucro estimado na mesma margem seria de ${anaMoney(X.lucroEst)}; é só uma estimativa, porque os custos fixos não crescem junto com a receita.</div>
-    <div class="es-box"><div class="ql">Produtos que vamos oferecer · quem na base é elegível</div><div style="overflow-x:auto"><table class="ca-table" style="min-width:880px"><thead><tr><th>Produto</th><th>Quem é elegível</th><th class="r">Elegíveis</th><th class="r">Fila prioritária</th><th class="r">Receita no 1º ano por apólice</th><th class="r">Fechamentos esperados*</th></tr></thead><tbody>${linhas}</tbody></table></div>
-      <div class="hint" style="margin-top:6px">Elegíveis = médicos com plantão nos últimos 12 meses que ainda não têm o produto. Fila prioritária = renda em plantões de R$ 150 mil+ (RC: anestesia e UTI). Receita no 1º ano = prêmio mensal × 12 × comissão + carregamento de entrada. *Fechamentos esperados = elegíveis × taxa do funil de ${Math.round(C.convVida*1000)/10}% se cada um fosse contatado uma vez.</div></div>
-    <div class="es-box" style="margin-top:14px"><div class="ql">Base × meta · o cruzamento</div>
-      <div class="an-grid">
-        <div><b>Vida</b><div>A meta pede <b>${anaN(Math.round(X.vidaNec))}</b> apólices novas. A base tem <b>${anaN(X.elVida)}</b> médicos sem apólice de vida (${anaN(X.elVidaAt)} em atividade). Com o funil de ${Math.round(C.convVida*1000)/10}%, contatar todos uma vez entrega cerca de <b>${anaN(Math.round(X.expVida))}</b> apólices, ou <b>${Math.round(X.cobVida*100)}%</b> da meta.</div></div>
-        <div><b>Saúde</b><div>A meta pede <b>${anaN(Math.round(X.saudeNec))}</b> vidas novas (a partir de jan/2027). Há <b>${anaN(X.elSaude)}</b> médicos em atividade. Contatar todos uma vez entrega cerca de <b>${anaN(Math.round(X.expSaude))}</b> vidas, ou <b>${Math.round(X.cobSaude*100)}%</b> da meta.</div></div>
-        <div><b>Ritmo</b><div>Com <b>${anaN(C.contSem)}</b> contatos por semana, a base inteira (${anaN(ANA.rows.length)} médicos) é percorrida em <b>${anaN(X.semBase)} semanas</b>. Até dez/2027 são ${anaN(X.semFim)} semanas, ou ${anaN(X.contTot)} contatos: mais do que a base tem. O resto da meta depende de indicação, retorno de quem não fechou e mercado aberto.</div></div>
-      </div></div>
-    <div class="es-box" style="margin-top:14px"><div class="ql">Leitura para o corretor</div><ul style="margin:6px 0 0 18px">
-      <li>Comece pela <b>fila de vida</b> (${anaN(PR[0].fila)} médicos em atividade, renda de R$ 150 mil+, sem apólice): cada fechamento vale cerca de ${anaMoney(PR[0].rec)} no 1º ano.</li>
-      <li>Use o <b>RC</b> como porta de entrada em anestesia e UTI (${anaN(PR[3].fila)} sem RC): ticket menor, decisão mais rápida, e abre a conversa de vida.</li>
-      <li>Leve o <b>plano de saúde</b> aos ${anaN(PR[4].fila)} de renda alta a partir de jan/2027, com o odontológico como combo.</li>
-      <li>Para fechar a meta, a base sozinha não basta: peça <b>indicações</b> a cada fechamento e trabalhe por hospital.</li></ul></div>`;
-}
-async function renderAnalitico(){
-  const host = document.getElementById('an-body'); if(!host) return;
-  if(ANA.stage){ ANA.stage.destroy(); ANA.stage = null; }
-  if(!ANA.loaded){ host.innerHTML = '<div class="op-more">Carregando a base do Analítico…</div>'; await anaLoad(); }
-  document.querySelectorAll('#an-modes button').forEach(b=>b.classList.toggle('active', b.dataset.m===ANA.modo));
-  if(ANA.err){ host.innerHTML = `<div class="om-err">Não consegui carregar o Analítico: ${escapeHtml(ANA.err)}</div>`; return; }
-  if(!ANA.rows.length){ host.innerHTML = `<div class="es-box"><div class="ql">A base do Analítico ainda não foi carregada</div><div class="hint">A tabela <b>crm_analitico</b> está vazia. Ela é preenchida a partir do cadastro de médicos e dos plantões (projeto Aliança Plantões). </div></div>`; return; }
-  const S = anaStats();
-  if(ANA.modo==='painel') return anaPainel(host, S);
-  if(ANA.modo==='oport') return anaOport(host, S);
-  host.innerHTML = `<div class="an-tools"><label>Agrupar por <select id="an-lay">${Object.entries(ANA_DIMS).filter(([k])=>ANA.modo==='mapa'?false:true).map(([k,v])=>`<option value="${k}">${v.t}</option>`).join('')}</select></label>
-      <label>Colorir por <select id="an-col">${Object.entries(ANA_DIMS).filter(([k])=>k!=='todos').map(([k,v])=>`<option value="${k}">${v.t}</option>`).join('')}</select></label>
-      <label>Destacar <select id="an-hi"><option value="">Todos</option>${ANA_SEGMENTOS.map(s=>`<option value="${s.k}">${escapeHtml(s.t)}</option>`).join('')}</select></label>
-      <span class="hint" style="margin:0">Cada ponto é um médico; o tamanho mostra a faixa de renda em plantões. Passe o mouse para ver o perfil e clique para abrir o cadastro.</span></div>
-    <div class="an-stagewrap"><div id="an-stage" class="an-stage"></div></div>`;
-  const st = anaStage(document.getElementById('an-stage')); ANA.stage = st; st.onOpen = pid=>goToPersonView(pid);
-  const lay = document.getElementById('an-lay'), col = document.getElementById('an-col'), hi = document.getElementById('an-hi');
-  const seg = k=> { const s = ANA_SEGMENTOS.find(x=>x.k===k); return s ? s.f : null; };
-  const apply = ()=> st.set({layout: ANA.modo==='mapa'?'mapa':lay.value, color:col.value, hi:seg(hi.value)});
-  if(ANA.modo==='mapa'){ lay.parentElement.style.display = 'none'; col.value = 'area'; await anaGeo(); } else { lay.value = ANA.layoutSel || 'idade'; col.value = ANA.colorSel || 'area'; }
-  hi.value = ANA.hiSel || ''; [lay,col,hi].forEach(e=>e.addEventListener('change', ()=>{ ANA.layoutSel = lay.value; ANA.colorSel = col.value; ANA.hiSel = hi.value; apply(); })); apply();
-}
-function anaPainel(host, S){
-  const seg = ANA_SEGMENTOS.map(s=>{ const n = ANA.rows.filter(s.f).length; return `<div class="an-seg"><div><b>${escapeHtml(s.t)}</b><span>${escapeHtml(s.d)}</span></div><div class="n"><b>${anaN(n)}</b><small>${anaPct(n,S.N)}% da base</small></div><div class="a"><button type="button" class="om-cancel" data-seg="${s.k}">Ver nos pontos</button><button type="button" class="om-cancel" data-lista="${s.k}">Ver nomes</button></div></div>`; }).join('');
-  host.innerHTML = anaCardHtml(S) + `<div class="hint" style="margin:6px 0 14px">Renda = plantões Aliança nos últimos 12 meses, em faixas (não é a renda total do médico). Sexo é estimado pelo primeiro nome. Região: por enquanto, onde o médico atua (hospital); o endereço de residência ainda não está na base.</div>
-    <div class="an-grid">
-      <div class="es-box"><div class="ql">Idade</div>${anaBar(S.porIdade.filter(x=>x[0]!=='Sem idade'), S.comIdade, 'idade')}<div class="hint" style="margin:6px 0 0">${anaN(S.N-S.comIdade)} médicos sem data de nascimento ficam de fora deste gráfico.</div></div>
-      <div class="es-box"><div class="ql">Área de atuação (quem tem plantão)</div>${anaBar(S.porArea, S.nAtivos, 'area')}</div>
-      <div class="es-box"><div class="ql">Renda em plantões, 12 meses (quem tem plantão)</div>${anaBar(S.porRenda, S.nAtivos, 'renda')}</div>
-      <div class="es-box"><div class="ql">Proteção hoje</div>${anaBar(S.porProt, S.N, 'protecao')}</div>
-      <div class="es-box"><div class="ql">Onde atuam (hospital)</div>${anaBar(S.porHosp.slice(0,10), S.nAtivos, 'hospital')}</div>
-      <div class="es-box"><div class="ql">Onde atuam (cidade)</div>${anaBar(S.porCid.slice(0,8), S.nAtivos, 'hospital')}<div class="ql" style="margin-top:14px">Sexo (estimado)</div>${anaBar(S.porSexo, S.N, 'sexo')}</div>
-    </div>
-    <div class="es-box" style="margin-top:14px"><div class="ql">Repertório para abordar · grupos de médicos</div><div id="an-segs">${seg}</div><div id="an-lista"></div></div>
-    <div class="es-box" style="margin-top:14px"><div class="ql">Perfil de um médico</div><div class="sg-row"><input id="an-busca" class="ca-inp" style="flex:1;min-width:240px" placeholder="Digite o nome do médico"><button class="om-save" id="an-buscar">Buscar</button></div><div id="an-perfil" style="margin-top:10px"></div></div>`;
-  host.querySelectorAll('[data-seg]').forEach(b=>b.addEventListener('click', ()=>{ const s = ANA_SEGMENTOS.find(x=>x.k===b.dataset.seg); ANA.modo = 'pontos'; ANA.layoutSel = s.layout; ANA.colorSel = s.layout==='protecao'?'protecao':'area'; ANA.hiSel = s.k; renderAnalitico(); }));
-  host.querySelectorAll('[data-lista]').forEach(b=>b.addEventListener('click', ()=>{ const s = ANA_SEGMENTOS.find(x=>x.k===b.dataset.lista); const list = ANA.rows.filter(s.f).filter(r=>r.pid).sort((a,c)=>(c.rf-a.rf)||(c.pl-a.pl)).slice(0,40);
-    document.getElementById('an-lista').innerHTML = `<div class="ql" style="margin-top:12px">${escapeHtml(s.t)} · primeiros ${list.length} com cadastro no CRM</div><div class="an-list">${list.map(r=>`<a href="#" data-pid="${r.pid}"><b>${escapeHtml(ANA.nomes.get(r.pid)||'Cadastro')}</b><span>${[r.idade!=null?r.idade+' anos':null, r.area, r.hosp, r.pl>0?ANA_RENDA[r.rf]:null].filter(Boolean).map(escapeHtml).join(' · ')}</span></a>`).join('')||'<span class="hint">Nenhum com cadastro vinculado.</span>'}</div>`;
-    document.querySelectorAll('#an-lista [data-pid]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); goToPersonView(a.dataset.pid); })); }));
-  const busca = ()=>{ const q = anaSemAc(document.getElementById('an-busca').value); const out = document.getElementById('an-perfil'); if(q.length<3){ out.innerHTML = '<span class="hint">Digite pelo menos 3 letras.</span>'; return; }
-    const ach = ANA.rows.filter(r=>r.pid && anaSemAc(ANA.nomes.get(r.pid)||'').includes(q)).slice(0,6); out.innerHTML = ach.length ? ach.map(r=>anaPerfilHtml(r)).join('') : '<span class="hint">Ninguém encontrado com esse nome na base do Analítico.</span>';
-    out.querySelectorAll('[data-pid]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); goToPersonView(a.dataset.pid); })); };
-  document.getElementById('an-buscar').addEventListener('click', busca); document.getElementById('an-busca').addEventListener('keydown', e=>{ if(e.key==='Enter') busca(); });
-}
-const anaSemAc = t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
-// frase de repertório: quem é o médico e como é o grupo dele
-function anaPerfilTxt(r){
-  const g = ANA.rows.filter(x=>x.fi===r.fi && (x.area||'')===(r.area||'')); const gp = g.filter(x=>x.prot).length;
-  const partes = [];
-  if(r.idade!=null) partes.push(r.idade+' anos'); if(r.area) partes.push(r.area.toLowerCase()); if(r.hosp) partes.push('atua no '+r.hosp+' ('+((ANA_HOSP[r.hosp]||{}).cid||'')+')');
-  partes.push(r.pl>0 ? 'fez '+anaN(r.pl)+' plantões em 12 meses (renda em plantões: '+ANA_RENDA[r.rf]+')' : 'sem plantão Aliança nos últimos 12 meses');
-  const grupo = g.length>1 ? `No grupo dele (${r.fi!=='Sem idade'?r.fi.toLowerCase()+' anos':'sem idade'}${r.area?', '+r.area.toLowerCase():''}) são ${anaN(g.length)} médicos e ${anaPct(gp,g.length)}% têm apólice ativa.` : '';
-  return {linha: partes.join(' · '), grupo, prot: r.prot ? 'Já tem apólice ativa ('+r.protT+').' : 'Ainda sem apólice ativa: boa hora para a conversa de proteção.'};
-}
-function anaPerfilHtml(r){ const t = anaPerfilTxt(r); return `<div class="an-perfil"><a href="#" data-pid="${r.pid}"><b>${escapeHtml(ANA.nomes.get(r.pid)||'Cadastro')}</b></a><div>${escapeHtml(t.linha)}</div><div class="hint" style="margin:3px 0">${escapeHtml(t.grupo)}</div><div>${escapeHtml(t.prot)}</div></div>`; }
-async function anaCardPessoa(p){
-  const host = document.getElementById('pv-ana'); if(!host) return;
-  try{ if(!ANA.loaded) await anaLoad(); const r = ANA.rows.find(x=>x.pid===p.id);
-    if(!r){ host.style.display = 'none'; return; } host.style.display = ''; const t = anaPerfilTxt(r);
-    host.innerHTML = `<div class="ql">Repertório para a conversa <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— do Analítico, estimativas pela base Aliança</small></div><div>${escapeHtml(t.linha)}</div><div class="hint" style="margin:4px 0">${escapeHtml(t.grupo)}</div><div>${escapeHtml(t.prot)}</div>`;
-  }catch(e){ host.style.display = 'none'; }
-}
-// ---- apresentação: pontos, mapa, narração e trilha (tudo no navegador) ----
-function anaCenas(S){
-  const N = S.N, c = [], C = ANA.com, X = anaCruza(), PR = anaProdutos();
-  const lista = a=> a.length>1 ? a.slice(0,-1).join(', ')+' e '+a[a.length-1] : (a[0]||'');
-  const pIdade = k=> (S.porIdade.find(x=>x[0]===k)||[0,0])[1];
-  const m40 = S.comIdade ? anaPct(S.menos40, S.comIdade) : 0, top = S.porArea[0] || ['Anestesia',0], topH = S.porHosp.slice(0,3).map(x=>x[0]), topC = S.porCid.slice(0,3).map(x=>x[0]);
-  const pv = k=> PR.find(p=>p.k===k) || {};
-  const idades = S.porIdade.filter(x=>x[0]!=='Sem idade');
-  const top5 = S.porHosp.slice(0,5).reduce((t,x)=>t+x[1],0);
-  const cidIdx = {}; S.porCid.forEach((x,i)=>{ cidIdx[x[0]] = i; });
-  c.push({k:'1 · Quem são', t:`${anaN(N)} médicos na nossa base.`, s:'Cada ponto é um médico · o tamanho mostra a renda em plantões', layout:'todos', color:'area', dur:9000,
-    fala:`Esta é a base da Aliança. São ${anaN(N)} médicos, e cada ponto é um deles. Quanto maior o ponto, maior a renda que ele teve em plantões conosco nos últimos doze meses. ${anaN(S.nAtivos)} fizeram plantão no período. Vamos entender quem são, onde atuam, o que podemos oferecer e quanto isso vale.`,
-    kpis:[[anaN(N),'médicos'],[anaN(S.nAtivos),'com plantão em 12 meses'],[anaN(S.nProt),'com apólice ativa']]});
-  c.push({k:'2 · Idade', t:`Uma base jovem: ${m40}% abaixo de 40 anos.`, s:`Entre os ${anaN(S.comIdade)} com data de nascimento · mediana de ${S.mediana} anos`, layout:'idade', color:'idade', forma:'pilha', leg:'cada ponto = 1 médico · o tamanho mostra a renda em plantões', dur:12000,
-    fala:`Entre os ${anaN(S.comIdade)} médicos com data de nascimento, ${m40} por cento têm menos de quarenta anos, e a mediana é de ${S.mediana} anos. É uma base que está construindo carreira e patrimônio. A conversa de proteção da renda e de vida faz sentido agora, e não daqui a vinte anos.`,
-    kpis:[[anaN(pIdade('30–39')),'de 30 a 39 anos'],[anaN(pIdade('Até 29')),'até 29 anos'],[anaN(pIdade('50–59')+pIdade('60+')),'50 anos ou mais']]});
-  c.push({k:'3 · Atuação', t:`${top[0]} é a área de ${anaPct(top[1], S.nAtivos)}% dos que atuam.`, s:S.porArea.map(x=>x[0]+' '+anaN(x[1])).join(' · '), layout:'area', color:'area', forma:'pizza', leg:'a esfera são os médicos em atividade · cada ponto = 1 médico', dur:11000,
-    fala:`Entre quem atua, ${top[0].toLowerCase()} lidera, com ${anaPct(top[1], S.nAtivos)} por cento dos médicos. ${S.porArea.slice(1).map(x=>x[0].toLowerCase()+' tem '+anaN(x[1])).join(', ')}. O risco muda com a área: quem opera, quem plantona em terapia intensiva e quem cuida de enfermaria têm rotinas e exposições diferentes.`,
-    kpis:S.porArea.slice(0,3).map(x=>[anaN(x[1]),x[0].toLowerCase()])});
-  c.push({k:'4 · Onde atuam', t:`Grande SP, ABC e Baixada: ${lista(topC)}.`, s:'Hospitais onde os médicos fazem plantão', layout:'mapa', color:'area', dur:13000,
-    fala:`No mapa, onde eles atuam. A concentração está em ${lista(topC)}. Isso dá um roteiro de abordagem: dá para ir ao hospital, fazer uma conversa de corredor, um café com a especialista e pedir indicação entre colegas.`,
-    kpis:[[anaN(S.porHosp.length),'hospitais com médicos'],[anaN(S.porCid.length),'cidades'],[anaN((S.porHosp[0]||[0,0])[1]),'no maior polo']]});
-  c.push({k:'5 · Hospitais', t:`Cinco hospitais concentram ${anaPct(top5, S.nAtivos)}% dos médicos em atividade.`, s:'Tamanho do bloco = médicos que atuam no hospital', viz:{tipo:'treemap', dur:2000, itens:S.porHosp.map(x=>({l:x[0], v:x[1], s:(ANA_HOSP[x[0]]||{}).cid, cor:ANA_PAL[(cidIdx[(ANA_HOSP[x[0]]||{}).cid]||0)%ANA_PAL.length]}))}, dur:12000,
-    fala:`Olhando por hospital, a concentração fica ainda mais clara. Cinco hospitais reúnem ${anaPct(top5, S.nAtivos)} por cento dos médicos em atividade. Os maiores são ${lista(topH)}. Cada bloco é um hospital, e a cor mostra a cidade. É por aqui que a abordagem rende mais.`,
-    kpis:S.porHosp.slice(0,3).map(x=>[anaN(x[1]),x[0]])});
-  c.push({k:'6 · Renda', t:`${anaPct(S.plAlta, S.totalPl)}% dos plantões vêm de ${anaN(S.altaRenda)} médicos de renda alta.`, s:'Renda em plantões Aliança nos últimos 12 meses, por faixa', viz:{tipo:'barras', fmt:'n', total:S.nAtivos, dur:1900, itens:S.porRenda.map(x=>({l:x[0], v:x[1], cor:anaCor('renda',x[0])}))}, dur:12000,
-    fala:`A renda em plantões é concentrada. ${anaN(S.altaRenda)} médicos, os de faixa mais alta, respondem por ${anaPct(S.plAlta, S.totalPl)} por cento de todos os plantões. É um retrato só do que ganham conosco, e não da renda total deles. Mas mostra quem mais depende da própria produção, e portanto quem mais precisa proteger a renda.`,
-    kpis:S.porRenda.slice(2).map(x=>[anaN(x[1]),x[0].replace('R$ ','').toLowerCase()])});
-  c.push({k:'Momento de vida', t:'Em que momento da carreira cada um está.', s:'Cada ponto é um médico na sua idade · verde = já tem apólice, vermelho = ainda não', layout:'idade', color:'protecao', forma:'enxame', leg:'cada ponto = 1 médico · só quem tem data de nascimento', dur:14000,
-    fala:`Colocando cada médico na sua idade, aparecem três momentos. Até os trinta e cinco anos, a fase de construção: carreira, renda e primeiras dívidas. Dos trinta e cinco aos cinquenta, a consolidação: família, patrimônio e filhos. Depois dos cinquenta, o legado: sucessão e proteção do que foi construído. Em verde, quem já tem apólice conosco; em vermelho, quem ainda não tem. A conversa muda em cada fase, mas a lacuna de proteção está em todas.`,
-    kpis:[[anaN(S.comIdade),'com idade conhecida'],[anaN(S.menos40),'abaixo de 40 anos']]});
-  c.push({k:'7 · Proteção hoje', t:`Só ${anaPct(S.nProt, N)}% têm apólice ativa.`, s:'Vida em grupo (Porto), cortesia COPA e RC Unimed', viz:{tipo:'rosca', fmt:'n', dur:1900, centro:{n:anaPct(S.nProt,N), l:'já protegidos', fmt:'p'}, itens:S.porProt.map(x=>({l:x[0], v:x[1], cor:anaCor('protecao',x[0])}))}, dur:11000,
-    fala:`Hoje, ${anaN(S.nProt)} médicos têm alguma apólice ativa conosco, ${anaPct(S.nProt, N)} por cento da base. Os outros ${anaN(N - S.nProt)} ainda não têm nada. Essa é a distância entre o que a Aliança já entregou e o que ainda pode proteger.`,
-    kpis:S.porProt.map(x=>[anaN(x[1]),x[0].toLowerCase()])});
-  const faixasR = ANA_RENDA.slice(1), idadeL = ANA_IDADE.slice(0,5);
-  const calor = idadeL.map(fi=>faixasR.map((_,j)=>ANA.rows.filter(r=>r.pl>0 && !r.temVida && r.fi===fi && r.rf===j+1).length));
-  c.push({k:'8 · Onde está a oportunidade', t:'Quem atua, tem renda e não tem vida.', s:'Médicos em atividade sem apólice de vida, por idade e renda em plantões', viz:{tipo:'calor', dur:2200, linhas:idadeL.map(x=>x+' anos'.replace('Até 29 anos','')), colunas:faixasR.map(x=>x.replace('R$ ','')), valores:calor}, dur:13000,
-    fala:`Cruzando idade e renda, aparece o mapa de calor da oportunidade. Cada quadrado é um grupo de médicos em atividade que ainda não tem seguro de vida. Quanto mais claro, mais médicos. O bloco mais forte mostra por onde começar a conversa.`,
-    kpis:[[anaN(S.alvo.length),'renda de R$ 150 mil+ sem apólice'],[anaN(S.alvoJovem.length),'deles com menos de 50 anos']]});
-  if(C){
-    c.push({k:'9 · O que oferecemos', t:'Vida, RC e saúde: o núcleo da oferta.', s:'Elegíveis na base e fila prioritária de cada produto', viz:{tipo:'barras', fmt:'n', dur:2000, series:[{n:'Elegíveis',cor:'#4f7cff'},{n:'Fila prioritária',cor:'#75f5d2'}], itens:[['vida','Seguro de Vida'],['rc','RC profissional'],['saude','Plano de saúde'],['prest','Prestamista'],['prev','Previdência']].map(([k,l])=>({l, v:[pv(k).el||0, pv(k).fila||0]}))}, dur:15000,
-      fala:`O núcleo da oferta tem três frentes. Seguro de vida, que carrega DIT e prestamista: ${anaN(pv('vida').el)} médicos em atividade ainda não têm. Responsabilidade civil profissional, a porta de entrada: ${anaN(pv('rc').el)} em atividade sem a cobertura. E plano de saúde, com odontológico, a partir de janeiro de dois mil e vinte e sete: ${anaN(pv('saude').el)} elegíveis. Previdência e responsabilidade de sócio-administrador entram como expansão, e patrimonial e equipamentos, por parceiros.`,
-      kpis:[[anaN(pv('vida').el),'elegíveis a vida'],[anaN(pv('rc').el),'elegíveis a RC'],[anaN(pv('saude').el),'elegíveis a saúde']]});
-    c.push({k:'10 · Quanto vale', t:`Uma apólice de vida vale cerca de ${anaMoney(pv('vida').rec)} no primeiro ano.`, s:'Prêmio mensal × 12 × comissão + carregamento de entrada', viz:{tipo:'numeros', dur:1800, itens:[{l:'VIDA', v:pv('vida').rec, fmt:'r', s:'por apólice no 1º ano', s2:'prêmio de '+anaMoney(C.tkVida)+'/mês', cor:'#75f5d2'},{l:'SAÚDE', v:pv('saude').rec, fmt:'r', s:'por vida no 1º ano', s2:'prêmio de '+anaMoney(C.tkSaude)+'/mês', cor:'#4f7cff'},{l:'RC PROFISSIONAL', v:pv('rc').rec, fmt:'r', s:'por apólice no 1º ano', s2:'ticket de '+anaMoney(C.tkRc)+'/mês'+(C.tkRcHip?' (hipótese)':''), cor:'#ffb454'}]}, dur:14000,
-      fala:`Quanto vale cada fechamento. Uma apólice de vida, com prêmio de ${anaFalaMoney(C.tkVida)} por mês, gera cerca de ${anaFalaMoney(pv('vida').rec)} no primeiro ano, entre comissão recorrente e carregamento de entrada. Um plano de saúde gera cerca de ${anaFalaMoney(pv('saude').rec)}. E a responsabilidade civil, cerca de ${anaFalaMoney(pv('rc').rec)}, com um ticket menor, que ajuda a abrir a porta.`,
-      kpis:[[anaN(pv('vida').fila),'na fila de vida'],[anaN(pv('rc').fila),'na fila de RC']]});
-    c.push({k:'11 · A meta', t:`${anaMoney(C.bas.rec)} de receita até dezembro de 2027.`, s:'De onde vem a receita: vida, saúde, indicação e RX Vantage', viz:{tipo:'cascata', fmt:'c', dur:2200, totalLabel:'Meta de receita', itens:[{l:'Vida', v:C.bas.recVida, cor:'#75f5d2'},{l:'Saúde', v:C.bas.recSaude, cor:'#4f7cff'},{l:'Indicação', v:C.bas.recInd, cor:'#ffb454'},{l:'RX Vantage', v:C.bas.recRx, cor:'#c084fc'}]}, dur:14000,
-      fala:`A meta travada é de ${anaFalaMoney(C.bas.rec)} de receita entre setembro de dois mil e vinte e seis e dezembro de dois mil e vinte e sete. Vida responde pela maior fatia, com ${anaFalaMoney(C.bas.recVida)}, seguida de saúde, com ${anaFalaMoney(C.bas.recSaude)}. Indicação e RX Vantage completam. Para chegar lá, é preciso contratar ${anaFalaMoney(C.bas.premTot)} de prêmio mensal novo. Até hoje, ${anaN(C.realN)} vendas novas estão registradas.`,
-      kpis:[[anaMoney(C.bas.rec),'meta de receita'],[anaMoney(C.bas.premTot),'prêmio mensal novo a contratar']]});
-    const hojeIdx = Math.max(0, (C.meses||[]).findIndex(m=>m.m===new Date().toISOString().slice(0,7)));
-    const mn = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-    if((C.meses||[]).length>2) c.push({k:'12 · O caminho', t:'A receita cresce mês a mês até dezembro de 2027.', s:`Receita mensal prevista na meta · lucro previsto no plano: ${anaMoney(ANA_PLANO.lucro)}`, viz:{tipo:'linha', fmt:'c', dur:2600, hoje:hojeIdx, pontos:C.meses.map(m=>({x:mn[+m.m.slice(5,7)-1]+'/'+m.m.slice(2,4), y:m.rec}))}, dur:14000,
-      fala:`O caminho até dezembro de dois mil e vinte e sete. A receita mensal prevista parte de quase zero, passa a acelerar quando o plano de saúde entra, em janeiro, e chega a ${anaFalaMoney(C.meses[C.meses.length-1].rec)} por mês no fim do período. A linha laranja marca onde estamos hoje. Segundo a planilha de custos do Grupo, no cenário realista o lucro líquido previsto é de ${anaFalaMoney(ANA_PLANO.lucro)}, uma margem de ${Math.round(ANA_PLANO.margem*100)} por cento.`,
-      kpis:[[anaMoney(ANA_PLANO.lucro),'lucro previsto no plano'],[Math.round(ANA_PLANO.margem*100)+'%','margem líquida']]});
-    const F = C.funil, f1 = F.cont, f2 = f1*F.pAg/100, f3 = f2*F.pEf/100, f4 = f3*F.pPr/100, f5 = f4*F.pFe/100;
-    c.push({k:'13 · O funil', t:`De ${anaN(f1)} contatos por semana, ${f5.toLocaleString('pt-BR',{maximumFractionDigits:1})} viram apólice.`, s:'Funil comercial de vida: parâmetros do módulo Comercial', viz:{tipo:'funil', fmt:'n', dur:2200, etapas:[{l:'Contatos', v:f1, cor:'#4f7cff'},{l:'Reuniões agendadas', v:f2, cor:'#5ec8ff'},{l:'Conversas efetivadas', v:f3, cor:'#75f5d2'},{l:'Propostas', v:f4, cor:'#ffb454'},{l:'Fechamentos', v:Math.max(f5,0.4), cor:'#ff7a7a'}]}, dur:14000,
-      fala:`O funil comercial. De cada ${anaN(f1)} contatos por semana, cerca de ${anaN(f2)} viram reunião agendada, ${anaN(f3)} se efetivam, ${anaN(f4)} recebem proposta, e ${f5.toLocaleString('pt-BR',{maximumFractionDigits:1})} fecham. É uma conversão de ${Math.round(C.convVida*1000)/10} por cento entre o contato e o fechamento. Cada etapa melhorada multiplica o resultado.`,
-      kpis:[[Math.round(C.convVida*1000)/10+'%','contato → fechamento'],[anaN(C.contSem),'contatos por semana']]});
-    c.push({k:'14 · O cruzamento', t:`A base cobre ${Math.round(X.cobVida*100)}% da meta de vida com o funil atual.`, s:`Apólices que a meta pede × o que a base entrega em um contato por médico`, layout:'todos', color:'protecao', forma:'unidades', leg:'cada ponto = 1 apólice de vida ou 1 vida de saúde', unid:[{n:Math.round(X.vidaNec), cor:'#ffb454', l:'Vida · a meta pede', s:'apólices novas'},{n:Math.max(1,Math.round(X.expVida)), cor:'#75f5d2', l:'Vida · a base entrega', s:'com um contato por médico'},{n:Math.round(X.saudeNec), cor:'#ffb454', l:'Saúde · a meta pede', s:'vidas novas'},{n:Math.max(1,Math.round(X.expSaude)), cor:'#75f5d2', l:'Saúde · a base entrega', s:'com um contato por médico'}], dur:16000,
-      fala:`Agora, o cruzamento. A meta de vida pede cerca de ${anaN(Math.round(X.vidaNec))} apólices novas. Temos ${anaN(X.elVida)} médicos sem apólice de vida. Com o funil atual, contatar todos eles uma vez entrega cerca de ${anaN(Math.round(X.expVida))} apólices, ${Math.round(X.cobVida*100)} por cento da meta. Com ${anaN(C.contSem)} contatos por semana, percorremos a base inteira em ${anaN(X.semBase)} semanas. A base é o ponto de partida, mas o resto virá de indicação, de quem não fechou na primeira conversa e do mercado aberto.`,
-      kpis:[[anaN(Math.round(X.vidaNec)),'apólices de vida pedidas'],[anaN(Math.round(X.expVida)),'entregues pela base'],[anaN(X.semBase)+' sem.','para percorrer a base']]});
-  }
-  c.push({k:C?'15 · O plano':'9 · A oportunidade', t:`${anaN(S.alvo.length)} médicos para abordar primeiro.`, s:`Atuam bastante, renda de R$ 150 mil+, sem apólice · ${anaN(S.alvoJovem.length)} têm menos de 50 anos`, layout:'protecao', color:'protecao', hi:r=>r.pl>0 && r.rf>=2 && !r.prot, dur:15000,
-    fala:`O plano é simples. Primeiro, ${anaN(S.alvo.length)} médicos que atuam bastante, com renda em plantões de cento e cinquenta mil reais ou mais, e nenhuma apólice ativa, destacados agora: ${anaN(S.alvoJovem.length)} têm menos de cinquenta anos. Segundo, abrir a conversa pela responsabilidade civil em anestesia e terapia intensiva, e levar a vida em seguida. Terceiro, trabalhar por hospital, para ganhar indicações dentro do mesmo grupo. E em cada conversa, adaptar a mensagem à idade: patrimônio para os mais jovens, sucessão e legado para os mais experientes.`,
-    kpis:[[anaN(S.alvo.length),'fila principal'],[anaN(S.alvoJovem.length),'menos de 50 anos'],[anaPct(S.alvo.length, S.nAtivos)+'%','dos que atuam']]});
-  c.forEach((q,i)=>{ if(q.k) q.k = (i+1)+' · '+q.k.replace(/^\d+ · /,''); });
-  c.push({fim:true, limpo:true, k:'', t:'CRM Aliança', s:'Dados da própria base, atualizados quando o Analítico é recarregado', layout:'todos', color:'protecao', dur:8000,
-    fala:`Resumindo: uma base jovem, concentrada em poucos hospitais, com muita gente que trabalha bastante e ainda não tem proteção. Uma oferta clara, uma meta definida e um caminho para chegar lá. CRM Aliança.`, kpis:[[anaN(N),'médicos'],[anaN(S.alvo.length),'na fila principal'],[anaPct(S.nProt,N)+'%','já protegidos']]});
-  return c;
-}
-const ANA_AUDIO = { ctx:null, on:true, musica:true, nodes:null, fala:null, rate:0.93, arq:null };
-// Trilha original gerada por código (Web Audio): pad, baixo, arpejo com eco e pulso suave, em Lá menor / Fá / Dó / Sol.
-// Opcionalmente a pessoa escolhe um arquivo de áudio livre de direitos para tocar no lugar da trilha gerada.
-const anaMf = n=> 440*Math.pow(2,(n-69)/12);
-const ANA_ACORDES = [ {r:45, t:[57,60,64]}, {r:41, t:[53,57,60]}, {r:48, t:[60,64,67]}, {r:43, t:[55,59,62]} ];
-function anaRuido(ctx, seg){ const n = Math.floor(ctx.sampleRate*seg), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0); for(let i=0;i<n;i++) d[i] = Math.random()*2-1; return buf; }
-function anaSomIniciar(){
-  try{ const AC = window.AudioContext||window.webkitAudioContext; if(!AC) return; const a = ANA_AUDIO; a.ctx = a.ctx || new AC(); if(a.ctx.state==='suspended') a.ctx.resume();
-    if(a.nodes) return; const c = a.ctx;
-    const master = c.createGain(); master.gain.value = 0.0001; const comp = c.createDynamicsCompressor(); master.connect(comp); comp.connect(c.destination);
-    const mus = c.createGain(); mus.gain.value = a.musica ? 1 : 0.0001; mus.connect(master);
-    const fx = c.createGain(); fx.gain.value = 1; fx.connect(master);
-    const eco = c.createDelay(1); eco.delayTime.value = 0.42; const fb = c.createGain(); fb.gain.value = 0.38; const lpE = c.createBiquadFilter(); lpE.type = 'lowpass'; lpE.frequency.value = 2200; eco.connect(lpE); lpE.connect(fb); fb.connect(eco); lpE.connect(mus);
-    const ruido = anaRuido(c, 2);
-    master.gain.linearRampToValueAtTime(0.9, c.currentTime+2.2);
-    const N = {master, mus, fx, eco, ruido, passo:0, prox:c.currentTime+0.2, timer:null, bpm:88};
-    N.timer = setInterval(()=>anaSomTick(), 110); a.nodes = N;
-  }catch(e){ console.warn('som', e); }
-}
-function anaNota(tipo, f, t, dur, vol, destino, att){
-  const a = ANA_AUDIO, c = a.ctx, o = c.createOscillator(), g = c.createGain(); o.type = tipo; o.frequency.value = f; att = att||0.01;
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+att); g.gain.exponentialRampToValueAtTime(0.0001, t+dur); o.connect(g); g.connect(destino); o.start(t); o.stop(t+dur+0.05); return {o,g};
-}
-function anaSomTick(){
-  const a = ANA_AUDIO, N = a.nodes; if(!a.ctx || !N || a.arq) return; const c = a.ctx, passoDur = 60/N.bpm/2;
-  while(N.prox < c.currentTime + 0.4){
-    const t = N.prox, i = N.passo, ac = ANA_ACORDES[Math.floor(i/16)%ANA_ACORDES.length], k = i%16;
-    if(k===0){ // pad e baixo a cada acorde (2 compassos)
-      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 950; lp.connect(N.mus);
-      ac.t.forEach((m,j)=>{ anaNota('triangle', anaMf(m-12)*(1+(j-1)*0.002), t, passoDur*16+1.2, 0.05, lp, 1.1); anaNota('sine', anaMf(m), t, passoDur*16+1.0, 0.018, lp, 1.4); });
-      anaNota('sine', anaMf(ac.r), t, passoDur*7, 0.16, N.mus, 0.03);
-    }
-    if(k===8) anaNota('sine', anaMf(ac.r), t, passoDur*6, 0.12, N.mus, 0.03);
-    // arpejo (pluck) em colcheias, vai para o eco
-    const padrao = [0,1,2,1,2,1,0,2]; const nota = ac.t[padrao[i%8]] + (i%8===4 || i%8===7 ? 12 : 0);
-    if(!(k===7 || k===15)){ const pl = anaNota('triangle', anaMf(nota), t, 0.5, 0.045, N.mus, 0.006); const sd = c.createGain(); sd.gain.value = 0.55; pl.g.connect(sd); sd.connect(N.eco); }
-    // pulso: bumbo suave nos tempos, chiado leve nos contratempos
-    if(i%2===0){ const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(48, t+0.14); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.11, t+0.005); g.gain.exponentialRampToValueAtTime(0.0001, t+0.22); o.connect(g); g.connect(N.mus); o.start(t); o.stop(t+0.25); }
-    else { const s2 = c.createBufferSource(); s2.buffer = N.ruido; const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7000; const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.014, t+0.004); g.gain.exponentialRampToValueAtTime(0.0001, t+0.07); s2.connect(hp); hp.connect(g); g.connect(N.mus); s2.start(t, Math.random()); s2.stop(t+0.09); }
-    N.prox += passoDur; N.passo++;
-  }
-}
-// efeito a cada troca de gráfico: varredura de ar (whoosh), bolhas estourando e um brilho ascendente
-function anaSomTransicao(fim){
-  const a = ANA_AUDIO, N = a.nodes; if(!a.ctx || !N || !a.on && !a.musica) return; const c = a.ctx, t0 = c.currentTime + 0.02;
-  try{
-    const s1 = c.createBufferSource(); s1.buffer = N.ruido; s1.loop = true; const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4; bp.frequency.setValueAtTime(220, t0); bp.frequency.exponentialRampToValueAtTime(4200, t0+0.65); bp.frequency.exponentialRampToValueAtTime(900, t0+1.2);
-    const g1 = c.createGain(); g1.gain.setValueAtTime(0.0001, t0); g1.gain.exponentialRampToValueAtTime(0.16, t0+0.4); g1.gain.exponentialRampToValueAtTime(0.0001, t0+1.25); s1.connect(bp); bp.connect(g1); g1.connect(N.fx); s1.start(t0); s1.stop(t0+1.3);
-    for(let i=0;i<7;i++){ const ti = t0 + 0.1 + Math.random()*0.85, f0 = 380 + Math.random()*700, o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(f0, ti); o.frequency.exponentialRampToValueAtTime(f0*1.9, ti+0.09); g.gain.setValueAtTime(0.0001, ti); g.gain.exponentialRampToValueAtTime(0.07, ti+0.012); g.gain.exponentialRampToValueAtTime(0.0001, ti+0.16); o.connect(g); g.connect(N.fx); o.start(ti); o.stop(ti+0.2); }
-    const notas = fim ? [69,72,76,81,84] : [81,84,88]; notas.forEach((m,j)=>{ const ti = t0 + 0.55 + j*0.09; anaNota('sine', anaMf(m), ti, fim?2.4:1.5, 0.028, N.fx, 0.01); const sd = c.createGain(); sd.gain.value = 0.4; });
-  }catch(e){ console.warn('efeito', e); }
-}
-function anaMusicaLigar(on){ const a = ANA_AUDIO; a.musica = !!on; if(a.nodes){ a.nodes.mus.gain.cancelScheduledValues(a.ctx.currentTime); a.nodes.mus.gain.linearRampToValueAtTime(a.musica?1:0.0001, a.ctx.currentTime+0.4); } if(a.audioEl){ a.audioEl.muted = !a.musica; } }
-// trilha escolhida pela pessoa (arquivo de áudio livre de direitos): toca em loop no lugar da trilha gerada
-function anaMusicaArquivo(file){
-  const a = ANA_AUDIO; if(!file || !a.ctx || !a.nodes) return;
-  try{ if(a.audioEl){ a.audioEl.pause(); URL.revokeObjectURL(a.audioEl.src); }
-    const el = new Audio(URL.createObjectURL(file)); el.loop = true; el.volume = 1; a.audioEl = el; a.arq = file.name; el.muted = !a.musica;
-    if(!a.srcNode){ a.srcNode = a.ctx.createMediaElementSource(el); } else { a.srcNode.disconnect(); }
-    const g = a.ctx.createGain(); g.gain.value = 0.32; a.srcNode.connect(g); g.connect(a.nodes.mus); el.play().catch(()=>{}); showToast('Trilha escolhida: '+file.name);
-  }catch(e){ console.warn('trilha', e); a.arq = null; showToast('Não consegui usar esse arquivo de áudio.'); }
-}
-function anaSomParar(){ const a = ANA_AUDIO; const N = a.nodes; if(N){ clearInterval(N.timer); try{ N.master.gain.cancelScheduledValues(a.ctx.currentTime); N.master.gain.linearRampToValueAtTime(0.0001, a.ctx.currentTime+0.7); }catch(e){} a.nodes = null; }
-  if(a.audioEl){ try{ a.audioEl.pause(); URL.revokeObjectURL(a.audioEl.src); }catch(e){} a.audioEl = null; } a.arq = null; a.srcNode = null; }
-const ANA_VOZ_KEY = 'ana_voz';
-function anaVozes(){ try{ return (speechSynthesis.getVoices()||[]).filter(v=>/^pt/i.test(v.lang)); }catch(e){ return []; } }
-function anaVozNota(v){ const n = v.name||''; let t = 0; if(/natural|neural/i.test(n)) t += 60; if(/online/i.test(n)) t += 25; if(/google/i.test(n)) t += 15; if(/francisca|antonio|thalita|brenda|donato|giovanna|fabio|leila|elza|manuela|yara|valerio|humberto|nicolau/i.test(n)) t += 10; if(/pt[-_]BR/i.test(v.lang)) t += 8; if(/desktop|maria|daniel/i.test(n)) t -= 20; if(v.localService===false) t += 3; return t; }
-function anaVozAtual(){ let pref = null; try{ pref = localStorage.getItem(ANA_VOZ_KEY); }catch(e){} const vs = anaVozes(); return (pref && vs.find(v=>v.voiceURI===pref)) || vs.slice().sort((a,b)=>anaVozNota(b)-anaVozNota(a))[0] || null; }
-function anaFalarParar(){ if(ANA_AUDIO.fala) ANA_AUDIO.fala.cancel = true; try{ speechSynthesis.cancel(); }catch(e){} }
-// fala frase por frase, com pausa curta entre elas (soa menos "leitura contínua" e evita o corte de falas longas)
-function anaFalar(texto, fim){
-  if(!ANA_AUDIO.on || !('speechSynthesis' in window)) return null;
-  try{ anaFalarParar();
-    // frases, e dentro delas pedaços de até ~90 caracteres quebrados nas vírgulas: a pausa natural vem do respiro, não do motor de voz
-    const partes = []; String(texto||'').replace(/\s+/g,' ').trim().split(/(?<=[.!?:;])\s+/).filter(Boolean).forEach(fr=>{ if(fr.length<=95){ partes.push(fr); return; } let cur = ''; fr.split(/(?<=,)\s+/).forEach(pc=>{ if(cur && (cur+' '+pc).length>95){ partes.push(cur); cur = pc; } else cur = cur ? cur+' '+pc : pc; }); if(cur) partes.push(cur); });
-    const v = anaVozAtual(); const tok = {cancel:false}; ANA_AUDIO.fala = tok; let i = 0;
-    const prox = ()=>{ if(tok.cancel) return; if(i>=partes.length){ if(fim) fim(); return; } const f = partes[i++]; const u = new SpeechSynthesisUtterance(f); u.lang = 'pt-BR'; if(v) u.voice = v;
-      const fimFrase = /[.!?]$/.test(f); u.rate = (ANA_AUDIO.rate || 0.93) + (i%3===0 ? 0.02 : 0); u.pitch = /\?$/.test(f) ? 1.08 : (fimFrase ? 0.98 : 1.03); u.volume = 1;
-      const pausa = /[.!?]$/.test(f) ? 420 : /[:;]$/.test(f) ? 280 : 170; u.onend = ()=>setTimeout(prox, pausa); u.onerror = ()=>setTimeout(prox, 120); speechSynthesis.speak(u); };
-    prox(); return tok; }catch(e){ return null; }
-}
-// ---- gráficos animados da apresentação: colunas, barras, rosca, treemap, mapa de calor, cascata, linha, funil e números ----
-const anaEase = t=> 1-Math.pow(1-Math.max(0,Math.min(1,t)),3);
-const anaSeg = (p, i, n, dur)=> anaEase((p - (i/Math.max(1,n))*(1-dur))/dur);
-const anaCurto = v=>{ v = Number(v)||0; return v>=1e6 ? 'R$ '+(v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mi' : v>=1e3 ? 'R$ '+Math.round(v/1e3).toLocaleString('pt-BR')+' mil' : 'R$ '+Math.round(v); };
-function anaViz(host){
-  const cv = document.createElement('canvas'); cv.className = 'an-cv2'; host.appendChild(cv); const ctx = cv.getContext('2d');
-  const V = {w:0,h:0,dpr:1,spec:null,t0:0,alpha:0,alvo:0,alive:true,raf:0,kpi:false};
-  const size = ()=>{ const r = host.getBoundingClientRect(); V.dpr = Math.min(2, window.devicePixelRatio||1); V.w = Math.max(200, r.width); V.h = Math.max(200, r.height); cv.width = V.w*V.dpr; cv.height = V.h*V.dpr; cv.style.width = V.w+'px'; cv.style.height = V.h+'px'; };
-  const T = (t,x,y,f,c,al)=>{ ctx.font = f; ctx.fillStyle = c||'#e8f1f6'; ctx.textAlign = al||'left'; ctx.fillText(String(t),x,y); };
-  const FN = (px,w)=> (w||600)+' '+px+'px Inter, sans-serif', FC = px=> '700 '+px+'px "Roboto Condensed", Inter, sans-serif';
-  const rr = (x,y,w,h,r)=>{ const q = Math.max(0,Math.min(r,w/2,h/2)); ctx.beginPath(); ctx.moveTo(x+q,y); ctx.arcTo(x+w,y,x+w,y+h,q); ctx.arcTo(x+w,y+h,x,y+h,q); ctx.arcTo(x,y+h,x,y,q); ctx.arcTo(x,y,x+w,y,q); ctx.closePath(); };
-  const fm = (v,k)=> k==='r' ? anaMoney(v) : k==='c' ? anaCurto(v) : k==='p' ? Math.round(v)+'%' : anaN(Math.round(v));
-  const area = ()=>{ const w = V.w, h = V.h, narrow = w<900, x = narrow?24:70, y = narrow?150:Math.max(170,h*0.24), rt = V.kpi && !narrow ? 310 : (narrow?24:70); return {x, y, w:Math.max(200,w-x-rt), h:Math.max(160,h-y-(narrow?175:165))}; };
-  const eixo = (R, y)=>{ ctx.strokeStyle = 'rgba(160,190,205,.28)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(R.x, y); ctx.lineTo(R.x+R.w, y); ctx.stroke(); };
-  const TIPOS = {
-    colunas(R,p,sp){ const it = sp.itens, n = it.length, mx = Math.max(1,...it.map(i=>i.v)), gap = Math.min(46,R.w/n*0.22), bw = (R.w-gap*(n-1))/n, base = R.y+R.h-36; eixo(R, base);
-      it.forEach((q,i)=>{ const pp = anaSeg(p,i,n,0.55), hh = (base-R.y-34)*(q.v/mx)*pp, x = R.x+i*(bw+gap); ctx.fillStyle = q.cor; rr(x, base-hh, bw, hh, 12); ctx.fill();
-        T(fm(q.v*pp,sp.fmt), x+bw/2, base-hh-14, FC(Math.min(34,bw*0.34)), '#fff', 'center'); if(sp.total) T(Math.round(q.v/sp.total*100)*pp>0 ? Math.round(q.v/sp.total*100)+'%' : '', x+bw/2, base-hh+Math.min(30,bw*0.3), FN(13,700), 'rgba(3,13,19,.85)', 'center'); T(q.l, x+bw/2, base+26, FN(14,600), 'rgba(205,222,232,.92)', 'center'); }); },
-    barras(R,p,sp){ const it = sp.itens, n = it.length, ser = sp.series||[{n:'',cor:null}], rowH = Math.min(86, R.h/n), lw = Math.min(260, R.w*0.3), bx = R.x+lw, bwMax = R.w-lw-130, mx = Math.max(1,...it.flatMap(i=>[].concat(i.v)));
-      it.forEach((q,i)=>{ const y = R.y + i*rowH + (R.h-rowH*n)/2, pp = anaSeg(p,i,n,0.5), vs = [].concat(q.v), bh = Math.min(26,(rowH*0.74)/vs.length);
-        T(q.l, bx-16, y+rowH/2+5, FN(15,600), 'rgba(205,222,232,.95)', 'right');
-        vs.forEach((v,j)=>{ const yy = y + rowH/2 - (vs.length*bh+(vs.length-1)*5)/2 + j*(bh+5), w = Math.max(3,bwMax*(v/mx)*pp), cor = (ser[j]&&ser[j].cor) || q.cor || '#75f5d2'; ctx.fillStyle = 'rgba(160,190,205,.08)'; rr(bx,yy,bwMax,bh,bh/2); ctx.fill(); ctx.fillStyle = cor; rr(bx,yy,w,bh,bh/2); ctx.fill(); T(fm(v*pp,sp.fmt)+(sp.total?'  '+Math.round(v/sp.total*100)+'%':''), bx+w+10, yy+bh-6, FN(14,700), '#e8f1f6', 'left'); }); });
-      if(sp.series && sp.series[0].n){ sp.series.forEach((q,j)=>{ const x = R.x+R.w-210; ctx.fillStyle = q.cor; rr(x, R.y-34+j*22, 14, 14, 4); ctx.fill(); T(q.n, x+22, R.y-22+j*22, FN(13,600), 'rgba(205,222,232,.9)', 'left'); }); } },
-    rosca(R,p,sp){ const it = sp.itens, tot = it.reduce((t,i)=>t+i.v,0)||1, r = Math.min(R.h/2, R.w*0.3), cx = R.x+r+20, cy = R.y+R.h/2, th = r*0.3; let a0 = -Math.PI/2; const sweep = anaEase(p)*Math.PI*2;
-      it.forEach(q=>{ const a1 = a0 + (q.v/tot)*Math.PI*2, ea = Math.min(a1, -Math.PI/2+sweep); if(ea>a0){ ctx.beginPath(); ctx.arc(cx,cy,r-th/2,a0+0.012,ea-0.012); ctx.lineWidth = th; ctx.strokeStyle = q.cor; ctx.lineCap = 'butt'; ctx.stroke(); } a0 = a1; });
-      T(fm(sp.centro.n*anaEase(p), sp.centro.fmt), cx, cy+8, FC(r*0.34), '#fff', 'center'); T(sp.centro.l, cx, cy+8+r*0.2, FN(14,600), 'rgba(190,210,222,.85)', 'center');
-      it.forEach((q,i)=>{ const pp = anaSeg(p,i,it.length,0.5), x = cx+r+90, y = R.y+R.h/2-(it.length*58)/2+i*58+20; ctx.globalAlpha *= pp; ctx.fillStyle = q.cor; rr(x,y-16,16,16,5); ctx.fill(); T(q.l, x+28, y-3, FN(17,700), '#e8f1f6', 'left'); T(fm(q.v,sp.fmt)+'  ·  '+Math.round(q.v/tot*100)+'%', x+28, y+20, FN(14,500), 'rgba(190,210,222,.85)', 'left'); ctx.globalAlpha /= (pp||1); }); },
-    treemap(R,p,sp){ const it = sp.itens.slice().sort((a,b)=>b.v-a.v), out = [];
-      const cut = (L,x,y,w,h)=>{ if(!L.length) return; if(L.length===1){ out.push({q:L[0],x,y,w,h}); return; } const tot = L.reduce((t,i)=>t+i.v,0); let acc = 0, k = 0; for(;k<L.length-1;k++){ if(acc+L[k].v > tot/2 && k>0) break; acc += L[k].v; } k = Math.max(1,k); const A = L.slice(0,k), B = L.slice(k), fa = A.reduce((t,i)=>t+i.v,0)/tot; if(w>=h){ cut(A,x,y,w*fa,h); cut(B,x+w*fa,y,w*(1-fa),h); } else { cut(A,x,y,w,h*fa); cut(B,x,y+h*fa,w,h*(1-fa)); } };
-      cut(it, R.x, R.y, R.w, R.h);
-      out.forEach((c,i)=>{ const pp = anaSeg(p,i,out.length,0.5), g = 4, w = c.w-g, h = c.h-g; ctx.globalAlpha *= pp; ctx.fillStyle = c.q.cor; rr(c.x+g/2+ (1-pp)*8, c.y+g/2, w, h, 10); ctx.fill(); ctx.fillStyle = 'rgba(3,13,19,.28)'; rr(c.x+g/2, c.y+g/2, w, h, 10); ctx.fill();
-        if(w>110 && h>54){ T(c.q.l, c.x+16, c.y+34, FN(Math.min(20,Math.max(13,w/12)),700), '#fff', 'left'); T(anaN(c.q.v)+' médicos'+(c.q.s?' · '+c.q.s:''), c.x+16, c.y+56, FN(13,500), 'rgba(235,245,250,.9)', 'left'); } ctx.globalAlpha /= (pp||1); }); },
-    calor(R,p,sp){ const nl = sp.linhas.length, nc = sp.colunas.length, lw = 120, hh = 44, cw = (R.w-lw)/nc, ch = Math.min(86,(R.h-hh)/nl), mx = Math.max(1,...sp.valores.flat()); let best = {v:-1,i:0,j:0};
-      sp.colunas.forEach((c,j)=>T(c, R.x+lw+j*cw+cw/2, R.y+26, FN(14,700), 'rgba(205,222,232,.95)', 'center'));
-      sp.linhas.forEach((l,i)=>{ T(l, R.x+lw-14, R.y+hh+i*ch+ch/2+5, FN(15,700), 'rgba(205,222,232,.95)', 'right'); sp.valores[i].forEach((v,j)=>{ if(v>best.v) best = {v,i,j}; const pp = anaSeg(p,i*nc+j,nl*nc,0.4), x = R.x+lw+j*cw, y = R.y+hh+i*ch; ctx.fillStyle = 'rgba(160,190,205,.07)'; rr(x+3,y+3,cw-6,ch-6,12); ctx.fill(); ctx.globalAlpha *= pp; ctx.fillStyle = 'rgba(117,245,210,'+(0.14+0.8*v/mx)+')'; rr(x+3,y+3,cw-6,ch-6,12); ctx.fill(); T(anaN(v), x+cw/2, y+ch/2+8, FC(Math.min(30,ch*0.4)), v/mx>0.5?'#031219':'#e8f1f6', 'center'); ctx.globalAlpha /= (pp||1); }); });
-      if(p>0.85){ const x = R.x+lw+best.j*cw, y = R.y+hh+best.i*ch; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; rr(x+3,y+3,cw-6,ch-6,12); ctx.stroke(); } },
-    cascata(R,p,sp){ const it = sp.itens, n = it.length+1, tot = it.reduce((t,i)=>t+i.v,0), gap = 24, bw = (R.w-gap*(n-1))/n, base = R.y+R.h-36, esc = (base-R.y-44)/tot; let acc = 0; eixo(R, base);
-      it.forEach((q,i)=>{ const pp = anaSeg(p,i,n,0.5), hh = q.v*esc*pp, y = base-(acc*esc)-hh, x = R.x+i*(bw+gap); ctx.fillStyle = q.cor; rr(x,y,bw,hh,10); ctx.fill(); T(fm(q.v*pp,sp.fmt), x+bw/2, y-12, FC(Math.min(30,bw*0.3)), '#fff', 'center'); T(q.l, x+bw/2, base+26, FN(14,600), 'rgba(205,222,232,.92)', 'center');
-        if(pp>0.99 && i<it.length){ ctx.setLineDash([5,5]); ctx.strokeStyle = 'rgba(190,210,222,.4)'; ctx.beginPath(); ctx.moveTo(x+bw, y); ctx.lineTo(x+bw+gap, y); ctx.stroke(); ctx.setLineDash([]); } acc += q.v; });
-      const pt = anaSeg(p,n-1,n,0.5), x = R.x+(n-1)*(bw+gap), hh = tot*esc*pt; ctx.fillStyle = sp.corTotal||'#75f5d2'; rr(x,base-hh,bw,hh,10); ctx.fill(); T(fm(tot*pt,sp.fmt), x+bw/2, base-hh-12, FC(Math.min(34,bw*0.34)), '#fff', 'center'); T(sp.totalLabel||'Total', x+bw/2, base+26, FN(14,800), '#75f5d2', 'center'); },
-    linha(R,p,sp){ const pts = sp.pontos, n = pts.length, mx = Math.max(1,...pts.map(q=>q.y))*1.08, base = R.y+R.h-34, X = i=>R.x+i*(R.w/(n-1)), Y = v=>base-(v/mx)*(base-R.y-20);
-      for(let g=0;g<=4;g++){ const v = mx*g/4, y = Y(v); ctx.strokeStyle = 'rgba(160,190,205,'+(g?0.14:0.3)+')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(R.x,y); ctx.lineTo(R.x+R.w,y); ctx.stroke(); T(anaCurto(v), R.x-10, y+4, FN(12,500), 'rgba(160,190,205,.75)', 'right'); }
-      const lim = (n-1)*anaEase(p), k = Math.floor(lim), fr = lim-k; ctx.save(); ctx.beginPath(); ctx.moveTo(X(0),base); for(let i=0;i<=k;i++) ctx.lineTo(X(i),Y(pts[i].y)); if(k<n-1){ ctx.lineTo(X(k)+(X(k+1)-X(k))*fr, Y(pts[k].y+(pts[k+1].y-pts[k].y)*fr)); }
-      const xe = k<n-1 ? X(k)+(X(k+1)-X(k))*fr : X(n-1); ctx.lineTo(xe, base); ctx.closePath(); const gr = ctx.createLinearGradient(0,R.y,0,base); gr.addColorStop(0,'rgba(117,245,210,.38)'); gr.addColorStop(1,'rgba(117,245,210,.02)'); ctx.fillStyle = gr; ctx.fill(); ctx.restore();
-      ctx.beginPath(); for(let i=0;i<=k;i++){ if(i) ctx.lineTo(X(i),Y(pts[i].y)); else ctx.moveTo(X(i),Y(pts[i].y)); } if(k<n-1) ctx.lineTo(X(k)+(X(k+1)-X(k))*fr, Y(pts[k].y+(pts[k+1].y-pts[k].y)*fr)); ctx.lineWidth = 3.5; ctx.strokeStyle = '#75f5d2'; ctx.lineJoin = 'round'; ctx.stroke();
-      pts.forEach((q,i)=>{ if(i%2===0 || i===n-1) T(q.x, X(i), base+24, FN(12,500), 'rgba(190,210,222,.85)', 'center'); });
-      if(sp.hoje!=null && sp.hoje>=0 && sp.hoje<n){ const x = X(sp.hoje); ctx.setLineDash([6,5]); ctx.strokeStyle = 'rgba(255,180,84,.85)'; ctx.beginPath(); ctx.moveTo(x,R.y); ctx.lineTo(x,base); ctx.stroke(); ctx.setLineDash([]); T('hoje', x, R.y-6, FN(13,800), '#ffb454', 'center'); }
-      if(p>0.92){ const q = pts[n-1]; ctx.fillStyle = '#75f5d2'; ctx.beginPath(); ctx.arc(X(n-1),Y(q.y),6,0,6.2832); ctx.fill(); T(fm(q.y,sp.fmt), X(n-1)-12, Y(q.y)-16, FC(26), '#fff', 'right'); } },
-    funil(R,p,sp){ const it = sp.etapas, n = it.length, rh = Math.min(84, R.h/n), mx = it[0].v, lw = Math.min(250, R.w*0.26), bx = R.x+lw, bw = Math.max(160, R.w-lw-200), cx = bx+bw/2;
-      it.forEach((q,i)=>{ const pp = anaSeg(p,i,n,0.5), w = Math.max(bw*0.09, bw*(q.v/mx))*pp, y = R.y+(R.h-rh*n)/2+i*rh;
-        T(q.l, R.x, y+rh/2+6, FN(16,700), 'rgba(205,222,232,.95)', 'left');
-        ctx.fillStyle = q.cor; rr(cx-w/2, y+6, w, rh-14, 14); ctx.fill();
-        if(w>=90) T(fm(q.v*pp,sp.fmt), cx, y+rh/2+9, FC(26), '#031219', 'center'); else T(fm(q.v*pp,sp.fmt), cx+w/2+10, y+rh/2+9, FC(26), '#fff', 'left');
-        if(i>0 && pp>0.9) T(Math.round(q.v/it[i-1].v*100)+'% da etapa anterior', bx+bw+24, y+rh/2+5, FN(13,700), 'rgba(255,180,84,.95)', 'left'); }); },
-    numeros(R,p,sp){ const it = sp.itens, n = it.length, gap = 28, cw = Math.min(380,(R.w-gap*(n-1))/n), x0 = R.x+(R.w-(cw*n+gap*(n-1)))/2, ch = Math.min(300,R.h*0.8), y = R.y+(R.h-ch)/2;
-      it.forEach((q,i)=>{ const pp = anaSeg(p,i,n,0.5), x = x0+i*(cw+gap); ctx.globalAlpha *= pp; ctx.fillStyle = 'rgba(8,28,38,.88)'; rr(x, y+(1-pp)*30, cw, ch, 20); ctx.fill(); ctx.strokeStyle = q.cor; ctx.lineWidth = 2; ctx.stroke();
-        T(q.l, x+cw/2, y+(1-pp)*30+52, FN(17,800), q.cor, 'center'); T(fm(q.v*pp,q.fmt), x+cw/2, y+(1-pp)*30+ch*0.55, FC(Math.min(64,cw*0.2)), '#fff', 'center'); T(q.s, x+cw/2, y+(1-pp)*30+ch*0.55+38, FN(13,500), 'rgba(190,210,222,.85)', 'center'); if(q.s2) T(q.s2, x+cw/2, y+(1-pp)*30+ch*0.55+60, FN(12,500), 'rgba(160,190,205,.75)', 'center'); ctx.globalAlpha /= (pp||1); }); } };
-  function paint(now){
-    if(!V.w) return;
-    V.alpha += (V.alvo-V.alpha)*0.14; if(V.alpha<0.01 && !V.alvo){ ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); return; }
-    ctx.setTransform(V.dpr,0,0,V.dpr,0,0); ctx.clearRect(0,0,V.w,V.h); const sp = V.spec; if(!sp || !TIPOS[sp.tipo]) return;
-    const p = Math.max(0,Math.min(1,(now-V.t0)/(sp.dur||2000))); ctx.globalAlpha = V.alpha; ctx.lineCap = 'round'; try{ TIPOS[sp.tipo](area(), p, sp); }catch(e){ console.warn('viz', sp.tipo, e); } ctx.globalAlpha = 1;
-  }
-  function frame(now){ if(!V.alive) return; V.raf = requestAnimationFrame(frame); paint(now); }
-  V.paint = paint;
-  V.show = (sp, o)=>{ V.spec = sp; V.kpi = !!(o&&o.kpi); V.t0 = performance.now()+250; V.alvo = 1; };
-  V.hide = ()=>{ V.alvo = 0; };
-  V.destroy = ()=>{ V.alive = false; cancelAnimationFrame(V.raf); if(V.ro) V.ro.disconnect(); cv.remove(); };
-  V.ro = new ResizeObserver(size); V.ro.observe(host); size(); V.raf = requestAnimationFrame(frame);
-  return V;
-}
-async function anaApresentar(){
-  if(!ANA.loaded) await anaLoad(); if(!ANA.rows.length){ showToast('A base do Analítico ainda está vazia.'); return; }
-  await anaGeo(); const S = anaStats(), cenas = anaCenas(S); const ov = document.getElementById('an-pres'); ov.hidden = false; document.body.classList.add('an-presenting');
-  ov.innerHTML = `<img class="an-pmark" src="assets/logo-branco.png" alt="">
-    <div class="an-pstage" id="an-pst"></div><svg class="shield an-pshield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg><div class="an-pcap" id="an-pcap"></div><div class="an-pkpi" id="an-pkpi"></div><div class="an-pfala" id="an-pfala"></div>
-    <div class="an-pctl"><button type="button" id="an-pp" title="Pausar (barra de espaço)">Pausar</button><button type="button" id="an-pm" title="Narração">Voz</button><button type="button" id="an-pmu" title="Música de fundo">Música</button><button type="button" id="an-pmf" title="Escolher um arquivo de áudio livre de direitos como trilha">Trilha</button><input type="file" id="an-pma" accept="audio/*" hidden><button type="button" id="an-pf" title="Tela cheia">⛶</button><button type="button" id="an-px" title="Sair (Esc)">✕</button></div><div class="an-pbar"><i id="an-pbar"></i></div>`;
-  const st = anaStage(document.getElementById('an-pst')), viz = anaViz(document.getElementById('an-pst')); ANA.pres = {st, viz, i:-1, pausa:false, timer:null, alive:true, cenas};
-  const P = ANA.pres; ANA_AUDIO.on = true; ANA_AUDIO.musica = true; anaSomIniciar();
-  const parar = ()=>{ P.alive = false; clearTimeout(P.timer); anaFalarParar(); anaSomParar(); viz.destroy(); st.destroy(); ov.hidden = true; ov.innerHTML = ''; document.body.classList.remove('an-presenting'); if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); ANA.pres = null; document.removeEventListener('keydown', teclas); };
-  const teclas = e=>{ if(e.key==='Escape') parar(); else if(e.key==='ArrowRight') ir(P.i+1); else if(e.key==='ArrowLeft') ir(P.i-1); else if(e.key===' '){ e.preventDefault(); pausa(); } };
-  const pausa = ()=>{ P.pausa = !P.pausa; document.getElementById('an-pp').textContent = P.pausa?'Continuar':'Pausar'; if(P.pausa){ clearTimeout(P.timer); try{ speechSynthesis.pause(); }catch(e){} } else { try{ speechSynthesis.resume(); }catch(e){} agendar(P.restante||1500); } };
-  const agendar = ms=>{ clearTimeout(P.timer); P.t0 = Date.now(); P.restante = ms; P.timer = setTimeout(()=>{ if(P.alive && !P.pausa) ir(P.i+1); }, ms); };
-  const ir = i=>{
-    if(!P.alive) return; if(i>=cenas.length){ parar(); return; } i = Math.max(0,i); P.i = i; const c = cenas[i]; anaFalarParar();
-    st.topo = Math.round(Math.max(120, Math.min(215, st.h*0.2))); st.reserva = Math.round(Math.max(150, Math.min(190, st.h*0.16))); st.direita = (c.kpis && c.kpis.length && st.w>1000) ? Math.round(Math.min(290, st.w*0.19)) : 0;
-    if(c.limpo){ viz.hide(); st.set({oculto:true, layout:'todos', color:'area', hi:null, forma:'cluster', unid:null, leg:''}); } else if(c.viz){ st.set({oculto:true, layout:c.layout||'todos', color:c.color||'area', hi:null, forma:'cluster', unid:null, leg:''}); viz.show(c.viz, {kpi:(c.kpis||[]).length>0}); } else { viz.hide(); st.set({oculto:false, layout:c.layout, color:c.color, hi:c.hi||null, forma:c.forma||'cluster', unid:c.unid||null, leg:c.leg||''}); } anaSomTransicao(!!c.fim);
-    ov.classList.toggle('fim', !!c.fim); const cap = document.getElementById('an-pcap'); cap.classList.add('fade');
-    setTimeout(()=>{ cap.innerHTML = (c.k?`<i>${escapeHtml(c.k)}</i>`:'')+`<b>${escapeHtml(c.t)}</b><span>${escapeHtml(c.s)}</span>`; cap.classList.remove('fade'); }, 280);
-    document.getElementById('an-pkpi').innerHTML = (c.kpis||[]).map(k=>`<div><b>${escapeHtml(String(k[0]))}</b><span>${escapeHtml(k[1])}</span></div>`).join('');
-    const fl = document.getElementById('an-pfala'); fl.textContent = c.fala||''; document.getElementById('an-pbar').style.width = ((i+1)/cenas.length*100)+'%';
-    let acabou = false; const avancar = ()=>{ if(acabou || !P.alive || P.pausa) return; acabou = true; setTimeout(()=>{ if(P.alive && !P.pausa) ir(i+1); }, 900); };
-    const u = anaFalar(c.fala, avancar); if(u){ P.timer = setTimeout(avancar, Math.max(c.dur, c.fala.length*95)+4000); } else agendar(Math.max(c.dur, 6000));
-  };
-  ov.onmousemove = ()=>{ ov.classList.add('mov'); clearTimeout(P.mv); P.mv = setTimeout(()=>ov.classList.remove('mov'), 2600); };
-  document.getElementById('an-px').addEventListener('click', parar); document.getElementById('an-pp').addEventListener('click', pausa);
-  document.getElementById('an-pm').addEventListener('click', e=>{ ANA_AUDIO.on = !ANA_AUDIO.on; e.target.textContent = ANA_AUDIO.on?'Voz':'Sem voz'; if(!ANA_AUDIO.on){ anaFalarParar(); agendar(Math.max(cenas[P.i].dur,6000)); } else { ir(P.i); } });
-  document.getElementById('an-pmu').addEventListener('click', e=>{ anaMusicaLigar(!ANA_AUDIO.musica); e.target.textContent = ANA_AUDIO.musica?'Música':'Sem música'; });
-  const pma = document.getElementById('an-pma'); document.getElementById('an-pmf').addEventListener('click', ()=>pma.click()); pma.addEventListener('change', ()=>{ if(pma.files[0]) anaMusicaArquivo(pma.files[0]); pma.value = ''; });
-  document.getElementById('an-pf').addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else ov.requestFullscreen && ov.requestFullscreen().catch(()=>{}); });
-  document.addEventListener('keydown', teclas); try{ if(ov.requestFullscreen) await ov.requestFullscreen(); }catch(e){}
-  setTimeout(()=>ir(0), 400);
-}
-
-document.addEventListener('click', e=>{
-  const mb = e.target.closest('#an-modes button'); if(mb){ ANA.modo = mb.dataset.m; renderAnalitico(); return; }
-  if(e.target.closest('#an-play')){ anaApresentar(); return; }
-  if(e.target.closest('#an-reload')){ ANA.loaded = false; renderAnalitico(); }
-});
+// Analítico saiu do CRM Aliança em 03/11/2026.
 async function renderAta(){
   const { data, error } = await sb.from('crm_ata_entregaveis').select('*').order('data', {ascending:false});
   const el = document.getElementById('ata-list');
@@ -5256,10 +4609,8 @@ const OP_STAGE_COLORS = ['#c7cef9','#9fb0ff','#7d92ff','#5b74ff','#3a55ff','#1f3
 const OP_MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const OP_SORT_OPTS = [
   {v:'nome', l:'Nome (A-Z)'},
-  {v:'classificacao', l:'Fidelizados primeiro'},
-  {v:'plantoes', l:'Maior valor pago em plantões'},
+  {v:'classificacao', l:'Lista: Premium, quente, frio'},
   {v:'etapa', l:'Etapa mais avançada'},
-  {v:'plantao', l:'Plantão mais recente'},
 ];
 const OP_SIT_OPTS = [
   {v:'', l:'Todas as situações'},
@@ -5391,13 +4742,12 @@ function opIsCliente(pid){ return (OP.apo.get(pid)||[]).some(a=>a.status!=='canc
 // Aliança Premium = médico com apólice ativa de RC Profissional (Unimed) ou Vida em Grupo (Porto). O grupo da COPA (Vida em Grupo MAG) é outro e fica de fora.
 const OP_PREMIUM_TIPOS = ['RC Profissional','Vida em Grupo'];
 function opIsPremium(p){ return isMedico(p) && (OP.apo.get(p.id)||[]).some(a=> OP_PREMIUM_TIPOS.includes(a.tipo_seguro) && caEfetivo(a)==='ativa'); }
-// Médico fidelizado Aliança (= Call Hot) = mais de 20 plantões trabalhados nos últimos 90 dias, qualquer especialidade (anestesia, UTI, enfermaria). A lista vem da tabela crm_fidelizados, calculada a partir do Aliança Plantões.
-function opIsFid(p){ return !!(OP.fid && OP.fid.has(p.id)); }
-function opIsMorno(p){ return !!(OP.morno && OP.morno.has(p.id)); }
+// Fidelizado/morno saíram do CRM em 03/11/2026. Call Hot manual continua.
+function opIsFid(p){ return false; }     // fidelizado/morno vinham dos plantões: saíram do CRM em 03/11/2026
+function opIsMorno(p){ return false; }
 function opIsCallHot(p){ return p.classificacao==='call_hot' || opIsFid(p); }
 function opPremiumRotulo(){ const o = document.querySelector('#op-f-class option[value="premium"]'); if(o) o.textContent = '⭐ Aliança Premium ('+OP.pessoas.filter(opIsPremium).length+')';
-  const f = document.querySelector('#op-f-class option[value="fidelizado"]'); if(f) f.textContent = '🔥 Fidelizados, mais de 20 plantões ('+OP.pessoas.filter(opIsCallHot).length+')';
-  const m = document.querySelector('#op-f-class option[value="morno"]'); if(m) m.textContent = '🌤️ Mornos de plantão, 11 a 20 ('+OP.pessoas.filter(opIsMorno).length+')'; }
+  }
 function opIsClienteAtivo(pid){ return (OP.apo.get(pid)||[]).some(a=>caEfetivo(a)==='ativa'); }
 
 async function opFetchAll(table, cols, orderCols){
@@ -5421,11 +4771,10 @@ async function opLoadFunilApo(){
   ]);
   OP.funil = new Map(); fun.forEach(r=>{ if(!OP.funil.has(r.pessoa_id)) OP.funil.set(r.pessoa_id,new Map()); OP.funil.get(r.pessoa_id).set(r.etapa, r); });
   OP.apo = new Map(); apo.forEach(r=>{ if(!OP.apo.has(r.pessoa_id)) OP.apo.set(r.pessoa_id,[]); OP.apo.get(r.pessoa_id).push(r); });
-  try{ const fz = await opFetchAll('crm_fidelizados','pessoa_id,plantoes_90d,especialidade,calculado_em,nivel,ultimo_plantao',['pessoa_id']); OP.fid = new Map(fz.filter(r=>r.nivel==='fidelizado').map(r=>[r.pessoa_id,r])); OP.morno = new Map(fz.filter(r=>r.nivel==='morno').map(r=>[r.pessoa_id,r])); }catch(e){ OP.fid = new Map(); OP.morno = new Map(); console.warn('fidelizados', e); try{ showToast('Não consegui carregar as listas de fidelizados e mornos. Recarregue a página (Ctrl+F5).'); }catch(x){} }
+  OP.fid = new Map(); OP.morno = new Map();
   try{ opPremiumRotulo(); }catch(e){}
   opAlertasAtualizar();
-  try{ const pl = await opFetchAll('crm_plantoes_resumo','pessoa_id,primeiro_plantao,ultimo_plantao,qtde_mes_atual,qtde_mes_ref,valor_mes_ref,valor_12m,meses_12m',['pessoa_id']);
-       OP.plant = new Map(); pl.forEach(r=>OP.plant.set(r.pessoa_id, r)); }catch(e){ console.warn('plantoes', e); }
+  OP.plant = new Map();
   OP.tempCache = null; OP.prosp = new Map();
   try{ const pp = await opFetchAll('crm_prospeccao','id,pessoa_id,status,updated_at',['id']);
        pp.forEach(r=>{ if(r.pessoa_id && r.status==='Sem interesse'){ const d = new Date(r.updated_at); const a = OP.prosp.get(r.pessoa_id); if(!a || d>a) OP.prosp.set(r.pessoa_id, d); } }); }catch(e){ console.warn('prospeccao', e); }
@@ -5445,7 +4794,7 @@ async function renderOperacao(force){
   OP.loading = true;
   try{
     if(!OP.loaded){
-      OP.pessoas = await opFetchAll('crm_pessoas','id,nome,crm,especialidade,tipo,cpf,telefone,email,origem,vinculo_callmed,observacoes,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026',['nome','id']);
+      OP.pessoas = await opFetchAll('crm_pessoas','id,nome,crm,especialidade,tipo,cpf,telefone,email,origem,vinculo_callmed,observacoes,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes',['nome','id']);
     }
     await opLoadFunilApo();
     const wasLoaded = OP.loaded;
@@ -5511,9 +4860,7 @@ function opApplyFilters(keep, scrollToList){
     return true;
   });
   if(sort==='classificacao'){ const rk = p=> opIsCallHot(p)?0 : opIsMorno(p)?1 : p.classificacao==='quente'?2 : p.classificacao==='frio'?3 : 4; list = list.slice().sort((a,b)=>rk(a)-rk(b)); }
-  if(sort==='plantoes') list = list.slice().sort((a,b)=>(Number(b.total_pago_plantoes_2026)||0)-(Number(a.total_pago_plantoes_2026)||0));
   if(sort==='etapa') list = list.slice().sort((a,b)=>opCurEtapaIdx(b.id)-opCurEtapaIdx(a.id));
-  if(sort==='plantao') list = list.slice().sort((a,b)=>{ const ua=(OP.plant.get(a.id)||{}).ultimo_plantao||'', ub=(OP.plant.get(b.id)||{}).ultimo_plantao||''; return ub<ua?-1:(ub>ua?1:0); });
   const prevShown = keep ? OP.shown : 0;
   const scroller = document.getElementById('op-scroll');
   const prevTop = keep ? scroller.scrollTop : 0, prevLeft = keep ? scroller.scrollLeft : 0;
@@ -6473,7 +5820,7 @@ function normNome(x){
 }
 async function ensurePessoas(){
   // corretora sem nenhum cliente (1ª importação): sem esta trava, cada linha da planilha buscava o cadastro de novo (320 linhas = 20 s)
-  if(!OP.pessoas.length && !(OP._vazioAte > Date.now())){ OP.pessoas = await opFetchAll('crm_pessoas','id,nome,crm,crm_uf,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026',['nome','id']); if(!OP.pessoas.length) OP._vazioAte = Date.now() + 60000; }
+  if(!OP.pessoas.length && !(OP._vazioAte > Date.now())){ OP.pessoas = await opFetchAll('crm_pessoas','id,nome,crm,crm_uf,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes',['nome','id']); if(!OP.pessoas.length) OP._vazioAte = Date.now() + 60000; }
 }
 async function findPessoas({cpf, crm, crm_uf, nome, telefone}){
   await ensurePessoas();
@@ -7264,7 +6611,7 @@ async function mc2Extras(host){
   const first = host.firstElementChild; host.insertBefore(box, first ? first.nextSibling : null);
   try{
     const [{data:pes}, {data:pl}, apo] = await Promise.all([ sb.from('crm_pessoas').select('id,nome,telefone,classificacao').eq('classificacao','quente'),
-      sb.from('crm_plantoes_resumo').select('pessoa_id,ultimo_plantao,qtde_mes_atual'), opFetchAll('crm_apolices','id,pessoa_id,origem_apolice,valor_premio',['id']) ]);
+      Promise.resolve({data:[]}), opFetchAll('crm_apolices','id,pessoa_id,origem_apolice,valor_premio',['id']) ]);
     const plMap = new Map((pl||[]).map(r=>[r.pessoa_id,r])); const hoje = new Date(); hoje.setHours(0,0,0,0);
     const dias = d => d ? Math.round((hoje-new Date(d+'T00:00:00'))/86400000) : null;
     const comPonte = new Set(MC2.regs.filter(r=>r.frente==='ponte_escalista' && r.pessoa_id && dias(r.data_registro)<=30).map(r=>r.pessoa_id));
@@ -7475,7 +6822,7 @@ function ncRow(){
   return row;
 }
 async function ncCreateLead(){
-  const { data, error } = await sb.from('crm_pessoas').insert(ncRow()).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026').single();
+  const { data, error } = await sb.from('crm_pessoas').insert(ncRow()).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single();
   if(error){ ncBanner('Não consegui criar o lead automaticamente: '+escapeHtml(error.message)); return; }
   NC.pessoaId = data.id; OP.pessoas.push(data); OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
   await ncRegisterDocs(data.id);
@@ -7537,10 +6884,10 @@ async function ncSave(){
     let data;
     const row = ncRow();
     if(NC.pessoaId){
-      const r = await sb.from('crm_pessoas').update(row).eq('id', NC.pessoaId).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026').single(); if(r.error) throw r.error; data = r.data;
+      const r = await sb.from('crm_pessoas').update(row).eq('id', NC.pessoaId).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single(); if(r.error) throw r.error; data = r.data;
       const i = OP.pessoas.findIndex(x=>x.id===data.id); if(i>=0) OP.pessoas[i] = data;
     } else {
-      const r = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026').single(); if(r.error) throw r.error; data = r.data;
+      const r = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single(); if(r.error) throw r.error; data = r.data;
       OP.pessoas.push(data); OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
       if(row.origem==='Indicação' && row.quem_indicou) await ncRegistrarIndicacao(data.id, row.quem_indicou);
     }
@@ -7963,7 +7310,7 @@ async function impRun(){
     for(let i=0;i<novos.length;i+=100){
       btn.textContent = `Cadastrando clientes ${Math.min(i+100,novos.length)}/${novos.length}...`;
       const chunk = novos.slice(i,i+100);
-      const { data, error } = await sb.from('crm_pessoas').insert(chunk.map(n=>{ const r = {nome:n.nome, tipo}; if(n.cpf) r.cpf = n.cpf; return r; })).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026');
+      const { data, error } = await sb.from('crm_pessoas').insert(chunk.map(n=>{ const r = {nome:n.nome, tipo}; if(n.cpf) r.cpf = n.cpf; return r; })).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes');
       if(error) throw error;
       data.forEach((d,j)=>{ chunk[j].id = d.id; OP.pessoas.push(d); });
     }
@@ -8103,7 +7450,7 @@ async function caFase1(files, fixed, opts){
           const row = {nome:g.nome, tipo:document.getElementById('f1-tipo').value||'medico'};
           if(g._status!=='existe' && dOnly(g.cpf).length===11) row.cpf = fmtCPF(g.cpf);
           if(g.telefone) row.telefone = g.telefone; if(g.nasc) row.data_nascimento = g.nasc;
-          const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026').single();
+          const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single();
           if(error) throw error; pessoaId = data.id; OP.pessoas.push(data); nCad++;
         }
         for(const di of g.docs){
@@ -8208,7 +7555,7 @@ async function caFormMulti(file, f){
           let pessoaId = r.match ? r.match.id : null;
           if(!pessoaId){
             if(!nomeInput){ falhas++; continue; }
-            const { data, error } = await sb.from('crm_pessoas').insert({nome:nomeInput, cpf:r.cpf, tipo:g('cm-tipo')||'medico'}).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026').single();
+            const { data, error } = await sb.from('crm_pessoas').insert({nome:nomeInput, cpf:r.cpf, tipo:g('cm-tipo')||'medico'}).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single();
             if(error) throw error; pessoaId = data.id; OP.pessoas.push(data);
           }
           let path = pathAll;
@@ -8309,7 +7656,7 @@ async function caSave(file, f){
     let pessoaId = (sel && sel!=='novo') ? sel : null;
     if(sel==='novo'){
       const row = {nome:g('ca-n-nome'), tipo:g('ca-n-tipo')||'medico'}; if(g('ca-n-cpf')) row.cpf = g('ca-n-cpf'); if(g('ca-n-crm')) row.crm = g('ca-n-crm');
-      const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026').single(); if(error) throw error;
+      const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single(); if(error) throw error;
       pessoaId = data.id; OP.pessoas.push(data); OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
     }
     const path = await docsUpload(file, tipo==='estudo'||tipo==='concorrente' ? 'estudos' : 'apolices');
@@ -8396,7 +7743,7 @@ async function caSaveApolices(file, f, rows, box){
     let pessoaId = (sel && sel!=='novo') ? sel : null;
     if(sel==='novo'){
       const row = {nome:g('cx-n-nome'), tipo:g('cx-n-tipo')||'medico'}; if(g('cx-n-cpf')) row.cpf=g('cx-n-cpf'); if(g('cx-n-crm')) row.crm=g('cx-n-crm');
-      const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026').single();
+      const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single();
       if(error) throw error; pessoaId = data.id; OP.pessoas.push(data); OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
     }
     const path = await docsUpload(file, 'apolices');
@@ -9052,7 +8399,7 @@ document.getElementById('op-newcli').addEventListener('click', ()=> openNovoClie
 // ---------- SUGESTÕES DE MELHORIA (texto livre + voz, com histórico e status) ----------
 const SG_STATUS = [['nova','Nova','#0018fc'],['em_analise','Em análise','#c8790b'],['aprovada','Aprovada','#0f7a53'],['em_execucao','Em execução','#00125e'],['concluida','Concluída','#0f7a53'],['rejeitada','Rejeitada','#c23636'],['depois','Deixar para depois','#646b89']];
 const SG_TIPOS = {ideia:'Ideia nova', melhoria:'Melhoria', problema:'Problema / erro', duvida:'Dúvida'};
-const SG_TELAS = ['Aliança','Central de Apólices','Comercial','Vendas','Reuniões','Indicadores','Analítico','Estudo','Cadastro do cliente','Novo cliente','Agenda','Base','Sugestões','Ata','Login / acesso','Outro'];
+const SG_TELAS = ['Aliança','Central de Apólices','Comercial','Vendas','Reuniões','Indicadores','Estudo','Cadastro do cliente','Novo cliente','Agenda','Base','Sugestões','Ata','Login / acesso','Outro'];
 const SG = { list:[], filter:'', q:'', rec:null, media:null, chunks:[], audioBlob:null, recording:false };
 const sgLabel = (k)=> (SG_STATUS.find(s=>s[0]===k)||[k,k,'#666']);
 
@@ -9611,7 +8958,7 @@ async function ctRun(){
   const rel = { novos:0, atualizados:0, apoNovas:0, apoAtualizadas:0, avisos:0, problemas:[...CT.problemas], leves:[...CT.leves] };
   try{
     const tipo = document.getElementById('ct-tipo').value, upd = document.getElementById('ct-upd').checked;
-    const COLS = 'id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes,total_pago_plantoes_2026';
+    const COLS = 'id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes';
     const comApolice = []; // {pessoa_id, apo, linha, nome}
     const alvosProsp = [], enviarProsp = !!(document.getElementById('ct-prosp') && document.getElementById('ct-prosp').checked), listaProsp = ((document.getElementById('ct-lista')||{}).value||'').trim();
     for(let i=0;i<CT.novos.length;i+=100){
@@ -10128,7 +9475,7 @@ document.getElementById('who-email').title = 'Clique para trocar o nome exibido'
 document.getElementById('who-email').addEventListener('click', ()=>userNameDialog(false));
 
 // ---- backup ----
-const BACKUP_TABLES = ['crm_demandas','crm_vendas','crm_nao_vendas','crm_prospeccao','crm_acoes','crm_pessoas','crm_apolices','crm_funil','crm_oportunidades','crm_atividades','crm_estudos','crm_documentos','crm_diagnostico','crm_eventos_vida','crm_indicacoes','crm_pos_venda','crm_redes_sociais','crm_relacionamento','crm_agenda','crm_tarefas_diarias','crm_lembretes','crm_base_conhecimento','crm_sugestoes','crm_metas','crm_plantoes_resumo','crm_catalogo_produtos','crm_ata_entregaveis','crm_ata_semanal','crm_indicadores','crm_mais_carlas'];
+const BACKUP_TABLES = ['crm_demandas','crm_vendas','crm_nao_vendas','crm_prospeccao','crm_acoes','crm_pessoas','crm_apolices','crm_funil','crm_oportunidades','crm_atividades','crm_estudos','crm_documentos','crm_diagnostico','crm_eventos_vida','crm_indicacoes','crm_pos_venda','crm_redes_sociais','crm_relacionamento','crm_agenda','crm_tarefas_diarias','crm_lembretes','crm_base_conhecimento','crm_sugestoes','crm_metas','crm_catalogo_produtos','crm_ata_entregaveis','crm_ata_semanal','crm_indicadores','crm_mais_carlas'];
 async function backupNow(){
   const btn = document.getElementById('btn-backup'); btn.disabled = true; let out = {exportado_em:new Date().toISOString(), tabelas:{}};
   try{
@@ -11088,11 +10435,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611030954"></script>
-<script src="painel.js?v=202611030954"></script>
-<script src="cobranca.js?v=202611030954"></script>
-<script src="cadastro.js?v=202611030954"></script>
-<script src="contrato.js?v=202611030954"></script>
-<script src="guarda.js?v=202611030954"></script>
+<script src="plataforma.js?v=202611031036"></script>
+<script src="painel.js?v=202611031036"></script>
+<script src="cobranca.js?v=202611031036"></script>
+<script src="cadastro.js?v=202611031036"></script>
+<script src="contrato.js?v=202611031036"></script>
+<script src="guarda.js?v=202611031036"></script>
 </body>
 </html>

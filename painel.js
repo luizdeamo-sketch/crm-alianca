@@ -12,7 +12,7 @@
     ['vendas', 'Vendas', 'Prospecção, Consultoria, Reuniões, Base de conhecimento, agenda no Outlook/Teams e IA de vendas'],
     ['carteira', 'Carteira', 'Central de Apólices, renovações, pós-venda e IA de carteira (apólice e documento). A lista de clientes vem em todos os planos'],
     ['gestao', 'Gestão', 'Indicadores, metas, orçamento, funil, Mais Carlas e Ata']];
-  const EXTRAS = [['analitico', 'Analítico (base de plantões)'], ['premium', 'Premium / COPA / fidelizados']];
+  const EXTRAS = [['premium', 'Premium / COPA']];   // Analítico e fidelizados (plantões) saíram do CRM em 03/11/2026
   // escada de planos (decisão do Luiz, 29/10/2026); os preços ficam na configuração da plataforma (aba Pagamentos)
   const PLANOS = { vendas: 'Vendas', carteira: 'Carteira', vendas_carteira: 'Vendas + Carteira', completo: 'Vendas + Carteira + Equipe' };   // 2 módulos sozinhos + Equipe (02/11/2026)
   const DESC_PLANO = { vendas: 'módulo Vendas', carteira: 'módulo Carteira', vendas_carteira: 'módulos Vendas e Carteira', completo: 'módulos Vendas e Carteira, mais a Equipe' };

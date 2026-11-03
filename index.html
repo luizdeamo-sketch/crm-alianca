@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611031452">
+<meta name="app-build" content="202611031651">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -750,6 +750,9 @@ window.ALIANCA = {
   .fl-step.cur{ background:var(--brand-soft); border-color:var(--brand); } .fl-step.cur .n{ background:var(--brand); border-color:var(--brand); color:#fff; }
   .fl-main{ flex:1; min-width:0; overflow:auto; padding:20px 26px 48px; }
   .fl-nav{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:4px; flex-wrap:wrap; }
+  .fgrid.rc-linha{ grid-template-columns:2fr 2fr 1fr auto auto; align-items:end; }
+  .fgrid.rc-linha > *, .fgrid.rc-linha input, .fgrid.rc-linha select{ min-width:0; } .fgrid.rc-linha input:not([type=radio]), .fgrid.rc-linha select{ width:100%; box-sizing:border-box; }
+  @media (max-width:700px){ .fgrid.rc-linha{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
   .fl-mini{ display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
   .fl-pill{ display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink-soft); border-radius:999px; padding:3px 11px; font-size:12px; font-weight:600; }
   .fl-pill.done{ background:var(--teal-soft); border-color:var(--teal-deep); color:var(--teal-deep); }
@@ -3240,19 +3243,326 @@ function flowClose(refresh){
 // cartão na aba Proteção: progresso e botão que abre o fluxo
 async function pvFluxoCard(p){
   const host = document.getElementById('pp-flowcard'); if(!host) return;
-  host.innerHTML = '<div class="ql">Fluxo de proteção</div><div class="op-more">Carregando…</div>';
+  host.innerHTML = '<div class="ql">Consultoria</div><div class="op-more">Carregando…</div>';
   let st = []; try{ st = await flowStatus(p); }catch(e){ st = []; }
+  let rc = null; try{ const r = await sb.from('crm_rc').select('updated_at').eq('pessoa_id', p.id).maybeSingle(); rc = r.error ? null : (r.data || false); }catch(e){ rc = null; }
   const feitas = st.slice(0,5).filter(Boolean).length, prox = st.slice(0,5).findIndex(x=>!x);
-  host.innerHTML = `<div class="ql">Fluxo de proteção <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— do documento do cliente até a apresentação, uma etapa por vez</small></div>
-    <div class="fl-mini">${FLOW_STEPS.map((s,k)=>`<span class="fl-pill${st[k]?' done':''}">${st[k]?'✓':(k+1)} ${escapeHtml(s.t)}</span>`).join('')}</div>
-    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="om-save" id="fl-open">▶ ${feitas?'Continuar o fluxo de proteção':'Iniciar o fluxo de proteção'}</button><small style="color:var(--ink-faint)">${feitas} de 5 etapas concluídas${prox>=0?' · próxima: '+escapeHtml(FLOW_STEPS[prox].t):' · tudo pronto para apresentar'}</small></div>`;
-  host.querySelector('#fl-open').addEventListener('click', ()=>pvFluxo(p, prox>=0?prox:5));
+  const aba = PV.consAba || 'vida';
+  const bt = (k, t, on)=>`<button type="button" class="${aba===k?'om-save':'om-cancel'}" data-cons="${k}"${on?'':' disabled title="Em construção"'} style="min-width:96px">${t}${on?'':' <small style="font-weight:400">· em construção</small>'}</button>`;
+  host.innerHTML = `<div class="ql">Consultoria <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— um cadastro, quatro frentes: o que já se sabe do cliente aparece em todas</small></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">${bt('vida','Vida',true)}${bt('rc','RC',true)}${bt('saude','Saúde',false)}${bt('consorcio','Consórcio',false)}</div>
+    <div id="cons-corpo"></div>`;
+  const corpo = host.querySelector('#cons-corpo');
+  if(aba==='rc'){
+    corpo.innerHTML = `<div class="hint" style="margin:0 0 8px;font-size:13px">Responsabilidade Civil em 5 etapas: segurado, profissão, atuação, faturamento e sinistros, cotação e ficha.</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="om-save" id="rc-open">▶ ${rc?'Continuar a consultoria de RC':'Iniciar a consultoria de RC'}</button><small style="color:var(--ink-faint)">${rc?'última alteração em '+new Date(rc.updated_at).toLocaleString('pt-BR'):'ainda não começou'}</small></div>`;
+    corpo.querySelector('#rc-open').addEventListener('click', ()=>rcAbrir(p));
+  } else {
+    corpo.innerHTML = `<div class="fl-mini">${FLOW_STEPS.map((s,k)=>`<span class="fl-pill${st[k]?' done':''}">${st[k]?'✓':(k+1)} ${escapeHtml(s.t)}</span>`).join('')}</div>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="om-save" id="fl-open">▶ ${feitas?'Continuar o fluxo de proteção':'Iniciar o fluxo de proteção'}</button><small style="color:var(--ink-faint)">${feitas} de 5 etapas concluídas${prox>=0?' · próxima: '+escapeHtml(FLOW_STEPS[prox].t):' · tudo pronto para apresentar'}</small></div>`;
+    corpo.querySelector('#fl-open').addEventListener('click', ()=>pvFluxo(p, prox>=0?prox:5));
+  }
+  host.querySelectorAll('[data-cons]').forEach(b=>b.addEventListener('click', ()=>{ if(b.disabled) return; PV.consAba = b.dataset.cons; pvFluxoCard(p); }));
 }
 
 // ---- PROTEÇÃO: oportunidades, apólices e documentos ficam aqui; as fases (2 a 6) rodam no Fluxo de proteção ----
 async function pvProtecao(body, p){
   body.innerHTML = `<div class="es-box" id="pp-opps"></div><div class="es-box" id="pp-flowcard"></div><div class="es-box" id="pp-apo"></div><div class="es-box" id="pp-docs"></div>`;
   pvOportunidades(p); pvFluxoCard(p); pvApolices(p); pvDocumentos(p);
+}
+
+// ============ CONSULTORIA DE RC (pedido da Amanda, 03/11/2026) ============
+// Um cadastro, quatro frentes: o que já existe do cliente vem preenchido (com a origem), o que for respondido aqui grava no cadastro
+// (crm_pessoas) e aparece no Vida. O que é só do RC fica em crm_rc (um por cliente). Nenhum campo é obrigatório.
+// Toda escolha tem "Outro (digitar)": o valor digitado vai para crm_rc_opcoes e passa a aparecer como sugestão para a equipe.
+const OUTRO = '__outro__';
+const RC_L = {
+  segmento: ['Médicos','Odontologia','Psicologia','Fisioterapia','Nutrição','Enfermagem','Fonoaudiologia','Farmácia e biomedicina','Clínicas e hospitais (PJ)','Advocacia','Contabilidade','Engenharia e arquitetura','Corretagem e consultoria','Tecnologia'],
+  // lista provisória, até a Amanda mandar a lista oficial da Porto (com as variações que mudam o risco)
+  esp_medicos: ['Anestesiologia','Endoscopia (todos os tratos)','Oftalmologia com cirurgia','Oftalmologia sem cirurgia','Ortopedia e Traumatologia com cirurgia','Ortopedia e Traumatologia sem cirurgia','Ginecologia com cirurgia sem partos','Ginecologia sem cirurgia ou partos','Ginecologia com obstetrícia','Cirurgia plástica','Cirurgia geral','Cardiologia','Clínica médica','Dermatologia','Pediatria sem cirurgia','Psiquiatria','Radiologia','Medicina intensiva (UTI)','Medicina de urgência (plantão PS)','Medicina da família'],
+  esp_advocacia: ['Trabalhista','Cível','Tributário','Penal','Família e sucessões','Empresarial','Previdenciário'],
+  perfil: ['Residente','Estudante em estágio','Especialista','Sócio','Autônomo','Empregado','Eventual'],
+  conselho: ['CRM','CRO','CRP','CREFITO','CRN','COREN','CRF','CREFONO','OAB','CRC','CREA','CAU','Sem registro'],
+  contratacao: ['Pessoa física','Pessoa jurídica','Sociedade','Clínica ou hospital'],
+  locais: ['Centro cirúrgico','Consultório','Hospital','Plantão','UTI','Home care','Telemedicina','Escritório','Obra','Empresa do cliente'],
+  fluxo: ['Muito baixo','Baixo','Médio','Alto','Muito alto'],
+  limite: ['R$ 100.000','R$ 250.000','R$ 500.000','R$ 1.000.000','R$ 2.000.000'],
+  franquia: ['Sem franquia','10% dos prejuízos','R$ 2.500','R$ 5.000'],
+  retroatividade: ['Sem retroatividade','1 ano','2 anos','3 anos','5 anos','Ilimitada'],
+  pendencias: ['Data de conclusão da residência','Outro registro profissional','Outro CNPJ','Plantões eventuais'],
+  situacao: ['Em andamento','Encerrada'],
+  residencia: ['R1','R2','R3','R4','R5','R6']
+};
+const RC_STEPS = [
+  {t:'Segurado',                s:'Nome, CPF, nascimento, contato'},
+  {t:'Profissão',               s:'Segmento, especialidade, perfil, registros'},
+  {t:'Atuação',                 s:'Contratação, onde atua, volume, equipe'},
+  {t:'Faturamento e sinistros', s:'Faturamento e as 3 perguntas'},
+  {t:'Cotação e ficha',         s:'Limite, franquia, pendências, ficha'}];
+const RC_CAMPOS_RC = ['segmento','especialidades','perfil','residencia_ano','residencia_conclusao','registros','contratacao','socios','atividade_hoje','experiencia','locais','outras_atividades','fluxo','tem_equipe','equipe_qtd','faturamento_mensal','faturamento_anual','faturamento_origem','sin_reclamacao','sin_reclamacoes','sin_reclamacao_obs','sin_circunstancia','sin_circunstancia_obs','registro_ativo','registro_ativo_obs','limite','franquia','retroatividade','pontos_confirmar','pendencias'];
+const RC_CAMPOS_PESSOA = ['nome','cpf','data_nascimento','telefone','email','cnpj','crm','crm_uf','especialidade'];
+const RC = { open:false, p:null, step:0, d:{}, ini:{}, pes:{}, pesIni:{}, origem:{}, op:{}, existe:false, semTabela:false };
+const rcJ = v => JSON.stringify(v==null || v==='' ? null : v);
+function rcOpcoes(campo, base){ const extra = (RC.op[campo]||[]).filter(v=>!base.some(b=>b.toLowerCase()===v.toLowerCase())); return base.concat(extra); }
+function rcOrig(k){ const o = RC.origem[k]; return o ? ` <span class="tagx" title="Pode editar">${escapeHtml(o)}</span>` : ''; }
+// escolha única com "Outro (digitar)"
+function rcSel(id, label, campo, base, val, full){
+  const ops = rcOpcoes(campo, base), outro = val && !ops.includes(val);
+  return `<label class="fl${full?' full':''}"><span>${label}${rcOrig(id)}</span><select data-rc="${id}" data-outro-de="${id}"><option value="">—</option>${ops.map(o=>`<option${o===val?' selected':''}>${escapeHtml(o)}</option>`).join('')}<option value="${OUTRO}"${outro?' selected':''}>Outro (digitar)</option></select>
+    <input data-rc-outro="${id}" placeholder="Digite aqui" value="${outro?escapeHtml(val):''}" style="${outro?'':'display:none'}"></label>`;
+}
+// múltipla escolha (marcar) com "Outro (digitar)"
+function rcMulti(id, label, campo, base, vals){
+  vals = Array.isArray(vals) ? vals : []; const ops = rcOpcoes(campo, base); const todos = ops.concat(vals.filter(v=>!ops.includes(v)));
+  return `<div class="fl full"><span>${label}${rcOrig(id)}</span>${todos.length>12?`<input data-rc-busca="${id}" type="search" placeholder="Buscar..." style="margin:2px 0 4px">`:''}
+    <div class="chks" data-rc-multi="${id}">${todos.map(o=>`<label class="chk"><input type="checkbox" value="${escapeHtml(o)}"${vals.includes(o)?' checked':''}> ${escapeHtml(o)}</label>`).join('')}</div>
+    <div style="display:flex;gap:6px;margin-top:4px"><input data-rc-novo="${id}" placeholder="Outro (digitar) e clicar em Incluir" style="flex:1"><button type="button" class="om-cancel" data-rc-inclui="${id}">Incluir</button></div></div>`;
+}
+function rcSimNao(id, label, val){
+  return `<label class="fl"><span>${label}</span><select data-rc="${id}"><option value="">—</option><option value="sim"${val===true?' selected':''}>Sim</option><option value="nao"${val===false?' selected':''}>Não</option></select></label>`;
+}
+function rcTxt(id, label, val, type, full, area){
+  return area ? `<label class="fl full"><span>${label}${rcOrig(id)}</span><textarea data-rc="${id}" rows="3" style="border:1px solid var(--border);border-radius:6px;padding:8px;font-family:inherit;font-size:13px;text-transform:none">${escapeHtml(val||'')}</textarea></label>`
+    : `<label class="fl${full?' full':''}"><span>${label}${rcOrig(id)}</span><input data-rc="${id}" type="${type||'text'}" value="${escapeHtml(val==null?'':String(val))}"></label>`;
+}
+
+async function rcCarregar(p){
+  RC.semTabela = false;
+  const [pe, rc, op, dg, es] = await Promise.all([
+    sb.from('crm_pessoas').select(RC_CAMPOS_PESSOA.join(',')).eq('id', p.id).maybeSingle(),
+    sb.from('crm_rc').select('*').eq('pessoa_id', p.id).maybeSingle(),
+    sb.from('crm_rc_opcoes').select('campo,valor,usos').order('usos',{ascending:false}),
+    sb.from('crm_diagnostico').select('renda_mensal_valor_exato').eq('pessoa_id', p.id).maybeSingle(),
+    sb.from('crm_estudos').select('renda_mensal').eq('pessoa_id', p.id).order('created_at',{ascending:false}).limit(1).maybeSingle()]);
+  if(rc.error && /crm_rc|relation|does not exist|schema cache/i.test(rc.error.message||'')){ RC.semTabela = true; return; }
+  if(rc.error) throw rc.error;
+  RC.pes = {}; RC_CAMPOS_PESSOA.forEach(k=>{ RC.pes[k] = (pe.data||{})[k] ?? null; }); RC.pesIni = {...RC.pes};
+  RC.existe = !!rc.data; RC.d = {}; RC_CAMPOS_RC.forEach(k=>{ RC.d[k] = rc.data ? rc.data[k] : null; });
+  ['especialidades','registros','locais','sin_reclamacoes','pendencias'].forEach(k=>{ if(!Array.isArray(RC.d[k])) RC.d[k] = []; });
+  RC.origem = {};
+  ['nome','cpf','data_nascimento','telefone','email'].forEach(k=>{ if(RC.pes[k]) RC.origem[k] = 'veio do cadastro'; });
+  if(!RC.existe){
+    // primeira vez: puxa o que o CRM já sabe
+    if(RC.pes.especialidade){ RC.d.especialidades = String(RC.pes.especialidade).split(/\s*[,;]\s*/).filter(Boolean); RC.origem.especialidades = 'veio do cadastro'; }
+    if(RC.pes.crm){ RC.d.registros = [{conselho:'CRM', numero:RC.pes.crm, uf:RC.pes.crm_uf||'', principal:true}]; RC.origem.registros = 'veio do cadastro'; }
+    if(RC.pes.cnpj){ RC.d.contratacao = 'Pessoa jurídica'; RC.origem.contratacao = 'veio do cadastro'; }
+    if(RC.pes.crm || /m[ée]dic/i.test(RC.pes.especialidade||'')) RC.d.segmento = 'Médicos';
+    const renda = Number(dg.data && dg.data.renda_mensal_valor_exato) || Number(es.data && es.data.renda_mensal) || 0;
+    if(renda > 0){ RC.d.faturamento_mensal = renda; RC.d.faturamento_anual = renda*12; RC.d.faturamento_origem = 'diagnostico'; }
+  }
+  if(RC.d.faturamento_origem==='diagnostico') RC.origem.faturamento_mensal = 'veio do estudo de Vida · a confirmar';
+  RC.ini = JSON.parse(JSON.stringify(RC.d));
+  RC.op = {}; (op.data||[]).forEach(o=>{ (RC.op[o.campo] = RC.op[o.campo] || []).push(o.valor); });
+}
+function rcEtapaFeita(i){
+  const d = RC.d, pe = RC.pes;
+  return [ !!(pe.nome && (pe.cpf || pe.data_nascimento)), !!(d.segmento && (d.especialidades.length || d.perfil)), !!(d.contratacao || (d.locais||[]).length),
+           !!(Number(d.faturamento_mensal)>0 && d.sin_reclamacao!=null), !!(d.limite) ][i];
+}
+async function rcAbrir(p, step){
+  const vc = document.querySelector('.view-container'); if(!vc || !p) return;
+  if(FLOW.open) flowClose(false);
+  let el = document.getElementById('flow'); if(!el){ el = document.createElement('div'); el.id = 'flow'; vc.appendChild(el); }
+  RC.open = true; RC.p = p;
+  el.innerHTML = `<aside class="fl-side"><button type="button" class="om-cancel" id="rc-close">← Voltar ao cadastro</button>
+      <div class="fl-who"><b>${escapeHtml(p.nome)}</b><small>Consultoria de RC · uma etapa por vez</small></div><div id="fl-steps"></div></aside>
+    <div class="fl-main" id="fl-main"><div class="es-box" id="rc-box"><div class="op-more">Carregando…</div></div><div class="fl-nav" id="fl-nav"></div></div>`;
+  el.classList.add('open');
+  el.querySelector('#rc-close').addEventListener('click', ()=>rcFechar(true));
+  try{ await rcCarregar(p); }catch(e){ document.getElementById('rc-box').innerHTML = '<div class="om-err">Não consegui abrir a consultoria de RC: '+escapeHtml(e.message||String(e))+'</div>'; return; }
+  if(RC.semTabela){ document.getElementById('rc-box').innerHTML = '<div class="hint" style="font-size:14px">A consultoria de RC está sendo instalada no sistema. Tente de novo em instantes.</div>'; return; }
+  rcGo(step==null ? Math.max(0, [0,1,2,3,4].findIndex(i=>!rcEtapaFeita(i))) : step);
+}
+function rcFechar(refresh){
+  const el = document.getElementById('flow'); const estava = RC.open;
+  if(el){ el.classList.remove('open'); el.innerHTML = ''; }
+  RC.open = false; RC.p = null;
+  if(estava && refresh && typeof PV!=='undefined' && PV.person && PV.tab==='protecao') pvShowTab('protecao');
+}
+function rcSide(){
+  const host = document.getElementById('fl-steps'); if(!host) return;
+  host.innerHTML = RC_STEPS.map((s,k)=>{ const feita = rcEtapaFeita(k), cur = k===RC.step;
+    return `<button type="button" class="fl-step${cur?' cur':''}${feita?' done':''}" data-rcs="${k}"><span class="n">${feita && !cur ? '✓' : k+1}</span><span><b>${escapeHtml(s.t)}</b><small>${escapeHtml(s.s)}</small></span></button>`; }).join('');
+  host.querySelectorAll('[data-rcs]').forEach(b=>b.addEventListener('click', async ()=>{ if(await rcSalvar(true)) rcGo(+b.dataset.rcs); }));
+}
+function rcNav(){
+  const nav = document.getElementById('fl-nav'); if(!nav) return; const i = RC.step, last = RC_STEPS.length-1;
+  nav.innerHTML = `${i>0?`<button type="button" class="om-cancel" id="rc-prev">← ${escapeHtml(RC_STEPS[i-1].t)}</button>`:'<span></span>'}
+    <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><small id="rc-st" style="color:var(--ink-faint)"></small><button type="button" class="om-save" id="rc-save">💾 Salvar</button>
+    ${i<last?`<button type="button" class="om-save" id="rc-next">Salvar e ir para ${escapeHtml(RC_STEPS[i+1].t)} →</button>`:'<button type="button" class="om-cancel" id="rc-end">Salvar e voltar ao cadastro</button>'}</span>`;
+  nav.querySelector('#rc-save').addEventListener('click', ()=>rcSalvar(false));
+  const pv = nav.querySelector('#rc-prev'), nx = nav.querySelector('#rc-next'), en = nav.querySelector('#rc-end');
+  if(pv) pv.addEventListener('click', async ()=>{ if(await rcSalvar(true)) rcGo(i-1); });
+  if(nx) nx.addEventListener('click', async ()=>{ if(await rcSalvar(true)) rcGo(i+1); });
+  if(en) en.addEventListener('click', async ()=>{ if(await rcSalvar(true)) rcFechar(true); });
+}
+function rcGo(i){
+  RC.step = Math.max(0, Math.min(RC_STEPS.length-1, i));
+  const box = document.getElementById('rc-box'); if(!box) return;
+  const d = RC.d, pe = RC.pes, s = RC_STEPS[RC.step];
+  const idade = pvIdade({data_nascimento:pe.data_nascimento});
+  let h = `<div class="ql">RC · ${RC.step+1} de ${RC_STEPS.length} · ${escapeHtml(s.t)} <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— nada aqui é obrigatório; o que ficar em branco vira pergunta na hora da cotação</small></div>`;
+  if(RC.step===0){
+    h += `<div class="fgrid">${rcTxt('nome','Nome completo',pe.nome,'text',true)}${rcTxt('cpf','CPF',pe.cpf)}${rcTxt('data_nascimento','Data de nascimento'+(idade!=null?' ('+idade+' anos)':''),pe.data_nascimento,'date')}${rcTxt('telefone','Telefone',pe.telefone)}${rcTxt('email','E-mail',pe.email)}</div>
+      <div class="hint">Estes dados são do cadastro do cliente: o que mudar aqui muda também no cadastro e no Vida.</div>`;
+  } else if(RC.step===1){
+    const espBase = d.segmento==='Médicos' ? RC_L.esp_medicos : d.segmento==='Advocacia' ? RC_L.esp_advocacia : [];
+    const regs = d.registros.length ? d.registros : [{conselho:'', numero:'', uf:'', principal:true}];
+    h += `<div class="fgrid">${rcSel('segmento','Segmento','segmento',RC_L.segmento,d.segmento)}${rcSel('perfil','Perfil','perfil',RC_L.perfil,d.perfil)}
+      <span data-rc-res style="display:${d.perfil==='Residente'?'contents':'none'}">${rcSel('residencia_ano','Ano de residência','residencia',RC_L.residencia,d.residencia_ano)}${rcTxt('residencia_conclusao','Ano de conclusão da residência',d.residencia_conclusao)}</span>
+      ${rcMulti('especialidades', d.segmento && !espBase.length ? 'Especialidade / área de atuação (digite em Outro)' : 'Especialidade / área de atuação (pode marcar mais de uma)', 'esp_'+(d.segmento||''), espBase, d.especialidades)}</div>
+      ${d.segmento==='Médicos'?'<div class="hint">Lista provisória: a lista oficial da Porto, com as variações que mudam o risco, entra quando chegar.</div>':''}
+      <div class="ql" style="margin-top:14px">Registro profissional${rcOrig('registros')}</div>
+      <div id="rc-regs" style="display:grid;gap:6px">${regs.map((r,k)=>rcRegLinha(r,k)).join('')}</div>
+      <button type="button" class="om-cancel" id="rc-reg-add" style="margin-top:6px">+ Outro registro</button>`;
+  } else if(RC.step===2){
+    const pj = /jur[íi]dica|sociedade|cl[íi]nica/i.test(d.contratacao||'');
+    h += `<div class="fgrid">${rcSel('contratacao','Contratação','contratacao',RC_L.contratacao,d.contratacao)}
+      <span data-rc-pj style="display:${pj?'contents':'none'}">${rcTxt('cnpj','CNPJ',pe.cnpj)}${rcTxt('socios','Sócios',d.socios)}</span>
+      <span data-rc-pf class="hint" style="display:${d.contratacao==='Pessoa física'?'block':'none'};grid-column:1/-1;margin:0">Pessoa física: registrado como sem CNPJ.</span>
+      ${rcTxt('atividade_hoje','Atividade hoje',d.atividade_hoje,'',true,true)}${rcTxt('experiencia','Experiência anterior',d.experiencia,'',true,true)}
+      ${rcMulti('locais','Local de atuação','locais',RC_L.locais,d.locais)}
+      ${rcTxt('outras_atividades','Outras atividades que exerce',d.outras_atividades,'',true,true)}
+      ${rcSel('fluxo','Fluxo de atendimento','fluxo',RC_L.fluxo,d.fluxo)}${rcSimNao('tem_equipe','Tem equipe?',d.tem_equipe)}
+      <span data-rc-eq style="display:${d.tem_equipe===true?'contents':'none'}">${rcTxt('equipe_qtd','Quantas pessoas na equipe',d.equipe_qtd,'number')}</span></div>`;
+  } else if(RC.step===3){
+    const recl = d.sin_reclamacoes.length ? d.sin_reclamacoes : [{}];
+    h += `<div class="fgrid">${rcTxt('faturamento_mensal','Faturamento mensal (R$)',d.faturamento_mensal,'number')}${rcTxt('faturamento_anual','Faturamento anual estimado (R$, mensal × 12)',d.faturamento_anual,'number')}</div>
+      <div class="ql" style="margin-top:14px">Sinistralidade</div>
+      <div class="fgrid">${rcSimNao('sin_reclamacao','a) Nos últimos 5 anos, sofreu reclamações ou ações judiciais, criminais, administrativas ou arbitrais pela atividade profissional?',d.sin_reclamacao)}${rcTxt('sin_reclamacao_obs','Observação',d.sin_reclamacao_obs)}</div>
+      <div data-rc-recl style="display:${d.sin_reclamacao===true?'block':'none'};margin:6px 0 10px"><div id="rc-recls" style="display:grid;gap:6px">${recl.map((r,k)=>rcReclLinha(r,k)).join('')}</div><button type="button" class="om-cancel" id="rc-recl-add" style="margin-top:6px">+ Outra reclamação</button></div>
+      <div data-rc-nunca class="hint" style="display:${d.sin_reclamacao===false?'block':'none'}">Registrado: nunca teve reclamação.</div>
+      <div class="fgrid" style="margin-top:8px">${rcSimNao('sin_circunstancia','b) Conhece alguma circunstância que possa gerar reclamação ou ação futura?',d.sin_circunstancia)}
+      <span data-rc-circ style="display:${d.sin_circunstancia===true?'contents':'none'}">${rcTxt('sin_circunstancia_obs','Descreva',d.sin_circunstancia_obs,'',true,true)}</span></div>
+      <div class="fgrid" style="margin-top:8px">${rcSimNao('registro_ativo','c) O registro profissional está ativo no conselho de classe?',d.registro_ativo)}${rcTxt('registro_ativo_obs','Observação',d.registro_ativo_obs)}</div>
+      <div data-rc-inativo class="om-err" style="display:${d.registro_ativo===false?'block':'none'}">Atenção: se, na vigência da apólice, o registro estiver ausente ou inabilitado, a seguradora não paga a indenização.</div>`;
+  } else {
+    const pend = d.pendencias, nomes = pend.map(x=>x.texto);
+    const sug = rcOpcoes('pendencias', RC_L.pendencias).filter(t=>!nomes.includes(t));
+    h += `<div class="fgrid">${rcSel('limite','Limite de indenização','limite',RC_L.limite,d.limite)}${rcSel('franquia','Franquia','franquia',RC_L.franquia,d.franquia)}${rcSel('retroatividade','Retroatividade','retroatividade',RC_L.retroatividade,d.retroatividade)}</div>
+      <div class="ql" style="margin-top:14px">Pontos a confirmar</div>
+      ${rcTxt('pontos_confirmar','Anotações',d.pontos_confirmar,'',true,true)}
+      <div id="rc-pend" style="display:grid;gap:4px;margin-top:6px">${pend.map((x,k)=>`<label class="chk" style="font-size:13px"><input type="checkbox" data-rc-pend="${k}"${x.resolvida?' checked':''}> ${escapeHtml(x.texto)} <span class="tagx">${x.resolvida?'resolvido':'a confirmar'}</span></label>`).join('')}</div>
+      <div class="chks" style="margin-top:6px">${sug.map(t=>`<button type="button" class="om-cancel" data-rc-pend-add="${escapeHtml(t)}" style="padding:4px 10px">+ ${escapeHtml(t)}</button>`).join('')}</div>
+      <div style="display:flex;gap:6px;margin-top:6px"><input id="rc-pend-novo" placeholder="Outra pendência (digitar)" style="flex:1"><button type="button" class="om-cancel" id="rc-pend-inc">Incluir</button></div>
+      <div class="hint" style="margin-top:14px">Em preparação: o aviso de "cotação possível?" para Porto, Akad e Unimed Seguros e o botão <b>Gerar ficha técnica (PDF)</b>. Entram quando chegarem as listas das seguradoras e o modelo da ficha.</div>`;
+  }
+  box.innerHTML = h;
+  rcLigar(box); rcSide(); rcNav();
+  const m = document.getElementById('fl-main'); if(m) m.scrollTop = 0;
+}
+function rcRegLinha(r, k){
+  const opt = rcOpcoes('conselho', RC_L.conselho), outro = r.conselho && !opt.includes(r.conselho);
+  return `<div class="fgrid rc-linha" data-rc-reg="${k}">
+    <label class="fl"><span>Conselho</span><select data-reg="conselho"><option value="">—</option>${opt.map(o=>`<option${o===r.conselho?' selected':''}>${escapeHtml(o)}</option>`).join('')}<option value="${OUTRO}"${outro?' selected':''}>Outro (digitar)</option></select><input data-reg="conselho_outro" placeholder="Qual conselho" value="${outro?escapeHtml(r.conselho):''}" style="${outro?'':'display:none'}"></label>
+    <label class="fl"><span>Número</span><input data-reg="numero" value="${escapeHtml(r.numero||'')}"></label>
+    <label class="fl"><span>UF</span><input data-reg="uf" maxlength="2" value="${escapeHtml(r.uf||'')}"></label>
+    <label class="chk" style="padding-bottom:8px"><input type="radio" name="rc-reg-pri" data-reg="principal"${r.principal?' checked':''}> principal</label>
+    <button type="button" class="om-cancel" data-reg-del="${k}" title="Tirar este registro" style="padding:6px 10px">✕</button></div>`;
+}
+function rcReclLinha(r, k){
+  return `<div class="fgrid rc-linha" data-rc-rec="${k}">
+    <label class="fl"><span>Ano</span><input data-rec="ano" value="${escapeHtml(r.ano||'')}"></label>
+    <label class="fl"><span>Valor (R$)</span><input data-rec="valor" type="number" value="${escapeHtml(r.valor==null?'':String(r.valor))}"></label>
+    <label class="fl"><span>Situação</span><select data-rec="situacao"><option value="">—</option>${RC_L.situacao.map(o=>`<option${o===r.situacao?' selected':''}>${o}</option>`).join('')}</select></label>
+    <label class="fl"><span>Seguradora que atendeu</span><input data-rec="seguradora" value="${escapeHtml(r.seguradora||'')}"></label>
+    <button type="button" class="om-cancel" data-rec-del="${k}" title="Tirar" style="padding:6px 10px">✕</button></div>`;
+}
+// lê a tela para RC.d / RC.pes (chamado antes de salvar e antes de redesenhar)
+function rcLer(){
+  const box = document.getElementById('rc-box'); if(!box) return;
+  box.querySelectorAll('[data-rc]').forEach(el=>{
+    const k = el.dataset.rc; let v = el.value;
+    if(el.dataset.outroDe && v===OUTRO){ const o = box.querySelector(`[data-rc-outro="${k}"]`); v = o ? o.value.trim() : ''; }
+    if(el.tagName==='SELECT' && (v==='sim' || v==='nao')) v = v==='sim';
+    else if(el.tagName==='SELECT' && v==='' && ['tem_equipe','sin_reclamacao','sin_circunstancia','registro_ativo'].includes(k)) v = null;
+    else if(el.type==='number') v = v==='' ? null : Number(v);
+    else if(typeof v==='string'){ v = v.trim(); if(v==='') v = null; }
+    if(RC_CAMPOS_PESSOA.includes(k)) RC.pes[k] = v; else RC.d[k] = v;
+  });
+  box.querySelectorAll('[data-rc-multi]').forEach(w=>{ RC.d[w.dataset.rcMulti] = [...w.querySelectorAll('input:checked')].map(i=>i.value); });
+  const regs = [...box.querySelectorAll('[data-rc-reg]')];
+  if(regs.length){ RC.d.registros = regs.map(r=>{ const g = n=>r.querySelector(`[data-reg="${n}"]`);
+      let c = g('conselho').value; if(c===OUTRO) c = g('conselho_outro').value.trim();
+      return { conselho:c||'', numero:g('numero').value.trim(), uf:g('uf').value.trim().toUpperCase(), principal:g('principal').checked }; })
+    .filter(r=>r.conselho || r.numero); }
+  const recs = [...box.querySelectorAll('[data-rc-rec]')];
+  if(recs.length){ RC.d.sin_reclamacoes = recs.map(r=>{ const g = n=>r.querySelector(`[data-rec="${n}"]`).value.trim();
+      return { ano:g('ano'), valor:g('valor')===''?null:Number(g('valor')), situacao:g('situacao'), seguradora:g('seguradora') }; })
+    .filter(r=>r.ano || r.valor!=null || r.situacao || r.seguradora); }
+  box.querySelectorAll('[data-rc-pend]').forEach(c=>{ const x = RC.d.pendencias[+c.dataset.rcPend]; if(x) x.resolvida = c.checked; });
+}
+function rcLigar(box){
+  const mostra = (sel, on)=>{ const e = box.querySelector(sel); if(e) e.style.display = on ? (e.tagName==='SPAN' && !e.classList.contains('hint') ? 'contents' : 'block') : 'none'; };
+  box.querySelectorAll('[data-outro-de]').forEach(s=>s.addEventListener('change', ()=>{ const o = box.querySelector(`[data-rc-outro="${s.dataset.outroDe}"]`); if(o){ o.style.display = s.value===OUTRO ? '' : 'none'; if(s.value===OUTRO) o.focus(); } }));
+  box.querySelectorAll('select[data-reg="conselho"]').forEach(s=>s.addEventListener('change', ()=>{ const o = s.parentNode.querySelector('[data-reg="conselho_outro"]'); o.style.display = s.value===OUTRO ? '' : 'none'; }));
+  const on = (k, fn)=>{ const e = box.querySelector(`[data-rc="${k}"]`); if(e) e.addEventListener('change', ()=>fn(e.value)); };
+  on('segmento', ()=>{ rcLer(); RC.d.especialidades = RC.d.especialidades || []; rcGo(1); });   // muda a lista de especialidades
+  on('perfil', v=>mostra('[data-rc-res]', v==='Residente'));
+  on('contratacao', v=>{ mostra('[data-rc-pj]', /jur[íi]dica|sociedade|cl[íi]nica/i.test(v)); mostra('[data-rc-pf]', v==='Pessoa física'); });
+  on('tem_equipe', v=>mostra('[data-rc-eq]', v==='sim'));
+  on('sin_reclamacao', v=>{ mostra('[data-rc-recl]', v==='sim'); mostra('[data-rc-nunca]', v==='nao'); });
+  on('sin_circunstancia', v=>mostra('[data-rc-circ]', v==='sim'));
+  on('registro_ativo', v=>mostra('[data-rc-inativo]', v==='nao'));
+  const fm = box.querySelector('[data-rc="faturamento_mensal"]'), fa = box.querySelector('[data-rc="faturamento_anual"]');
+  if(fm && fa){ let manual = fa.value!=='' && Number(fa.value)!==Number(fm.value)*12; fa.addEventListener('input', ()=>{ manual = true; });
+    fm.addEventListener('input', ()=>{ if(!manual) fa.value = fm.value==='' ? '' : String(Number(fm.value)*12); }); }
+  box.querySelectorAll('[data-rc-busca]').forEach(b=>b.addEventListener('input', ()=>{ const q = b.value.trim().toLowerCase(); box.querySelectorAll(`[data-rc-multi="${b.dataset.rcBusca}"] .chk`).forEach(l=>{ l.style.display = !q || l.textContent.toLowerCase().includes(q) ? '' : 'none'; }); }));
+  box.querySelectorAll('[data-rc-inclui]').forEach(b=>b.addEventListener('click', ()=>{ const k = b.dataset.rcInclui, inp = box.querySelector(`[data-rc-novo="${k}"]`), v = inp.value.trim(); if(!v) return;
+    const w = box.querySelector(`[data-rc-multi="${k}"]`); const ja = [...w.querySelectorAll('input')].find(i=>i.value.toLowerCase()===v.toLowerCase());
+    if(ja){ ja.checked = true; } else { const l = document.createElement('label'); l.className = 'chk'; l.innerHTML = `<input type="checkbox" value="${escapeHtml(v)}" checked> ${escapeHtml(v)}`; w.appendChild(l); l.querySelector('input').dispatchEvent(new Event('change', {bubbles:true})); }
+    inp.value = ''; }));
+  const regAdd = box.querySelector('#rc-reg-add'); if(regAdd) regAdd.addEventListener('click', ()=>{ rcLer(); RC.d.registros.push({conselho:'', numero:'', uf:'', principal:!RC.d.registros.length}); if(RC.d.registros.length===1 && !RC.d.registros[0].conselho) RC.d.registros.push({conselho:'',numero:'',uf:'',principal:false}); rcGo(1); });
+  box.querySelectorAll('[data-reg-del]').forEach(b=>b.addEventListener('click', ()=>{ rcLer(); RC.d.registros.splice(+b.dataset.regDel, 1); rcGo(1); }));
+  const recAdd = box.querySelector('#rc-recl-add'); if(recAdd) recAdd.addEventListener('click', ()=>{ rcLer(); RC.d.sin_reclamacoes.push({}); if(RC.d.sin_reclamacoes.length===1) RC.d.sin_reclamacoes.push({}); rcGo(3); });
+  box.querySelectorAll('[data-rec-del]').forEach(b=>b.addEventListener('click', ()=>{ rcLer(); RC.d.sin_reclamacoes.splice(+b.dataset.recDel, 1); rcGo(3); }));
+  box.querySelectorAll('[data-rc-pend-add]').forEach(b=>b.addEventListener('click', ()=>{ rcLer(); RC.d.pendencias.push({texto:b.dataset.rcPendAdd, resolvida:false}); rcGo(4); }));
+  const pInc = box.querySelector('#rc-pend-inc'); if(pInc) pInc.addEventListener('click', ()=>{ const v = box.querySelector('#rc-pend-novo').value.trim(); if(!v) return; rcLer(); RC.d.pendencias.push({texto:v, resolvida:false}); rcGo(4); });
+}
+// valores digitados em "Outro" que ainda não estão nas listas: viram sugestão da equipe (crm_rc_opcoes)
+function rcNovasOpcoes(){
+  const d = RC.d, novos = [];
+  const um = (campo, base, v)=>{ if(v && !rcOpcoes(campo, base).some(o=>o.toLowerCase()===String(v).toLowerCase())) novos.push({campo, valor:String(v)}); };
+  um('segmento', RC_L.segmento, d.segmento); um('perfil', RC_L.perfil, d.perfil); um('residencia', RC_L.residencia, d.residencia_ano);
+  um('contratacao', RC_L.contratacao, d.contratacao); um('fluxo', RC_L.fluxo, d.fluxo);
+  um('limite', RC_L.limite, d.limite); um('franquia', RC_L.franquia, d.franquia); um('retroatividade', RC_L.retroatividade, d.retroatividade);
+  const espBase = d.segmento==='Médicos' ? RC_L.esp_medicos : d.segmento==='Advocacia' ? RC_L.esp_advocacia : [];
+  (d.especialidades||[]).forEach(v=>um('esp_'+(d.segmento||''), espBase, v)); (d.locais||[]).forEach(v=>um('locais', RC_L.locais, v));
+  (d.registros||[]).forEach(r=>um('conselho', RC_L.conselho, r.conselho)); (d.pendencias||[]).forEach(x=>um('pendencias', RC_L.pendencias, x.texto));
+  const vistos = new Set(); return novos.filter(n=>{ const k = n.campo+'|'+n.valor.toLowerCase(); if(vistos.has(k)) return false; vistos.add(k); return true; });
+}
+// grava só o que mudou: cadastro (crm_pessoas) e RC (crm_rc)
+async function rcSalvar(silencioso){
+  if(!RC.open || !RC.p) return false;
+  rcLer();
+  const st = document.getElementById('rc-st'); const p = RC.p;
+  // o registro principal (se for CRM) preenche CRM e UF do cadastro; a especialidade entra no cadastro se ele não tiver
+  const pri = (RC.d.registros||[]).find(r=>r.principal) || (RC.d.registros||[])[0];
+  if(pri && pri.conselho==='CRM' && pri.numero){ RC.pes.crm = pri.numero; RC.pes.crm_uf = pri.uf || RC.pes.crm_uf; }
+  if(!RC.pesIni.especialidade && (RC.d.especialidades||[]).length) RC.pes.especialidade = RC.d.especialidades.join(', ');
+  if(RC.pes.cpf){ const c = dOnly(RC.pes.cpf); if(c.length===11) RC.pes.cpf = fmtCPF(c); }
+  const pesUpd = {}; RC_CAMPOS_PESSOA.forEach(k=>{ if(rcJ(RC.pes[k])!==rcJ(RC.pesIni[k])) pesUpd[k] = RC.pes[k]; });
+  if(pesUpd.nome===null) delete pesUpd.nome;   // nome não fica em branco
+  const rcUpd = {}; RC_CAMPOS_RC.forEach(k=>{ if(rcJ(RC.d[k])!==rcJ(RC.ini[k])) rcUpd[k] = RC.d[k]; });
+  if('faturamento_mensal' in rcUpd && RC.d.faturamento_origem==='diagnostico' && RC.ini.faturamento_mensal!==RC.d.faturamento_mensal){ rcUpd.faturamento_origem = 'confirmado'; RC.d.faturamento_origem = 'confirmado'; delete RC.origem.faturamento_mensal; }
+  if(!Object.keys(pesUpd).length && !Object.keys(rcUpd).length && RC.existe){ if(st) st.textContent = 'Nada mudou'; rcSide(); return true; }
+  if(st) st.textContent = 'Salvando…';
+  if(Object.keys(pesUpd).length){
+    const { error } = await sb.from('crm_pessoas').update(pesUpd).eq('id', p.id);
+    if(error){ if(st) st.textContent = ''; showToast('Erro ao salvar o cadastro: '+error.message); return false; }
+    Object.assign(p, pesUpd); RC.pesIni = {...RC.pes}; if(typeof opSyncPessoa==='function') opSyncPessoa(p.id, pesUpd);
+  }
+  const agora = new Date().toISOString();
+  const res = RC.existe
+    ? (Object.keys(rcUpd).length ? await sb.from('crm_rc').update({...rcUpd, updated_at:agora}).eq('pessoa_id', p.id) : {error:null})
+    : await sb.from('crm_rc').insert({...RC.d, pessoa_id:p.id, criado_por:curUserName()||null});
+  if(res.error){ if(st) st.textContent = ''; showToast('Erro ao salvar a consultoria de RC: '+res.error.message); return false; }
+  RC.existe = true; RC.ini = JSON.parse(JSON.stringify(RC.d));
+  const novos = rcNovasOpcoes();
+  if(novos.length){ const r = await sb.from('crm_rc_opcoes').insert(novos.map(n=>({...n, criado_por:curUserName()||null})));
+    if(!r.error) novos.forEach(n=>{ (RC.op[n.campo] = RC.op[n.campo] || []).push(n.valor); }); }
+  if(st) st.textContent = 'Salvo ✓'; if(!silencioso) showToast('Consultoria de RC salva');
+  rcSide(); return true;
 }
 // ============ FASE 4 · COTAÇÕES E PLANO NOVO (leitura manual por enquanto) ============
 // Tabela de cotações recebidas (todas as seguradoras), marcação em Solução 1 (completa) e Solução 2 (necessária), vínculo com a apólice
@@ -5179,11 +5489,13 @@ async function demOutraNec(p, prefill){
       <label style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12.5px"><input type="checkbox" id="on-lembrar" checked> Lembrar este especialista para este produto</label>
       <label style="display:flex;gap:6px;align-items:center;margin-top:4px;font-size:12.5px"><input type="checkbox" id="on-wa" checked> Abrir o WhatsApp com o resumo para o especialista (você confere e envia)</label>
       <div class="om-err" id="on-err"></div></div>
-    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="on-save">Registrar a demanda</button></div>`);
+    <div class="om-foot"><button type="button" class="om-cancel" id="on-rc" style="display:none" title="Abre a consultoria de RC deste cliente, com o que o CRM já sabe dele">📋 Abrir a consultoria de RC</button><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="on-save">Registrar a demanda</button></div>`);
   const g = id=>box.querySelector('#'+id).value.trim();
   const aplicaProduto = ()=>{ const prod = g('on-prod'), e = esps[prod] || {};
     box.querySelector('#on-guia').innerHTML = '<b>Perguntas para levantar:</b> '+demGuiaPerguntas(prod).map(escapeHtml).join(' · ');
+    box.querySelector('#on-rc').style.display = /^RC\b|responsabilidade/i.test(prod) ? '' : 'none';
     box.querySelector('#on-esp').value = e.nome || ''; box.querySelector('#on-tel').value = e.telefone || ''; };
+  box.querySelector('#on-rc').addEventListener('click', ()=>{ dlgClose(); rcAbrir(p); });
   box.querySelector('#on-prod').addEventListener('change', aplicaProduto); aplicaProduto();
   box.querySelector('#on-roteiro').addEventListener('click', ev=>{ ev.preventDefault(); const ta = box.querySelector('#on-desc'); const atual = ta.value.trim(); ta.value = (atual ? atual+String.fromCharCode(10)+String.fromCharCode(10) : '') + demGuiaTexto(g('on-prod')); ta.focus(); });
   box.querySelector('#on-save').addEventListener('click', async ()=>{
@@ -10470,11 +10782,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611031452"></script>
-<script src="painel.js?v=202611031452"></script>
-<script src="cobranca.js?v=202611031452"></script>
-<script src="cadastro.js?v=202611031452"></script>
-<script src="contrato.js?v=202611031452"></script>
-<script src="guarda.js?v=202611031452"></script>
+<script src="plataforma.js?v=202611031651"></script>
+<script src="painel.js?v=202611031651"></script>
+<script src="cobranca.js?v=202611031651"></script>
+<script src="cadastro.js?v=202611031651"></script>
+<script src="contrato.js?v=202611031651"></script>
+<script src="guarda.js?v=202611031651"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611022100">
+<meta name="app-build" content="202611030910">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Torre Aliança">
 <title>Torre de Controle - Aliança</title>
@@ -9915,13 +9915,17 @@ async function opHojeDialog(onlyMine){
   const bd = opBirthdays(7), dr = opDatasRelevantes();
   const nxt = agNext.count ?? 0;
   const sec = (title, cnt, html)=>`<div class="es-box"><div class="ql">${title} <span class="tagx" style="margin-left:6px">${cnt}</span></div>${html||'<div class="hint">Nada por aqui.</div>'}</div>`;
+  // renovação e pós-venda são do módulo Carteira (decisão do Luiz, 02/11/2026): sem ele, a tela mostra quantas apólices vencem e convida a ativar
+  const temCarteira = tcModulo('central');
+  const carteiraConvite = (nRenov, nAvisos)=> (nRenov || nAvisos) ? `<div class="es-box" style="border:1px dashed var(--brand,#9c7518)"><div class="ql">🔒 Renovações e pós-venda · módulo Carteira</div><div style="font-size:13px;line-height:1.6">Você tem <b>${nRenov}</b> apólice(s) vencendo nos próximos 60 dias${nAvisos?` e <b>${nAvisos}</b> aviso(s) de renovação ou pós-venda esperando`:''}. Com o módulo <b>Carteira</b>, o sistema avisa cada renovação com 30, 15 e 7 dias, organiza o pós-venda e lê as apólices para você.</div><div style="margin-top:8px"><button class="om-save" type="button" id="hj-ver-planos">Ver o módulo Carteira</button></div></div>` : '';
   document.getElementById('hj-body').innerHTML =
     `<div class="sg-row" style="margin-bottom:10px"><label class="chk"><input type="checkbox" id="hj-mine" ${onlyMine?'checked':''}> Só as minhas (${escapeHtml(me)})</label><span style="flex:1"></span><span class="tagx ${nxt<3?'warn':''}">Agenda da semana que vem: ${nxt} evento(s)${nxt<3?' — deixe-a cheia antes de a atual acabar':''}</span></div>`
     + reuSecoes(reu)
     + sec('Ações de hoje e atrasadas', acoes.length, acoes.map(p=>{ const d = daysTo(p.proxima_data); return hojeRow(p, d<0?`<span class="tagx bad">atrasada ${-d}d</span>`:'<span class="tagx warn">hoje</span>', escapeHtml(p.proxima_acao)+' · '+escapeHtml(p.proximo_responsavel||'')); }).join(''))
     + sec('Leads em funil sem próxima ação', semAcao.length, semAcao.slice(0,40).map(p=>hojeRow(p, '', 'Defina a próxima ação')).join('') + (semAcao.length>40?`<div class="hint">+${semAcao.length-40} outros — use o filtro “Próxima ação” na Aliança.</div>`:''))
-    + sec('Avisos de renovação (30, 15 e 7 dias) de hoje e atrasados', (avR.data||[]).length, (avR.data||[]).map(a=>{ const p = OP.pessoas.find(x=>x.id===a.pessoa_id); if(!p) return ''; const d = daysTo(a.data_aviso); return hojeRow(p, d<0?`<span class="tagx bad">atrasado ${-d}d</span> <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`:`<span class="tagx warn">hoje</span> <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`, escapeHtml(a.titulo||'Renovação')); }).join(''))
+    + (temCarteira ? sec('Avisos de renovação (30, 15 e 7 dias) de hoje e atrasados', (avR.data||[]).length, (avR.data||[]).map(a=>{ const p = OP.pessoas.find(x=>x.id===a.pessoa_id); if(!p) return ''; const d = daysTo(a.data_aviso); return hojeRow(p, d<0?`<span class="tagx bad">atrasado ${-d}d</span> <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`:`<span class="tagx warn">hoje</span> <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`, escapeHtml(a.titulo||'Renovação')); }).join(''))
     + sec('Renovações nos próximos 60 dias', renov.length, renov.map(r=>hojeRow(r.p, `<span class="tagx ${r.dd<=15?'bad':(r.dd<=30?'warn':'')}">${r.dd}d</span>`, escapeHtml((r.a.tipo_seguro||'')+' · '+(r.a.seguradora||'')))).join(''))
+      : carteiraConvite(renov.length, (avR.data||[]).length))
     + sec('Relacionamento e datas (aniversários, família, 3/6/9/12 meses, datas especiais)', (lembR.data||[]).length, (lembR.data||[]).slice(0,40).map(lembLinha).join('') + ((lembR.data||[]).length>40?`<div class="hint">+${(lembR.data||[]).length-40} outros nos próximos dias.</div>`:''))
     + sec('Completar o cadastro: clientes sem data de nascimento (sem ela não há lembrete de aniversário)', incompl.length, incompl.slice(0,25).map(x=>hojeRow(x, '', 'Peça o documento ou pergunte na próxima conversa')).join('') + (incompl.length>25?`<div class="hint">+${incompl.length-25} outros.</div>`:''))
     + sec('Datas relevantes do cadastro', dr.length, dr.map(x=>hojeRow(x.p, x.dd===0?'<span class="tagx warn">hoje</span>':x.dd+'d', escapeHtml(x.dr.descricao)+' · '+fmtDate(x.dr.data))).join(''))
@@ -9932,6 +9936,7 @@ async function opHojeDialog(onlyMine){
   b.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); dlgClose(); goToPersonView(a.dataset.openp); }));
   b.querySelector('#hj-mine').addEventListener('change', e=>opHojeDialog(e.target.checked));
   reuLigar(b, reu, onlyMine);
+  { const vp = b.querySelector('#hj-ver-planos'); if(vp) vp.addEventListener('click', ()=>{ dlgClose(); const bp = document.getElementById('btn-planos'); if(bp) bp.click(); }); }
   b.querySelectorAll('[data-lmsg]').forEach(btn=>btn.addEventListener('click', async ()=>{ const r = (lembR.data||[]).find(x=>x.chave===btn.dataset.lmsg); if(!r) return;
     if(r.tipo==='data_comemorativa'){ lembAbrirLista(r); return; }
     const modelo = await lembModelo(r.momento==='relacionamento'?'relacionamento':r.momento); const wa = waLink(r.telefone); if(!wa){ showToast('Esta pessoa não tem telefone cadastrado.'); return; }
@@ -10968,7 +10973,7 @@ async function admUsrHtml(){
   const modsTxt = em=>{ const r = ADM.ext.get(String(em).toLowerCase()), m = (r && r.modulos) || []; return m.length ? m.length+' módulo(s)' : 'Todos'; };
   const pendentes = [...ADM.ext.values()].filter(r=>!comLogin.has(String(r.email).toLowerCase()));
   // vagas do plano (produto): quantas pessoas com acesso a corretora usa e pode ter
-  let vagas = ''; try{ const li = await sb.rpc('crm_limite_info'); if(!li.error && li.data){ const d = li.data, cheio = d.ativos >= d.limite, nomes = {vendas:'Vendas', vendas_carteira:'Vendas + Carteira', completo:'Completo', permuta:'Permuta'};
+  let vagas = ''; try{ const li = await sb.rpc('crm_limite_info'); if(!li.error && li.data){ const d = li.data, cheio = d.ativos >= d.limite, nomes = {vendas:'Vendas', carteira:'Carteira', vendas_carteira:'Vendas + Carteira', completo:'Vendas + Carteira + Equipe', permuta:'Permuta'};
     vagas = `<div class="es-box" style="margin:0 0 14px;${cheio?'border-color:#e7b9b3;background:#fdf3f1':''}"><b>👥 ${d.ativos} de ${d.limite} pessoas com acesso</b> <span class="hint" style="margin:0">· plano ${escapeHtml(nomes[d.plano]||d.plano)} (o administrador conta)${cheio?' · <b>limite atingido</b>: desative quem não usa mais para liberar uma vaga, ou peça para mudar de plano em Sugestões.':''}</span>
       <div class="hint" style="margin:6px 0 0">A senha de cada pessoa fica guardada de forma criptografada e ninguém consegue ver, nem você nem a Capacity Case. Se alguém esqueceu, use <b>Definir senha temporária</b> na tabela: você escolhe a senha nova, passa para a pessoa e ela troca no primeiro acesso.</div></div>`; } }catch(e){}
   const blocoPA = !window.ALIANCA.primeiroAcesso ? '' : `${vagas}<div class="es-box" style="margin:0 0 14px"><div class="ql">➕ Liberar primeiro acesso</div><div class="hint" style="margin:2px 0 8px">A pessoa entra no link do sistema, clica em <b>Primeiro acesso</b> e cria a própria senha. A liberação vale 48 horas.</div>
@@ -11084,11 +11089,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611022100"></script>
-<script src="painel.js?v=202611022100"></script>
-<script src="cobranca.js?v=202611022100"></script>
-<script src="cadastro.js?v=202611022100"></script>
-<script src="contrato.js?v=202611022100"></script>
-<script src="guarda.js?v=202611022100"></script>
+<script src="plataforma.js?v=202611030910"></script>
+<script src="painel.js?v=202611030910"></script>
+<script src="cobranca.js?v=202611030910"></script>
+<script src="cadastro.js?v=202611030910"></script>
+<script src="contrato.js?v=202611030910"></script>
+<script src="guarda.js?v=202611030910"></script>
 </body>
 </html>

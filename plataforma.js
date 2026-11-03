@@ -7,6 +7,7 @@
   'use strict';
   const PADRAO = { nome: 'Aliança', logo: 'assets/logo-icone.png', logoGrande: 'assets/logo-marinho.png' };
   const NOME_BASE = 'Torre de Controle - Aliança';
+  const MODO_PAINEL = /[?&]painel=1/.test(location.search);   // endereço dos gestores da plataforma (plataforma.html)
   let MARCA = null;          // {id, nome_exibicao, logo_url, cores, sou_admin, dono_plataforma}
   let observador = null;
 
@@ -59,7 +60,7 @@
     if (!MARCA) return;
     aplicarCores(MARCA.cores);
     const nome = MARCA.nome_exibicao || PADRAO.nome;
-    document.title = nomeSistema();
+    document.title = MODO_PAINEL ? 'Painel da Plataforma · CRM Aliança' : nomeSistema();
     document.querySelectorAll('.tc-nm, .hdr-title').forEach((el) => { el.textContent = nome; });
     const h1 = document.querySelector('.login-hero h1.tc-h1 small'); if (h1) h1.textContent = nome;
     const hl = document.querySelector('.hdr-logo'); if (hl) { hl.src = MARCA.logo_url || PADRAO.logo; hl.alt = nomeSistema(); }
@@ -122,9 +123,16 @@
   }
   // tela de entrada: a marca do link próprio da corretora (…/crm-alianca/<link> ou ?c=<link>); sem link, a última marca vista neste navegador
   const slugDoLink = (new URLSearchParams(location.search).get('c') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
-  try { const m = JSON.parse(localStorage.getItem('tc_marca') || 'null'); if (m && (!slugDoLink || localStorage.getItem('tc_slug') === slugDoLink)) { MARCA = m; aplicarMarca(); MARCA = null; } } catch (e) { /* nada */ }
+  // endereço dos gestores da plataforma (…/plataforma.html → ?painel=1): entrada neutra, sem a marca da última corretora vista neste
+  // navegador (antes a Amanda via a marca da CallMed ao entrar como gestora)
+  if (MODO_PAINEL) {
+    document.title = 'Painel da Plataforma · CRM Aliança';
+    const pintar = () => { const h = document.querySelector('.login-hero h1.tc-h1 small'); if (h) h.textContent = 'Painel da Plataforma'; else setTimeout(pintar, 200); };
+    pintar();
+  }
+  try { const m = JSON.parse(localStorage.getItem('tc_marca') || 'null'); if (!MODO_PAINEL && m && (!slugDoLink || localStorage.getItem('tc_slug') === slugDoLink)) { MARCA = m; aplicarMarca(); MARCA = null; } } catch (e) { /* nada */ }
   async function marcaDoLink() {
-    if (!slugDoLink) return;
+    if (!slugDoLink || MODO_PAINEL) return;
     if (typeof sb === 'undefined') return setTimeout(marcaDoLink, 200);
     try {
       const { data: s } = await sb.auth.getSession(); if (s && s.session) return;   // logado: vale a corretora do usuário
@@ -193,19 +201,23 @@
       ['📚 Base', 'Base de conhecimento com produtos, argumentos e respostas para objeções.'],
       ['📅 Agenda no Outlook, Teams e Google', 'A agenda do sistema aparece no calendário que você já usa.'],
       ['✨ IA de vendas', 'Resumo do cliente, análise da reunião e sugestões do próximo passo.']] },
-    { k: 'vendas_carteira', nome: 'Vendas + Carteira', para: 'Para quem também cuida das apólices e das renovações.', itens: [
-      ['➕ Tudo do Vendas', ''],
-      ['📄 Apólices', 'Central de apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda.'],
+    // 2 módulos que rodam sozinhos (Vendas e Carteira) + a Equipe como complemento de quem tem os dois (decisão do Luiz, 02/11/2026)
+    { k: 'carteira', nome: 'Carteira', para: 'Para quem já tem clientes e não quer perder nenhuma renovação.', itens: [
+      ['📄 Apólices', 'Central de apólices com todas as apólices num lugar só, por vencimento.'],
+      ['🔔 Renovações', 'Avisos de 30, 15 e 7 dias antes de cada apólice vencer, e o pós-venda.'],
       ['✨ IA de carteira', 'Lê a apólice, a cotação ou o documento e preenche os dados para você.']] },
-    { k: 'completo', nome: 'Completo', para: 'Para quem gerencia uma equipe e quer números.', itens: [
-      ['➕ Tudo do Vendas + Carteira', ''],
+    { k: 'vendas_carteira', nome: 'Vendas + Carteira', para: 'Os dois módulos juntos: a venda fechada já cai na carteira e a renovação volta para a venda.', itens: [
+      ['➕ Tudo do Vendas', ''],
+      ['➕ Tudo da Carteira', '']] },
+    { k: 'completo', nome: 'Vendas + Carteira + Equipe', para: 'O complemento para quem gerencia corretores e quer os números de cada um.', itens: [
+      ['➕ Os dois módulos', ''],
       ['📊 Indicadores', 'Painel com os números da corretora e de cada corretor.'],
       ['💼 Comercial', 'Metas, orçamento, funil com taxas de conversão e indicações (Mais Carlas).'],
       ['📝 Ata', 'Ata da semana com entregáveis e responsáveis.']] }];
   async function abrirPlanos() {
     let info = {};
     try { const r = await sb.rpc('crm_planos_info'); if (!r.error && r.data) info = r.data; } catch (e) { /* mostra sem preço */ }
-    const precos = info.precos || {}, lim = info.limites || { vendas: 3, vendas_carteira: 5, completo: 10, permuta: 10 }, atual = info.plano || '';
+    const precos = info.precos || {}, lim = info.limites || { vendas: 3, carteira: 3, vendas_carteira: 5, completo: 10, permuta: 10 }, atual = info.plano || '';
     const brl = (v) => v == null ? '' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const fundo = document.createElement('div'); fundo.id = 'tc-planos';
     fundo.style.cssText = 'position:fixed;inset:0;z-index:99994;background:rgba(17,24,39,.6);overflow:auto;padding:24px 16px;font:15px/1.5 "Segoe UI",system-ui,sans-serif';

@@ -5,7 +5,7 @@
 (function () {
   'use strict';
   const QR_LIB = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js';
-  const PLANOS = { vendas: 'Vendas', vendas_carteira: 'Vendas + Carteira', completo: 'Completo (Vendas + Carteira + Gestão)' };
+  const PLANOS = { vendas: 'Vendas', carteira: 'Carteira', vendas_carteira: 'Vendas + Carteira', completo: 'Vendas + Carteira + Equipe' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const dataBR = (d) => d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '—';

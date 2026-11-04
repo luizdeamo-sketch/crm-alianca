@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611031651">
+<meta name="app-build" content="202611040823">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -1013,20 +1013,23 @@ document.getElementById('btn-forgot').addEventListener('click', async ()=>{
 if(window.ALIANCA.primeiroAcesso){
   const bp = document.getElementById('btn-primeiro'); bp.style.display = '';
   bp.addEventListener('click', ()=>{
-    const box = dlgOpen(`<div class="om-title"><div><h3>Primeiro acesso</h3><div class="om-sub">Use o e-mail que o administrador liberou para você e crie a sua senha.</div></div><button data-close>✕</button></div>
+    const box = dlgOpen(`<div class="om-title"><div><h3>Primeiro acesso</h3><div class="om-sub">Use o e-mail e o código que vieram na mensagem do administrador e crie a sua senha.</div></div><button data-close>✕</button></div>
       <div class="dlg-body"><div class="fgrid">
-        <label class="fl full"><span>E-mail</span><input id="pa-email" type="email" autocomplete="username" value="${escapeHtml(document.getElementById('login-email').value.trim())}"></label>
+        <label class="fl"><span>E-mail</span><input id="pa-email" type="email" autocomplete="username" value="${escapeHtml(document.getElementById('login-email').value.trim())}"></label>
+        <label class="fl"><span>Código de acesso (8 letras e números)</span><input id="pa-codigo" autocomplete="one-time-code" maxlength="12" placeholder="ex.: K7M2-QX9P" style="text-transform:uppercase;letter-spacing:.08em"></label>
         <label class="fl"><span>Nova senha (10 ou mais caracteres)</span><input id="pa-senha" type="password" autocomplete="new-password"></label>
         <label class="fl"><span>Repita a senha</span><input id="pa-senha2" type="password" autocomplete="new-password"></label>
       </div><div class="om-err" id="pa-err"></div></div>
       <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="pa-ok">Criar senha e entrar</button></div>`);
     box.querySelector('#pa-ok').addEventListener('click', async ev=>{
       const email = box.querySelector('#pa-email').value.trim(), senha = box.querySelector('#pa-senha').value, err = box.querySelector('#pa-err');
+      const codigo = box.querySelector('#pa-codigo').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
       if(!email){ err.textContent = 'Digite o seu e-mail.'; return; }
+      if(codigo.length !== 8){ err.textContent = 'Digite o código de 8 letras e números que veio na mensagem do administrador.'; return; }
       if(senha.length < 10){ err.textContent = 'A senha precisa ter pelo menos 10 caracteres.'; return; }
       if(senha !== box.querySelector('#pa-senha2').value){ err.textContent = 'As duas senhas não são iguais.'; return; }
       ev.target.disabled = true; ev.target.textContent = 'Criando…';
-      const { data, error } = await sb.functions.invoke('primeiro-acesso', { body:{ email, senha } });
+      const { data, error } = await sb.functions.invoke('primeiro-acesso', { body:{ email, senha, codigo } });
       let msg = data && data.error; if(error){ msg = error.message; try{ const j = await error.context.json(); if(j && j.error) msg = j.error; }catch(x){} }
       if(msg){ err.textContent = msg; ev.target.disabled = false; ev.target.textContent = 'Criar senha e entrar'; return; }
       const res = await sb.auth.signInWithPassword({ email, password: senha });
@@ -7078,6 +7081,8 @@ function dlgOpen(html, wide){
   return box;
 }
 function dlgClose(){ const b = document.getElementById('dlg'); if(b){ b.style.display='none'; b.innerHTML=''; } if(window._dlgOnClose){ const f = window._dlgOnClose; window._dlgOnClose = null; f(); } }
+// código de primeiro acesso em dois blocos de 4 (K7M2-QX9P), mais fácil de ditar e digitar
+const paCodFmt = c => { const s = String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); return s.length===8 ? s.slice(0,4)+'-'+s.slice(4) : s; };
 function fld(id, label, val, type, full){
   return `<label class="fl${full?' full':''}"><span>${label}</span><input id="${id}" type="${type||'text'}" value="${escapeHtml(val||'')}"></label>`;
 }
@@ -10660,7 +10665,7 @@ async function admUsrHtml(){
   if(error) return '<div class="om-err">Não consegui ler os usuários: '+escapeHtml(error.message)+'</div>';
   ADM.usr = data||[]; const eu = (window._userEmail||'').toLowerCase();
   // dados extras de crm_usuarios: módulos e liberação de primeiro acesso (inclui quem ainda não tem login)
-  const ext = await sb.from('crm_usuarios').select('email,nome,papel,ativo,modulos,primeiro_acesso_ate');
+  const ext = await sb.from('crm_usuarios').select('email,nome,papel,ativo,modulos,primeiro_acesso_ate,primeiro_acesso_codigo');
   ADM.ext = new Map((ext.data||[]).map(r=>[String(r.email).toLowerCase(), r]));
   const comLogin = new Set(ADM.usr.map(u=>String(u.email).toLowerCase()));
   const modsTxt = em=>{ const r = ADM.ext.get(String(em).toLowerCase()), m = (r && r.modulos) || []; return m.length ? m.length+' módulo(s)' : 'Todos'; };
@@ -10674,7 +10679,7 @@ async function admUsrHtml(){
     <label>Papel<select id="pa-n-papel"><option value="especialista">Especialista</option><option value="leitura">Somente leitura</option><option value="master">Master (tudo)</option></select></label>
     <button class="adm-b pri" id="pa-liberar" type="button">Liberar primeiro acesso</button></div>
     ${pendentes.length ? `<div class="ql" style="margin-top:12px">Aguardando primeiro acesso</div>${pendentes.map(r=>{ const ok = r.primeiro_acesso_ate && new Date(r.primeiro_acesso_ate) > new Date();
-      return `<div class="rec" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${escapeHtml(r.email)}</b> <span class="hint" style="margin:0">${escapeHtml(r.nome||'')} · ${escapeHtml(r.papel||'')} · ${ok ? 'liberado até '+escapeHtml(admDh(r.primeiro_acesso_ate)) : 'liberação vencida'}</span><span style="flex:1"></span><button class="adm-b adm-mod" data-e="${escapeHtml(r.email)}">Módulos: ${modsTxt(r.email)}</button><button class="adm-b pa-renovar" data-e="${escapeHtml(r.email)}">${ok?'Renovar':'Liberar de novo'} (48 h)</button></div>`; }).join('')}` : ''}</div>`;
+      return `<div class="rec" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${escapeHtml(r.email)}</b> <span class="hint" style="margin:0">${escapeHtml(r.nome||'')} · ${escapeHtml(r.papel||'')} · ${ok ? 'liberado até '+escapeHtml(admDh(r.primeiro_acesso_ate))+(r.primeiro_acesso_codigo?' · código <b style="letter-spacing:.08em">'+escapeHtml(paCodFmt(r.primeiro_acesso_codigo))+'</b>':'') : 'liberação vencida'}</span><span style="flex:1"></span><button class="adm-b adm-mod" data-e="${escapeHtml(r.email)}">Módulos: ${modsTxt(r.email)}</button><button class="adm-b pa-renovar" data-e="${escapeHtml(r.email)}">${ok?'Renovar':'Liberar de novo'} (48 h)</button></div>`; }).join('')}` : ''}</div>`;
   const novo = window.ALIANCA.primeiroAcesso ? blocoPA : `<div class="es-box" style="margin:0 0 14px"><div class="ql">➕ Novo usuário</div><div class="hint" style="margin:2px 0 8px">Cria o login já confirmado, com uma senha temporária que a pessoa é obrigada a trocar no primeiro acesso.</div>
     <div class="adm-filtros" style="margin:0"><label style="flex:1;min-width:220px">E-mail<input id="adm-n-email" type="email" placeholder="nome@suacorretora.com.br"></label><label style="min-width:180px">Nome<input id="adm-n-nome" placeholder="Nome completo"></label>
     <label>Papel<select id="adm-n-papel"><option value="especialista">Especialista</option><option value="leitura">Somente leitura</option><option value="master">Master (tudo)</option></select></label>
@@ -10765,10 +10770,14 @@ document.addEventListener('click', async e=>{
     }
     if(upd.error){ showToast(/row-level security/i.test(upd.error.message) ? 'Esse e-mail já é usado em outra empresa no sistema. Cada pessoa entra com um e-mail só; use outro e-mail (ex.: o corporativo).' : 'Erro: '+upd.error.message); return; }
     const link = (()=>{ const base = location.origin + location.pathname.replace(/[^/]*$/, ''); try{ const s = localStorage.getItem('tc_slug'); return s ? base + s : base; }catch(e){ return base; } })();   // link próprio da corretora
-    dlgOpen(`<h3 style="margin-top:0">Primeiro acesso liberado por 48 horas</h3><div class="hint">Envie para a pessoa: ela abre o link, clica em <b>Primeiro acesso</b>, digita o e-mail e cria a própria senha.</div>
-      <div style="margin:12px 0;padding:12px;background:#f4f5fb;border-radius:10px;font-size:14px"><div><b>Link:</b> ${escapeHtml(link)}</div><div style="margin-top:6px"><b>E-mail:</b> ${escapeHtml(lib ? document.getElementById('pa-n-email').value.trim() : ren.dataset.e)}</div></div>
+    const emailLib = (lib ? document.getElementById('pa-n-email').value.trim() : ren.dataset.e).toLowerCase();
+    // o código é gerado pelo banco na liberação; sem ele a pessoa não consegue criar a senha
+    const cr = await sb.from('crm_usuarios').select('primeiro_acesso_codigo').eq('email', emailLib).maybeSingle();
+    const cod = paCodFmt(cr.data && cr.data.primeiro_acesso_codigo);
+    dlgOpen(`<h3 style="margin-top:0">Primeiro acesso liberado por 48 horas</h3><div class="hint">Envie para a pessoa: ela abre o link, clica em <b>Primeiro acesso</b>, digita o e-mail e o código e cria a própria senha. Mande só para ela: quem tiver o código cria a senha.</div>
+      <div style="margin:12px 0;padding:12px;background:#f4f5fb;border-radius:10px;font-size:14px"><div><b>Link:</b> ${escapeHtml(link)}</div><div style="margin-top:6px"><b>E-mail:</b> ${escapeHtml(emailLib)}</div><div style="margin-top:6px"><b>Código:</b> <span style="font-size:18px;letter-spacing:.1em;font-weight:700">${escapeHtml(cod||'não gerado: feche e libere de novo')}</span></div></div>
       <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end"><button class="adm-b pri" id="pa-copiar">Copiar mensagem</button><button class="adm-b" onclick="dlgClose()">Fechar</button></div>`);
-    const msg = 'Seu acesso ao CRM Aliança está liberado. Abra '+link+' , clique em "Primeiro acesso", use este e-mail e crie a sua senha (vale por 48 horas).';
+    const msg = 'Seu acesso ao CRM Aliança está liberado. Abra '+link+' , clique em "Primeiro acesso", use este e-mail ('+emailLib+') e o código '+cod+' e crie a sua senha. Vale por 48 horas; não passe o código para ninguém.';
     document.getElementById('pa-copiar').addEventListener('click', async ev=>{ try{ await navigator.clipboard.writeText(msg); ev.target.textContent = 'Copiado ✓'; }catch(x){ showToast('Não consegui copiar; selecione e copie à mão.'); } });
     renderAdmin();
   }
@@ -10782,11 +10791,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611031651"></script>
-<script src="painel.js?v=202611031651"></script>
-<script src="cobranca.js?v=202611031651"></script>
-<script src="cadastro.js?v=202611031651"></script>
-<script src="contrato.js?v=202611031651"></script>
-<script src="guarda.js?v=202611031651"></script>
+<script src="plataforma.js?v=202611040823"></script>
+<script src="painel.js?v=202611040823"></script>
+<script src="cobranca.js?v=202611040823"></script>
+<script src="cadastro.js?v=202611040823"></script>
+<script src="contrato.js?v=202611040823"></script>
+<script src="guarda.js?v=202611040823"></script>
 </body>
 </html>

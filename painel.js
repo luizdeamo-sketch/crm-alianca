@@ -191,7 +191,7 @@
       try { novoId = await rpc('crm_plataforma_cliente_salvar', { p_id: null, p_dados: d }); }
       catch (err) { msg.textContent = 'Não foi possível criar: ' + err.message; return; }
       EST.corretoras = await rpc('crm_plataforma_corretoras');
-      recarregar(convite(EST.corretoras.find((x) => x.id === novoId) || { nome: d.razao_social, plano: d.plano === 'permuta' ? 'completo' : d.plano, gratuita: d.plano === 'permuta' }, d.admin_email, true));
+      recarregar(await conviteCod(EST.corretoras.find((x) => x.id === novoId) || { nome: d.razao_social, plano: d.plano === 'permuta' ? 'completo' : d.plano, gratuita: d.plano === 'permuta' }, d.admin_email, true));
     };
     raiz.querySelectorAll('[data-contrato]').forEach((b) => b.onclick = () => painelCliente(b));
     raiz.querySelectorAll('[data-suspender]').forEach((b) => b.onclick = async () => {
@@ -463,7 +463,7 @@
         } catch (err) { alert(err.message); }
       };
     }
-    tr.querySelector('[data-conv]').onclick = () => { EST.aviso = convite(c, c.admin_email, true); desenhar(); };
+    tr.querySelector('[data-conv]').onclick = async () => { EST.aviso = await conviteCod(c, c.admin_email, true); desenhar(); };
     tr.querySelector('[data-previa]').onclick = () => { const d = lerCliente(form); const erro = conferirCliente(d); if (erro) { msg.textContent = erro; return; } verContrato(gerarTexto(d, c)); };
     tr.querySelector('[data-f]').onclick = () => tr.remove();
     tr.querySelector('[data-salvar]').onclick = async () => {
@@ -775,7 +775,7 @@
       try { await rpc('crm_plataforma_usuario_salvar', { p_corretor: f.get('corretor'), p_email: email, p_nome: f.get('nome') || '', p_papel: 'master', p_ativo: true, p_liberar: liberar }); }
       catch (err) { raiz.querySelector('#pp-msg-u').textContent = 'Não foi possível cadastrar: ' + err.message; return; }
       const corr = EST.corretoras.find((c) => c.id === f.get('corretor'));
-      recarregar(liberar ? convite(corr, email) : `<div class="aviso">${esc(email)} cadastrado como administrador.</div>`);
+      recarregar(liberar ? await conviteCod(corr, email) : `<div class="aviso">${esc(email)} cadastrado como administrador.</div>`);
     };
     raiz.querySelectorAll('[data-desativar]').forEach((b) => b.onclick = () => {
       const u = usuario(b.dataset.desativar);
@@ -787,7 +787,7 @@
       try { await rpc('crm_plataforma_usuario_liberar', { p_email: b.dataset.liberar }); } catch (err) { alert(err.message); return; }
       const ehAdmin = ((usuario(b.dataset.liberar) || {}).papel) === 'master';
       EST.achado = undefined;
-      recarregar(convite(EST.corretoras.find((c) => c.id === b.dataset.corretor), b.dataset.liberar, ehAdmin));
+      recarregar(await conviteCod(EST.corretoras.find((c) => c.id === b.dataset.corretor), b.dataset.liberar, ehAdmin));
     });
     raiz.querySelectorAll('[data-redef]').forEach((b) => b.onclick = async () => {
       if (!confirm(`Mandar para ${b.dataset.redef} o e-mail de criar uma senha nova?`)) return;
@@ -809,7 +809,14 @@
     vendas_carteira: ['Tudo do plano Vendas, mais:', '📄 Central de Apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda', '✨ IA de carteira: lê a apólice, a cotação ou o documento e preenche os dados'],
     completo: ['Tudo dos módulos Vendas e Carteira, mais a Equipe:', '📊 Indicadores da corretora e de cada corretor', '💼 Comercial: metas, orçamento, funil com taxas e indicações', '📝 Ata da semana']
   };
-  function convite(corr, email, admin) {
+  // o código de primeiro acesso é gerado pelo banco na liberação (04/11/2026): sem ele a pessoa não cria a senha
+  const codFmt = (c) => { const s = String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); return s.length === 8 ? s.slice(0, 4) + '-' + s.slice(4) : s; };
+  async function conviteCod(corr, email, admin) {
+    let cod = ''; try { cod = codFmt(await rpc('crm_plataforma_codigo_acesso', { p_email: email })); } catch (e) { cod = ''; }
+    return convite(corr, email, admin, cod);
+  }
+  function convite(corr, email, admin, cod) {
+    const codTxt = cod ? `o código *${cod}*` : 'o código de acesso (este convite está sem código: libere o acesso de novo para gerar um)';
     const nome = corr ? 'CRM Aliança · ' + (corr.nome_exibicao || corr.nome) : 'CRM Aliança';
     const url = corr && corr.slug ? linkCorretora(corr.slug) : link();
     let txt;
@@ -835,7 +842,7 @@ ${url}
 Não chega e-mail para isso: é você quem cria a sua senha.
 1. Abra o link acima
 2. Clique em *"Primeiro acesso: criar minha senha"*
-3. Use este e-mail: ${email} e crie uma senha com pelo menos 10 caracteres (o primeiro acesso fica liberado por 48 horas)
+3. Use este e-mail: ${email} e ${codTxt}, e crie uma senha com pelo menos 10 caracteres (o primeiro acesso fica liberado por 48 horas; não passe o código para ninguém)
 4. O sistema oferece a confirmação em 2 etapas (código no celular, pelo Google Authenticator). Recomendamos ativar
 5. Complete os dados da sua empresa: CNPJ ou CPF, endereço, quem assina, e-mail financeiro e redes sociais
 6. Leia o contrato e clique em *Aceitar*. ${perm ? 'Pronto, o sistema libera na hora.' : `Pronto: a sua *degustação gratuita de ${dias} dias* começa aí, com tudo do seu plano.`}
@@ -859,7 +866,7 @@ Esqueceu a senha depois? Na tela de entrada, *Esqueci a senha* manda um e-mail (
 
 Qualquer coisa, estou por aqui. Boas vendas! 🚀`;
     } else {
-      txt = `Olá! O acesso ao ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email}\n3. Crie a sua senha (pelo menos 10 caracteres) e, se o sistema pedir, ative a confirmação em 2 etapas\n\nO primeiro acesso fica liberado por 48 horas. Não chega e-mail para isso. Salve o endereço nos favoritos: é o link próprio da sua corretora.`;
+      txt = `Olá! O acesso ao ${nome} está liberado para você.\n\n1. Abra ${url}\n2. Clique em "Primeiro acesso: criar minha senha" e use o e-mail ${email} e ${codTxt.replace(/\*/g, '')}\n3. Crie a sua senha (pelo menos 10 caracteres) e, se o sistema pedir, ative a confirmação em 2 etapas\n\nO primeiro acesso fica liberado por 48 horas e o código é só seu: não passe para ninguém. Não chega e-mail para isso. Salve o endereço nos favoritos: é o link próprio da sua corretora.`;
     }
     return `<div class="aviso"><b>Pronto. Mande esta mensagem para a pessoa:</b><pre class="convite">${esc(txt)}</pre>
       <div class="acoes"><button class="b" type="button" onclick="navigator.clipboard.writeText(${esc(JSON.stringify(txt))}).then(()=>this.textContent='Copiado ✓')">Copiar mensagem</button>

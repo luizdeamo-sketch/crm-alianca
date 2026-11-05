@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611051143">
+<meta name="app-build" content="202611051205">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -218,11 +218,14 @@ window.ALIANCA = {
   .hj-quadro{ background:var(--brand-soft,#eef0ff); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin:0 0 12px; }
   .hj-q-n{ font-size:20px; color:var(--navy); margin-bottom:4px; } .hj-q-t{ font-size:16px; color:var(--ink-soft); margin-bottom:12px; }
   .hj-q-bt{ min-height:48px; font-size:16px !important; padding:0 20px !important; }
+  .hj-cont{ display:inline-block; background:#eaf7f1; color:#0f5f40; border:1px solid #bfe5d2; border-radius:999px; padding:8px 16px; font-size:16px; margin:0 0 12px; }
+  .cr-grid input{ min-height:44px; font-size:16px; }
   .hj-guia{ display:block; width:100%; text-align:left; min-height:44px; border:1px solid var(--border); background:var(--surface); border-radius:10px; padding:10px 14px; font:inherit; font-size:16px; cursor:pointer; margin:0 0 12px; color:var(--ink); }
   .hj-mais > summary{ cursor:pointer; font-weight:600; font-size:16px; padding:12px 0; min-height:44px; }
   .hj-dir{ margin-left:10px; display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap; vertical-align:middle; }
   #view-hoje .rec, #view-comeco .gp-sub, #view-comeco .gp-x, #view-comeco .gp-porta span, #view-comeco .gp-pe{ font-size:16px; }
   #view-hoje .ql{ font-size:14px; text-transform:none; letter-spacing:0; } #view-hoje .tagx, #view-hoje .hint{ font-size:14px; }
+  #view-comeco .gp-link, #view-hoje .gp-link, #dlg .gp-link{ min-height:44px; font-size:15px; display:inline-flex; align-items:center; }
   #view-hoje .vd-btn, #view-comeco .gp-link, #ac-root .ac-acoes button, #ac-root .ac-atalhos button{ min-height:44px; font-size:15px; }
   #ac-root #ac-box{ font-size:16px; } #rail.enxuto .nav-btn span{ font-size:12px; }
   #view-comeco .gp-tag{ font-size:14px; } #view-hoje .hj-msg textarea{ font-size:16px !important; }
@@ -9868,7 +9871,7 @@ async function guiaRender(){
     <div class="gp-portas">
       <button type="button" class="gp-porta" data-gp="planilha"><span class="gp-ico">📊</span><b>Uma planilha</b><span>Excel ou CSV com nome, telefone e apólice. O sistema mostra tudo antes de gravar.</span></button>
       <button type="button" class="gp-porta" data-gp="pdfs"><span class="gp-ico">📄</span><b>Os PDFs das apólices</b><span>Arraste vários de uma vez: o sistema lê e cria cliente e apólice.</span></button>
-      <button type="button" class="gp-porta" data-gp="um"><span class="gp-ico">✍️</span><b>Nada organizado</b><span>Comece pelos clientes que renovam primeiro, um por um. Leva 1 minuto cada.</span></button>
+      <button type="button" class="gp-porta" data-gp="um"><span class="gp-ico">✍️</span><b>Nada organizado</b><span>Comece pelos clientes que renovam primeiro: nome, telefone e quando vence. Leva 1 minuto cada.</span></button>
     </div>`;
   const topo = feitos===passos.length
     ? `<h2 class="gp-h">Pronto! Você já usa o CRM no dia a dia.</h2><p class="gp-sub">Toda manhã, abra o Hoje (o primeiro item do menu): quem renova, quem faz aniversário e o que ficou para hoje.</p>`
@@ -9912,7 +9915,7 @@ document.getElementById('comeco-body').addEventListener('click', async ev=>{
   const a = b.dataset.gp;
   if(a==='planilha'){ const i = document.getElementById('op-import'); if(i) i.click(); }
   else if(a==='pdfs') document.getElementById('gp-file').click();
-  else if(a==='um') openNovoCliente({}, ()=>guiaRender());
+  else if(a==='um') cadRapido(()=>guiaRender());
   else if(a==='hoje') opHojeDialog(false);
   else if(a==='esconder'){ await guiaSalvar({ escondido:true }); window.guiaEmCurso = false; menuEnxuto(false); const op = document.querySelector('.nav-btn[data-view="operacao"]'); guiaBotao(GUIA.estado, 0); if(op) op.click(); }
 });
@@ -9930,8 +9933,95 @@ function menuEnxuto(on){
   mais.style.display = on ? '' : 'none';
 }
 document.getElementById('nav-mais').addEventListener('click', ()=>{ const r = document.getElementById('rail'); r.classList.toggle('aberto'); document.getElementById('nav-mais').setAttribute('aria-expanded', r.classList.contains('aberto')); });
+function cadRapido(onSaved){
+  let feitos = 0;
+  const box = dlgOpen(`<div class="om-title"><div><h3>Cadastrar um cliente</h3><div class="om-sub">Comece pelos que renovam primeiro. Só o nome é obrigatório; o resto você completa depois.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body"><div class="fgrid cr-grid">
+      <label class="fl"><span>Nome do cliente</span><input id="cr-nome" autocomplete="off" placeholder="Ex.: Ana Ribeiro"></label>
+      <label class="fl"><span>Telefone (WhatsApp)</span><input id="cr-tel" inputmode="tel" autocomplete="off" placeholder="(11) 98888-7777"></label>
+      <label class="fl"><span>Mês e ano em que o seguro vence (se souber)</span><input id="cr-venc" type="month" placeholder="11/2026"><small style="color:var(--ink-soft);font-size:14px">Ex.: 11/2026</small></label></div>
+      <div class="hint" id="cr-ok" style="margin-top:8px"></div><div class="om-err" id="cr-err"></div>
+      <div class="hint" style="margin-top:10px">Prefere preencher tudo de uma vez (CPF, endereço, documentos)? <a href="#" id="cr-completo">Abrir o cadastro completo</a></div></div>
+    <div class="om-foot"><a href="#" class="gp-link" id="cr-salvar">Pronto, ver quem renova</a><span style="flex:1"></span><button class="om-save hj-q-bt" id="cr-outro">Salvar e cadastrar o próximo</button></div>`);
+  const q = id=>box.querySelector(id);
+  q('#cr-completo').addEventListener('click', e=>{ e.preventDefault(); dlgClose(); openNovoCliente({}, onSaved); });
+  const salvar = async (outro)=>{
+    const nome = q('#cr-nome').value.trim(), tel = q('#cr-tel').value.trim(), err = q('#cr-err'); err.textContent = '';
+    if(!nome && !outro){ dlgClose(); if(feitos && onSaved) onSaved(); opHojeDialog(false); return; }   // "Pronto" sem nada preenchido: só fecha e abre o Hoje   // "Pronto" sem nada novo preenchido
+    // mês e ano (o campo month dá AAAA-MM; navegador sem ele aceita 11/2026): grava no dia 1
+    const vt = q('#cr-venc').value.trim(), m1 = vt.match(/^(\d{4})-(\d{2})/), m2 = vt.match(/^(\d{1,2})\/(\d{4})$/);
+    const venc = m1 ? m1[1]+'-'+m1[2]+'-01' : m2 ? m2[2]+'-'+String(m2[1]).padStart(2,'0')+'-01' : '';
+    if(vt && !venc){ err.textContent = 'Escreva o mês e o ano assim: 11/2026.'; return; }
+    if(!nome){ err.textContent = 'Escreva o nome do cliente.'; q('#cr-nome').focus(); return; }
+    if(tel && dOnly(tel).length < 10){ err.textContent = 'O telefone precisa do DDD, por exemplo (11) 98888-7777.'; return; }
+    [q('#cr-salvar'), q('#cr-outro')].forEach(b=>b.disabled = true);
+    try{
+      const ja = (await findPessoas({ nome, telefone:tel })).find(x=>x.why!=='nome semelhante');
+      if(ja && !confirm(`${ja.nome} já está no sistema (${ja.why}). Cadastrar mesmo assim?`)) return;
+      const row = { nome, tipo:tcPerfilPadrao() }; if(tel) row.telefone = tel;
+      const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single();
+      if(error) throw error;
+      if(venc){ const { error:e2 } = await sb.from('crm_apolices').insert({ pessoa_id:data.id, data_vencimento:venc, status:'ativa', origem_apolice:'carteira', observacoes:'Cadastro rápido: falta seguradora e produto.' });
+        if(e2){ const { error:e3 } = await sb.from('crm_pessoas').delete().eq('id', data.id);
+          if(e3){ OP.pessoas.push(data); OP.dirty = true; feitos++; throw new Error(nome+' foi salvo, mas sem o vencimento ('+e2.message+'). Coloque a data na apólice depois.'); }
+          throw e2; } }   // sem a apólice, não deixa o cadastro pela metade
+      OP.pessoas.push(data); OP.dirty = true; feitos++; GUIA.dados = null;
+      q('#cr-ok').innerHTML = `✔ <b>${escapeHtml(nome)}</b> salvo${venc?' com o vencimento':''}. ${feitos>1?feitos+' clientes cadastrados agora. ':''}Já cadastrou os mais urgentes? Toque em <b>Pronto, ver quem renova</b>.`;
+      if(outro){ ['#cr-nome','#cr-tel','#cr-venc'].forEach(id=>q(id).value = ''); q('#cr-nome').focus(); }
+      else { dlgClose(); showToast(nome+' salvo'); if(onSaved) onSaved(data); opHojeDialog(false); }
+    }catch(e){ err.textContent = 'Não consegui salvar: '+(e.message||e); }
+    finally{ [q('#cr-salvar'), q('#cr-outro')].forEach(b=>{ if(b) b.disabled = false; }); }
+  };
+  q('#cr-salvar').addEventListener('click', e=>{ e.preventDefault(); salvar(false); }); q('#cr-outro').addEventListener('click', ()=>salvar(true));
+  setTimeout(()=>q('#cr-nome').focus(), 50);
+}
 function guiaAtualizar(){ const v = document.getElementById('view-comeco'); if(v && v.classList.contains('active')) guiaRender(); }
 const HJ = { mine:false };
+// ---- Fase 2: a mensagem de renovação fica ligada à apólice (crm_atividades.apolice_id) e 7 dias depois o Hoje pergunta se renovou ----
+// enquanto a coluna não existir no banco, grava sem ela (a pergunta aparece igual; o vínculo com a apólice sai do texto da mensagem)
+async function atvInserir(row){
+  let r = await sb.from('crm_atividades').insert(row);
+  if(r.error && /apolice_id/i.test(r.error.message||'')){ const { apolice_id, ...sem } = row; r = await sb.from('crm_atividades').insert(sem); }
+  return r;
+}
+const RVC = { em:0, dados:null };
+async function atvRenovacoes(){
+  if(RVC.dados && Date.now()-RVC.em < 30000 && !OP.dirty) return RVC.dados;
+  const cols = 'id,pessoa_id,resumo,resultado,data_hora,proxima_data,apolice_id', hoje = ymdToday(), ha7 = new Date(Date.now()-7*864e5).toISOString(), ha400 = new Date(Date.now()-400*864e5).toISOString();
+  const q = c=>sb.from('crm_atividades').select(c).ilike('resumo','Mensagem de renovação%').gte('data_hora', ha400).order('data_hora',{ascending:false}).limit(2000);
+  let r = await q(cols); if(r.error && /apolice_id/i.test(r.error.message||'')) r = await q(cols.replace(',apolice_id',''));
+  const todas = r.data || [], vistas = new Set(), pendentes = [], ultima = new Map();
+  todas.forEach(x=>{ const k = x.pessoa_id+'|'+(x.apolice_id||'');   // a mensagem mais recente de cada apólice (sem vínculo: de cada cliente)
+    if(!ultima.has(x.pessoa_id)) ultima.set(x.pessoa_id, x);
+    if(vistas.has(k)) return; vistas.add(k);
+    const vence = x.proxima_data ? x.proxima_data <= hoje : x.data_hora <= ha7;
+    if((x.resultado==='Enviada' || x.resultado==='Conversando') && vence) pendentes.push(x); });
+  RVC.dados = { pendentes, renovadas: todas.filter(x=>x.resultado==='Renovou'), ultima }; RVC.em = Date.now();
+  return RVC.dados;
+}
+// a apólice da mensagem: pelo vínculo; nas antigas, pela seguradora e pelo produto escritos no texto
+function atvApolice(x){
+  const lista = OP.apo.get(x.pessoa_id) || [];
+  if(x.apolice_id) return lista.find(y=>y.id===x.apolice_id) || null;
+  const vivas = lista.filter(y=>y.status!=='cancelada' && y.status!=='encerrada'), txt = String(x.resumo||'').toLowerCase();
+  const pelaSeg = vivas.filter(y=>y.seguradora && txt.includes(String(y.seguradora).toLowerCase()));
+  return pelaSeg.length===1 ? pelaSeg[0] : vivas.length===1 ? vivas[0] : null;
+}
+// renovou: sugere o próximo vencimento depois de hoje (29/02 vira 28/02); apólice que já vence longe parece já renovada
+function renovSugestao(v){
+  if(!v) return { data:'', jaRenovada:false };
+  const atual = String(v).slice(0,10), em60 = ymd(new Date(Date.now()+60*864e5));
+  if(atual > em60) return { data:atual, jaRenovada:true };
+  let [y,m,d] = atual.split('-').map(Number), out = atual;
+  do { y++; const dd = Math.min(d, new Date(Date.UTC(y, m, 0)).getUTCDate()); out = y+'-'+String(m).padStart(2,'0')+'-'+String(dd).padStart(2,'0'); } while(out <= ymdToday());
+  return { data:out, jaRenovada:false };
+}
+function renovContador(RV){
+  const ids = new Set(); let premio = 0;
+  RV.renovadas.forEach(x=>{ const a = atvApolice(x); if(a && !ids.has(a.id)){ ids.add(a.id); premio += Number(a.valor_premio||0); } });
+  return RV.renovadas.length ? `✅ Renovações confirmadas: <b>${RV.renovadas.length}</b>${premio ? ` · <b>${brlCurto(premio)}</b> de prêmio` : ''}` : '';
+}
+const brlCurto = v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{ minimumFractionDigits:0, maximumFractionDigits:0 });
 async function hjTopo(renov){
   if(!window.guiaProduto) return '';   // Aliança e quem não passou pelo guiaIniciar: o Hoje fica como sempre foi
   let e, d; try{ e = await guiaEstado(); if(!GUIA.dados || Date.now()-GUIA.dadosEm > 30000 || OP.dirty){ GUIA.dados = await guiaDados(); GUIA.dadosEm = Date.now(); } d = GUIA.dados; }catch(er){ return ''; }
@@ -9959,7 +10049,7 @@ async function opHojeDialog(onlyMine){
   for(let i=0; i<200 && (OP.loading || !OP.loaded); i++) await new Promise(r=>setTimeout(r,150));
   const t0 = todayD().toISOString(), t1 = new Date(todayD().getTime()+86400000).toISOString();
   const dow = (todayD().getDay()+6)%7; const ini2 = new Date(todayD().getTime()+(7-dow)*86400000), fim2 = new Date(ini2.getTime()+7*86400000);
-  const avR = await sb.from('crm_avisos').select('id,pessoa_id,dias_antes,data_aviso,titulo,tipo').eq('status','pendente').lte('data_aviso', ymdToday()).order('data_aviso');
+  const avR = await sb.from('crm_avisos').select('id,pessoa_id,apolice_id,dias_antes,data_aviso,titulo,tipo').eq('status','pendente').lte('data_aviso', ymdToday()).order('data_aviso');
   const lembR = await sb.rpc('crm_lembretes', { p_dias:7 });
   const reu = await reuCarregar();
   const incompl = OP.pessoas.filter(x=>opIsCliente(x.id) && (!x.data_nascimento));
@@ -9969,7 +10059,7 @@ async function opHojeDialog(onlyMine){
     sb.from('crm_tarefas_diarias').select('*').eq('data', ymdToday()).order('created_at')]);
   const acoes = OP.pessoas.filter(p=>p.proxima_acao && daysTo(p.proxima_data)!==null && daysTo(p.proxima_data)<=0 && (!onlyMine || (p.proximo_responsavel||'')===me)).sort((a,b)=>String(a.proxima_data).localeCompare(String(b.proxima_data)));
   const semAcao = OP.pessoas.filter(p=>!p.proxima_acao && opIsLeadAberto(p));
-  const renov = []; OP.apo.forEach((list,pid)=>list.forEach(a=>{ if(a.status==='cancelada'||!a.data_vencimento) return; const dd = daysTo(String(a.data_vencimento).slice(0,10)); if(dd!==null && dd>=0 && dd<=60) renov.push({p:OP.pessoas.find(x=>x.id===pid), a, dd}); }));
+  const renov = []; OP.apo.forEach((list,pid)=>list.forEach(a=>{ if(a.status==='cancelada'||a.status==='encerrada'||!a.data_vencimento) return; const dd = daysTo(String(a.data_vencimento).slice(0,10)); if(dd!==null && dd>=0 && dd<=60) renov.push({p:OP.pessoas.find(x=>x.id===pid), a, dd}); }));
   renov.sort((x,y)=>x.dd-y.dd);
   const bd = opBirthdays(7), dr = opDatasRelevantes();
   const nxt = agNext.count ?? 0;
@@ -9980,6 +10070,14 @@ async function opHojeDialog(onlyMine){
   const apoDe = pid=>{ const r0 = renov.find(r=>r.p && r.p.id===pid); return r0 ? r0.a : null; };
   // topo: o quadro do resultado (até a primeira mensagem) e a linha do guia; durante o guia o resto do dia fica recolhido
   const topo = await hjTopo(renov);
+  let RV = { pendentes:[], renovadas:[], ultima:new Map() }; try{ RV = await atvRenovacoes(); }catch(e){}
+  const comPergunta = new Set(RV.pendentes.map(x=>x.apolice_id ? x.pessoa_id+'|'+x.apolice_id : x.pessoa_id));
+  const renovVer = renov.filter(r=>r.p && !comPergunta.has(r.p.id) && !comPergunta.has(r.p.id+'|'+r.a.id));
+  const contador = `<div class="hj-cont" ${RV.renovadas.length?'':'hidden'}>${renovContador(RV)}</div>`;
+  const perguntas = RV.pendentes.map(x=>{ const p = OP.pessoas.find(y=>y.id===x.pessoa_id); if(!p) return ''; const a = atvApolice(x);
+    const prod = a ? [a.tipo_seguro, a.seguradora].filter(Boolean).join(' · ') : '';
+    return `<div class="rec hj-row hj-renov" data-atv="${x.id}"><b>${escapeHtml(lembPrimeiroNome(p.nome))} renovou${a && a.tipo_seguro ? ' o seguro de '+escapeHtml(String(a.tipo_seguro).toLowerCase()) : ''}?</b> <small style="color:var(--ink-faint)">${escapeHtml(prod)}${x.resultado==='Conversando'?' · vocês estavam conversando':''}</small>
+      <span class="hj-dir"><button class="om-cancel vd-btn" data-renov="sim" style="font-weight:700">Sim</button><button class="om-cancel vd-btn" data-renov="nao">Não</button><button class="om-cancel vd-btn" data-renov="conv">Ainda conversando</button></span></div>`; }).join('');
   const avDe = pid=>(avR.data||[]).find(a=>a.pessoa_id===pid);
   const avSoltos = (avR.data||[]).filter(a=>!renov.some(r=>r.p && r.p.id===a.pessoa_id));   // quem já está em "Renovam" não repete nos avisos
   const restoDia = reuSecoes(reu)
@@ -9991,14 +10089,104 @@ async function opHojeDialog(onlyMine){
     + sec('Compromissos de hoje', (ag.data||[]).length, (ag.data||[]).map(e=>`<div class="rec"><span class="k">${new Date(e.data_inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>${escapeHtml(e.titulo)}${e.crm_pessoas?.nome?' · '+escapeHtml(e.crm_pessoas.nome):''}</div>`).join(''))
     + `<div class="es-box"><div class="ql">Tarefas avulsas de hoje</div>${(tar.data||[]).map(t=>`<div class="rec hj-task"><label class="chk"><input type="checkbox" data-task="${t.id}" ${t.concluida?'checked':''}> <span style="${t.concluida?'text-decoration:line-through;color:var(--ink-faint)':''}">${escapeHtml(t.descricao)}</span></label></div>`).join('')||'<div class="hint">Nenhuma tarefa.</div>'}
        <div class="sg-row" style="margin-top:8px"><input id="hj-task-new" class="ca-inp" placeholder="Nova tarefa (não precisa ter cliente ligado)..." style="flex:1"><button class="om-cancel" id="hj-task-add">+ Tarefa</button></div></div>`;
-  document.getElementById('hj-body').innerHTML = topo
-    + sec('Renovam nos próximos 60 dias', renov.length, renov.filter(r=>r.p).map(r=>{ const av = avDe(r.p.id); return hojeRow(r.p, `<span class="tagx ${r.dd<=15?'bad':(r.dd<=30?'warn':'')}">vence em ${r.dd} dia${r.dd===1?'':'s'}</span> ${msgBtn(r.p.id, r.a.id)}${av?` <button class="om-cancel vd-btn" data-avfeito="${av.id}" title="Já falei com o cliente sobre esta renovação">Feito</button>`:''}`, escapeHtml((r.a.tipo_seguro||'')+' · '+(r.a.seguradora||''))); }).join(''))
-    + (avSoltos.length ? sec('Avisos de renovação (30, 15 e 7 dias) de hoje e atrasados', avSoltos.length, avSoltos.map(a=>{ const p = OP.pessoas.find(x=>x.id===a.pessoa_id); if(!p) return ''; const d = daysTo(a.data_aviso); return hojeRow(p, (d<0?`<span class="tagx bad">atrasado ${-d} dia${-d===1?'':'s'}</span>`:`<span class="tagx warn">hoje</span>`)+` ${msgBtn(p.id, '')} <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`, escapeHtml(a.titulo||'Renovação')); }).join('')) : '')
+  document.getElementById('hj-body').innerHTML = contador + topo
+    + (perguntas ? sec('Já faz uma semana da mensagem: renovou?', RV.pendentes.length, perguntas) : '')
+    + sec('Renovam nos próximos 60 dias', renovVer.length, renovVer.map(r=>{ const av = avDe(r.p.id), ult = RV.ultima.get(r.p.id);
+        const jaMandou = ult && (ult.resultado==='Enviada' || ult.resultado==='Conversando') && (ult.apolice_id ? ult.apolice_id===r.a.id : true);
+        return hojeRow(r.p, `<span class="tagx ${r.dd<=15?'bad':(r.dd<=30?'warn':'')}">vence em ${r.dd} dia${r.dd===1?'':'s'}</span> ${jaMandou ? `<span class="tagx">✔ mensagem enviada em ${fmtDate(String(ult.data_hora).slice(0,10))}</span>` : msgBtn(r.p.id, r.a.id)}${av?` <button class="om-cancel vd-btn" data-avfeito="${av.id}" title="Já falei com o cliente sobre esta renovação">Feito</button>`:''}`, escapeHtml([r.a.tipo_seguro, r.a.seguradora].filter(Boolean).join(' · '))); }).join(''))
+    + (avSoltos.length ? sec('Avisos de renovação (30, 15 e 7 dias) de hoje e atrasados', avSoltos.length, avSoltos.map(a=>{ const p = OP.pessoas.find(x=>x.id===a.pessoa_id); if(!p) return ''; const d = daysTo(a.data_aviso); return hojeRow(p, (d<0?`<span class="tagx bad">atrasado ${-d} dia${-d===1?'':'s'}</span>`:`<span class="tagx warn">hoje</span>`)+` ${msgBtn(p.id, a.apolice_id||'')} <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`, escapeHtml(a.titulo||'Renovação')); }).join('')) : '')
     + (window.guiaEmCurso ? `<details class="hj-mais"><summary>Mais coisas do dia</summary>${restoDia}</details>` : restoDia)
     + `<div class="sg-row" style="margin-bottom:10px"><label class="chk"><input type="checkbox" id="hj-mine" ${onlyMine?'checked':''}> Só as minhas (${escapeHtml(me)})</label><span style="flex:1"></span><span class="tagx ${nxt<3?'warn':''}">Agenda da semana que vem: ${nxt} compromisso${nxt===1?'':'s'}${nxt<3?' — deixe-a cheia antes de a atual acabar':''}</span></div>`;
   if(renov.length) guiaEstado().then(e=>{ if(!e.viu_renovacao_em) guiaSalvar({ viu_renovacao_em:new Date().toISOString() }); }).catch(()=>{});
   const b = document.getElementById('hj-body');
   b.querySelectorAll('[data-hjguia]').forEach(x=>x.addEventListener('click', ()=>guiaAbrir()));
+  // "renovou?": Sim mostra a apólice e o novo vencimento para conferir; Não pergunta o motivo; nada grava antes do botão de confirmar
+  const anotar = async (x, mud)=>{ let { error } = await sb.from('crm_atividades').update(mud).eq('id', x.id);
+    if(error && 'apolice_id' in mud && /apolice_id/i.test(error.message||'')){ const { apolice_id, ...sem } = mud; ({ error } = await sb.from('crm_atividades').update(sem).eq('id', x.id)); }
+    if(error) showToast('Não consegui anotar: '+error.message); else RVC.dados = null; return !error; };
+  const comDesfazer = (row, html, voltar)=>{ row.innerHTML = html + ` <a href="#" class="gp-link" data-desf>Desfazer</a>`; const l = row.querySelector('[data-desf]');
+    const t = setTimeout(()=>{ if(l.isConnected) l.remove(); }, 10000);
+    l.addEventListener('click', async e=>{ e.preventDefault(); clearTimeout(t); l.remove(); await voltar(); OP.dirty = true; opHojeDialog(HJ.mine); }); };
+  const contadorAtualizar = ()=>{ const c = b.querySelector('.hj-cont'); if(c){ c.innerHTML = renovContador(RV); c.hidden = !RV.renovadas.length; } };
+  b.querySelectorAll('[data-renov]').forEach(btn=>btn.addEventListener('click', async ()=>{
+    const row = btn.closest('.hj-renov'), x = RV.pendentes.find(y=>y.id===row.dataset.atv); if(!x) return;
+    const p = OP.pessoas.find(y=>y.id===x.pessoa_id), nome = p ? lembPrimeiroNome(p.nome) : 'O cliente', r = btn.dataset.renov;
+    const antes = { resultado:x.resultado, proxima_acao:'Perguntar se renovou', proxima_data:x.proxima_data };
+    const voltarLinha = e=>{ e.preventDefault(); opHojeDialog(HJ.mine); };
+    const vivas = (OP.apo.get(x.pessoa_id)||[]).filter(y=>y.status!=='cancelada' && y.status!=='encerrada');
+    let a = atvApolice(x);
+    // sem a apólice certa (mensagem antiga, cliente com mais de uma): a pessoa escolhe; "nenhuma" não mexe em apólice
+    const escolha = (!a && vivas.length>1) ? `<label class="fl" style="margin-top:6px"><span>Qual apólice?</span><select class="ca-inp hj-qual" style="min-height:44px;font-size:16px"><option value="">Escolha a apólice</option>${vivas.map(y=>`<option value="${y.id}">${escapeHtml([y.tipo_seguro, y.seguradora].filter(Boolean).join(' · ')||'Apólice')}${y.data_vencimento?' · vence '+fmtDate(String(y.data_vencimento).slice(0,10)):''}</option>`).join('')}<option value="-">Nenhuma destas</option></select></label>` : '';
+    const qual = ()=>{ const sel = row.querySelector('.hj-qual'); if(!sel) return a; return sel.value && sel.value!=='-' ? vivas.find(y=>y.id===sel.value) : null; };
+    if(r==='conv'){ row.querySelectorAll('button').forEach(z=>z.disabled = true);
+      if(await anotar(x, { resultado:'Conversando', proxima_acao:'Perguntar se renovou', proxima_data:ymd(new Date(Date.now()+7*864e5)) })){ GUIA.dados = null; comDesfazer(row, `<span class="hint" style="margin:0">Anotado. Pergunto de novo daqui a 7 dias.</span>`, ()=>anotar(x, antes)); }
+      else row.querySelectorAll('button').forEach(z=>z.disabled = false);
+      return; }
+    if(r==='nao'){
+      row.innerHTML = `<div><b>${escapeHtml(nome)} não renovou.</b></div>${escolha}
+        <label class="fl" style="margin-top:6px"><span>Por quê? (opcional)</span><input class="ca-inp hj-motivo" placeholder="Ex.: achou mais barato em outro lugar" style="min-height:44px;font-size:16px"></label>
+        <label class="chk" style="margin-top:6px;min-height:44px"><input type="checkbox" class="hj-parar" checked style="width:22px;height:22px"> Parar os avisos desta apólice (ela sai de "Renovam")</label>
+        <div class="gp-acoes"><button type="button" class="om-save hj-q-bt" data-ok>Anotar</button><a href="#" class="gp-link" data-volta>Voltar</a></div>`;
+      row.querySelector('[data-volta]').addEventListener('click', voltarLinha);
+      row.querySelector('[data-ok]').addEventListener('click', async ev=>{ if(ev.target.disabled) return; ev.target.disabled = true;
+        const ap = qual(), motivo = row.querySelector('.hj-motivo').value.trim() || null, parar = row.querySelector('.hj-parar').checked && ap, stAntes = ap ? ap.status : null;
+        if(!(await anotar(x, { resultado:'Não renovou', proxima_acao:null, proxima_data:null, motivo_perda:motivo }))){ ev.target.disabled = false; return; }
+        if(parar){ const { error:e2 } = await sb.from('crm_apolices').update({ status:'encerrada' }).eq('id', ap.id); if(e2) showToast('Anotei, mas não consegui parar os avisos: '+e2.message); else { ap.status = 'encerrada'; OP.dirty = true; } }
+        GUIA.dados = null;
+        comDesfazer(row, `<span class="hint" style="margin:0">Anotado: ${escapeHtml(nome)} não renovou${parar?'; os avisos desta apólice pararam':''}. Fica registrado na ficha.</span>`, async ()=>{
+          await anotar(x, { ...antes, motivo_perda:null }); if(parar){ await sb.from('crm_apolices').update({ status:stAntes }).eq('id', ap.id); ap.status = stAntes; } }); });
+      return; }
+    // Sim
+    const desenharSim = ()=>{ const ap = qual(), sg = renovSugestao(ap && ap.data_vencimento), cx = row.querySelector('.hj-simdata');
+      if(!cx) return;
+      cx.innerHTML = !ap ? `<div class="hint">${escolha ? 'Escolha a apólice para conferir o vencimento.' : 'Não achei a apólice desta mensagem: a renovação fica anotada e o vencimento você ajusta na apólice.'}</div>`
+        : sg.jaRenovada ? `<div class="hint">Esta apólice já vence em ${fmtDate(sg.data)}: parece que a renovação já foi lançada. O vencimento fica como está.</div><input type="hidden" class="hj-novovenc" value="">`
+        : `<label class="fl" style="margin-top:6px"><span>Novo vencimento (confira)</span><input type="date" class="ca-inp hj-novovenc" value="${sg.data}" style="min-height:44px;font-size:16px"></label>`; };
+    row.innerHTML = `<div><b>${escapeHtml(nome)} renovou${a && a.tipo_seguro ? ' o seguro de '+escapeHtml(String(a.tipo_seguro).toLowerCase()) : ''}.</b></div>${escolha}<div class="hj-simdata"></div>
+      <div class="gp-acoes"><button type="button" class="om-save hj-q-bt" data-ok>Confirmar a renovação</button><a href="#" class="gp-link" data-volta>Voltar</a></div>`;
+    desenharSim(); const sel = row.querySelector('.hj-qual'); if(sel) sel.addEventListener('change', desenharSim);
+    row.querySelector('[data-volta]').addEventListener('click', voltarLinha);
+    row.querySelector('[data-ok]').addEventListener('click', async ev=>{
+      if(ev.target.disabled) return;
+      const erro = t=>{ let e = row.querySelector('.hj-erro'); if(!e){ e = document.createElement('div'); e.className = 'om-err hj-erro'; row.querySelector('.gp-acoes').before(e); } e.textContent = t; };
+      const ap = qual(); if(row.querySelector('.hj-qual') && !row.querySelector('.hj-qual').value){ erro('Escolha qual apólice renovou.'); return; }
+      const inp = row.querySelector('.hj-novovenc'), novo = inp ? inp.value : '', vencAntes = ap ? ap.data_vencimento : null;
+      if(ap && novo && vencAntes && novo <= String(vencAntes).slice(0,10)){ erro('O novo vencimento precisa ser depois do atual ('+fmtDate(String(vencAntes).slice(0,10))+').'); return; }
+      ev.target.disabled = true;
+      const mudAtv = { resultado:'Renovou', proxima_acao:null, proxima_data:null }; if(ap && !x.apolice_id) mudAtv.apolice_id = ap.id;
+      const ok = await anotar(x, mudAtv);
+      if(!ok){ ev.target.disabled = false; return; }
+      if(ap) x.apolice_id = x.apolice_id || ap.id;
+      let vencTxt = '';
+      const stAntesSim = ap ? ap.status : null;
+      if(ap && novo){ const mud = { data_vencimento:novo }; if(ap.status==='encerrada') mud.status = 'ativa';   // cancelada nunca volta sozinha
+        const { error:e2 } = await sb.from('crm_apolices').update(mud).eq('id', ap.id);
+        if(e2) showToast('Anotei a renovação, mas não consegui mudar o vencimento: '+e2.message); else { Object.assign(ap, mud); vencTxt = ` Novo vencimento: ${fmtDate(novo)}.`; } }
+      OP.dirty = true; GUIA.dados = null;
+      const primeira = !RV.renovadas.length; RV.renovadas.push(x); contadorAtualizar();
+      const tel = p && (p.telefone || ((await sb.from('crm_pessoas').select('telefone').eq('id', p.id).maybeSingle()).data||{}).telefone), wa = waLink(tel);
+      row.innerHTML = `<div class="hj-quadro" style="margin:0"><div class="hj-q-n">${primeira?'Sua primeira renovação confirmada! 🎉':'Mais uma renovação confirmada! 🎉'}</div>
+        <div class="hj-q-t">${escapeHtml(nome)} renovou.${escapeHtml(vencTxt)} Cliente satisfeito é a melhor hora para pedir uma indicação.</div>
+        ${wa ? `<button type="button" class="om-save hj-q-bt" data-ind>Pedir uma indicação para ${escapeHtml(nome)}</button>` : `<div class="hint">${escapeHtml(nome)} está sem telefone no cadastro.</div>`}
+        <a href="#" class="gp-link" data-desf style="margin-left:12px">Desfazer</a></div>`;
+      const ld = row.querySelector('[data-desf]'), td = setTimeout(()=>{ if(ld.isConnected) ld.remove(); }, 10000);
+      ld.addEventListener('click', async e=>{ e.preventDefault(); clearTimeout(td); ld.remove();
+        await anotar(x, antes); if(ap && novo && vencAntes){ await sb.from('crm_apolices').update({ data_vencimento:vencAntes, status:stAntesSim }).eq('id', ap.id); ap.data_vencimento = vencAntes; ap.status = stAntesSim; }
+        OP.dirty = true; opHojeDialog(HJ.mine); });
+      const bi = row.querySelector('[data-ind]'); if(bi) bi.addEventListener('click', async ()=>{
+        // a mensagem de indicação abre para editar, como a de renovação
+        let modelo = ''; try{ modelo = await lembModelo('indicacao'); }catch(e){}
+        if(!modelo) modelo = 'Oi, {primeiro_nome}! Obrigado pela confiança de novo. Se você conhece alguém que também quer cuidar da renda e do patrimônio, pode me indicar? Eu cuido de tudo com o mesmo carinho.';
+        bi.outerHTML = `<label class="fl full" style="margin-top:6px"><span>Mensagem para ${escapeHtml(nome)} (pode editar)</span><textarea rows="3" class="hj-indtxt" style="border:1px solid var(--border);border-radius:6px;padding:8px;font-family:inherit;font-size:16px;text-transform:none">${escapeHtml(lembTexto(modelo, {nome:p.nome}))}</textarea></label>
+          <div style="margin-top:6px"><button type="button" class="om-save hj-q-bt" data-indwa>Abrir no WhatsApp</button></div>`;
+        const bw = row.querySelector('[data-indwa]'); bw.addEventListener('click', async ()=>{
+          if(bw.disabled) return; bw.disabled = true;
+          window.open(wa+'?text='+encodeURIComponent(row.querySelector('.hj-indtxt').value.trim()), '_blank', 'noopener');
+          const { error:e3 } = await atvInserir({ pessoa_id:p.id, apolice_id:ap?ap.id:null, tipo:'whatsapp', data_hora:new Date().toISOString(), resumo:'Pedido de indicação (depois da renovação)', resultado:'Enviada', responsavel:curUserName()||null });
+          bw.outerHTML = `<div class="hint" style="margin:0">✔ Pedido de indicação aberto no WhatsApp${e3?'':' e registrado na ficha'}.</div>`; });
+      });
+    });
+  }));
   b.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); dlgClose(); goToPersonView(a.dataset.openp); }));
   b.querySelector('#hj-mine').addEventListener('change', e=>opHojeDialog(e.target.checked));
   reuLigar(b, reu, onlyMine);
@@ -10011,7 +10199,7 @@ async function opHojeDialog(onlyMine){
     const dd = a && a.data_vencimento ? daysTo(String(a.data_vencimento).slice(0,10)) : 30;
     let modelo = ''; try{ modelo = await lembModelo(dd<=7 ? 'renovacao_7' : dd<=15 ? 'renovacao_15' : 'renovacao_30'); }catch(e){}
     if(!modelo) modelo = 'Oi, {primeiro_nome}! Tudo bem? Sua {produto} ({seguradora}) vence dia {vencimento}. Quer que eu já veja a renovação para você?';
-    const texto = lembTexto(modelo, {nome:p.nome}, { produto:a&&a.tipo_seguro ? 'proteção de '+String(a.tipo_seguro).toLowerCase() : 'sua proteção', seguradora:a&&a.seguradora||'', vencimento:a&&a.data_vencimento ? String(a.data_vencimento).slice(0,10) : '' });
+    const texto = lembTexto(modelo, {nome:p.nome}, { produto:a&&a.tipo_seguro ? String(a.tipo_seguro).toLowerCase() : 'seguro', seguradora:a&&a.seguradora||'', vencimento:a&&a.data_vencimento ? String(a.data_vencimento).slice(0,10) : '' });
     const tel = p.telefone || ((await sb.from('crm_pessoas').select('telefone').eq('id', pid).maybeSingle()).data||{}).telefone;
     const wa = waLink(tel);
     const box2 = document.createElement('div'); box2.className = 'hj-msg es-box'; box2.style.margin = '4px 0 8px';
@@ -10024,11 +10212,11 @@ async function opHojeDialog(onlyMine){
       const msg = box2.querySelector('textarea').value.trim(); window.open(wa+'?text='+encodeURIComponent(msg), '_blank', 'noopener');
       const primeira = (()=>{ try{ return !localStorage.getItem('tc_passo_msg:'+String(window._userEmail||'').toLowerCase()); }catch(e){ return false; } })();
       try{ localStorage.setItem('tc_passo_msg:'+String(window._userEmail||'').toLowerCase(), String(Date.now())); }catch(e){}
-      let registrou = false; GUIA.dados = null;
-      try{ const { error:eAt } = await sb.from('crm_atividades').insert({ pessoa_id:pid, tipo:'whatsapp', data_hora:new Date().toISOString(), resumo:'Mensagem de renovação'+(a?': '+[a.tipo_seguro,a.seguradora].filter(Boolean).join(' · '):''), resultado:'Enviada', responsavel:curUserName()||null }); if(eAt) throw eAt; registrou = true; OP.dirty = true; }
+      let registrou = false; GUIA.dados = null; RVC.dados = null;
+      try{ const { error:eAt } = await atvInserir({ pessoa_id:pid, apolice_id:a?a.id:null, proxima_acao:'Perguntar se renovou', proxima_data:ymd(new Date(Date.now()+7*864e5)), tipo:'whatsapp', data_hora:new Date().toISOString(), resumo:'Mensagem de renovação'+(a?': '+[a.tipo_seguro,a.seguradora].filter(Boolean).join(' · '):''), resultado:'Enviada', responsavel:curUserName()||null }); if(eAt) throw eAt; registrou = true; OP.dirty = true; }
       catch(e){ showToast('A mensagem abriu no WhatsApp, mas não consegui registrar na ficha do cliente: '+(e.message||e)); }
       if(registrou && window.guiaProduto) guiaRender();   // recalcula o guia: depois da primeira mensagem o menu volta inteiro
-      box2.innerHTML = `<div class="hint" style="margin:0">✔ Mensagem aberta no WhatsApp em ${new Date().toLocaleDateString('pt-BR')}${registrou?' e registrada na ficha':''}.${primeira?' <b>Pronto!</b> A partir de agora o sistema te lembra 30, 15 e 7 dias antes de cada vencimento, aqui no Hoje.':''}</div>`;
+      box2.innerHTML = `<div class="hint" style="margin:0">✔ Mensagem aberta no WhatsApp em ${new Date().toLocaleDateString('pt-BR')}${registrou?' e registrada na ficha':''}.${primeira?' <b>Pronto!</b> A partir de agora o sistema te lembra 30, 15 e 7 dias antes de cada vencimento, aqui no Hoje.':''} Daqui a 7 dias eu pergunto se renovou.</div>`;
     });
   }));
   b.querySelectorAll('[data-lmsg]').forEach(btn=>btn.addEventListener('click', async ()=>{ const r = (lembR.data||[]).find(x=>x.chave===btn.dataset.lmsg); if(!r) return;
@@ -10091,6 +10279,15 @@ function opAlertasDialog(){
 }
 document.getElementById('op-alertas').addEventListener('click', opAlertasDialog);
 document.getElementById('op-hoje').addEventListener('click', ()=>opHojeDialog(false));
+// faixa escura do cabeçalho acompanha os botões do canto (App, Planos, Pagamento, Minha corretora…): nenhum fica metade no claro
+function hdrNavyAjustar(){
+  const h = document.querySelector('#app header'), w = h && h.querySelector('.who'), n = h && h.querySelector('.hdr-navy'); if(!w || !n) return;
+  const precisa = h.getBoundingClientRect().right - w.getBoundingClientRect().left;
+  n.style.width = Math.max(470, h.clientWidth*0.36, precisa/0.86 + 24) + 'px';   // a diagonal ocupa os 14% da esquerda da faixa
+}
+window.addEventListener('resize', hdrNavyAjustar);
+try{ new MutationObserver(()=>requestAnimationFrame(hdrNavyAjustar)).observe(document.querySelector('#app header .who'), { childList:true, subtree:true, characterData:true }); }catch(e){}
+setTimeout(hdrNavyAjustar, 300);
 document.getElementById('op-callhot').addEventListener('click', opCallHotDialog);
 
 // ---------- INDICADORES ----------
@@ -11198,11 +11395,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611051143"></script>
-<script src="painel.js?v=202611051143"></script>
-<script src="cobranca.js?v=202611051143"></script>
-<script src="cadastro.js?v=202611051143"></script>
-<script src="contrato.js?v=202611051143"></script>
-<script src="guarda.js?v=202611051143"></script>
+<script src="plataforma.js?v=202611051205"></script>
+<script src="painel.js?v=202611051205"></script>
+<script src="cobranca.js?v=202611051205"></script>
+<script src="cadastro.js?v=202611051205"></script>
+<script src="contrato.js?v=202611051205"></script>
+<script src="guarda.js?v=202611051205"></script>
 </body>
 </html>

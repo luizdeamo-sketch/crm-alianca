@@ -8,8 +8,8 @@
 (function () {
   'use strict';
   const PLANOS = [
-    ['vendas', 'Vendas', 'Prospecção, Consultoria com as fases de proteção, Reuniões, Base de conhecimento, agenda no Outlook/Teams e IA de vendas.'],
-    ['carteira', 'Carteira', 'As apólices: Central de Apólices, renovações com avisos de 30, 15 e 7 dias, pós-venda e IA que lê apólices e documentos.'],
+    ['vendas', 'Vendas', 'Avisos de renovação de 30, 15 e 7 dias, Prospecção, Consultoria com as fases de proteção, Reuniões, Base de conhecimento, agenda no Outlook/Teams e IA de vendas.'],
+    ['carteira', 'Carteira', 'Avisos de renovação de 30, 15 e 7 dias, Central de Apólices, pós-venda e IA que lê apólices e documentos.'],
     ['vendas_carteira', 'Vendas + Carteira', 'Os dois módulos juntos: a venda fechada já cai na carteira e a renovação volta para a venda.'],
     ['completo', 'Vendas + Carteira + Equipe', 'Os dois módulos, mais a Equipe: indicadores de cada corretor, metas, orçamento, funil com taxas, indicações e Ata da semana.']];
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -192,11 +192,8 @@
       const fim = fimDegust ? new Date(fimDegust + 'T12:00:00').toLocaleDateString('pt-BR') : '';
       moldura('Tudo pronto!', `${rotulo(5)} · O seu cadastro está concluído.`, `
         ${fim ? `<div class="ok"><b>A sua degustação gratuita vai até ${esc(fim)}.</b> Até lá, use à vontade. Alguns dias antes do fim, aparece aqui no sistema a primeira fatura com o QR Code do Pix; é só pagar e clicar em "Já paguei".</div>` : '<div class="ok"><b>Contrato aceito.</b> O sistema está liberado para a sua equipe.</div>'}
-        <div><b>Próximos passos</b><ol style="margin:6px 0 0 18px">
-          <li><b>Cadastre a sua equipe</b> em Admin: inclua o e-mail de cada pessoa e libere o primeiro acesso.</li>
-          <li><b>Baixe a planilha padrão</b>, preencha com os seus clientes e apólices e <b>suba a carteira</b>; o sistema mostra uma prévia antes de gravar.</li>
-          <li>Guarde o link próprio da sua corretora: <b>${esc(new URL('./', location.href).href + (INFO.slug || ''))}</b></li></ol>
-          <p style="color:#5d6871;margin:8px 0 0">O quadro "Comece por aqui", no canto da tela, leva você a cada passo.</p></div>`,
+        <div>Ao clicar em <b>Começar a usar</b>, a tela <b>Primeiros passos</b> leva você do cadastro dos clientes à primeira mensagem de renovação.
+          A equipe você inclui depois, em Admin.<br>Guarde o link próprio da sua corretora: <b>${esc(new URL('./', location.href).href + (INFO.slug || ''))}</b></div>`,
         `<span></span><button type="button" class="pri" id="c-fim">Começar a usar</button>`);
       raiz.querySelector('#c-fim').onclick = () => location.reload();
     }

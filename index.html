@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611050952">
+<meta name="app-build" content="202611051143">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -22,7 +22,7 @@ window.ALIANCA = {
   cores: { '--navy': '#111827', '--navy-deep': '#0d1117', '--brand': '#9c7518', '--brand-hover': '#7d5e13',
            '--brand-soft': '#f7f1e3', '--brand-ink': '#9c7518', '--teal': '#d7aa42', '--teal-deep': '#9c7518', '--teal-ink': '#9c7518' },
   modulos: null,          // sistema inteiro; o master escolhe os módulos de cada pessoa na Admin
-  inicio: 'vendas',
+  inicio: 'hoje',   // fluxo da primeira entrada (05/11/2026): o Hoje é a tela de entrada do produto
   primeiroAcesso: true,   // a pessoa liberada pelo master cria a própria senha na tela de login
   ia: true                // chave da Anthropic no Supabase do produto desde 02/11/2026; cada função confere plano e acesso em dia
 };
@@ -211,6 +211,53 @@ window.ALIANCA = {
   .mfa-faixa{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:240; background:#fff7e0; border:1px solid #f0d58a; border-radius:12px; box-shadow:0 12px 30px -10px rgba(11,20,51,.4); color:#5a4300; padding:8px 14px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; max-width:min(560px,92vw); } .mfa-faixa .mfa-x{ background:transparent !important; color:#5a4300 !important; border:0 !important; padding:2px 6px !important; }
   .op-prosp{ margin-left:8px; font-size:11px; font-weight:700; padding:1px 9px; border-radius:999px; border:1px solid var(--brand,#0018fc); background:#fff; color:var(--brand,#0018fc); cursor:pointer; vertical-align:middle; line-height:1.5 } .op-prosp:hover{ background:var(--brand,#0018fc); color:#fff } .op-prosp[disabled]{ opacity:.5; cursor:wait }
   .mfa-faixa button{ border:1px solid #0018fc; background:#0018fc; color:#fff; border-radius:999px; padding:3px 12px; font-weight:700; cursor:pointer; }
+
+  /* Primeiros passos (guia da primeira entrada) */
+  #view-comeco.active, #view-hoje.active{ display:block; }
+  .hj-cab h2{ margin:0; font-size:22px; color:var(--navy); } .hj-cab{ margin-bottom:12px; }
+  .hj-quadro{ background:var(--brand-soft,#eef0ff); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin:0 0 12px; }
+  .hj-q-n{ font-size:20px; color:var(--navy); margin-bottom:4px; } .hj-q-t{ font-size:16px; color:var(--ink-soft); margin-bottom:12px; }
+  .hj-q-bt{ min-height:48px; font-size:16px !important; padding:0 20px !important; }
+  .hj-guia{ display:block; width:100%; text-align:left; min-height:44px; border:1px solid var(--border); background:var(--surface); border-radius:10px; padding:10px 14px; font:inherit; font-size:16px; cursor:pointer; margin:0 0 12px; color:var(--ink); }
+  .hj-mais > summary{ cursor:pointer; font-weight:600; font-size:16px; padding:12px 0; min-height:44px; }
+  .hj-dir{ margin-left:10px; display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap; vertical-align:middle; }
+  #view-hoje .rec, #view-comeco .gp-sub, #view-comeco .gp-x, #view-comeco .gp-porta span, #view-comeco .gp-pe{ font-size:16px; }
+  #view-hoje .ql{ font-size:14px; text-transform:none; letter-spacing:0; } #view-hoje .tagx, #view-hoje .hint{ font-size:14px; }
+  #view-hoje .vd-btn, #view-comeco .gp-link, #ac-root .ac-acoes button, #ac-root .ac-atalhos button{ min-height:44px; font-size:15px; }
+  #ac-root #ac-box{ font-size:16px; } #rail.enxuto .nav-btn span{ font-size:12px; }
+  #view-comeco .gp-tag{ font-size:14px; } #view-hoje .hj-msg textarea{ font-size:16px !important; }
+  .cl-ok-l{ display:inline-flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; } .cl-ok-l input{ width:24px; height:24px; } .cl-ok-l span{ display:none; }
+  @media (max-width:820px){ #view-hoje{ padding-bottom:140px !important; } #view-hoje .hj-dir{ display:flex; margin:8px 0 0; }
+    #rail.enxuto .nav-btn{ flex:1 1 0 !important; width:auto !important; min-width:0; }
+    .cl-tab{ min-width:0 !important; } .cl-tab, .cl-tab tbody, .cl-tab tr, .cl-tab td{ display:block; width:100%; } .cl-tab thead{ display:none; }
+    .cl-tab tr{ border:1px solid var(--border); border-radius:12px; margin-bottom:10px; padding:6px; } .cl-tab td{ border:0 !important; padding:4px 6px; }
+    .cl-tab td[data-label]::before{ content:attr(data-label); display:block; font-size:14px; color:var(--ink-soft); font-weight:600; }
+    .cl-tab td[data-label="Gravar"]::before{ display:none; } .cl-ok-l span{ display:inline; font-size:16px; }
+    .cl-tab input:not([type=checkbox]){ width:100%; min-height:44px; font-size:16px; } }
+  #rail.enxuto .nav-btn.nav-extra{ display:none !important; } #rail.enxuto.aberto .nav-btn.nav-extra:not([data-off]){ display:flex !important; }
+  @media (max-width:760px){ #view-hoje{ padding:16px !important; } }
+  .gp{ color:var(--ink); }
+  .gp-h{ font-size:24px; margin:0 0 6px; color:var(--navy); }
+  .gp-sub{ color:var(--ink-soft); margin:0 0 18px; font-size:15px; }
+  .gp-q{ font-size:17px; margin:8px 0 10px; }
+  .gp-portas{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-bottom:22px; }
+  .gp-porta{ display:flex; flex-direction:column; gap:6px; text-align:left; padding:18px; border:1px solid var(--border); border-radius:14px; background:var(--surface); cursor:pointer; font:inherit; color:inherit; min-height:120px; }
+  .gp-porta:hover, .gp-porta:focus-visible{ border-color:var(--navy); box-shadow:0 6px 18px rgba(0,18,94,.12); outline:none; }
+  .gp-porta b{ font-size:16px; color:var(--navy); } .gp-porta span{ color:var(--ink-soft); font-size:14px; } .gp-porta .gp-ico{ font-size:26px; }
+  .gp-barra{ height:8px; background:var(--border); border-radius:99px; overflow:hidden; margin:0 0 14px; } .gp-barra i{ display:block; height:100%; background:var(--navy); }
+  .gp-lista{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+  .gp-passo{ display:grid; grid-template-columns:34px 1fr; gap:12px; padding:14px 16px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  .gp-passo.agora{ border-color:var(--navy); box-shadow:0 0 0 2px rgba(0,18,94,.10); }
+  .gp-passo.ok{ opacity:.75; } .gp-passo.pulado{ opacity:.7; }
+  .gp-n{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:700; background:var(--bg); border:1px solid var(--border); }
+  .gp-passo.ok .gp-n{ background:#1f7a4d; color:#fff; border-color:#1f7a4d; } .gp-passo.agora .gp-n{ background:var(--navy); color:#fff; border-color:var(--navy); }
+  .gp-passo b{ font-size:15.5px; } .gp-x{ color:var(--ink-soft); font-size:14px; margin-top:2px; }
+  .gp-acoes{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:10px; }
+  .gp-tag{ font-size:12px; background:var(--bg); border:1px solid var(--border); border-radius:99px; padding:1px 8px; color:var(--ink-faint); }
+  .gp-link{ border:0; background:none; color:var(--ink-soft); text-decoration:underline; cursor:pointer; font:inherit; font-size:14px; padding:6px 0; min-height:34px; }
+  .gp-pe{ margin-top:18px; color:var(--ink-faint); font-size:13.5px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .gp-cont{ font-size:10.5px; opacity:.8; }
+  @media (max-width:760px){ #view-comeco{ padding:16px !important; } .gp-h{ font-size:20px; } }
 </style>
 
 
@@ -273,6 +320,8 @@ window.ALIANCA = {
   </header>
 
   <nav id="rail">
+    <button class="nav-btn" data-view="hoje" title="Hoje: renovações, avisos e o que fazer hoje"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg><span>Hoje</span></button>
+    <button class="nav-btn" data-view="comeco" style="display:none" title="Primeiros passos: do cadastro à primeira mensagem de renovação"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20.5V4.5"/><path d="M5 5h11l-2.5 3.5L16 12H5"/></svg><span>Primeiros passos <small class="gp-cont"></small></span></button>
     <button class="nav-btn" data-view="indicadores" title="Indicadores do funil e da produção"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l3.5-4.5"/><circle cx="12" cy="16" r="1.25"/><path d="M4 19.5h16"/></svg><span>Indicadores</span></button>
     <button class="nav-btn active" data-view="operacao"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.25"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.5"/><path d="M15.5 14.2c2.6-.3 4.5 1.3 5 4.3"/></svg><span>Aliança</span></button>
     <button class="nav-btn" data-view="central" title="Central de Apólices"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/><path d="M12.5 11.2l2.7 1v1.9c0 1.8-1.2 3.1-2.7 3.7-1.5-.6-2.7-1.9-2.7-3.7v-1.9z"/></svg><span>Apólices</span></button>
@@ -283,10 +332,14 @@ window.ALIANCA = {
     <button class="nav-btn" data-view="conhecimento"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="2.75"/><path d="M4.5 6v6c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75V6"/><path d="M4.5 12v6c0 1.5 3.4 2.75 7.5 2.75s7.5-1.25 7.5-2.75v-6"/></svg><span>Base</span></button>
     <button class="nav-btn" data-view="sugestoes" title="Sugestões de melhoria do sistema"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17.5h6"/><path d="M10 20.5h4"/><path d="M12 3.5a5.5 5.5 0 0 0-3.3 9.9c.5.4.8 1 .8 1.6v.5h5v-.5c0-.6.3-1.2.8-1.6A5.5 5.5 0 0 0 12 3.5z"/></svg><span>Sugestões</span></button>
     <button class="nav-btn" data-view="ata"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 3h6v3H9z"/><path d="M8.5 11l1.2 1.2 2-2.2M8.5 16l1.2 1.2 2-2.2M13.5 11.5h2.5M13.5 16.5h2.5"/></svg><span>Ata</span></button>
+    <button class="nav-btn nav-mais-btn" id="nav-mais" type="button" style="display:none" title="Mostrar as outras telas" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg><span>Mais</span></button>
     <button class="nav-btn" id="nav-admin" data-view="admin" style="display:none" title="Usuários, acessos e auditoria (só master)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.500-7-10V6z"/><path d="M9.500 12l2 2 3.500-4"/></svg><span>Admin</span></button>
   </nav>
 
   <div class="view-container">
+
+    <div id="view-hoje" class="view" style="overflow-y:auto; padding:22px 28px;"><div class="hj-cab"><h2>Hoje — o que preciso fazer</h2><div class="om-sub" id="hj-data"></div></div><div id="hj-body"><div class="op-more">Carregando...</div></div></div>
+    <div id="view-comeco" class="view" style="overflow-y:auto; padding:26px 32px;"><div id="comeco-body" class="gp"></div></div>
 
     <div id="view-operacao" class="view active">
       <div class="op-top">
@@ -441,7 +494,7 @@ window.ALIANCA = {
       <div class="pg">
         <div class="pg-head"><h2>Indicadores</h2><span class="sub">Funil contra as metas, tempo parado, produção Aliança e oportunidades.</span>
           <span style="margin-left:auto;display:flex;gap:8px"><select id="ind-periodo" class="ca-inp" style="width:170px"><option value="semana">Esta semana</option><option value="mes" selected>Este mês</option><option value="30d">Últimos 30 dias</option><option value="tri">Últimos 3 meses</option><option value="tudo">Todo o período</option></select><button class="om-cancel" id="ind-metas">Metas</button></span></div>
-        <details id="ind-tour" class="es-box" style="margin:0 0 14px" open><summary class="tour-sum"><span class="tour-a">🎬 Visão do gestor: como o CRM Aliança funciona <span style="font-weight:500;color:var(--ink-soft);font-size:12.5px">(vídeo de 5 minutos · quem vende vê o vídeo em Vendas)</span></span><span class="tour-x">▲ Recolher</span><span class="tour-b">▶ Rever o vídeo: visão do gestor (5 min)</span></summary>
+        <details id="ind-tour" class="es-box" style="margin:0 0 14px"><summary class="tour-sum"><span class="tour-a">🎬 Visão do gestor: como o CRM Aliança funciona <span style="font-weight:500;color:var(--ink-soft);font-size:12.5px">(vídeo de 5 minutos · quem vende vê o vídeo em Vendas)</span></span><span class="tour-x">▲ Recolher</span><span class="tour-b">▶ Rever o vídeo: visão do gestor (5 min)</span></summary>
           <div style="margin-top:10px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start"><video controls preload="metadata" style="width:100%;max-width:760px;border-radius:10px;background:#00125e" src="crm-alianca-gestor.mp4"></video>
           <div style="flex:1;min-width:240px;font-size:13px;line-height:1.6;color:var(--ink-soft)"><b style="color:var(--ink)">O caminho, passo a passo</b><br>1. Cadastrar o lead<br>2. Botões de inteligência da ficha<br>3. Registrar cada contato em Vendas<br>4. Mudar o status<br>5. Acompanhar na Aliança<br>6. Dúvida? Botão 💬 com print marcado</div></div></details>
         <script>try{ const d = document.getElementById('ind-tour'), v = d.querySelector('video'); let visto = false; if(localStorage.getItem('ind-tour-fechado')==='1') d.open = false; d.addEventListener('toggle', ()=>{ try{ localStorage.setItem('ind-tour-fechado', d.open?'0':'1'); }catch(e){} if(!d.open && v) v.pause(); }); const fim = ()=>{ if(visto) return; visto = true; d.open = false; }; v.addEventListener('ended', fim); v.addEventListener('timeupdate', ()=>{ if(v.duration && v.currentTime/v.duration > 0.97) fim(); }); }catch(e){}</script>
@@ -475,8 +528,8 @@ window.ALIANCA = {
           <select id="ca-f-venc"><option value="">Qualquer vencimento</option><option value="vencidas">Já vencidas</option><option value="30">Vencem em 30 dias</option><option value="60">Vencem em 60 dias</option><option value="90">Vencem em 90 dias</option></select>
           <select id="ca-f-entrega"><option value="">Entrega: qualquer</option><option value="pendente">Certificado pendente de entrega</option><option value="feita">Já entregue</option></select>
         </div>
-        <div class="dz" id="ca-dz"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5V4M7.5 8.5L12 4l4.5 4.5"/><path d="M4.5 15v3.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V15"/></svg> Arraste os documentos (PDF, Excel ou foto) aqui ou clique — o sistema lê nome e CPF, acha ou cria o cadastro e anexa os arquivos<input type="file" id="ca-file" multiple accept=".pdf,.xlsx,.xls,image/*" hidden></div>
-        <div class="hint" style="margin:4px 0 0"><a href="#" id="ca-old" style="color:var(--brand)">Usar o leitor antigo de apólice</a> (cria a apólice e tenta ler as coberturas — será refeito na próxima fase)<input type="file" id="ca-file-old" multiple accept=".pdf,image/*" hidden></div>
+        <div class="dz" id="ca-dz"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5V4M7.5 8.5L12 4l4.5 4.5"/><path d="M4.5 15v3.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V15"/></svg> <span><b>Arraste aqui os PDFs das suas apólices</b> (pode ser 1 ou 100) ou clique. O sistema lê cada um, descobre de quem é e guarda o vencimento. Você confere antes de gravar.</span><input type="file" id="ca-file" multiple accept=".pdf,.xlsx,.xls,image/*" hidden></div>
+        <div class="hint" style="margin:4px 0 0"><a href="#" id="ca-old" style="color:var(--brand)">Abrir uma apólice por vez, com todos os campos</a> (para conferir coberturas e detalhes de uma apólice)<input type="file" id="ca-file-old" multiple accept=".pdf,image/*" hidden></div>
         <div id="ca-list"></div>
       </div>
     </div>
@@ -929,7 +982,7 @@ document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ if(!aliancaModuloL
 window.TC_MODULOS = null;
 const tcModulo = k => !Array.isArray(window.TC_MODULOS) || window.TC_MODULOS.includes(k);
 function tcAplicarModulosCorretora(){   // Admin e Sugestões ficam sempre no menu
-  document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(v!=='admin' && v!=='sugestoes' && !tcModulo(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+  document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(!['admin','sugestoes','hoje','comeco'].includes(v) && !tcModulo(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
   if(!tcModulo('premium')) document.querySelectorAll('#op-f-class option[value="premium"], #op-f-class option[value="fidelizado"]').forEach(o=>o.remove());
   document.body.classList.toggle('tc-sem-agenda-externa', !tcModulo('agenda_externa'));
 }
@@ -939,7 +992,7 @@ async function aliancaModulosDoUsuario(email){
     if(mc && mc.data && Array.isArray(mc.data.recursos)){ window.TC_MODULOS = mc.data.recursos; tcAplicarModulosCorretora(); }   // recursos = telas e IA dos módulos contratados (Vendas, Carteira, Gestão), calculados no banco
     const lista = (u && u.modulos) || [];   // módulos por usuário (vazio = todos os da corretora); o master vê todos os da corretora
     if(master !== true && lista.length){
-      document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(v!=='admin' && v!=='sugestoes' && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+      document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(!['admin','sugestoes','hoje','comeco'].includes(v) && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
     }
     const ativo = document.querySelector('.nav-btn.active');
     if(!ativo || ativo.dataset.off){ const p = document.querySelector('.nav-btn[data-view]:not([data-off]):not(#nav-admin)'); if(p) p.click(); }
@@ -2583,7 +2636,7 @@ document.querySelectorAll('#com-tabs [data-ct]').forEach(t=>t.addEventListener('
   show('orc-body', k==='orc'); show('par-body', k==='par'); show('com-body', k==='metas'); show('mc2-body', k==='carlas');
   if(k==='orc') renderOrcamento(); else if(k==='par') renderParametros(); else if(k==='carlas') renderMaisCarlas(); else renderComercial();
 }));
-document.querySelectorAll('.nav-btn').forEach(btn=>{
+document.querySelectorAll('.nav-btn[data-view]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
@@ -2601,6 +2654,8 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
     if(btn.dataset.view === 'conhecimento') renderConhecimento();
     if(btn.dataset.view === 'ata') renderAta();
     if(btn.dataset.view === 'admin') renderAdmin();
+    if(btn.dataset.view === 'comeco') guiaRender();
+    if(btn.dataset.view === 'hoje') opHojeDialog(HJ.mine);
   });
 });
 function goToPersonView(personId, tab){
@@ -7137,7 +7192,7 @@ function dlgOpen(html, wide){
   box.innerHTML = `<div class="dlg-card${wide?' wide':''}">${html}</div>`; box.style.display = 'flex';
   return box;
 }
-function dlgClose(){ const b = document.getElementById('dlg'); if(b){ b.style.display='none'; b.innerHTML=''; } if(window._dlgOnClose){ const f = window._dlgOnClose; window._dlgOnClose = null; f(); } }
+function dlgClose(){ const b = document.getElementById('dlg'); if(b){ b.style.display='none'; b.innerHTML=''; } if(window._dlgOnClose){ const f = window._dlgOnClose; window._dlgOnClose = null; f(); } if(typeof guiaAtualizar==='function') guiaAtualizar(); }
 // código de primeiro acesso em dois blocos de 4 (K7M2-QX9P), mais fácil de ditar e digitar
 const paCodFmt = c => { const s = String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); return s.length===8 ? s.slice(0,4)+'-'+s.slice(4) : s; };
 function fld(id, label, val, type, full){
@@ -7875,6 +7930,103 @@ async function caFase1(files, fixed, opts){
     }catch(e){ err.textContent = 'Erro ao salvar: '+(e.message||e)+' (parte pode já ter sido gravada — confira o cadastro).'; btn.disabled = false; btn.textContent = 'Salvar e anexar'; }
   });
 }
+// ============ LEITOR DE VÁRIAS APÓLICES (fluxo da primeira entrada, Fase 1, 05/11/2026) ============
+// Arrasta 1 ou 100 PDFs: o sistema lê cada um (IA de carteira quando a corretora tem; senão a leitura de texto), descobre de quem é,
+// mostra UMA tabela para conferir e grava as APÓLICES com vencimento (antes a área grande só criava o cliente e anexava o arquivo).
+// Documento com várias pessoas vai para o leitor detalhado (caFormMulti). Nada é gravado antes de "Gravar".
+const caLoteData = d => d ? String(d).slice(0,10).split('-').reverse().join('/') : '';
+async function caLoteLer(file){
+  const r = { file, nome:'', cpf:'', seguradora:'', produto:'', numero:'', ini:'', fim:'', premio:'', capital:'', coberturas:[], valores:{}, multi:false, erro:'', viaIA:false };
+  let f = {};
+  try{ f = await docsRead(file); }catch(e){ r.erro = e.message||String(e); }
+  if(f.multiplas && f.multiplas.length>1){ r.multi = true; r.f = f; r.nome = f.multiplas.length+' pessoas'; return r; }
+  r.nome = f.nome||''; r.cpf = f.cpf||''; r.seguradora = f.seguradora||''; r.produto = f.tipo_seguro||''; r.numero = f.numero_apolice||'';
+  r.ini = f.vig_ini||''; r.fim = f.vig_fim||''; r.capital = f.capital||'';
+  if(f.premio) r.premio = f.premio_periodo==='mensal' ? Math.round(f.premio*12*100)/100 : f.premio;
+  r.coberturas = f.coberturas||[]; r.valores = f.coberturas_valores||{};
+  // a IA completa o que a leitura de texto não achou (só para quem tem a IA de carteira)
+  const falta = !r.seguradora || !r.fim || !r.nome;
+  if(falta && aiMedia(file) && window.ALIANCA.ia !== false && tcModulo('ia_carteira')){
+    try{ const { data, error } = await sb.functions.invoke('extrair-apolice', { body: { file_base64: await proFileB64(file), media_type: aiMedia(file), filename: file.name } });
+      if(!error && data && !data.error && data.apolice){ const a = data.apolice; r.viaIA = true;
+        r.seguradora = r.seguradora || a.seguradora || ''; r.produto = r.produto || a.produto || ''; r.numero = r.numero || a.numero_apolice || '';
+        r.ini = r.ini || a.vigencia_inicio || ''; r.fim = r.fim || a.vigencia_fim || ''; r.nome = r.nome || a.segurado || '';
+        if(!r.cpf && a.cpf && validCPF(a.cpf)) r.cpf = fmtCPF(a.cpf);
+        if(!r.premio && Number(a.total_mensal)>0) r.premio = Math.round(Number(a.total_mensal)*12*100)/100;
+        if(!r.capital){ const caps = (a.itens||[]).map(x=>Number(x.capital)||0).filter(Boolean); if(caps.length) r.capital = Math.max(...caps); } } }
+    catch(e){ console.warn('IA apólice (lote):', e.message||e); }
+  }
+  return r;
+}
+// prêmio do lote: aceita 1.850,00 e 1850.5; o campo mostra no jeito brasileiro
+function clPremNum(v){ const t = String(v==null?'':v).replace(/[R$\s]/g,''); if(!t) return null; const n = (t.includes(',') || /^\d{1,3}(\.\d{3})+$/.test(t)) ? Number(t.replace(/\./g,'').replace(',','.')) : Number(t); return isFinite(n) ? n : null; }
+function clPremTxt(v){ if(v===''||v==null) return ''; const n = typeof v==='number' ? v : clPremNum(v); return n===null ? String(v) : n.toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+async function caLote(files){
+  files = [...files].filter(f=>f && f.name && aiMedia(f)); if(!files.length){ showToast('Envie PDFs ou fotos das apólices.'); return; }
+  const box = dlgOpen(`<div class="om-title"><div><h3>Lendo as suas apólices…</h3><div class="om-sub" id="cl-prog">Lendo 0 de ${files.length}</div></div></div><div class="dlg-body"><div class="op-more">Pode levar alguns minutos. Nada é gravado antes de você conferir.</div></div>`, true);
+  await ensurePessoas();
+  const rows = [];
+  for(let i=0;i<files.length;i++){ const pg = document.getElementById('cl-prog'); if(pg) pg.textContent = `Lendo ${i+1} de ${files.length}: ${files[i].name}`; rows.push(await caLoteLer(files[i])); }
+  const multis = rows.filter(r=>r.multi), lista = rows.filter(r=>!r.multi);
+  for(const r of lista){ const found = (r.cpf || r.nome) ? await findPessoas({cpf:r.cpf, nome:r.nome}) : []; r.match = found.find(isStrong) || null; }
+  const dup = r => r.match && (OP.apo.get ? (OP.apo.get(r.match.id)||[]) : []).some(a=>a.numero_apolice && r.numero && String(a.numero_apolice).trim()===String(r.numero).trim());
+  const aviso = r => [!r.nome && !r.match ? 'de quem é' : '', !r.seguradora ? 'a seguradora' : '', !r.fim ? 'o vencimento' : ''].filter(Boolean);
+  const linha = (r,i)=>{ const av = aviso(r), ja = dup(r);
+    return `<tr data-i="${i}" style="${av.length?'background:var(--amber-soft)':''}">
+      <td data-label="Gravar"><label class="cl-ok-l"><input type="checkbox" class="cl-ok" ${ja?'':'checked'} aria-label="Gravar esta apólice"><span>Gravar esta</span></label></td>
+      <td data-label="Cliente"><input class="cl-nome" value="${escapeHtml(r.match?r.match.nome:r.nome)}" placeholder="Nome do cliente" aria-label="Cliente" ${r.match?'readonly':''}><div class="hint" style="margin:2px 0 0">${r.match?'✔ já está no sistema':(r.nome?'cliente novo':'⚠ De quem é esta apólice?')}${ja?' · ⚠ esta apólice já está gravada':''}</div></td>
+      <td data-label="Vence em"><input class="cl-fim" type="date" value="${escapeHtml(r.fim||'')}" aria-label="Vence em"></td>
+      <td data-label="Seguradora"><input class="cl-seg" value="${escapeHtml(r.seguradora)}" placeholder="Seguradora" aria-label="Seguradora"></td>
+      <td data-label="Produto"><input class="cl-prod" value="${escapeHtml(r.produto)}" placeholder="Ex.: Vida" aria-label="Produto"></td>
+      <td data-label="Prêmio anual (R$)"><input class="cl-prem" inputmode="decimal" value="${escapeHtml(clPremTxt(r.premio))}" placeholder="Ex.: 1.850,00" aria-label="Prêmio anual em reais"></td>
+      <td data-label="Arquivo" style="font-size:13px;color:var(--ink-soft)">${escapeHtml(r.file.name)}${av.length?`<div style="color:var(--amber-ink);font-weight:600">⚠ Está faltando ${av.join(', ')}. Pode completar aqui?</div>`:''}${r.erro?`<div>não consegui ler o texto</div>`:''}</td></tr>`; };
+  box.querySelector('.dlg-card').innerHTML = `<div class="om-title"><div><h3>Confira as ${lista.length} apólice(s) antes de gravar</h3><div class="om-sub">Corrija o que estiver errado direto na tabela. As linhas com ⚠ precisam de um olhar seu. O que não tiver vencimento é gravado, mas o sistema só avisa a renovação quando a data estiver certa.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body">
+      ${multis.length?`<div class="hint" style="margin:0 0 8px">⚠ ${multis.length} arquivo(s) trazem várias pessoas (${multis.map(m=>escapeHtml(m.file.name)).join(', ')}): eles abrem depois, um por um, no leitor detalhado.</div>`:''}
+      <div style="overflow-x:auto"><table class="ca-table cl-tab" style="width:100%"><thead><tr><th></th><th>Cliente</th><th>Vence em</th><th>Seguradora</th><th>Produto</th><th>Prêmio anual</th><th>Arquivo</th></tr></thead>
+      <tbody>${lista.map(linha).join('')}</tbody></table></div>
+      <div class="om-err" id="cl-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save hj-q-bt" id="cl-save">Gravar ${lista.filter(r=>!dup(r)).length} apólice${lista.filter(r=>!dup(r)).length===1?'':'s'}</button></div>`;
+  if(!lista.length){ dlgClose(); if(multis.length){ multis.forEach(m=>caQueue.push(m.file)); caNext(); } return; }
+  box.querySelector('tbody').addEventListener('change', ev=>{ if(!ev.target.classList.contains('cl-ok')) return; const n = box.querySelectorAll('.cl-ok:checked').length; box.querySelector('#cl-save').textContent = 'Gravar '+n+' apólice'+(n===1?'':'s'); });
+  box.querySelector('#cl-save').addEventListener('click', async ev=>{
+    const btn = ev.target, err = box.querySelector('#cl-err'); err.textContent = '';
+    const plano = [...box.querySelectorAll('tbody tr')].map(tr=>{ const r = lista[+tr.dataset.i], q = c=>tr.querySelector(c);
+      return { r, ok:q('.cl-ok').checked, nome:q('.cl-nome').value.trim(), seg:q('.cl-seg').value.trim(), prod:q('.cl-prod').value.trim(), fim:q('.cl-fim').value, prem:q('.cl-prem').value }; }).filter(x=>x.ok);
+    const semNome = plano.find(x=>!x.r.match && !x.nome); if(semNome){ err.textContent = `Falta o nome do cliente do arquivo "${semNome.r.file.name}" (ou desmarque a linha).`; return; }
+    if(!plano.length){ err.textContent = 'Marque ao menos uma apólice.'; return; }
+    const premRuim = plano.find(x=>x.prem && clPremNum(x.prem)===null); if(premRuim){ err.textContent = `O prêmio "${premRuim.prem}" do arquivo "${premRuim.r.file.name}" não é um valor em reais. Escreva assim: 1.850,00.`; return; }
+    btn.disabled = true; let ok = 0, novos = 0, falhas = [], semData = 0;
+    const criados = new Map();   // o mesmo cliente novo em dois PDFs (vida + RC) vira um cadastro só
+    const chavesCli = x=>{ const c = dOnly(x.r.cpf||''), k = ['nome:'+normNome(x.nome).join(' ')]; if(c.length===11) k.unshift('cpf:'+c); return k; };
+    for(let k=0;k<plano.length;k++){ const x = plano[k]; btn.textContent = `Gravando ${k+1} de ${plano.length}…`;
+      try{
+        let pid = x.r.match ? x.r.match.id : (chavesCli(x).map(k=>criados.get(k)).find(Boolean) || null);
+        if(!pid){ const row = {nome:x.nome, tipo:tcPerfilPadrao()}; if(dOnly(x.r.cpf).length===11) row.cpf = fmtCPF(x.r.cpf);
+          const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single();
+          if(error) throw error; pid = data.id; OP.pessoas.push(data); novos++; x.r.match = {id:pid, nome:data.nome}; chavesCli(x).forEach(k=>criados.set(k, pid)); }
+        const path = await docsUpload(x.r.file, 'apolices');
+        const { error: e2 } = await sb.from('crm_apolices').insert({ pessoa_id:pid, seguradora:x.seg||null, tipo_seguro:x.prod||null, numero_apolice:x.r.numero||null,
+          data_emissao:x.r.ini||null, data_vencimento:x.fim||null, valor_premio:clPremNum(x.prem), valor_cobertura:x.r.capital===''?null:Number(x.r.capital),
+          status:'ativa', origem_apolice:'carteira', vinculo_comercial:tcModulo('premium') ? 'Aliança' : null, coberturas:x.r.coberturas||[], coberturas_valores:x.r.valores||{}, arquivo_apolice:path,
+          observacoes:`Lida em lote de "${x.r.file.name}"${x.r.viaIA?' (com IA)':''}.` });
+        if(e2) throw e2; ok++; if(!x.fim) semData++;
+      }catch(e){ falhas.push(x.r.file.name+': '+(e.message||e)); }
+    }
+    OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR')); OP.dirty = true; CA.loaded = false;
+    const hoje = new Date(), em60 = new Date(Date.now()+60*864e5);
+    const renovam = plano.filter(x=>x.fim && new Date(x.fim+'T12:00:00')>=new Date(hoje.toDateString()) && new Date(x.fim+'T12:00:00')<=em60).length;
+    try{ localStorage.setItem('tc_passo_apolices:'+String(window._userEmail||'').toLowerCase(), String(Date.now())); }catch(e){}
+    box.querySelector('.dlg-card').innerHTML = `<div class="om-title"><div><h3>${ok} apólice(s) gravada(s) 🎉</h3><div class="om-sub">${novos?novos+' cliente(s) novo(s) · ':''}${renovam?`<b>${renovam} renovam nos próximos 60 dias.</b>`:'Nenhuma renova nos próximos 60 dias.'}</div></div><button data-close>✕</button></div>
+      <div class="dlg-body">${semData?`<div class="hint" style="margin:0 0 8px">⚠ ${semData} apólice(s) ficaram sem vencimento: sem a data, o sistema não consegue te avisar. Dá para colocar depois na Central de Apólices.</div>`:''}
+        ${falhas.length?`<div class="om-err" style="margin:0 0 8px">Não consegui gravar ${falhas.length}: ${falhas.map(escapeHtml).join(' · ')}</div>`:''}
+        <div class="hint">A partir de agora o sistema te lembra 30, 15 e 7 dias antes de cada vencimento, na tela Hoje.</div></div>
+      <div class="om-foot"><span style="flex:1"></span>${multis.length?'<button class="om-cancel" id="cl-multi">Abrir os arquivos com várias pessoas</button>':''}<button class="om-save" id="cl-hoje">Ver quem renova</button></div>`;
+    const bm = box.querySelector('#cl-multi'); if(bm) bm.addEventListener('click', ()=>{ dlgClose(); multis.forEach(m=>caQueue.push(m.file)); caNext(); });
+    box.querySelector('#cl-hoje').addEventListener('click', ()=>{ dlgClose(); if(typeof opHojeDialog==='function') opHojeDialog(); });
+    if(typeof renderCentral==='function' && document.getElementById('view-central') && document.getElementById('view-central').classList.contains('active')) renderCentral(true);
+  });
+}
 let caQueue = [];
 function caEnqueue(files){ caQueue = caQueue.concat(files); if(!document.getElementById('dlg') || document.getElementById('dlg').style.display!=='flex') caNext(); }
 async function caNext(){
@@ -8174,8 +8326,11 @@ async function caSaveApolices(file, f, rows, box){
   dz.addEventListener('click', ()=>inp.click());
   dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('over'); });
   dz.addEventListener('dragleave', ()=>dz.classList.remove('over'));
-  dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('over'); caFase1([...e.dataTransfer.files]); });
-  inp.addEventListener('change', ()=>{ const fs = [...inp.files]; inp.value=''; caFase1(fs); });
+  // PDFs e fotos de apólice vão para o leitor de várias apólices (cria a apólice com vencimento); planilha e outros seguem no leitor de documentos
+  const entrada = fs=>{ fs = [...fs].filter(f=>f && f.name); const ap = fs.filter(f=>aiMedia(f)), outros = fs.filter(f=>!aiMedia(f));
+    if(ap.length) caLote(ap); else if(outros.length) caFase1(outros); };
+  dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('over'); entrada(e.dataTransfer.files); });
+  inp.addEventListener('change', ()=>{ const fs = [...inp.files]; inp.value=''; entrada(fs); });
   const old = document.getElementById('ca-file-old');
   document.getElementById('ca-old').addEventListener('click', e=>{ e.preventDefault(); old.click(); });
   old.addEventListener('change', ()=>{ caEnqueue([...old.files]); old.value=''; });
@@ -9083,7 +9238,7 @@ document.getElementById('op-export-contatos').addEventListener('click', ()=>{
 });
 let CT = null;
 document.getElementById('op-import').addEventListener('click', ()=>{
-  const box = dlgOpen(`<div class="om-title"><div><h3>Importar carteira: clientes e apólices</h3><div class="om-sub">Traga todos os seus clientes e as apólices ativas de uma vez. Só o nome é obrigatório; colunas que você não tiver podem ficar de fora. O sistema cruza cada linha com o cadastro pelo CPF e, sem CPF, pelo telefone (também CRM e nome idêntico) e atualiza em vez de duplicar. Cada apólice ativa com vencimento gera os avisos de renovação de 30, 15 e 7 dias.</div></div><button data-close>✕</button></div>
+  const box = dlgOpen(`<div class="om-title"><div><h3>Importar carteira: clientes e apólices</h3><div class="om-sub">Traga todos os seus clientes e as apólices ativas de uma vez. Só o nome é obrigatório; colunas que você não tiver podem ficar de fora. O sistema cruza cada linha com o cadastro pelo CPF e, sem CPF, pelo telefone (e nome idêntico) e atualiza em vez de duplicar. Cada apólice ativa com vencimento gera os avisos de renovação de 30, 15 e 7 dias.</div></div><button data-close>✕</button></div>
     <div class="dlg-body"><div class="sg-row" style="margin-bottom:10px"><button class="om-save" id="ct-t-pl" type="button">📄 Planilha de clientes</button><button class="om-cancel" id="ct-t-cel" type="button">📱 Contatos do celular (WhatsApp)</button></div>
     <div id="ct-pl"><div class="es-box" style="margin:0 0 10px"><div class="ql">Em 3 passos</div><div style="font-size:12.5px;line-height:1.6"><b>1.</b> Baixe a planilha padrão. <b>2.</b> Preencha uma linha por apólice (cliente com 2 apólices = 2 linhas com o mesmo CPF; lead sem apólice = 1 linha). <b>3.</b> Envie o arquivo abaixo, confira a prévia e clique em Importar.<br><b>O mínimo da planilha:</b> o <b>nome</b> e o <b>telefone ou CPF</b> de cada pessoa. Quem tem apólice: <b>seguradora, tipo e vencimento</b>, para o sistema avisar a renovação. Sua planilha pode ter outro formato: a IA lê os títulos das colunas e sugere onde vai cada uma.</div>
       <div style="margin-top:8px"><button class="om-save" id="ct-modelo">📥 Baixar planilha padrão (Excel)</button></div></div>
@@ -9148,16 +9303,20 @@ async function ctLoad(file){
     const used = new Set();
     CT_FIELDS.forEach(([k,,re])=>{ const i = heads.findIndex((h,ix)=>!used.has(ix) && re.test(h) && !/label|r[óo]tulo/i.test(h)); CT.map[k] = i; if(i>=0) used.add(i); });
     const padrao = heads.filter(h=>CT_TEMPLATE_HEADS.some(t=>t.replace(/\*/g,'').trim().toLowerCase()===h.toLowerCase())).length >= Math.max(3, heads.length*0.6);
-    step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.base.length} linhas${tit?` (títulos encontrados na linha ${tit+1})`:''}${CT.exemplos?` · <b>${CT.exemplos} linha(s) de exemplo da planilha padrão ignorada(s)</b>`:''}. Confira as colunas (o que não tiver, deixe “não importar”):</div><div id="ct-ia"></div>
+    step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.base.length} linhas${tit?` (títulos encontrados na linha ${tit+1})`:''}${CT.exemplos?` · <b>${CT.exemplos} linha(s) de exemplo da planilha padrão ignorada(s)</b>`:''}.</div><div id="ct-ia"></div>
+      <details id="ct-cols" class="es-box" style="margin-top:10px"${CT.map.nome<0?' open':''}><summary style="cursor:pointer;font-weight:600">🔧 Ver ou trocar as colunas <span style="font-weight:400;color:var(--ink-soft)">(${CT_FIELDS.filter(([k])=>CT.map[k]>=0).length} reconhecidas)</span></summary>
+      <div class="hint" style="margin-top:6px">O que a planilha não tiver, deixe “não importar”. Trocou alguma coluna? Clique em <b>Conferir de novo</b>.</div>
       <div class="fgrid" style="margin-top:10px">${CT_FIELDS.map(([k,l])=>`<label class="fl"><span>${l}</span><select data-ct="${k}"><option value="-1">— não importar —</option>${heads.map((h,i)=>`<option value="${i}" ${CT.map[k]===i?'selected':''}>${escapeHtml(h||('coluna '+(i+1)))}</option>`).join('')}</select></label>`).join('')}
-      <label class="fl"><span>Profissão dos contatos novos</span><select id="ct-tipo">${tipoOptions((CT.mode==='celular' || !tcModulo('premium')) ? 'outro' : 'medico')}</select></label></div>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
+      <label class="fl"><span>Profissão dos contatos novos</span><select id="ct-tipo">${tipoOptions((CT.mode==='celular' || !tcModulo('premium')) ? 'outro' : 'medico')}</select></label></div></details>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="ct-upd" checked> Contato já existente: preencher só os campos que estão vazios no cadastro (recomendado)</label>
-      <div class="es-box" style="margin-top:10px"><label class="chk"><input type="checkbox" id="ct-prosp" ${['p_status','p_data','p_canal','p_hist'].some(k=>CT.map[k]>=0 && CT.rows.some(r=>String(r[CT.map[k]]||'').trim()!==''))?'checked':''}> <b>Enviar para a Prospecção (Vendas)</b>: cada pessoa da planilha vira uma linha para prospectar</label>
+      <details class="es-box" style="margin-top:10px"${['p_status','p_data','p_canal','p_hist'].some(k=>CT.map[k]>=0 && CT.rows.some(r=>String(r[CT.map[k]]||'').trim()!==''))?' open':''}><summary style="cursor:pointer;font-weight:600">📋 Mandar também para a Prospecção (opcional)</summary><label class="chk" style="margin-top:6px"><input type="checkbox" id="ct-prosp" ${['p_status','p_data','p_canal','p_hist'].some(k=>CT.map[k]>=0 && CT.rows.some(r=>String(r[CT.map[k]]||'').trim()!==''))?'checked':''}> <b>Enviar para a Prospecção (Vendas)</b>: cada pessoa da planilha vira uma linha para prospectar</label>
         <label class="fl" style="margin-top:6px"><span>Nome da lista (fica como origem na Prospecção)</span><input id="ct-lista" placeholder="Ex.: Lista da assessoria, outubro"></label>
-        <div class="hint">Se a planilha tiver as colunas "Prospecção: status, data, canal e o que aconteceu", elas registram o que você já fez com cada pessoa. Quem já está na Prospecção não é duplicado.</div></div>
-      <div style="margin-top:12px"><button class="om-save" id="ct-prev">Conferir antes de importar</button></div><div id="ct-result"></div>`;
+        <div class="hint">Se a planilha tiver as colunas "Prospecção: status, data, canal e o que aconteceu", elas registram o que você já fez com cada pessoa. Quem já está na Prospecção não é duplicado.</div></details>
+      <div style="margin-top:12px"><button class="om-cancel" id="ct-prev">Conferir de novo</button></div><div id="ct-result"></div>`;
     step.querySelector('#ct-prev').addEventListener('click', ctPreview);
-    if(!vcf && CT.mode==='planilha' && !padrao) ctIaMapear();   // planilha fora do padrão: a IA sugere as colunas
+    ['ct-pl','ct-guia'].forEach(id=>{ const el = document.getElementById(id); if(el) el.hidden = true; });   // arquivo escolhido: some a explicação, fica só a conferência
+    if(!vcf && CT.mode==='planilha' && !padrao) ctIaMapear().then(()=>{ if(CT.map.nome>=0) ctPreview(); });   // planilha fora do padrão: a IA sugere as colunas
+    else if(CT.map.nome>=0) ctPreview();
   }catch(e){ step.innerHTML = '<div class="om-err">Erro: '+escapeHtml(e.message||e)+'</div>'; }
 }
 // ---- IA da importação (02/11/2026): a IA vê SÓ os títulos e o formato de cada coluna, nunca os dados dos clientes ----
@@ -9213,8 +9372,7 @@ async function ctIaMapear(){
     const lab = Object.fromEntries(CT_FIELDS.map(([k,l])=>[k,l.replace(/\s*\*$/,'')]));
     const extrasTxt = CT.extras.length ? `<br>• Cada linha tem até <b>${CT.extras.length+1} apólices</b> lado a lado. Na importação, cada apólice vira uma linha do mesmo cliente (${CT.extras.map((g,j)=>'apólice '+(j+2)+': '+Object.entries(g).map(([k,i])=>lab[k]+' ← '+nomeCol(i)).join(', ')).join('; ')}).
       <label class="chk" style="margin-top:4px"><input type="checkbox" id="ct-extras" checked> Separar as apólices lado a lado</label>` : '';
-    box.innerHTML = `<div class="reco" style="margin:8px 0">✨ <b>Sugestão da IA</b>${data.observacao?': '+escapeHtml(data.observacao):''}<br>• As colunas marcadas em dourado foram escolhidas pela IA. Confira e troque o que quiser.${extrasTxt}
-      <br>• Em "Conferir antes de importar" você vê as primeiras linhas já no padrão antes de gravar qualquer coisa.</div>`;
+    box.innerHTML = `<div class="reco" style="margin:8px 0">✨ <b>Sugestão da IA</b>${data.observacao?': '+escapeHtml(data.observacao):''}<br>• Abaixo já está a conferência com as colunas que a IA escolheu. Para trocar alguma, abra <b>Ver ou trocar as colunas</b> (as escolhidas pela IA estão em dourado).${extrasTxt}</div>`;
   }catch(e){
     box.innerHTML = '<div class="hint" style="margin:8px 0">A IA não conseguiu sugerir as colunas agora ('+escapeHtml(e.message||e)+'). Escolha as colunas abaixo; o resto funciona igual.</div>';
   }
@@ -9532,7 +9690,7 @@ function opDatasRelevantes(){
   const out = []; OP.pessoas.forEach(p=>(p.datas_relevantes||[]).forEach(dr=>{ const dd = daysTo(dr.data); if(dd!==null && dd>=0 && dd<=(dr.antecedencia||7)) out.push({p, dr, dd}); }));
   return out.sort((a,b)=>a.dd-b.dd);
 }
-const hojeRow = (p, right, sub)=>`<div class="rec hj-row"><a href="#" data-openp="${p.id}" style="font-weight:600;color:var(--brand)">${escapeHtml(p.nome)}</a>${sub?` <small style="color:var(--ink-faint)">${sub}</small>`:''}<span style="float:right;font-size:12px">${right||''}</span></div>`;
+const hojeRow = (p, right, sub)=>`<div class="rec hj-row"><a href="#" data-openp="${p.id}" style="font-weight:600;color:var(--brand)">${escapeHtml(p.nome)}</a>${sub?` <small style="color:var(--ink-faint)">${sub}</small>`:''}<span class="hj-dir">${right||''}</span></div>`;
 
 // ===== Lembretes de relacionamento: aniversários (cliente e família), 3/6/9/12 meses da apólice, contato a cada 3 meses e datas especiais =====
 function lembPrimeiroNome(n){ // "DRA. FULANA DE TAL" → "Dra. Fulana"; "JOÃO SILVA" → "João"
@@ -9656,10 +9814,149 @@ async function reuBadge(){
     b.dataset.n = n ? String(n) : ''; b.classList.toggle('reu-badge', n>0); b.title = n ? `Hoje — ${n} lembrete(s) de reunião para enviar` : 'Hoje — painel do dia'; }catch(e){}
 }
 setInterval(reuBadge, 5*60000);
+// ============ PRIMEIROS PASSOS (fluxo da primeira entrada, aprovado pelo Conselho em 05/11/2026) ============
+// Tela no lugar do conteúdo (não é janela por cima): pergunta o que a pessoa tem dos clientes e leva, em 4 passos, até a
+// primeira mensagem de renovação. O que já foi feito sai dos dados; esconder, pular e "já vi a lista" ficam em
+// crm_guia_usuario (cada um só a própria linha), com o navegador de reserva enquanto a tabela não responder.
+const GUIA = { estado:null };
+const guiaChave = ()=>'tc_guia:'+String(window._userEmail||'').toLowerCase();   // aparelho compartilhado: cada pessoa com o próprio guia
+async function guiaEstado(){
+  if(GUIA.estado) return GUIA.estado;
+  let e = null;
+  try{ const r = await sb.from('crm_guia_usuario').select('escondido,pulados,viu_renovacao_em').maybeSingle(); if(!r.error) e = r.data || {}; }catch(er){}
+  if(!e){ try{ e = (window._userEmail && JSON.parse(localStorage.getItem(guiaChave())||'null')) || {}; }catch(er){ e = {}; } e.local = true; }
+  e.pulados = e.pulados || [];
+  GUIA.estado = e; return e;
+}
+async function guiaSalvar(campos){
+  const e = await guiaEstado(); Object.assign(e, campos);
+  try{ if(window._userEmail) localStorage.setItem(guiaChave(), JSON.stringify({ escondido:!!e.escondido, pulados:e.pulados, viu_renovacao_em:e.viu_renovacao_em||null })); }catch(er){}
+  if(e.local) return;
+  try{
+    const { data:{ user } } = await sb.auth.getUser(); if(!user) return;
+    const { error } = await sb.from('crm_guia_usuario').upsert({ user_id:user.id, escondido:!!e.escondido, pulados:e.pulados, viu_renovacao_em:e.viu_renovacao_em||null, atualizado_em:new Date().toISOString() });
+    if(error) console.warn('guia: não gravou no banco', error.message);
+  }catch(er){}
+}
+async function guiaDados(){
+  const em60 = ymd(new Date(todayD().getTime()+60*86400000));
+  const [p, a, r, m] = await Promise.all([
+    sb.from('crm_pessoas').select('id', { count:'exact', head:true }),
+    sb.from('crm_apolices').select('id', { count:'exact', head:true }).not('data_vencimento','is',null),
+    sb.from('crm_apolices').select('id', { count:'exact', head:true }).eq('status','ativa').gte('data_vencimento', ymdToday()).lte('data_vencimento', em60),
+    sb.from('crm_atividades').select('id', { count:'exact', head:true }).ilike('resumo','Mensagem de renovação%')]);
+  return { clientes:p.count||0, apolices:a.count||0, renovam:r.count||0, msgs:m.count||0 };
+}
+function guiaPassos(d, e){
+  const pulou = k=>e.pulados.includes(k);
+  return [
+    { k:'clientes', feito:d.clientes>0, t:'Traga os seus clientes', x:d.clientes>0 ? `${d.clientes} cliente${d.clientes>1?'s':''} no sistema.` : 'Escolha acima o jeito mais fácil para você: planilha, PDFs ou um por um.' },
+    { k:'apolices', feito:d.apolices>0, pulado:pulou('apolices') && !d.apolices, t:'Traga as apólices com a data de vencimento', x:d.apolices>0 ? `${d.apolices} apólice${d.apolices>1?'s':''} com vencimento.` : 'Arraste os PDFs: o sistema lê seguradora, produto, prêmio e vencimento. Você só confere.', b:'Enviar os PDFs das apólices', a:'pdfs', pular:true },
+    { k:'ver', feito:!!e.viu_renovacao_em, t:'Veja quem renova nos próximos 60 dias', x:d.renovam ? `${d.renovam} apólice${d.renovam>1?'s':''} vence${d.renovam>1?'m':''} nos próximos 60 dias.` : 'A lista fica no Hoje, o primeiro item do menu.', b:'Ver quem renova', a:'hoje' },
+    { k:'msg', feito:d.msgs>0, t:'Mande a primeira mensagem de renovação', x:d.msgs>0 ? 'Feito! O sistema registrou a conversa na ficha do cliente.' : 'No Hoje, toque em WhatsApp ao lado do cliente: a mensagem vem pronta, você ajusta e envia.', b:'Escolher o cliente e mandar', a:'hoje' } ];
+}
+async function guiaRender(){
+  const el = document.getElementById('comeco-body'); if(!el) return;
+  const [e, d] = await Promise.all([guiaEstado(), guiaDados()]);
+  GUIA.dados = d; GUIA.dadosEm = Date.now();
+  const passos = guiaPassos(d, e), feitos = passos.filter(p=>p.feito).length, prox = passos.find(p=>!p.feito && !p.pulado);
+  guiaBotao(e, feitos);
+  window.guiaEmCurso = !e.escondido && feitos<passos.length && e.pulados.includes('_novato');
+  menuEnxuto(window.guiaEmCurso);
+  const nome = (()=>{ try{ return String(curUserName()||'').split(' ')[0]; }catch(er){ return ''; } })();
+  const portas = d.clientes ? '' : `<h3 class="gp-q">O que você tem hoje dos seus clientes?</h3>
+    <div class="gp-portas">
+      <button type="button" class="gp-porta" data-gp="planilha"><span class="gp-ico">📊</span><b>Uma planilha</b><span>Excel ou CSV com nome, telefone e apólice. O sistema mostra tudo antes de gravar.</span></button>
+      <button type="button" class="gp-porta" data-gp="pdfs"><span class="gp-ico">📄</span><b>Os PDFs das apólices</b><span>Arraste vários de uma vez: o sistema lê e cria cliente e apólice.</span></button>
+      <button type="button" class="gp-porta" data-gp="um"><span class="gp-ico">✍️</span><b>Nada organizado</b><span>Comece pelos clientes que renovam primeiro, um por um. Leva 1 minuto cada.</span></button>
+    </div>`;
+  const topo = feitos===passos.length
+    ? `<h2 class="gp-h">Pronto! Você já usa o CRM no dia a dia.</h2><p class="gp-sub">Toda manhã, abra o Hoje (o primeiro item do menu): quem renova, quem faz aniversário e o que ficou para hoje.</p>`
+    : d.clientes
+      ? `<h2 class="gp-h">${nome ? escapeHtml(nome)+', f' : 'F'}alta${passos.length-feitos>1?'m':''} ${passos.length-feitos} passo${passos.length-feitos>1?'s':''} para a primeira mensagem de renovação</h2><p class="gp-sub">O CRM Aliança lembra de cada renovação dos seus clientes e deixa a mensagem pronta para o WhatsApp. Em poucos minutos você sabe quem renova nos próximos 60 dias e já fala com o primeiro.</p>`
+      : `<h2 class="gp-h">Bem-vindo${nome ? ', '+escapeHtml(nome) : ''}! Em 15 minutos você vê quem renova e manda a primeira mensagem.</h2><p class="gp-sub">Comece trazendo os seus clientes. Não precisa ter nada arrumado.</p>`;
+  el.innerHTML = `${topo}${portas}
+    <div class="gp-barra" role="progressbar" aria-valuemin="0" aria-valuemax="${passos.length}" aria-valuenow="${feitos}" aria-label="Passos feitos"><i style="width:${Math.round(feitos/passos.length*100)}%"></i></div>
+    <ol class="gp-lista">${passos.map((p,i)=>`<li class="gp-passo${p.feito?' ok':''}${p===prox?' agora':''}${p.pulado?' pulado':''}">
+      <span class="gp-n" aria-hidden="true">${p.feito?'✓':i+1}</span>
+      <div><b>${p.t}</b>${p.pulado?' <span class="gp-tag">pulado</span>':''}<div class="gp-x">${p.x}</div>
+        ${!p.feito && p.b && p===prox ? `<div class="gp-acoes"><button type="button" class="om-save hj-q-bt" data-gp="${p.a}">${p.b}</button>${p.pular && !p.pulado ? `<button type="button" class="gp-link" data-gp-pular="${p.k}">Ainda não tenho</button>` : ''}</div>` : ''}</div></li>`).join('')}</ol>
+    <div class="gp-pe">${feitos===passos.length ? '<button type="button" class="om-save hj-q-bt" data-gp="esconder">Fechar o guia</button>' : '<button type="button" class="gp-link" data-gp="esconder">Esconder este guia</button> <span>Para reabrir depois: balão 💬 › Como funciona o CRM Aliança.</span>'}</div>
+    <input type="file" id="gp-file" multiple accept=".pdf,image/*" hidden>`;
+}
+function guiaBotao(e, feitos){
+  const b = document.querySelector('.nav-btn[data-view="comeco"]'); if(!b) return;
+  b.style.display = e.escondido ? 'none' : '';
+  const s = b.querySelector('.gp-cont'); if(s) s.textContent = feitos<4 ? feitos+'/4' : '';
+}
+function guiaAbrir(){ const b = document.querySelector('.nav-btn[data-view="comeco"]'); if(b){ b.style.display = ''; b.click(); } }
+async function guiaIniciar(){
+  window.guiaProduto = true;
+  try{
+    const e = await guiaEstado(); if(e.escondido) return;
+    const d = await guiaDados(), passos = guiaPassos(d, e), feitos = passos.filter(p=>p.feito).length;
+    if(feitos===passos.length) return;
+    guiaBotao(e, feitos);
+    if((!d.clientes || !d.apolices) && !e.pulados.includes('_novato')) await guiaSalvar({ pulados:[...e.pulados, '_novato'] });
+    window.guiaEmCurso = e.pulados.includes('_novato');
+    menuEnxuto(window.guiaEmCurso);
+    // o Hoje pode ter aberto antes do guia (é a tela de entrada): redesenha para mostrar o quadro e a linha do guia
+    if(document.getElementById('view-hoje').classList.contains('active')) opHojeDialog(HJ.mine);
+    if(!d.clientes) guiaAbrir();   // sem nenhum cliente: a boas-vindas é a entrada; depois a entrada é o Hoje, com a linha do guia no topo
+  }catch(er){ console.warn('guia:', er); }
+}
+document.getElementById('comeco-body').addEventListener('click', async ev=>{
+  const pu = ev.target.closest('[data-gp-pular]');
+  if(pu){ const e = await guiaEstado(); await guiaSalvar({ pulados:[...new Set([...e.pulados, pu.dataset.gpPular])] }); guiaRender(); return; }
+  const b = ev.target.closest('[data-gp]'); if(!b) return;
+  const a = b.dataset.gp;
+  if(a==='planilha'){ const i = document.getElementById('op-import'); if(i) i.click(); }
+  else if(a==='pdfs') document.getElementById('gp-file').click();
+  else if(a==='um') openNovoCliente({}, ()=>guiaRender());
+  else if(a==='hoje') opHojeDialog(false);
+  else if(a==='esconder'){ await guiaSalvar({ escondido:true }); window.guiaEmCurso = false; menuEnxuto(false); const op = document.querySelector('.nav-btn[data-view="operacao"]'); guiaBotao(GUIA.estado, 0); if(op) op.click(); }
+});
+document.getElementById('comeco-body').addEventListener('change', async ev=>{
+  if(ev.target.id!=='gp-file' || !ev.target.files.length) return;
+  const fs = [...ev.target.files]; ev.target.value = '';
+  await caLote(fs); guiaRender();
+});
+function menuEnxuto(on){
+  const rail = document.getElementById('rail'), mais = document.getElementById('nav-mais'); if(!rail || !mais) return;
+  const fica = ['hoje','operacao','sugestoes','admin'].concat(tcModulo('central') ? ['central'] : []);
+  rail.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('nav-extra', !!on && !fica.includes(b.dataset.view)));
+  const op = rail.querySelector('.nav-btn[data-view="operacao"] span'); if(op){ if(!op.dataset.orig) op.dataset.orig = op.textContent; op.textContent = on ? 'Clientes' : op.dataset.orig; }
+  rail.classList.toggle('enxuto', !!on); if(!on) rail.classList.remove('aberto');
+  mais.style.display = on ? '' : 'none';
+}
+document.getElementById('nav-mais').addEventListener('click', ()=>{ const r = document.getElementById('rail'); r.classList.toggle('aberto'); document.getElementById('nav-mais').setAttribute('aria-expanded', r.classList.contains('aberto')); });
+function guiaAtualizar(){ const v = document.getElementById('view-comeco'); if(v && v.classList.contains('active')) guiaRender(); }
+const HJ = { mine:false };
+async function hjTopo(renov){
+  if(!window.guiaProduto) return '';   // Aliança e quem não passou pelo guiaIniciar: o Hoje fica como sempre foi
+  let e, d; try{ e = await guiaEstado(); if(!GUIA.dados || Date.now()-GUIA.dadosEm > 30000 || OP.dirty){ GUIA.dados = await guiaDados(); GUIA.dadosEm = Date.now(); } d = GUIA.dados; }catch(er){ return ''; }
+  const passos = guiaPassos(d, e), feitos = passos.filter(x=>x.feito).length;
+  const linhaGuia = (!e.escondido && feitos<passos.length) ? `<button type="button" class="hj-guia" data-hjguia>📍 Primeiros passos · ${feitos} de ${passos.length} · <b>Continuar</b></button>` : '';
+  if(d.msgs>0) return linhaGuia;
+  const r0 = renov.find(r=>r.p), pn = r0 ? escapeHtml(lembPrimeiroNome(r0.p.nome)) : '';
+  const corpo = r0
+    ? `<div class="hj-q-n"><b>${renov.length}</b> ${renov.length>1?'apólices renovam':'apólice renova'} nos próximos 60 dias.</div>
+       <div class="hj-q-t">O primeiro é <b>${pn}</b>, em <b>${r0.dd} dia${r0.dd===1?'':'s'}</b>. O sistema te avisa 30, 15 e 7 dias antes, aqui no Hoje.</div>
+       <button type="button" class="om-save hj-q-bt" data-renmsg="${r0.p.id}|${r0.a.id}">Mandar WhatsApp para ${pn}</button>`
+    : d.apolices
+      ? `<div class="hj-q-n">Nenhuma apólice vence nos próximos 60 dias.</div><div class="hj-q-t">Quando chegar a hora, ela aparece aqui com a mensagem pronta. Enquanto isso, confira se todas as suas apólices já estão no sistema.</div><button type="button" class="om-save hj-q-bt" data-hjguia>Trazer mais apólices</button>`
+      : `<div class="hj-q-n">Ainda não há apólices com vencimento.</div><div class="hj-q-t">Traga os PDFs das apólices: o sistema lê e mostra aqui quem renova primeiro.</div><button type="button" class="om-save hj-q-bt" data-hjguia>Trazer as apólices</button>`;
+  return `<div class="hj-quadro">${corpo}</div>${linhaGuia}`;
+}
 async function opHojeDialog(onlyMine){
+  const vh = document.getElementById('view-hoje');
+  if(!vh.classList.contains('active')){ HJ.mine = !!onlyMine; dlgClose(); const nb = document.querySelector('.nav-btn[data-view="hoje"]'); if(nb) nb.click(); return; }
+  HJ.mine = !!onlyMine;
   const me = curUserName();
-  const box = dlgOpen(`<div class="om-title"><div><h3>Hoje — o que preciso fazer</h3><div class="om-sub">${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})}</div></div><button data-close>✕</button></div>
-    <div class="dlg-body" id="hj-body"><div class="op-more">Carregando...</div></div>`, true);
+  document.getElementById('hj-data').textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  // Hoje como primeira tela: espera a carga de clientes e apólices (a mesma da tela Aliança), e recarrega depois de importar
+  if(!OP.loaded || OP.dirty) await renderOperacao();
+  for(let i=0; i<200 && (OP.loading || !OP.loaded); i++) await new Promise(r=>setTimeout(r,150));
   const t0 = todayD().toISOString(), t1 = new Date(todayD().getTime()+86400000).toISOString();
   const dow = (todayD().getDay()+6)%7; const ini2 = new Date(todayD().getTime()+(7-dow)*86400000), fim2 = new Date(ini2.getTime()+7*86400000);
   const avR = await sb.from('crm_avisos').select('id,pessoa_id,dias_antes,data_aviso,titulo,tipo').eq('status','pendente').lte('data_aviso', ymdToday()).order('data_aviso');
@@ -9677,28 +9974,63 @@ async function opHojeDialog(onlyMine){
   const bd = opBirthdays(7), dr = opDatasRelevantes();
   const nxt = agNext.count ?? 0;
   const sec = (title, cnt, html)=>`<div class="es-box"><div class="ql">${title} <span class="tagx" style="margin-left:6px">${cnt}</span></div>${html||'<div class="hint">Nada por aqui.</div>'}</div>`;
-  // renovação e pós-venda são do módulo Carteira (decisão do Luiz, 02/11/2026): sem ele, a tela mostra quantas apólices vencem e convida a ativar
-  const temCarteira = tcModulo('central');
-  const carteiraConvite = (nRenov, nAvisos)=> (nRenov || nAvisos) ? `<div class="es-box" style="border:1px dashed var(--brand,#9c7518)"><div class="ql">🔒 Renovações e pós-venda · módulo Carteira</div><div style="font-size:13px;line-height:1.6">Você tem <b>${nRenov}</b> apólice(s) vencendo nos próximos 60 dias${nAvisos?` e <b>${nAvisos}</b> aviso(s) de renovação ou pós-venda esperando`:''}. Com o módulo <b>Carteira</b>, o sistema avisa cada renovação com 30, 15 e 7 dias, organiza o pós-venda e lê as apólices para você.</div><div style="margin-top:8px"><button class="om-save" type="button" id="hj-ver-planos">Ver o módulo Carteira</button></div></div>` : '';
-  document.getElementById('hj-body').innerHTML =
-    `<div class="sg-row" style="margin-bottom:10px"><label class="chk"><input type="checkbox" id="hj-mine" ${onlyMine?'checked':''}> Só as minhas (${escapeHtml(me)})</label><span style="flex:1"></span><span class="tagx ${nxt<3?'warn':''}">Agenda da semana que vem: ${nxt} evento(s)${nxt<3?' — deixe-a cheia antes de a atual acabar':''}</span></div>`
-    + reuSecoes(reu)
+  // renovação em TODOS os planos (decisão do Luiz, 05/11/2026): avisos de 30/15/7 dias e a lista de quem renova ficam no topo do Hoje,
+  // cada um com o botão 💬 da mensagem de renovação pronta. A Central de Apólices, a IA de carteira e o pós-venda seguem no módulo Carteira.
+  const msgBtn = (pid, aid)=>`<button class="om-cancel vd-btn" data-renmsg="${pid}|${aid||''}" title="Mandar a mensagem de renovação pelo WhatsApp">WhatsApp</button>`;
+  const apoDe = pid=>{ const r0 = renov.find(r=>r.p && r.p.id===pid); return r0 ? r0.a : null; };
+  // topo: o quadro do resultado (até a primeira mensagem) e a linha do guia; durante o guia o resto do dia fica recolhido
+  const topo = await hjTopo(renov);
+  const avDe = pid=>(avR.data||[]).find(a=>a.pessoa_id===pid);
+  const avSoltos = (avR.data||[]).filter(a=>!renov.some(r=>r.p && r.p.id===a.pessoa_id));   // quem já está em "Renovam" não repete nos avisos
+  const restoDia = reuSecoes(reu)
     + sec('Ações de hoje e atrasadas', acoes.length, acoes.map(p=>{ const d = daysTo(p.proxima_data); return hojeRow(p, d<0?`<span class="tagx bad">atrasada ${-d}d</span>`:'<span class="tagx warn">hoje</span>', escapeHtml(p.proxima_acao)+' · '+escapeHtml(p.proximo_responsavel||'')); }).join(''))
-    + sec('Leads em funil sem próxima ação', semAcao.length, semAcao.slice(0,40).map(p=>hojeRow(p, '', 'Defina a próxima ação')).join('') + (semAcao.length>40?`<div class="hint">+${semAcao.length-40} outros — use o filtro “Próxima ação” na Aliança.</div>`:''))
-    + (temCarteira ? sec('Avisos de renovação (30, 15 e 7 dias) de hoje e atrasados', (avR.data||[]).length, (avR.data||[]).map(a=>{ const p = OP.pessoas.find(x=>x.id===a.pessoa_id); if(!p) return ''; const d = daysTo(a.data_aviso); return hojeRow(p, d<0?`<span class="tagx bad">atrasado ${-d}d</span> <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`:`<span class="tagx warn">hoje</span> <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`, escapeHtml(a.titulo||'Renovação')); }).join(''))
-    + sec('Renovações nos próximos 60 dias', renov.length, renov.map(r=>hojeRow(r.p, `<span class="tagx ${r.dd<=15?'bad':(r.dd<=30?'warn':'')}">${r.dd}d</span>`, escapeHtml((r.a.tipo_seguro||'')+' · '+(r.a.seguradora||'')))).join(''))
-      : carteiraConvite(renov.length, (avR.data||[]).length))
+    + sec('Pessoas em negociação sem próximo passo', semAcao.length, semAcao.slice(0,40).map(p=>hojeRow(p, '', 'Defina a próxima ação')).join('') + (semAcao.length>40?`<div class="hint">+${semAcao.length-40} outros — use o filtro “Próxima ação” em Clientes.</div>`:''))
     + sec('Relacionamento e datas (aniversários, família, 3/6/9/12 meses, datas especiais)', (lembR.data||[]).length, (lembR.data||[]).slice(0,40).map(lembLinha).join('') + ((lembR.data||[]).length>40?`<div class="hint">+${(lembR.data||[]).length-40} outros nos próximos dias.</div>`:''))
     + sec('Completar o cadastro: clientes sem data de nascimento (sem ela não há lembrete de aniversário)', incompl.length, incompl.slice(0,25).map(x=>hojeRow(x, '', 'Peça o documento ou pergunte na próxima conversa')).join('') + (incompl.length>25?`<div class="hint">+${incompl.length-25} outros.</div>`:''))
     + sec('Datas relevantes do cadastro', dr.length, dr.map(x=>hojeRow(x.p, x.dd===0?'<span class="tagx warn">hoje</span>':x.dd+'d', escapeHtml(x.dr.descricao)+' · '+fmtDate(x.dr.data))).join(''))
     + sec('Compromissos de hoje', (ag.data||[]).length, (ag.data||[]).map(e=>`<div class="rec"><span class="k">${new Date(e.data_inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>${escapeHtml(e.titulo)}${e.crm_pessoas?.nome?' · '+escapeHtml(e.crm_pessoas.nome):''}</div>`).join(''))
     + `<div class="es-box"><div class="ql">Tarefas avulsas de hoje</div>${(tar.data||[]).map(t=>`<div class="rec hj-task"><label class="chk"><input type="checkbox" data-task="${t.id}" ${t.concluida?'checked':''}> <span style="${t.concluida?'text-decoration:line-through;color:var(--ink-faint)':''}">${escapeHtml(t.descricao)}</span></label></div>`).join('')||'<div class="hint">Nenhuma tarefa.</div>'}
-       <div class="sg-row" style="margin-top:8px"><input id="hj-task-new" class="ca-inp" placeholder="Nova tarefa (não precisa ter médico vinculado)..." style="flex:1"><button class="om-save" id="hj-task-add">+ Tarefa</button></div></div>`;
+       <div class="sg-row" style="margin-top:8px"><input id="hj-task-new" class="ca-inp" placeholder="Nova tarefa (não precisa ter cliente ligado)..." style="flex:1"><button class="om-cancel" id="hj-task-add">+ Tarefa</button></div></div>`;
+  document.getElementById('hj-body').innerHTML = topo
+    + sec('Renovam nos próximos 60 dias', renov.length, renov.filter(r=>r.p).map(r=>{ const av = avDe(r.p.id); return hojeRow(r.p, `<span class="tagx ${r.dd<=15?'bad':(r.dd<=30?'warn':'')}">vence em ${r.dd} dia${r.dd===1?'':'s'}</span> ${msgBtn(r.p.id, r.a.id)}${av?` <button class="om-cancel vd-btn" data-avfeito="${av.id}" title="Já falei com o cliente sobre esta renovação">Feito</button>`:''}`, escapeHtml((r.a.tipo_seguro||'')+' · '+(r.a.seguradora||''))); }).join(''))
+    + (avSoltos.length ? sec('Avisos de renovação (30, 15 e 7 dias) de hoje e atrasados', avSoltos.length, avSoltos.map(a=>{ const p = OP.pessoas.find(x=>x.id===a.pessoa_id); if(!p) return ''; const d = daysTo(a.data_aviso); return hojeRow(p, (d<0?`<span class="tagx bad">atrasado ${-d} dia${-d===1?'':'s'}</span>`:`<span class="tagx warn">hoje</span>`)+` ${msgBtn(p.id, '')} <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`, escapeHtml(a.titulo||'Renovação')); }).join('')) : '')
+    + (window.guiaEmCurso ? `<details class="hj-mais"><summary>Mais coisas do dia</summary>${restoDia}</details>` : restoDia)
+    + `<div class="sg-row" style="margin-bottom:10px"><label class="chk"><input type="checkbox" id="hj-mine" ${onlyMine?'checked':''}> Só as minhas (${escapeHtml(me)})</label><span style="flex:1"></span><span class="tagx ${nxt<3?'warn':''}">Agenda da semana que vem: ${nxt} compromisso${nxt===1?'':'s'}${nxt<3?' — deixe-a cheia antes de a atual acabar':''}</span></div>`;
+  if(renov.length) guiaEstado().then(e=>{ if(!e.viu_renovacao_em) guiaSalvar({ viu_renovacao_em:new Date().toISOString() }); }).catch(()=>{});
   const b = document.getElementById('hj-body');
+  b.querySelectorAll('[data-hjguia]').forEach(x=>x.addEventListener('click', ()=>guiaAbrir()));
   b.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); dlgClose(); goToPersonView(a.dataset.openp); }));
   b.querySelector('#hj-mine').addEventListener('change', e=>opHojeDialog(e.target.checked));
   reuLigar(b, reu, onlyMine);
-  { const vp = b.querySelector('#hj-ver-planos'); if(vp) vp.addEventListener('click', ()=>{ dlgClose(); const bp = document.getElementById('btn-planos'); if(bp) bp.click(); }); }
+  // 💬 mensagem de renovação: abre a mensagem pronta (modelo renovacao_30/15/7 da corretora), editável, e o WhatsApp
+  b.querySelectorAll('[data-renmsg]').forEach(btn=>btn.addEventListener('click', async ()=>{
+    if(btn.closest('.hj-quadro')){ const alvo = b.querySelector('.hj-row [data-renmsg="'+btn.dataset.renmsg+'"]'); if(alvo){ alvo.scrollIntoView({ block:'center', behavior:'smooth' }); if(!(alvo.closest('.hj-row').nextElementSibling||{classList:{contains:()=>false}}).classList.contains('hj-msg')) alvo.click(); btn.outerHTML = '<div class="hj-q-t" style="margin:0"><b>A mensagem está logo abaixo ↓</b></div>'; } return; }
+    const [pid, aid] = btn.dataset.renmsg.split('|'); const p = OP.pessoas.find(x=>x.id===pid); if(!p) return;
+    const row = btn.closest('.hj-row'); const ja = row && row.nextElementSibling && row.nextElementSibling.classList.contains('hj-msg'); if(ja){ row.nextElementSibling.remove(); return; }
+    const a = aid ? ((OP.apo.get(pid)||[]).find(x=>x.id===aid) || null) : null;
+    const dd = a && a.data_vencimento ? daysTo(String(a.data_vencimento).slice(0,10)) : 30;
+    let modelo = ''; try{ modelo = await lembModelo(dd<=7 ? 'renovacao_7' : dd<=15 ? 'renovacao_15' : 'renovacao_30'); }catch(e){}
+    if(!modelo) modelo = 'Oi, {primeiro_nome}! Tudo bem? Sua {produto} ({seguradora}) vence dia {vencimento}. Quer que eu já veja a renovação para você?';
+    const texto = lembTexto(modelo, {nome:p.nome}, { produto:a&&a.tipo_seguro ? 'proteção de '+String(a.tipo_seguro).toLowerCase() : 'sua proteção', seguradora:a&&a.seguradora||'', vencimento:a&&a.data_vencimento ? String(a.data_vencimento).slice(0,10) : '' });
+    const tel = p.telefone || ((await sb.from('crm_pessoas').select('telefone').eq('id', pid).maybeSingle()).data||{}).telefone;
+    const wa = waLink(tel);
+    const box2 = document.createElement('div'); box2.className = 'hj-msg es-box'; box2.style.margin = '4px 0 8px';
+    box2.innerHTML = `<label class="fl full"><span>Mensagem para ${escapeHtml(lembPrimeiroNome(p.nome))} (pode editar)</span><textarea rows="3" style="border:1px solid var(--border);border-radius:6px;padding:8px;font-family:inherit;font-size:15px;text-transform:none">${escapeHtml(texto)}</textarea></label>
+      ${wa?`<div style="margin-top:6px"><button class="om-save hj-q-bt" type="button" data-renwa>Abrir no WhatsApp</button></div>`:`<div class="hint" style="margin-top:6px">⚠ ${escapeHtml(lembPrimeiroNome(p.nome))} está sem telefone. <a href="#" data-openp2="${pid}">Completar o cadastro</a></div>`}`;
+    row.after(box2);
+    const op2 = box2.querySelector('[data-openp2]'); if(op2) op2.addEventListener('click', e=>{ e.preventDefault(); dlgClose(); goToPersonView(pid); });
+    const bw = box2.querySelector('[data-renwa]'); if(bw) bw.addEventListener('click', async ()=>{
+      if(bw.disabled) return; bw.disabled = true;
+      const msg = box2.querySelector('textarea').value.trim(); window.open(wa+'?text='+encodeURIComponent(msg), '_blank', 'noopener');
+      const primeira = (()=>{ try{ return !localStorage.getItem('tc_passo_msg:'+String(window._userEmail||'').toLowerCase()); }catch(e){ return false; } })();
+      try{ localStorage.setItem('tc_passo_msg:'+String(window._userEmail||'').toLowerCase(), String(Date.now())); }catch(e){}
+      let registrou = false; GUIA.dados = null;
+      try{ const { error:eAt } = await sb.from('crm_atividades').insert({ pessoa_id:pid, tipo:'whatsapp', data_hora:new Date().toISOString(), resumo:'Mensagem de renovação'+(a?': '+[a.tipo_seguro,a.seguradora].filter(Boolean).join(' · '):''), resultado:'Enviada', responsavel:curUserName()||null }); if(eAt) throw eAt; registrou = true; OP.dirty = true; }
+      catch(e){ showToast('A mensagem abriu no WhatsApp, mas não consegui registrar na ficha do cliente: '+(e.message||e)); }
+      if(registrou && window.guiaProduto) guiaRender();   // recalcula o guia: depois da primeira mensagem o menu volta inteiro
+      box2.innerHTML = `<div class="hint" style="margin:0">✔ Mensagem aberta no WhatsApp em ${new Date().toLocaleDateString('pt-BR')}${registrou?' e registrada na ficha':''}.${primeira?' <b>Pronto!</b> A partir de agora o sistema te lembra 30, 15 e 7 dias antes de cada vencimento, aqui no Hoje.':''}</div>`;
+    });
+  }));
   b.querySelectorAll('[data-lmsg]').forEach(btn=>btn.addEventListener('click', async ()=>{ const r = (lembR.data||[]).find(x=>x.chave===btn.dataset.lmsg); if(!r) return;
     if(r.tipo==='data_comemorativa'){ lembAbrirLista(r); return; }
     const modelo = await lembModelo(r.momento==='relacionamento'?'relacionamento':r.momento); const wa = waLink(r.telefone); if(!wa){ showToast('Esta pessoa não tem telefone cadastrado.'); return; }
@@ -10256,7 +10588,7 @@ checkSession();
   /* ---------- PEÇA 2 · registro de uso ---------- */
   const SESSAO = (self.crypto && crypto.randomUUID) ? crypto.randomUUID().slice(0,12) : Math.random().toString(36).slice(2,14);
   const FILA = []; let ultimos = [];
-  const NAV_NOME = { operacao:'Aliança', pessoas:'Cadastro do cliente', central:'Central de Apólices', comercial:'Comercial', vendas:'Vendas', reunioes:'Reuniões', indicadores:'Indicadores', analitico:'Analítico', agenda:'Agenda', conhecimento:'Base', sugestoes:'Sugestões', ata:'Ata', login:'Login' };
+  const NAV_NOME = { hoje:'Hoje', comeco:'Primeiros passos', operacao:'Aliança', pessoas:'Cadastro do cliente', central:'Central de Apólices', comercial:'Comercial', vendas:'Vendas', reunioes:'Reuniões', indicadores:'Indicadores', analitico:'Analítico', agenda:'Agenda', conhecimento:'Base', sugestoes:'Sugestões', ata:'Ata', login:'Login' };
   const SUB_NOME = { ini:'Consultoria', pro:'Prospecção', cli:'Clientes trabalhados', dem:'Demandas', vend:'Vendas realizadas', nao:'Vendas não realizadas', resumo:'Resumo', orc:'Orçamento', par:'Parâmetros', metas:'Funil', carlas:'Mais Carlas', diario:'Diário', marcos:'Marcos', fluxo:'Fluxo de proteção', protecao:'Proteção' };
   const viewAtiva = ()=>{ const v = document.querySelector('.view.active'); return v ? v.id.replace(/^view-/,'') : 'login'; };
   function rotaAtual(){
@@ -10378,6 +10710,12 @@ checkSession();
     root.innerHTML = '<div id="ac-bubble" hidden></div><div id="ac-box" hidden></div><button type="button" id="ac-btn" title="Dar uma ideia, avisar de um problema ou tirar uma dúvida" aria-label="Falar com a equipe">💬</button>';
     document.body.appendChild(root);
     document.getElementById('ac-btn').addEventListener('click', ()=> abrirCaixa('botao', ''));
+    document.getElementById('ac-box').addEventListener('click', e=>{
+      const a = e.target.closest('[data-atalho]'); if(!a) return;
+      fecharCaixa('atalho:'+a.dataset.atalho);
+      if(a.dataset.atalho==='guia'){ if(typeof guiaSalvar==='function') guiaSalvar({ escondido:false }); if(typeof guiaAbrir==='function') guiaAbrir(); }
+      else { const b = document.getElementById('op-import'); if(b){ b.click(); setTimeout(()=>{ const t = document.getElementById('ct-t-cel'); if(t) t.click(); }, 120); } }
+    });
   }
   const bloqueado = ()=>{ const d = document.getElementById('dlg'); return (d && getComputedStyle(d).display !== 'none' && d.innerHTML) || ac.rec || !document.getElementById('ac-box').hidden || !document.getElementById('ac-bubble').hidden; };
   function fecharBalao(como){
@@ -10386,7 +10724,7 @@ checkSession();
   }
   function mostrarBalao(motivo, pergunta, forcar){
     montar();
-    if(!forcar && (email()==='' || SEM_BALAO.includes(email()) || bloqueado())) return false;
+    if(!forcar && (email()==='' || SEM_BALAO.includes(email()) || bloqueado() || window.guiaEmCurso)) return false;   // guiaEmCurso: corretora nova no guia Primeiros passos
     if(forcar && !document.getElementById('ac-bubble').hidden) fecharBalao('ignorou');
     ac.motivo = motivo; ac.pergunta = pergunta;
     const b = document.getElementById('ac-bubble');
@@ -10539,6 +10877,7 @@ checkSession();
       + '<textarea id="ac-texto" rows="4" placeholder="O que você quer dizer?"></textarea>'
       + '<div class="ac-linha"><button type="button" id="ac-mic">🎤 Falar</button><span class="ac-mut" id="ac-aviso-print">Mapas e fotos de fundo podem sair em branco no print.</span></div>'
       + '<div id="ac-print"></div>'
+      + (motivo==='botao' ? '<div class="ac-atalhos"><button type="button" data-atalho="guia">📍 Como funciona o CRM Aliança</button><button type="button" data-atalho="celular">📱 Trazer os contatos do celular</button></div>' : '')
       + '<div class="ac-linha"><button type="button" id="ac-enviar" class="ac-pri">Enviar</button></div><div id="ac-ok" hidden></div>';
     bx.hidden = false;
     bx.querySelector('#ac-fechar').onclick = ()=> fecharCaixa('fechou');
@@ -10602,7 +10941,7 @@ checkSession();
     #ac-root{ position:fixed; right:22px; bottom:22px; z-index:60; font-family:'Inter',sans-serif; }
     #ac-btn{ width:52px; height:52px; border-radius:50%; border:0; background:var(--brand,#0018fc); color:#fff; font-size:22px; cursor:pointer; box-shadow:0 8px 24px -8px rgba(11,20,51,.45); }
     #ac-btn:hover{ background:var(--brand-hover,#0012c4); }
-    #ac-bubble{ position:absolute; right:0; bottom:64px; width:300px; background:#fff; border:1px solid var(--border,#e3e6ee); border-radius:14px; padding:14px; box-shadow:0 12px 32px -10px rgba(11,20,51,.35); font-size:13px; line-height:1.45; color:var(--ink,#0b1433); }
+    #ac-bubble{ position:absolute; right:0; bottom:64px; width:300px; background:#fff; border:1px solid var(--border,#e3e6ee); border-radius:14px; padding:14px; box-shadow:0 12px 32px -10px rgba(11,20,51,.35); font-size:16px; line-height:1.45; color:var(--ink,#0b1433); }
     #ac-bubble p{ margin:0 0 10px; }
     .ac-acoes{ display:flex; gap:6px; flex-wrap:wrap; } .ac-acoes button, .ac-chips button, .ac-linha button, #ac-card button{ border:1px solid var(--border-control,#8a90a8); background:#fff; border-radius:999px; padding:5px 11px; font-size:12px; cursor:pointer; }
     .ac-acoes [data-ac=x]{ margin-left:auto; }
@@ -10635,7 +10974,11 @@ checkSession();
     .ac-ed-bt{ display:flex; gap:8px; flex-wrap:wrap; } .ac-ed-bt .ac-pri{ background:#0018fc; color:#fff; border-color:#0018fc; font-weight:700; }
     .ac-ed-in{ position:fixed; z-index:410; border:2px solid #e11d2e; border-radius:6px; padding:5px 8px; font:700 15px Inter,Arial,sans-serif; color:#e11d2e; background:#fff; min-width:220px; }
     @media print{ #ac-root, #ac-versao, #ac-card, #ac-ed{ display:none !important; } }
-    @media (max-width:700px){ .ac-desenho{ display:none; } #ac-box, #ac-bubble{ width:calc(100vw - 44px); } }`;
+    .ac-atalhos{ display:flex; flex-direction:column; gap:6px; margin:10px 0 4px; padding-top:10px; border-top:1px solid var(--border,#e3e6ee); }
+    .ac-atalhos button{ text-align:left; border:1px solid var(--border,#e3e6ee); background:#fff; border-radius:10px; padding:9px 12px; font-size:13.5px; cursor:pointer; min-height:40px; }
+    #ac-texto{ font-size:16px; }
+    @media (max-width:820px){ #ac-root{ right:12px; bottom:73px; } #ac-box, #ac-bubble{ width:calc(100vw - 24px); } }
+    @media (max-width:700px){ .ac-desenho{ display:none; } }`;
   document.head.appendChild(css);
 
   function iniciar(){ montar(); cartao(); checarTela(); verificarVersao(); }
@@ -10855,11 +11198,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611050952"></script>
-<script src="painel.js?v=202611050952"></script>
-<script src="cobranca.js?v=202611050952"></script>
-<script src="cadastro.js?v=202611050952"></script>
-<script src="contrato.js?v=202611050952"></script>
-<script src="guarda.js?v=202611050952"></script>
+<script src="plataforma.js?v=202611051143"></script>
+<script src="painel.js?v=202611051143"></script>
+<script src="cobranca.js?v=202611051143"></script>
+<script src="cadastro.js?v=202611051143"></script>
+<script src="contrato.js?v=202611051143"></script>
+<script src="guarda.js?v=202611051143"></script>
 </body>
 </html>

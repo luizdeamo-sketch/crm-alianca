@@ -123,7 +123,7 @@
       carregarEtapas();
       if (data.contrato_pendente || data.contrato_bloqueia) abrirContrato(0, data.sou_admin);   // contrato gerado pela gestora: aceitar antes de usar
       else if (data.sou_admin && data.precisa_cadastro) abrirCadastro(0);
-      else if (data.sou_admin) primeirosPassos();
+      else primeirosPassos();   // todos da equipe: cada um tem o próprio guia
     } catch (e) { console.warn('marca da corretora:', e); }
   }
   // tela de entrada: a marca do link próprio da corretora (…/crm-alianca/<link> ou ?c=<link>); sem link, a última marca vista neste navegador
@@ -175,60 +175,31 @@
   }
 
   function abrirContrato(tentativa, admin) {
-    if (window.TorreCadastro && window.TorreCadastro.abrirContrato) { window.TorreCadastro.abrirContrato().then((abriu) => { if (!abriu && admin) primeirosPassos(); }); return; }
+    if (window.TorreCadastro && window.TorreCadastro.abrirContrato) { window.TorreCadastro.abrirContrato().then((abriu) => { if (!abriu) primeirosPassos(); }); return; }
     if (tentativa < 40) setTimeout(() => abrirContrato(tentativa + 1, admin), 150);
   }
 
-  /* ---------- primeiros passos do administrador (corretora nova) ---------- */
-  async function primeirosPassos() {
-    const chave = 'tc_primeiros_' + MARCA.id;
-    try { if (localStorage.getItem(chave) === 'fechado') return; } catch (e) { /* nada */ }
-    const [p, u] = await Promise.all([
-      sb.from('crm_pessoas').select('id', { count: 'exact', head: true }),
-      sb.from('crm_usuarios').select('email', { count: 'exact', head: true })]);
-    const temClientes = (p.count || 0) > 0, temEquipe = (u.count || 0) > 1, temMarca = !!MARCA.logo_url;
-    if (temClientes && temEquipe && temMarca) return;
-    const passo = (feito, titulo, texto, botao, id) => `<li style="display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;padding:8px 0;border-top:1px solid #eef0f5">
-      <span style="font-size:18px">${feito ? '✅' : '⬜'}</span><div><b>${titulo}</b><div style="color:#5d6871;font-size:13px">${texto}</div>
-      ${feito ? '' : `<button type="button" data-pp="${id}" style="margin-top:6px;min-height:34px;padding:0 12px;border-radius:8px;border:0;background:var(--navy,#111827);color:#fff;cursor:pointer;font-weight:600">${botao}</button>`}</div></li>`;
-    let c = document.getElementById('tc-primeiros'); if (c) c.remove();
-    c = document.createElement('div'); c.id = 'tc-primeiros'; c.setAttribute('role', 'region'); c.setAttribute('aria-label', 'Primeiros passos');
-    c.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:9500;width:min(380px,calc(100vw - 32px));max-height:calc(100vh - 120px);overflow:auto;background:#fff;border:1px solid #e4e6e2;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);padding:14px 16px;font:14px/1.45 "Segoe UI",system-ui,sans-serif;color:#2a3540';
-    c.innerHTML = `<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:16px;color:#111827">Comece por aqui</b>
-      <button type="button" data-pp="fechar" aria-label="Fechar" style="border:0;background:none;font-size:18px;cursor:pointer">✕</button></div>
-      <div style="color:#5d6871;font-size:13px;margin:4px 0 6px">Quatro passos para deixar o ${esc(nomeSistema())} pronto para a sua equipe.</div>
-      <ol style="list-style:none;margin:0;padding:0">
-        ${passo(temEquipe, '1. Cadastre a sua equipe', 'Em Admin, inclua o e-mail de cada pessoa e libere o primeiro acesso.', 'Abrir Admin', 'equipe')}
-        ${passo(temClientes, '2. Baixe a planilha padrão', 'Uma linha por apólice; o mesmo cliente com duas apólices ocupa duas linhas.', 'Baixar planilha', 'modelo')}
-        ${passo(temClientes, '3. Suba os seus clientes', 'Envie a planilha preenchida; o sistema mostra uma prévia antes de gravar.', 'Importar carteira', 'importar')}
-        ${passo(temMarca, '4. Coloque o logo e as cores', 'É assim que o sistema aparece para todos, inclusive no link próprio da corretora.', 'Minha corretora', 'marca')}
-      </ol>`;
-    document.body.appendChild(c);
-    const abrirImport = () => { const b = document.getElementById('op-import'); if (b) b.click(); return !!b; };
-    c.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-pp]'); if (!b) return;
-      const a = b.dataset.pp;
-      if (a === 'fechar') { try { localStorage.setItem(chave, 'fechado'); } catch (er) { /* nada */ } c.remove(); }
-      else if (a === 'equipe') { const n = document.getElementById('nav-admin'); if (n) n.click(); }
-      else if (a === 'modelo') { if (abrirImport()) setTimeout(() => { const m = document.getElementById('ct-modelo'); if (m) m.click(); }, 300); }
-      else if (a === 'importar') abrirImport();
-      else if (a === 'marca') abrirMinhaCorretora();
-    });
-  }
+  /* ---------- primeiros passos: o guia mora no index.html (guiaIniciar, tela "Primeiros passos" no lugar do conteúdo).
+     A antiga caixa "Comece por aqui" saiu em 05/11/2026 (fluxo da primeira entrada aprovado pelo Conselho). ---------- */
+  function primeirosPassos() { if (typeof window.guiaIniciar === 'function') window.guiaIniciar(); }
+
 
   /* ---------- Planos: o que cada plano entrega (todos veem; o plano da corretora vem marcado) ---------- */
   // telas de cada módulo = crm_recursos_dos_modulos no banco (Vendas, Carteira, Gestão); mude os dois juntos
+  // renovação em TODOS os planos (decisão do Luiz, 05/11/2026): avisos de 30/15/7 dias e a mensagem pronta no Hoje
   const PLANOS_INFO = [
-    { k: 'vendas', nome: 'Vendas', para: 'Para quem quer organizar a prospecção e vender mais.', itens: [
+    { k: 'vendas', nome: 'Vendas', para: 'Para quem quer organizar a prospecção, vender mais e não perder renovação.', itens: [
+      ['🔔 Renovações', 'Quem renova nos próximos 60 dias e os avisos de 30, 15 e 7 dias, com a mensagem pronta para o WhatsApp (em todos os planos).'],
       ['🎯 Vendas', 'Prospecção com funil por etapas e Consultoria com as fases da proteção patrimonial do cliente.'],
       ['🤝 Reuniões', 'Reunião marcada que se confirma sozinha: lembretes prontos para o WhatsApp e o botão Hoje.'],
       ['📚 Base', 'Base de conhecimento com produtos, argumentos e respostas para objeções.'],
       ['📅 Agenda no Outlook, Teams e Google', 'A agenda do sistema aparece no calendário que você já usa.'],
       ['✨ IA de vendas', 'Resumo do cliente, análise da reunião e sugestões do próximo passo.']] },
     // 2 módulos que rodam sozinhos (Vendas e Carteira) + a Equipe como complemento de quem tem os dois (decisão do Luiz, 02/11/2026)
-    { k: 'carteira', nome: 'Carteira', para: 'Para quem já tem clientes e não quer perder nenhuma renovação.', itens: [
+    { k: 'carteira', nome: 'Carteira', para: 'Para quem já tem clientes e quer a carteira inteira organizada.', itens: [
+      ['🔔 Renovações', 'Quem renova e os avisos de 30, 15 e 7 dias, com a mensagem pronta (em todos os planos).'],
       ['📄 Apólices', 'Central de apólices com todas as apólices num lugar só, por vencimento.'],
-      ['🔔 Renovações', 'Avisos de 30, 15 e 7 dias antes de cada apólice vencer, e o pós-venda.'],
+      ['🤝 Pós-venda', 'Os contatos depois da venda, no tempo certo.'],
       ['✨ IA de carteira', 'Lê a apólice, a cotação ou o documento e preenche os dados para você.']] },
     { k: 'vendas_carteira', nome: 'Vendas + Carteira', para: 'Os dois módulos juntos: a venda fechada já cai na carteira e a renovação volta para a venda.', itens: [
       ['➕ Tudo do Vendas', ''],

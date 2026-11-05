@@ -10,7 +10,7 @@
   // Cadastro, Agenda, Sugestões e Admin vêm em todos. Sem lista = tudo liberado (inclusive os extras).
   const MODULOS = [
     ['vendas', 'Vendas', 'Prospecção, Consultoria, Reuniões, Base de conhecimento, agenda no Outlook/Teams e IA de vendas'],
-    ['carteira', 'Carteira', 'Central de Apólices, renovações, pós-venda e IA de carteira (apólice e documento). A lista de clientes vem em todos os planos'],
+    ['carteira', 'Carteira', 'Central de Apólices, pós-venda e IA de carteira (apólice e documento). A lista de clientes e os avisos de renovação vêm em todos os planos'],
     ['gestao', 'Gestão', 'Indicadores, metas, orçamento, funil, Mais Carlas e Ata']];
   const EXTRAS = [['premium', 'Premium / COPA']];   // Analítico e fidelizados (plantões) saíram do CRM em 03/11/2026
   // escada de planos (decisão do Luiz, 29/10/2026); os preços ficam na configuração da plataforma (aba Pagamentos)
@@ -93,6 +93,7 @@
         rpc('crm_plataforma_faturas'), rpc('crm_plataforma_config_ler')]);
       EST.faturas = EST.faturas || []; EST.config = EST.config || {};
       try { await carregarSugestoes(); } catch (e) { EST.sugestoes = []; }
+      try { EST.alertas = (await rpc('crm_plataforma_alertas_entrada')) || []; } catch (e) { EST.alertas = []; }
     } catch (e) { raiz.innerHTML = `<div style="padding:40px">Erro ao carregar o painel: ${esc(e.message)} <button class="b" id="pp-x">Fechar</button></div>`; raiz.querySelector('#pp-x').onclick = fechar; return; }
     desenhar();
   }
@@ -116,6 +117,7 @@
           <div class="kpi"><b>${aguardando}</b><span>contrato(s) aguardando aceite</span></div>
           <div class="kpi" style="${revisao ? 'border-color:#e7b9b3;background:#fdf3f1' : ''}"><b>${revisao}</b><span>pedido(s) de revisão do contrato</span></div>
         </div>
+        ${alertasEntrada()}
         ${EST.aviso || ''}
         ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : EST.aba === 'historico' ? telaHistorico() : EST.aba === 'sugestoes' ? telaSugestoes() : telaUsuarios()}
       </main>`;
@@ -125,6 +127,17 @@
       if (EST.aba === 'sugestoes') { try { await carregarSugestoes(); } catch (err) { alert(err.message); return; } }
       desenhar(); });
     if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else if (EST.aba === 'historico') ligarHistorico(); else if (EST.aba === 'sugestoes') ligarSugestoes(); else ligarUsuarios();
+  }
+
+  /* ---------- alerta da primeira entrada (para a Amanda, todo dia; fluxo aprovado em 05/11/2026) ---------- */
+  function alertasEntrada() {
+    const a = EST.alertas || []; if (!a.length) return '';
+    const quem = (x) => `<b>${esc(x.nome || x.email)}</b> <span style="color:#5d6871">(${esc(x.email)} · ${esc(x.corretora || '—')})</span>`;
+    const linha = (x) => x.tipo === 'nao_entrou'
+      ? `<li>${quem(x)} teve o acesso liberado em ${quando(x.desde)} e <b>ainda não entrou</b>. Libere o acesso de novo em Administradores (o código anterior venceu) e ligue.</li>`
+      : `<li>${quem(x)} entrou em ${quando(x.desde)} e <b>ainda não viu a lista de renovação</b>. Ofereça montar a carteira junto, por vídeo, em 20 minutos.</li>`;
+    return `<div class="aviso" style="border-color:#e7c46a;background:#fff8e6"><b>⏰ Primeira entrada: ${a.length} pessoa${a.length > 1 ? 's precisam' : ' precisa'} de você hoje</b>
+      <ul style="margin:6px 0 0 18px;padding:0">${a.map(linha).join('')}</ul></div>`;
   }
 
   /* ---------- corretoras ---------- */
@@ -804,9 +817,9 @@
   // convite com o link próprio da corretora; o administrador também recebe os primeiros passos
   // o que cada plano entrega, na mensagem de boas-vindas (mesmo conteúdo do botão 📦 Planos, plataforma.js)
   const ITENS_PLANO = {
-    vendas: ['🎯 Vendas: prospecção com funil por etapas e Consultoria com as fases da proteção patrimonial', '🤝 Reuniões que se confirmam sozinhas, com lembretes prontos para o WhatsApp', '📚 Base de conhecimento (produtos, argumentos, objeções)', '📅 Agenda no Outlook, Teams e Google', '✨ IA de vendas: resumo do cliente, análise da reunião e próximo passo sugerido'],
-    carteira: ['📄 Central de Apólices com todas as apólices por vencimento', '🔔 Avisos de renovação de 30, 15 e 7 dias e o pós-venda', '✨ IA de carteira: lê a apólice, a cotação ou o documento e preenche os dados'],
-    vendas_carteira: ['Tudo do plano Vendas, mais:', '📄 Central de Apólices com renovações e avisos de 30, 15 e 7 dias, e pós-venda', '✨ IA de carteira: lê a apólice, a cotação ou o documento e preenche os dados'],
+    vendas: ['🔔 Avisos de renovação de 30, 15 e 7 dias, com a mensagem pronta', '🎯 Vendas: prospecção com funil por etapas e Consultoria com as fases da proteção patrimonial', '🤝 Reuniões que se confirmam sozinhas, com lembretes prontos para o WhatsApp', '📚 Base de conhecimento (produtos, argumentos, objeções)', '📅 Agenda no Outlook, Teams e Google', '✨ IA de vendas: resumo do cliente, análise da reunião e próximo passo sugerido'],
+    carteira: ['🔔 Avisos de renovação de 30, 15 e 7 dias, com a mensagem pronta', '📄 Central de Apólices com todas as apólices por vencimento', '🤝 Pós-venda', '✨ IA de carteira: lê a apólice, a cotação ou o documento e preenche os dados'],
+    vendas_carteira: ['Tudo do plano Vendas, mais:', '📄 Central de Apólices com todas as apólices por vencimento, e pós-venda', '✨ IA de carteira: lê a apólice, a cotação ou o documento e preenche os dados'],
     completo: ['Tudo dos módulos Vendas e Carteira, mais a Equipe:', '📊 Indicadores da corretora e de cada corretor', '💼 Comercial: metas, orçamento, funil com taxas e indicações', '📝 Ata da semana']
   };
   // o código de primeiro acesso é gerado pelo banco na liberação (04/11/2026): sem ele a pessoa não cria a senha
@@ -853,11 +866,9 @@ ${perm ? '' : `*Degustação e assinatura*
 • Quer ativar antes? Em 💳 Pagamento, clique em *Pagar agora e ativar o plano*: a assinatura fica ativa na hora
 • Quer um plano maior? Em 📦 Planos, clique em *Mudar para…*. Na degustação não custa nada; depois, você paga só a diferença proporcional e o plano novo vale na hora
 
-`}*Primeiros passos lá dentro*
-• Cadastre a sua equipe em *Admin*
-• Na tela *Aliança*, baixe a planilha padrão, preencha com os seus clientes e clique em *Importar carteira*
-• Coloque o seu logo e as suas cores em *Minha corretora*
-• O quadro "Comece por aqui" guia cada passo, e o botão *📦 Planos* mostra tudo o que o seu plano tem
+`}*Lá dentro*
+• A tela *Primeiros passos* pergunta o que você tem dos seus clientes (planilha, PDFs das apólices ou nada organizado) e leva você até a primeira mensagem de renovação
+• O botão *📦 Planos* mostra tudo o que o seu plano tem
 
 *Dúvidas e ideias:* use a tela *Sugestões* ou o balão 💬 no canto da tela. A gente responde por lá.
 *O sistema cresce toda semana:* quando sair novidade, aparece a faixa "Saiu uma versão nova". É só clicar em *Atualizar*: se você estiver preenchendo algo, o sistema oferece salvar antes.

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611051205">
+<meta name="app-build" content="202611051222">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -220,6 +220,7 @@ window.ALIANCA = {
   .hj-q-bt{ min-height:48px; font-size:16px !important; padding:0 20px !important; }
   .hj-cont{ display:inline-block; background:#eaf7f1; color:#0f5f40; border:1px solid #bfe5d2; border-radius:999px; padding:8px 16px; font-size:16px; margin:0 0 12px; }
   .cr-grid input{ min-height:44px; font-size:16px; }
+  .dup-l{ display:flex; gap:10px; align-items:center; min-height:44px; cursor:pointer; } .dup-l input{ width:20px; height:20px; flex:none; }
   .hj-guia{ display:block; width:100%; text-align:left; min-height:44px; border:1px solid var(--border); background:var(--surface); border-radius:10px; padding:10px 14px; font:inherit; font-size:16px; cursor:pointer; margin:0 0 12px; color:var(--ink); }
   .hj-mais > summary{ cursor:pointer; font-weight:600; font-size:16px; padding:12px 0; min-height:44px; }
   .hj-dir{ margin-left:10px; display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap; vertical-align:middle; }
@@ -5458,9 +5459,43 @@ function opDupGroups(){
 }
 function opDupDialog(){
   const gs = opDupGroups();
-  const box = dlgOpen(`<div class="om-title"><div><h3>Possíveis duplicados (${gs.length})</h3><div class="om-sub">CPF igual sugere unir os cadastros. Nome igual com CPFs diferentes não aparece (são pessoas diferentes). Mesmo telefone e nome parecido pode ser a mesma pessoa — confira antes.</div></div><button data-close>✕</button></div>
-    <div class="dlg-body">${gs.length ? gs.map(g=>`<div class="q"><div class="ql">${g.why}</div>${g.list.map(p=>`<div style="padding:3px 0">• <a href="#" data-openp="${p.id}" style="color:var(--brand);font-weight:600">${escapeHtml(p.nome)}</a> <small style="color:var(--ink-faint)">${p.cpf||''} ${p.telefone||''}</small></div>`).join('')}</div>`).join('') : '<div class="op-more">Nenhum possível duplicado encontrado.</div>'}</div>`, true);
+  // o mais completo fica (campos preenchidos + apólices valem mais); a pessoa pode trocar antes de juntar
+  const peso = p=>Object.entries(p).filter(([k,v])=>!['id','corretor_id','created_at','updated_at'].includes(k) && v!=null && v!=='' && !(Array.isArray(v) && !v.length)).length + 3*((OP.apo.get(p.id)||[]).length);
+  const box = dlgOpen(`<div class="om-title"><div><h3>Possíveis duplicados (${gs.length})</h3><div class="om-sub">Escolha qual cadastro fica e toque em Juntar: apólices, histórico, documentos e o resto passam para ele, e o que estiver vazio nele é completado com o outro. Nome igual com CPFs diferentes não aparece (são pessoas diferentes).</div></div><button data-close>✕</button></div>
+    <div class="dlg-body">${gs.length ? gs.map((g,gi)=>{ const melhor = g.list.slice().sort((a,b)=>peso(b)-peso(a))[0];
+      return `<div class="q dup-g" data-g="${gi}"><div class="ql">${g.why}</div>${g.list.map(p=>{ const na = (OP.apo.get(p.id)||[]).length;
+        return `<label class="dup-l"><input type="radio" name="dup-${gi}" value="${p.id}" ${p===melhor?'checked':''}> <span><a href="#" data-openp="${p.id}" style="color:var(--brand);font-weight:600">${escapeHtml(p.nome)}</a> <small style="color:var(--ink-faint)">${[p.cpf, p.telefone, na ? na+' apólice'+(na>1?'s':'') : ''].filter(Boolean).map(escapeHtml).join(' · ')}</small></span></label>`; }).join('')}
+        <div class="gp-acoes"><button type="button" class="om-cancel vd-btn" data-juntar="${gi}">Juntar em um só (fica o marcado)</button></div><div class="om-err dup-err"></div></div>`; }).join('') : '<div class="op-more">Nenhum possível duplicado encontrado.</div>'}</div>`, true);
   box.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); dlgClose(); goToPersonView(a.dataset.openp); }));
+  box.querySelectorAll('[data-juntar]').forEach(btn=>btn.addEventListener('click', async ()=>{
+    const g = gs[+btn.dataset.juntar], el = btn.closest('.dup-g'), err = el.querySelector('.dup-err'); err.textContent = '';
+    const fica = el.querySelector('input[type=radio]:checked').value, ficaP = g.list.find(p=>p.id===fica), sai = g.list.filter(p=>p.id!==fica);
+    if(!confirm(`Juntar em um cadastro só?\n\nFica: ${ficaP.nome}\nSai: ${sai.map(p=>p.nome).join(', ')}\n\nApólices, histórico, documentos e o resto passam para ${ficaP.nome}. O que estiver vazio nele é completado com o outro. O cadastro que sai vai para o arquivo (nada se perde), mas a junção não se desfaz pelo sistema.`)) return;
+    btn.disabled = true; btn.textContent = 'Juntando…';
+    const repetidas = [];
+    for(const p of sai){
+      const { data, error } = await sb.rpc('crm_pessoas_juntar', { p_fica:fica, p_sai:p.id });
+      if(error){
+        const msg = (error.code==='PGRST202' || /could not find the function/i.test(error.message||'')) ? 'a junção ainda não está liberada nesta versão. Atualize a página e tente de novo.' : error.message;
+        err.textContent = 'Não consegui juntar '+p.nome+': '+msg; btn.disabled = false; btn.textContent = 'Juntar em um só (fica o marcado)'; OP.dirty = true; return; }
+      // o que já saiu some do grupo: se o próximo falhar, tentar de novo não esbarra nele
+      OP.pessoas = OP.pessoas.filter(x=>x.id!==p.id); g.list = g.list.filter(x=>x.id!==p.id);
+      const r = el.querySelector('input[value="'+p.id+'"]'); if(r) r.closest('.dup-l').remove();
+      (data && data.apolices_repetidas || []).forEach(a=>{ if(!repetidas.some(x=>x.id===a.id)) repetidas.push(a); });
+    }
+    OP.dirty = true; OP.loaded = false; if(typeof CA!=='undefined') CA.loaded = false;   // recarrega a ficha que ficou e a Central de Apólices
+    // a mesma carteira importada duas vezes deixa apólices iguais: oferece apagar as repetidas
+    if(repetidas.length && confirm(`Depois de juntar, ${ficaP.nome} ficou com ${repetidas.length} apólice${repetidas.length>1?'s':''} repetida${repetidas.length>1?'s':''} (mesmo número, ou mesma seguradora, produto e vencimento):
+
+${repetidas.map(a=>'• '+(a.texto||'apólice')+' (fica '+(a.fica_texto||'a original')+')').join(String.fromCharCode(10))}
+
+Apagar ${repetidas.length>1?'as repetidas':'a repetida'}? Fica a que tem o PDF e o prêmio.`)){
+      const { error:e2 } = await sb.from('crm_apolices').delete().in('id', repetidas.map(a=>a.id));
+      if(e2) showToast('Não consegui apagar as repetidas: '+e2.message+'. Dá para apagar na Central de Apólices.');
+    }
+    showToast('Cadastros juntados: fica '+ficaP.nome);
+    dlgClose(); await renderOperacao(true); opDupDialog();
+  }));
 }
 function opRenderKpis(){
   let med = 0, nao = 0, cli = 0, fun = 0;
@@ -11395,11 +11430,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611051205"></script>
-<script src="painel.js?v=202611051205"></script>
-<script src="cobranca.js?v=202611051205"></script>
-<script src="cadastro.js?v=202611051205"></script>
-<script src="contrato.js?v=202611051205"></script>
-<script src="guarda.js?v=202611051205"></script>
+<script src="plataforma.js?v=202611051222"></script>
+<script src="painel.js?v=202611051222"></script>
+<script src="cobranca.js?v=202611051222"></script>
+<script src="cadastro.js?v=202611051222"></script>
+<script src="contrato.js?v=202611051222"></script>
+<script src="guarda.js?v=202611051222"></script>
 </body>
 </html>

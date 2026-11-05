@@ -95,8 +95,10 @@ footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:13px; }
     document.title = (mc.nome ? mc.nome + ' · ' : '') + 'Seus seguros';
     // logo só do armazenamento do sistema (nada de imagem de terceiros rastreando quem abre)
     if(mc.logo_url && mc.logo_url.indexOf('https://iuotvottnailofxbaynx.supabase.co/storage/v1/object/public/') === 0){ const i = $('logo'); i.src = mc.logo_url; i.alt = mc.nome || ''; i.classList.remove('oculto'); }
-    const c = mc.cores || {}; const raiz = document.documentElement.style;
-    ['--brand','--brand-soft','--navy'].forEach(k => { if(typeof c[k] === 'string' && /^#[0-9a-f]{3,8}$/i.test(c[k])) raiz.setProperty(k, c[k]); });
+    // cores da corretora como ficam em "Minha corretora": principal (botões) e escura (títulos); o fundo claro sai da principal
+    const c = mc.cores || {}, raiz = document.documentElement.style, hex = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+    if(hex(c.principal)){ raiz.setProperty('--brand', c.principal); raiz.setProperty('--brand-soft', c.principal + '14'); }
+    if(hex(c.escura)) raiz.setProperty('--navy', c.escura);
     $('rodape').textContent = 'Dúvidas sobre o seu seguro? Fale com a ' + corr + '. Os seus dados são tratados pela ' + corr + ' e não ficam guardados neste aparelho.';
   }
   function invalido(t){ $('invTxt').textContent = t || 'Este link não está mais válido. Peça um link novo à sua corretora.'; mostra('invalido'); }

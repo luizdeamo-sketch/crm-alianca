@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611050945">
+<meta name="app-build" content="202611050952">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -292,7 +292,7 @@ window.ALIANCA = {
       <div class="op-top">
         <div class="op-filters">
           <div class="op-kpis" id="op-kpis"></div>
-          <input id="op-search" placeholder="Buscar por nome, CPF, CRM ou telefone...">
+          <input id="op-search" placeholder="Buscar por nome, CPF ou telefone...">
           <button id="op-ftoggle" class="om-cancel"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16l-6.2 7.3v5.4l-3.6 1.8v-7.2z"/></svg> Filtros<span id="op-fcount" class="op-fcount" style="display:none"></span></button>
           <div class="op-period-wrap" style="position:relative">
             <button id="op-period-toggle" class="om-cancel" title="Escolher o período exibido (data início e fim)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg> <span id="op-range"></span></button>
@@ -2780,7 +2780,7 @@ function pvRender(){
   const wa = waLink(p.telefone);
   view.innerHTML = `<div class="person-header"><div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn-ghost" id="btn-op-back">← Aliança</button><h2 style="margin:0">${escapeHtml(p.nome)}</h2></div>
-      <div class="tags" style="margin-top:8px"><span class="tag">${escapeHtml(perfilRotulo(p))}</span>${p.crm?`<span class="tag">CRM ${escapeHtml(p.crm)}</span>`:''}${p.especialidade?`<span class="tag">${escapeHtml(p.especialidade)}</span>`:''}${pvClassChip(p)}${pvDadosChips(p)}${(p.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+      <div class="tags" style="margin-top:8px"><span class="tag">${escapeHtml(perfilRotulo(p))}</span>${p.especialidade?`<span class="tag">${escapeHtml(p.especialidade)}</span>`:''}${pvClassChip(p)}${pvDadosChips(p)}${(p.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
       <div class="person-actions"><button class="om-cancel" id="pa-editar">Editar cadastro</button><button class="om-save" id="pa-prosp" title="Cria a linha em Vendas > Prospecção, já com os dados desta pessoa, e abre">🎯 Prospectar</button><button class="om-save" id="pa-fluxo">Fluxo de proteção</button><button class="om-cancel" id="pa-apolice">Anexar apólice</button><button class="om-cancel" id="pa-wa">WhatsApp com script</button><button class="om-cancel" id="pa-audit" title="Quem alterou o quê, e quando">Histórico de alterações</button><button class="om-save" id="pa-intel" title="Pesquisa pública e perguntas personalizadas para a abordagem">Inteligência</button><button class="om-cancel" id="pa-reuniao" title="Gravar/enviar uma reunião com esta pessoa">Nova reunião</button><button class="om-cancel" id="pa-del" style="color:var(--red)" title="Apaga o cadastro e tudo ligado a ele">Excluir cadastro</button></div>
       <div id="pv-next">${pvNextHtml(p)}</div>
       <div id="pv-redes"></div>
@@ -4772,7 +4772,7 @@ document.getElementById('agenda-pessoa-busca').addEventListener('input', async (
   const resEl = document.getElementById('agenda-pessoa-results');
   if(val.length < 2){ resEl.innerHTML=''; return; }
   const { data } = await sb.from('crm_pessoas').select('id,nome,crm').ilike('nome', `%${val}%`).limit(6);
-  resEl.innerHTML = (data||[]).map(p=>`<div class="rec" style="cursor:pointer;padding:6px 9px;" data-id="${p.id}" data-nome="${escapeHtml(p.nome)}">${escapeHtml(p.nome)} ${p.crm?('· CRM '+escapeHtml(p.crm)):''}</div>`).join('');
+  resEl.innerHTML = (data||[]).map(p=>`<div class="rec" style="cursor:pointer;padding:6px 9px;" data-id="${p.id}" data-nome="${escapeHtml(p.nome)}">${escapeHtml(p.nome)}</div>`).join('');
   resEl.querySelectorAll('[data-id]').forEach(el=>{
     el.addEventListener('click', ()=>{
       document.getElementById('agenda-pessoa-id').value = el.dataset.id;
@@ -5401,7 +5401,7 @@ function opDupGroups(){
 function opDupDialog(){
   const gs = opDupGroups();
   const box = dlgOpen(`<div class="om-title"><div><h3>Possíveis duplicados (${gs.length})</h3><div class="om-sub">CPF igual sugere unir os cadastros. Nome igual com CPFs diferentes não aparece (são pessoas diferentes). Mesmo telefone e nome parecido pode ser a mesma pessoa — confira antes.</div></div><button data-close>✕</button></div>
-    <div class="dlg-body">${gs.length ? gs.map(g=>`<div class="q"><div class="ql">${g.why}</div>${g.list.map(p=>`<div style="padding:3px 0">• <a href="#" data-openp="${p.id}" style="color:var(--brand);font-weight:600">${escapeHtml(p.nome)}</a> <small style="color:var(--ink-faint)">${p.cpf||''} ${p.crm?'CRM '+p.crm:''} ${p.telefone||''}</small></div>`).join('')}</div>`).join('') : '<div class="op-more">Nenhum possível duplicado encontrado.</div>'}</div>`, true);
+    <div class="dlg-body">${gs.length ? gs.map(g=>`<div class="q"><div class="ql">${g.why}</div>${g.list.map(p=>`<div style="padding:3px 0">• <a href="#" data-openp="${p.id}" style="color:var(--brand);font-weight:600">${escapeHtml(p.nome)}</a> <small style="color:var(--ink-faint)">${p.cpf||''} ${p.telefone||''}</small></div>`).join('')}</div>`).join('') : '<div class="op-more">Nenhum possível duplicado encontrado.</div>'}</div>`, true);
   box.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); dlgClose(); goToPersonView(a.dataset.openp); }));
 }
 function opRenderKpis(){
@@ -6251,7 +6251,7 @@ async function findPessoas({cpf, crm, crm_uf, nome, telefone}){
 }
 const isStrong = (p)=> p.why!=='nome semelhante' && p.why!=='telefone igual';
 function pessoaOptionHtml(p, name, checked){
-  return `<label class="pk"><input type="radio" name="${name}" value="${p.id}" ${checked?'checked':''}><span><b>${escapeHtml(p.nome)}</b> <small>${p.cpf?escapeHtml(p.cpf)+' · ':''}${p.crm?'CRM '+escapeHtml(p.crm)+' · ':''}${escapeHtml(p.why||'')}</small></span></label>`;
+  return `<label class="pk"><input type="radio" name="${name}" value="${p.id}" ${checked?'checked':''}><span><b>${escapeHtml(p.nome)}</b> <small>${p.cpf?escapeHtml(p.cpf)+' · ':''}${escapeHtml(p.why||'')}</small></span></label>`;
 }
 
 // ---------- janela genérica ----------
@@ -6277,7 +6277,7 @@ function redeLinksBusca(p){
   const L = [['Instagram','https://www.google.com/search?q='+encodeURIComponent('site:instagram.com "'+nome+'" médico'+esp)],
     ['LinkedIn','https://www.linkedin.com/search/results/people/?keywords='+encodeURIComponent(nome+' médico'+esp)],
     ['Facebook','https://www.facebook.com/search/people/?q='+encodeURIComponent(nome)],
-    ['Google','https://www.google.com/search?q='+encodeURIComponent('"'+nome+'"'+(p.crm?' CRM '+p.crm:'')+' médico')]];
+    ['Google','https://www.google.com/search?q='+encodeURIComponent('"'+nome+'"'+(p.profissao?' '+p.profissao:''))]];
   return L.map(([l,u])=>`<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer" style="${redeChipStyle}">🔎 ${l}</a>`).join(' ');
 }
 function redeChip(r){
@@ -6524,7 +6524,7 @@ async function ruNovaDialog(pre){
     sel = null; const q = busca.value.trim().toLowerCase();
     if(q.length<3){ res.innerHTML = ''; return; }
     const m = OP.pessoas.filter(p=>(p.nome||'').toLowerCase().includes(q)).slice(0,6);
-    res.innerHTML = m.length ? m.map(p=>`<div><a href="#" data-pid="${p.id}">${escapeHtml(p.nome)}</a> <small>${escapeHtml(p.especialidade||'')} ${p.crm?'· CRM '+escapeHtml(p.crm):''}</small></div>`).join('') : 'Ninguém encontrado — a análise poderá cadastrar como novo.';
+    res.innerHTML = m.length ? m.map(p=>`<div><a href="#" data-pid="${p.id}">${escapeHtml(p.nome)}</a> <small>${escapeHtml(p.especialidade||'')}</small></div>`).join('') : 'Ninguém encontrado — a análise poderá cadastrar como novo.';
     res.querySelectorAll('[data-pid]').forEach(a=>a.addEventListener('click', ev=>{ ev.preventDefault(); sel = a.dataset.pid; busca.value = OP.pessoas.find(x=>x.id===sel).nome; showSel(); }));
   });
   document.getElementById('ru-txtfile').addEventListener('change', async e=>{ const f = e.target.files[0]; if(f) document.getElementById('ru-txt').value = await f.text(); });
@@ -6665,7 +6665,7 @@ async function fichaTecnicaPDF(p){
   const used = new Set([...ess, ...saude, ...jorn.flatMap(([,ks])=>ks)]);
   const items = keys => keys.map(k=>[lab(k), ftVal(row[k])]).filter(x=>x[1]);
   const adn = Object.keys(row).filter(k=>!used.has(k) && !FT_SKIP.has(k)).map(k=>[lab(k), ftVal(row[k])]).filter(x=>x[1]);
-  const ident = [['Nome',p.nome],['CPF',p.cpf],['CRM',p.crm?p.crm+(p.crm_uf?'/'+p.crm_uf:''):null],['Especialidade',p.especialidade],['Telefone',p.telefone],['E-mail',p.email],['Data de nascimento',p.data_nascimento?fmtDate(p.data_nascimento):null],['Estado civil',p.estado_civil],['Gênero',p.sexo==='M'?'Masculino':p.sexo==='F'?'Feminino':null],['Profissão',p.profissao],['Cidade/UF',[p.cidade,p.uf].filter(Boolean).join('/')||null]].filter(x=>x[1]);
+  const ident = [['Nome',p.nome],['CPF',p.cpf],['Especialidade',p.especialidade],['Telefone',p.telefone],['E-mail',p.email],['Data de nascimento',p.data_nascimento?fmtDate(p.data_nascimento):null],['Estado civil',p.estado_civil],['Gênero',p.sexo==='M'?'Masculino':p.sexo==='F'?'Feminino':null],['Profissão',p.profissao],['Cidade/UF',[p.cidade,p.uf].filter(Boolean).join('/')||null]].filter(x=>x[1]);
   const box = (t, it) => it.length ? `<div class="ft-sec"><h3>${t}</h3><div class="ft-g">${it.map(([l,v])=>`<div class="ft-i"><span>${escapeHtml(l)}</span><b>${escapeHtml(String(v))}</b></div>`).join('')}</div></div>` : '';
   const hoje = new Date().toLocaleDateString('pt-BR');
   document.getElementById('print-report').innerHTML = `<style>
@@ -7064,7 +7064,7 @@ function mc2RegDialog(r){
       <label class="fl"><span>Frente</span><select id="mr-frente">${MC2_FRENTES.map(f=>`<option value="${f[0]}" ${r.frente===f[0]?'selected':''}>${f[1]}</option>`).join('')}</select></label>
       <label class="fl"><span>Pessoa indicada — já cadastrada?</span><input id="mr-busca" placeholder="Buscar por nome... (ou deixe em branco e preencha abaixo)" value="${selPessoa?escapeHtml(selPessoa.nome):''}" autocomplete="off"></label>
       <div id="mr-res" class="hint"></div>
-      ${fld('mr-nome','Nome (se ainda não cadastrada)',r.nome_indicado)}${fld('mr-tel','Telefone',r.telefone_indicado)}${fld('mr-crm','CRM',r.crm_indicado)}
+      ${fld('mr-nome','Nome (se ainda não cadastrada)',r.nome_indicado)}${fld('mr-tel','Telefone',r.telefone_indicado)}
       <label class="chk"><input type="checkbox" id="mr-aceita" ${r.aceita_contato?'checked':''}> Confirmado: a pessoa aceita ser contatada (LGPD)</label>
       <label class="fl"><span>Status</span><select id="mr-status">${MC2_STATUS.map(s=>`<option value="${s[0]}" ${r.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}</select></label>
       ${fld('mr-canal','Canal',r.canal)}${fld('mr-data','Data',r.data_registro,'date')}
@@ -7081,7 +7081,7 @@ function mc2RegDialog(r){
   busca.addEventListener('input', async ()=>{
     selPessoa = null; const q = busca.value.trim(); if(q.length<3){ res.innerHTML=''; return; }
     const { data } = await sb.from('crm_pessoas').select('id,nome,crm').ilike('nome',`%${q}%`).limit(6);
-    res.innerHTML = (data||[]).map(p=>`<div><a href="#" data-pid="${p.id}">${escapeHtml(p.nome)}</a> ${p.crm?'<small>CRM '+escapeHtml(p.crm)+'</small>':''}</div>`).join('') || 'Ninguém encontrado — preencha os campos manuais abaixo.';
+    res.innerHTML = (data||[]).map(p=>`<div><a href="#" data-pid="${p.id}">${escapeHtml(p.nome)}</a> </div>`).join('') || 'Ninguém encontrado — preencha os campos manuais abaixo.';
     res.querySelectorAll('[data-pid]').forEach(a=>a.addEventListener('click', ev=>{ ev.preventDefault(); const p = data.find(x=>x.id===a.dataset.pid); selPessoa = p; busca.value = p.nome; res.innerHTML = 'vinculado ao cadastro existente'; }));
   });
   const g = id=>document.getElementById(id).value.trim();
@@ -7090,7 +7090,7 @@ function mc2RegDialog(r){
     if(!selPessoa && !g('mr-nome')){ document.getElementById('mr-err').textContent = 'Selecione a pessoa cadastrada ou informe o nome.'; return; }
     const status = g('mr-status');
     if(['virou_lead','reuniao','proposta','plano_fechado'].includes(status) && !document.getElementById('mr-aceita').checked){ document.getElementById('mr-err').textContent = 'Sem "aceita ser contatada" marcado, o registro não pode avançar para esse status (regra de LGPD).'; return; }
-    const payload = { indicador_id:g('mr-ind'), frente:g('mr-frente'), pessoa_id:selPessoa?selPessoa.id:null, nome_indicado:selPessoa?null:(g('mr-nome')||null), telefone_indicado:g('mr-tel')||null, crm_indicado:g('mr-crm')||null,
+    const payload = { indicador_id:g('mr-ind'), frente:g('mr-frente'), pessoa_id:selPessoa?selPessoa.id:null, nome_indicado:selPessoa?null:(g('mr-nome')||null), telefone_indicado:g('mr-tel')||null, crm_indicado:r.crm_indicado||null,
       aceita_contato:document.getElementById('mr-aceita').checked, status, canal:g('mr-canal')||null, data_registro:g('mr-data')||ymdToday(), observacao:g('mr-obs')||null,
       agradecimento_feito:document.getElementById('mr-agrad').checked, comissao_devida:g('mr-com')?Number(g('mr-com')):null, comissao_paga:document.getElementById('mr-pago').checked, data_pagamento:g('mr-datapag')||null, updated_at:new Date().toISOString() };
     const { error } = r.id ? await sb.from('crm_mais_carlas').update(payload).eq('id', r.id) : await sb.from('crm_mais_carlas').insert(payload);
@@ -7145,10 +7145,11 @@ function fld(id, label, val, type, full){
 }
 
 // ---------- NOVO CLIENTE (com leitura de documentos) ----------
-const NC_FIELDS = [['nome','Nome completo *'],['cpf','CPF'],['crm','CRM'],['crm_uf','UF do CRM'],['data_nascimento','Data de nascimento','date'],['telefone','Telefone'],['email','E-mail'],['especialidade','Especialidade'],['cnpj','CNPJ (PJ)'],['razao_social','Razão social']];
+// sem CRM/UF do CRM (decisão do Luiz, 05/11/2026: campo de médico não faz parte do produto, nem na Aliança)
+const NC_FIELDS = [['nome','Nome completo *'],['cpf','CPF'],['data_nascimento','Data de nascimento','date'],['telefone','Telefone'],['email','E-mail'],['especialidade','Especialidade'],['cnpj','CNPJ (PJ)'],['razao_social','Razão social']];
 function openNovoCliente(prefill, onSaved){
   prefill = prefill || {};
-  const box = dlgOpen(`<div class="om-title"><div><h3>Novo cliente</h3><div class="om-sub">Anexe qualquer documento (RG, CNH, cartão do CRM, apólice, comprovantes). O sistema lê e preenche o que encontrar — você confere antes de salvar.</div></div><button data-close>✕</button></div>
+  const box = dlgOpen(`<div class="om-title"><div><h3>Novo cliente</h3><div class="om-sub">Anexe qualquer documento (RG, CNH, apólice, comprovantes). O sistema lê e preenche o que encontrar — você confere antes de salvar.</div></div><button data-close>✕</button></div>
     <div class="dlg-body">
       <div class="dz" id="nc-dz">Arraste documentos aqui ou clique para anexar<input type="file" id="nc-file" multiple accept=".pdf,image/*" hidden></div>
       <div id="nc-files" class="nc-files"></div>
@@ -7173,7 +7174,7 @@ function openNovoCliente(prefill, onSaved){
   dz.addEventListener('dragleave', ()=>dz.classList.remove('over'));
   dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('over'); ncAddFiles([...e.dataTransfer.files]); });
   inp.addEventListener('change', ()=>{ ncAddFiles([...inp.files]); inp.value=''; });
-  ['nc-cpf','nc-crm','nc-nome'].forEach(id=> box.querySelector('#'+id).addEventListener('change', ncCheckDup));
+  ['nc-cpf','nc-nome'].forEach(id=> box.querySelector('#'+id).addEventListener('change', ncCheckDup));
   box.querySelector('#nc-save').addEventListener('click', ncSave);
   box.querySelector('#nc-cep').addEventListener('change', ()=>cepFill('nc-'));
   box.querySelector('#nc-nome').addEventListener('change', async ()=>{ if(!NC.pessoaId && window._ncFiles.length && ncVal('nome')) await ncAfterRead(); });
@@ -7181,7 +7182,7 @@ function openNovoCliente(prefill, onSaved){
 }
 const NC = { pessoaId:null, existing:null };
 const NC_LBL = {cep:'CEP',nome:'nome',cpf:'CPF',crm:'CRM',crm_uf:'UF do CRM',data_nascimento:'nascimento',telefone:'telefone',email:'e-mail',especialidade:'especialidade',cnpj:'CNPJ',razao_social:'razão social',sexo:'sexo',estado_civil:'estado civil'};
-const NC_SAVE_KEYS = ['cpf','crm','crm_uf','data_nascimento','telefone','email','especialidade','sexo','estado_civil','cnpj','razao_social','origem','quem_indicou','profissao','regime_trabalho','cep','logradouro','numero','complemento','bairro','cidade','uf','campanha','parceiro','classificacao','observacoes'];
+const NC_SAVE_KEYS = ['cpf','data_nascimento','telefone','email','especialidade','sexo','estado_civil','cnpj','razao_social','origem','quem_indicou','profissao','regime_trabalho','cep','logradouro','numero','complemento','bairro','cidade','uf','campanha','parceiro','classificacao','observacoes'];
 const ncVal = (id)=>{ const el = document.getElementById('nc-'+id); return el ? el.value.trim() : ''; };
 function ncBanner(html, cls){ const b = document.getElementById('nc-banner'); if(b) b.innerHTML = html ? `<div class="${cls||'dup'}">${html}</div>` : ''; }
 
@@ -7990,8 +7991,8 @@ function caForm(file, f, found){
         ${opts || '<div class="hint">Nenhum cliente cadastrado encontrado com esses dados.</div>'}
         <label class="pk"><input type="radio" name="ca-pes" value="novo" ${opts && top?'':(opts?'':'checked')}><span><b>Cadastrar como novo cliente</b> ${f.nome?'— '+escapeHtml(f.nome):''}</span></label>
         <label class="pk"><input type="radio" name="ca-pes" value="buscar"><span><b>Buscar outro cliente</b></span></label>
-        <div id="ca-busca" style="display:none"><input id="ca-busca-q" class="ca-inp" placeholder="Nome, CPF ou CRM..."><div id="ca-busca-res"></div></div>
-        <div class="fgrid" id="ca-novo" style="display:none">${fld('ca-n-nome','Nome do cliente',f.nome,'text',true)}${fld('ca-n-cpf','CPF',f.cpf)}${fld('ca-n-crm','CRM',f.crm)}<label class="fl"><span>Perfil do cliente</span><select id="ca-n-tipo">${tipoOptions(f.crm?'medico':'outro')}</select></label></div></div>
+        <div id="ca-busca" style="display:none"><input id="ca-busca-q" class="ca-inp" placeholder="Nome ou CPF..."><div id="ca-busca-res"></div></div>
+        <div class="fgrid" id="ca-novo" style="display:none">${fld('ca-n-nome','Nome do cliente',f.nome,'text',true)}${fld('ca-n-cpf','CPF',f.cpf)}<label class="fl"><span>Perfil do cliente</span><select id="ca-n-tipo">${tipoOptions(f.crm?'medico':'outro')}</select></label></div></div>
       <div class="q"><div class="ql">3. Dados da apólice</div><div class="fgrid">
         ${fld('ca-seg','Seguradora *',f.seguradora)}${fld('ca-prod','Produto / tipo *',f.tipo_seguro)}
         ${fld('ca-num','Nº da apólice',f.numero_apolice)}
@@ -8039,7 +8040,7 @@ async function caSave(file, f){
   if(sel==='buscar'){ const r = document.querySelector('input[name="ca-pes2"]:checked'); sel = r ? r.value : null; if(!sel){ err.textContent = 'Selecione o cliente na busca.'; return; } }
   if(sel==='novo' && !g('ca-n-nome')){ err.textContent = 'Informe o nome do novo cliente.'; return; }
   if(sel==='novo'){
-    const dups = await findPessoas({cpf:g('ca-n-cpf')||f.cpf, crm:g('ca-n-crm'), nome:g('ca-n-nome')});
+    const dups = await findPessoas({cpf:g('ca-n-cpf')||f.cpf, nome:g('ca-n-nome')});
     const forte = dups.filter(isStrong);
     if(forte.length){ err.innerHTML = `<b>Este cliente já está cadastrado</b> (${escapeHtml(forte[0].why)}): ${escapeHtml(forte[0].nome)}. Não criei duplicado — <a href="#" id="ca-usar" data-id="${forte[0].id}">vincular a este cadastro</a>.`;
       const a = document.getElementById('ca-usar'); if(a) a.addEventListener('click', ev=>{ ev.preventDefault(); const box = document.getElementById('dlg'); let r = box.querySelector('input[name="ca-pes"][value="'+a.dataset.id+'"]');
@@ -8056,7 +8057,7 @@ async function caSave(file, f){
   try{
     let pessoaId = (sel && sel!=='novo') ? sel : null;
     if(sel==='novo'){
-      const row = {nome:g('ca-n-nome'), tipo:g('ca-n-tipo')||'medico'}; if(g('ca-n-cpf')) row.cpf = g('ca-n-cpf'); if(g('ca-n-crm')) row.crm = g('ca-n-crm');
+      const row = {nome:g('ca-n-nome'), tipo:g('ca-n-tipo')||'medico'}; if(g('ca-n-cpf')) row.cpf = g('ca-n-cpf');
       const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single(); if(error) throw error;
       pessoaId = data.id; OP.pessoas.push(data); OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
     }
@@ -8116,7 +8117,7 @@ async function caFormApolices(file, f, found){
       <div class="q"><div class="ql">2. De quem são?</div>
         ${opts || '<div class="hint">Nenhum cliente cadastrado encontrado com esses dados.</div>'}
         <label class="pk"><input type="radio" name="cx-pes" value="novo" ${opts && top?'':(opts?'':'checked')}><span><b>Cadastrar como novo cliente</b> ${f.nome?'— '+escapeHtml(f.nome):''}</span></label>
-        <div class="fgrid" id="cx-novo" style="display:none">${fld('cx-n-nome','Nome do cliente',f.nome,'text',true)}${fld('cx-n-cpf','CPF',f.cpf)}${fld('cx-n-crm','CRM',f.crm)}<label class="fl"><span>Perfil</span><select id="cx-n-tipo">${tipoOptions(f.crm?'medico':'outro')}</select></label></div></div>
+        <div class="fgrid" id="cx-novo" style="display:none">${fld('cx-n-nome','Nome do cliente',f.nome,'text',true)}${fld('cx-n-cpf','CPF',f.cpf)}<label class="fl"><span>Perfil</span><select id="cx-n-tipo">${tipoOptions(f.crm?'medico':'outro')}</select></label></div></div>
       <label class="fl"><span>Vínculo comercial *</span><select id="cx-vinc"><option value="Outra corretora">Outra corretora</option><option value="Aliança">Aliança</option><option value="Direto com seguradora">Direto com seguradora</option><option value="Não identificado">Não identificado</option></select></label>
       <div class="q"><div class="ql">3. As apólices (${rows.length})</div>${rows.map(rowHtml).join('')}</div>
       <div class="om-err" id="cx-err"></div></div>
@@ -8143,7 +8144,7 @@ async function caSaveApolices(file, f, rows, box){
   try{
     let pessoaId = (sel && sel!=='novo') ? sel : null;
     if(sel==='novo'){
-      const row = {nome:g('cx-n-nome'), tipo:g('cx-n-tipo')||'medico'}; if(g('cx-n-cpf')) row.cpf=g('cx-n-cpf'); if(g('cx-n-crm')) row.crm=g('cx-n-crm');
+      const row = {nome:g('cx-n-nome'), tipo:g('cx-n-tipo')||'medico'}; if(g('cx-n-cpf')) row.cpf=g('cx-n-cpf');
       const { data, error } = await sb.from('crm_pessoas').insert(row).select('id,nome,crm,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes').single();
       if(error) throw error; pessoaId = data.id; OP.pessoas.push(data); OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
     }
@@ -9002,7 +9003,7 @@ async function cepFill(prefix){
 function openEditPessoa(p){
   const box = dlgOpen(`<div class="om-title"><div><h3>Editar cadastro</h3><div class="om-sub">${escapeHtml(p.nome)}</div></div><button data-close>✕</button></div>
     <div class="dlg-body"><div class="fgrid">
-      ${fld('pe-nome','Nome completo *',p.nome,'text',true)}${fld('pe-cpf','CPF',p.cpf)}${fld('pe-crm','CRM',p.crm)}${fld('pe-crm_uf','UF do CRM',p.crm_uf)}
+      ${fld('pe-nome','Nome completo *',p.nome,'text',true)}${fld('pe-cpf','CPF',p.cpf)}
       ${fld('pe-data_nascimento','Data de nascimento',p.data_nascimento,'date')}${fld('pe-telefone','Telefone',p.telefone)}${fld('pe-email','E-mail',p.email)}${fld('pe-especialidade','Especialidade',p.especialidade)}
       ${fld('pe-cnpj','CNPJ (PJ)',p.cnpj)}${fld('pe-razao_social','Razão social',p.razao_social)}
       <label class="fl"><span>Profissão</span><select id="pe-tipo">${tipoOptions(p.tipo||'medico', p.profissao)}</select></label>
@@ -9015,7 +9016,7 @@ function openEditPessoa(p){
     <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="pe-save">Salvar</button></div>`, true);
   box.querySelector('#pe-cep').addEventListener('change', ()=>cepFill('pe-'));
   // Só vai para o banco o que a pessoa mudou nesta janela: campo vazio que ela não tocou não apaga o que está no cadastro.
-  const peKeys = ['cpf','crm','crm_uf','data_nascimento','telefone','email','especialidade','cnpj','razao_social','sexo','estado_civil','origem','quem_indicou','classificacao','observacoes','base_legal_contato'].concat(PF_EXTRA.map(x=>x[0]));
+  const peKeys = ['cpf','data_nascimento','telefone','email','especialidade','cnpj','razao_social','sexo','estado_civil','origem','quem_indicou','classificacao','observacoes','base_legal_contato'].concat(PF_EXTRA.map(x=>x[0]));
   const peVal = id=>document.getElementById('pe-'+id).value.trim();
   const peIni = {}; ['nome','tipo','tags'].concat(peKeys).forEach(k=>{ peIni[k] = peVal(k); });
   box.querySelector('#pe-save').addEventListener('click', async ()=>{
@@ -9046,7 +9047,7 @@ function opFillTagFilter(){
 // ---- importar contatos em massa (Excel/CSV) ----
 const CT_FIELDS = [
   ['nome','Nome *',/^nome|^cliente|^contato|^first name|^given name|^name$/i],['sobrenome','Sobrenome',/sobrenome|^last name|^family name/i],['cpf','CPF',/cpf/i],['data_nascimento','Data de nascimento',/nasc|birthday|anivers/i],['sexo','Gênero',/g[êe]nero|sexo/i],
-  ['profissao','Profissão',/profiss/i],['crm','CRM',/^crm/i],['especialidade','Especialidade',/especial/i],['regime_trabalho','Regime de trabalho',/regime/i],
+  ['profissao','Profissão',/profiss/i],['especialidade','Especialidade',/especial/i],['regime_trabalho','Regime de trabalho',/regime/i],
   ['telefone','Telefone',/telefone|celular|whats|fone|phone/i],['email','E-mail',/e-?mail/i],['cep','CEP',/^cep/i],['logradouro','Logradouro',/logradouro|rua|endere[çc]o/i],['numero','Número (endereço)',/^n[úu]mero$|^n[ºo]$|^n[úu]mero (do )?(endere|resid)/i],
   ['complemento','Complemento',/complemento/i],['bairro','Bairro',/bairro/i],['cidade','Cidade',/cidade|munic/i],['uf','Estado (UF)',/^estado|^uf$/i],
   ['origem','Origem',/^origem/i],['quem_indicou','Quem indicou',/indic/i],['campanha','Campanha',/campanha/i],['parceiro','Parceiro',/parceiro/i],['observacoes','Observação',/observa/i],
@@ -9055,11 +9056,11 @@ const CT_FIELDS = [
   ['emissao','Início da vigência / emissão',/emiss|in[íi]cio.*vig/i],['a_status','Status da apólice (ativa, cancelada, encerrada, proposta)',/status.*ap[óo]lice|situa[çc][ãa]o.*ap[óo]lice/i],['premio','Prêmio (R$)',/pr[êe]mio/i],['capital','Capital segurado / cobertura (R$)',/capital|import[âa]ncia segurada|^cobertura/i],
   ['comissao','Comissão (%)',/comiss/i],['forma_pagamento','Forma de pagamento',/forma.*pag|^pagamento/i],
   ['p_status','Prospecção: status',/^(prospec[çc][ãa]o:?\s*)?(status|situa[çc][ãa]o)/i],['p_data','Prospecção: data do contato',/data.*contato|contato.*data|data da prospec/i],['p_canal','Prospecção: canal',/^(prospec[çc][ãa]o:?\s*)?canal/i],['p_hist','Prospecção: o que aconteceu',/hist[óo]rico|o que aconteceu|resultado do contato/i]];
-const CT_TEMPLATE_HEADS = ['Nome*','Sobrenome','CPF','Data de nascimento','Gênero','Profissão','CRM','Especialidade','Regime de trabalho','Telefone','E-mail','CEP','Logradouro','Número','Complemento','Bairro','Cidade','Estado','Origem','Quem indicou','Campanha','Parceiro','Observação','Classificação','Tags','Seguradora','Tipo de apólice','Nº da apólice','Início da vigência','Vencimento da apólice','Status da apólice','Prêmio (R$)','Capital segurado (R$)','Comissão (%)','Forma de pagamento','Prospecção: status','Prospecção: data do contato','Prospecção: canal','Prospecção: o que aconteceu'];
+const CT_TEMPLATE_HEADS = ['Nome*','Sobrenome','CPF','Data de nascimento','Gênero','Profissão','Especialidade','Regime de trabalho','Telefone','E-mail','CEP','Logradouro','Número','Complemento','Bairro','Cidade','Estado','Origem','Quem indicou','Campanha','Parceiro','Observação','Classificação','Tags','Seguradora','Tipo de apólice','Nº da apólice','Início da vigência','Vencimento da apólice','Status da apólice','Prêmio (R$)','Capital segurado (R$)','Comissão (%)','Forma de pagamento','Prospecção: status','Prospecção: data do contato','Prospecção: canal','Prospecção: o que aconteceu'];
 // ---- exportar contatos filtrados (Aliança), com colunas escolhidas ----
 const OP_EXPORT_COLS = [
   ['nome','Nome', p=>p.nome], ['cpf','CPF', p=>p.cpf?fmtCPF(p.cpf):''], ['telefone','Telefone', p=>p.telefone||''], ['email','E-mail', p=>p.email||''],
-  ['crm','CRM', p=>p.crm?(p.crm+(p.crm_uf?'/'+p.crm_uf:'')):''], ['especialidade','Especialidade', p=>p.especialidade||''],
+  ['especialidade','Especialidade', p=>p.especialidade||''],
   ['classificacao','Classificação', p=>CLASSIF[p.classificacao]||''], ['tags','Tags', p=>(p.tags||[]).join(', ')],
   ['origem','Origem', p=>p.origem||''], ['proxima_acao','Próxima ação', p=>p.proxima_acao||''], ['proxima_data','Data da próxima ação', p=>p.proxima_data?fmtDate(p.proxima_data):''],
   ['cidade','Cidade', p=>[p.cidade,p.uf].filter(Boolean).join('/')],
@@ -9104,9 +9105,10 @@ document.getElementById('op-import').addEventListener('click', ()=>{
     try{ await docsLoadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
       // exemplo: a mesma cliente com 2 apólices ocupa 2 linhas (mesmo CPF); um lead sem apólice ocupa 1 linha
       const ws = XLSX.utils.aoa_to_sheet([CT_TEMPLATE_HEADS,
-        ['Maria','Souza Lima','529.982.247-25','12/03/1985','Feminino','Médica','123456','Anestesiologia','CLT','(11) 98765-4321','maria@exemplo.com','01310-100','Av. Paulista','1000','Sala 12','Bela Vista','São Paulo','SP','Indicação','Carla','','','Cliente desde 2022','Quente','Cliente','Porto Seguro','Vida','123456','01/01/2026','31/12/2026','Ativa','1.850,00','500.000,00','20','Mensal no cartão','','','',''],
-        ['Maria','Souza Lima','529.982.247-25','','','','','','','','','','','','','','','','','','','','','','','Unimed','RC Profissional','RC-7788','15/03/2026','14/03/2027','Ativa','2.400,00','1.000.000,00','15','Anual','','','',''],
-        ['João','Pereira','','','Masculino','Engenheiro','','','PJ','(11) 91234-5678','joao@exemplo.com','','','','','','Campinas','SP','Indicação','Maria','','','Quer cotar vida','Frio','Lead','','','','','','','','','','','Retornar','20/10/2026','WhatsApp','Pediu retorno na semana que vem']]);
+        // exemplo com cara de exemplo (nome "EXEMPLO …", CPF e e-mail de exemplo): a importação ignora estas linhas
+        ['EXEMPLO Maria','(apague esta linha)','529.982.247-25','12/03/1985','Feminino','Professora','','CLT','(11) 90000-0001','maria@exemplo.com','01310-100','Av. Paulista','1000','Sala 12','Bela Vista','São Paulo','SP','Indicação','Carla','','','Cliente desde 2022','Quente','Cliente','Porto Seguro','Vida','123456','01/01/2026','31/12/2026','Ativa','1.850,00','500.000,00','20','Mensal no cartão','','','',''],
+        ['EXEMPLO Maria','(apague esta linha)','529.982.247-25','','','','','','','','','','','','','','','','','','','','','','Seguradora Exemplo','RC Profissional','EX-0002','15/03/2026','14/03/2027','Ativa','2.400,00','1.000.000,00','15','Anual','','','',''],
+        ['EXEMPLO João','(apague esta linha)','','','Masculino','Engenheiro','','PJ','(11) 90000-0002','joao@exemplo.com','','','','','','Campinas','SP','Indicação','Maria','','','Quer cotar vida','Frio','Lead','','','','','','','','','','','Retornar','20/10/2026','WhatsApp','Pediu retorno na semana que vem']]);
       ws['!cols'] = CT_TEMPLATE_HEADS.map(h=>({wch:Math.max(14,h.length+4)}));
       const como = XLSX.utils.aoa_to_sheet([['Como preencher a planilha padrão'],[''],
         ['1. Uma linha por apólice. Cliente com 2 apólices ocupa 2 linhas, com o mesmo CPF (os dados da pessoa podem ficar só na primeira).'],
@@ -9137,11 +9139,16 @@ async function ctLoad(file){
     if(rows.length - tit < 2) throw new Error(vcf ? 'Não encontrei contatos com nome neste arquivo .vcf.' : 'A planilha precisa ter uma linha de títulos e ao menos um contato.');
     const heads = rows[tit].map(h=>String(h||'').replace(/\*/g,'').trim());
     const google = heads.some(h=>/^(first name|last name|phone 1 - value|e-?mail 1 - value|telefone 1 - valor)$/i.test(h));
-    CT = { file:file.name, heads, base:rows.slice(tit+1), rows:rows.slice(tit+1), map:{}, extras:[], linhaTitulo:tit, mode: (vcf || google || window.CT_MODE==='celular') ? 'celular' : 'planilha' };
+    // as linhas de exemplo da planilha padrão nunca entram (05/11/2026: a Bravita importou a "Maria Souza Lima" do exemplo e achou que
+    // era cliente de outra corretora): CPF de exemplo, e-mail @exemplo.com ou nome marcado EXEMPLO
+    const ehExemplo = r => r.some(x=>{ const s = String(x||'').trim(); return /^529\.?982\.?247-?25$/.test(s) || /@exemplo\.com$/i.test(s) || /^EXEMPLO\b/i.test(s); });
+    const dados = rows.slice(tit+1), exemplos = dados.filter(ehExemplo).length, semEx = dados.filter(r=>!ehExemplo(r));
+    if(!semEx.length) throw new Error('A planilha só tem as linhas de exemplo da planilha padrão. Apague os exemplos, coloque os seus clientes e importe de novo.');
+    CT = { file:file.name, heads, base:semEx, rows:semEx, map:{}, extras:[], linhaTitulo:tit, exemplos, mode: (vcf || google || window.CT_MODE==='celular') ? 'celular' : 'planilha' };
     const used = new Set();
     CT_FIELDS.forEach(([k,,re])=>{ const i = heads.findIndex((h,ix)=>!used.has(ix) && re.test(h) && !/label|r[óo]tulo/i.test(h)); CT.map[k] = i; if(i>=0) used.add(i); });
     const padrao = heads.filter(h=>CT_TEMPLATE_HEADS.some(t=>t.replace(/\*/g,'').trim().toLowerCase()===h.toLowerCase())).length >= Math.max(3, heads.length*0.6);
-    step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.base.length} linhas${tit?` (títulos encontrados na linha ${tit+1})`:''}. Confira as colunas (o que não tiver, deixe “não importar”):</div><div id="ct-ia"></div>
+    step.innerHTML = `<div class="hint">Arquivo: <b>${escapeHtml(file.name)}</b> — ${CT.base.length} linhas${tit?` (títulos encontrados na linha ${tit+1})`:''}${CT.exemplos?` · <b>${CT.exemplos} linha(s) de exemplo da planilha padrão ignorada(s)</b>`:''}. Confira as colunas (o que não tiver, deixe “não importar”):</div><div id="ct-ia"></div>
       <div class="fgrid" style="margin-top:10px">${CT_FIELDS.map(([k,l])=>`<label class="fl"><span>${l}</span><select data-ct="${k}"><option value="-1">— não importar —</option>${heads.map((h,i)=>`<option value="${i}" ${CT.map[k]===i?'selected':''}>${escapeHtml(h||('coluna '+(i+1)))}</option>`).join('')}</select></label>`).join('')}
       <label class="fl"><span>Profissão dos contatos novos</span><select id="ct-tipo">${tipoOptions((CT.mode==='celular' || !tcModulo('premium')) ? 'outro' : 'medico')}</select></label></div>${CT.mode==='celular'?'<div class="hint" style="margin-top:6px">Contatos do celular: os novos entram como leads com origem <b>WhatsApp/contatos</b> e a tag <b>whatsapp-contatos</b>.</div>':''}
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="ct-upd" checked> Contato já existente: preencher só os campos que estão vazios no cadastro (recomendado)</label>
@@ -10848,11 +10855,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611050945"></script>
-<script src="painel.js?v=202611050945"></script>
-<script src="cobranca.js?v=202611050945"></script>
-<script src="cadastro.js?v=202611050945"></script>
-<script src="contrato.js?v=202611050945"></script>
-<script src="guarda.js?v=202611050945"></script>
+<script src="plataforma.js?v=202611050952"></script>
+<script src="painel.js?v=202611050952"></script>
+<script src="cobranca.js?v=202611050952"></script>
+<script src="cadastro.js?v=202611050952"></script>
+<script src="contrato.js?v=202611050952"></script>
+<script src="guarda.js?v=202611050952"></script>
 </body>
 </html>

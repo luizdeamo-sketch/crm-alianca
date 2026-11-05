@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://iuotvottnailofxbaynx.supabase.co data:; connect-src https://iuotvottnailofxbaynx.supabase.co; frame-ancestors 'none'; base-uri 'none'; form-action 'none'">
+<title>Seus seguros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Portal do cliente do CRM Aliança (05/11/2026): o cliente final da corretora vê as apólices dele e baixa o PDF.
+   As cores vêm da marca da corretora; sem marca, as do CRM Aliança. Nada fica guardado no navegador. */
+:root{ --brand:#9c7518; --brand-soft:#f7f1e3; --navy:#111827; --ink:#1f2933; --ink-soft:#5d6871; --bg:#f6f6f3; --surface:#fff; --border:#e4e6e2; --ok:#1f7a4d; --err:#9e2f24; }
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Inter, "Segoe UI", system-ui, sans-serif; }
+header{ background:var(--surface); border-bottom:1px solid var(--border); padding:16px; display:flex; align-items:center; gap:14px; }
+header img{ max-height:44px; max-width:180px; object-fit:contain; }
+header .nome{ font-weight:700; font-size:18px; color:var(--navy); }
+main{ padding:20px 16px 40px; display:grid; gap:16px; }
+h1{ margin:0; font-size:clamp(22px, 2.2vw + 14px, 32px); color:var(--navy); line-height:1.25; }
+.sub{ margin:4px 0 0; color:var(--ink-soft); }
+.caixa{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
+.grade{ display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+label{ display:grid; gap:6px; font-weight:600; font-size:15px; }
+input{ font:inherit; padding:12px; border:1px solid var(--border); border-radius:10px; min-height:48px; width:100%; max-width:320px; }
+button{ font:inherit; font-weight:600; min-height:48px; padding:0 20px; border-radius:10px; border:0; background:var(--brand); color:#fff; cursor:pointer; }
+button.sec{ background:var(--surface); color:var(--navy); border:1px solid var(--border); }
+button:disabled{ opacity:.6; cursor:default; }
+.msg{ min-height:22px; color:var(--err); font-size:15px; }
+.seguro h2{ margin:0 0 2px; font-size:19px; color:var(--navy); }
+.seguro .seg{ color:var(--ink-soft); font-size:14px; }
+.linhas{ display:grid; gap:8px; margin:14px 0; }
+.linha{ display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid var(--border); padding-bottom:8px; font-size:15px; flex-wrap:wrap; }
+.linha span:first-child{ color:var(--ink-soft); }
+.linha b{ text-align:right; }
+.cob{ margin:4px 0 14px; padding:0; list-style:none; display:grid; gap:6px; font-size:15px; }
+.cob li{ display:flex; justify-content:space-between; gap:12px; background:var(--brand-soft); border-radius:8px; padding:8px 10px; flex-wrap:wrap; }
+.tag{ display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:999px; background:#e5f3ec; color:var(--ok); margin-left:6px; vertical-align:middle; }
+.tag.fim{ background:#fdf0dc; color:#8a5a00; }
+footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:13px; }
+.oculto{ display:none !important; }
+</style>
+</head>
+<body>
+<header><img id="logo" alt="" class="oculto"><span class="nome" id="nomeCorr"></span></header>
+<main>
+  <section id="carregando" class="caixa">Abrindo…</section>
+
+  <section id="confirmar" class="caixa oculto">
+    <h1>Bem-vindo(a)</h1>
+    <p class="sub">Para proteger os seus dados, confirme a sua data de nascimento.</p>
+    <form id="form" style="display:grid;gap:12px;margin-top:14px" onsubmit="return false">
+      <label for="nasc">Data de nascimento<input id="nasc" type="date" autocomplete="bday" required></label>
+      <div><button id="entrar" type="submit">Ver os meus seguros</button></div>
+      <div class="msg" id="msg" role="alert"></div>
+    </form>
+  </section>
+
+  <section id="painel" class="oculto" style="display:grid;gap:16px">
+    <div>
+      <h1 id="ola"></h1>
+      <p class="sub" id="boas"></p>
+    </div>
+    <div class="grade" id="lista"></div>
+    <div class="msg" id="msg2" role="alert"></div>
+    <div><button class="sec" id="sair" type="button">Sair</button></div>
+  </section>
+
+  <section id="invalido" class="caixa oculto"><h1>Link indisponível</h1><p class="sub" id="invTxt"></p></section>
+</main>
+<footer id="rodape"></footer>
+<script>
+(function(){
+  'use strict';
+  const URL_FN = 'https://iuotvottnailofxbaynx.supabase.co/functions/v1/portal-cliente', ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1b3R2b3R0bmFpbG9meGJheW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1Mjg2NjMsImV4cCI6MjEwODEwNDY2M30._0FhywQ4Vq3km5Rl4tHEPtCLBVom4VAGaXG3X3nrUyQ';
+  const $ = id => document.getElementById(id);
+  const mostra = id => ['carregando','confirmar','painel','invalido'].forEach(s => $(s).classList.toggle('oculto', s !== id));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const brl = v => v == null || v === '' || isNaN(Number(v)) ? '' : Number(v).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  const data = d => d ? String(d).slice(0,10).split('-').reverse().join('/') : '';
+  // o token vem só depois do # (não vai para o servidor da página, nem para logs, nem para o histórico de outros sites)
+  const m = location.hash.match(/[#&]t=([A-Za-z0-9_-]{40,64})/);
+  const token = m ? m[1] : '';
+  let nasc = '', corr = 'a sua corretora';
+
+  async function chama(corpo){
+    const r = await fetch(URL_FN, { method:'POST', headers:{ 'Content-Type':'application/json', apikey:ANON, Authorization:'Bearer '+ANON }, body: JSON.stringify({ token, ...corpo }), cache:'no-store', credentials:'omit' });
+    let j = {}; try{ j = await r.json(); }catch(e){}
+    return { ok: r.ok, j };
+  }
+  function aplicaMarca(mc){
+    if(!mc) return;
+    corr = mc.nome || corr; $('nomeCorr').textContent = mc.nome || '';
+    document.title = (mc.nome ? mc.nome + ' · ' : '') + 'Seus seguros';
+    // logo só do armazenamento do sistema (nada de imagem de terceiros rastreando quem abre)
+    if(mc.logo_url && mc.logo_url.indexOf('https://iuotvottnailofxbaynx.supabase.co/storage/v1/object/public/') === 0){ const i = $('logo'); i.src = mc.logo_url; i.alt = mc.nome || ''; i.classList.remove('oculto'); }
+    const c = mc.cores || {}; const raiz = document.documentElement.style;
+    ['--brand','--brand-soft','--navy'].forEach(k => { if(typeof c[k] === 'string' && /^#[0-9a-f]{3,8}$/i.test(c[k])) raiz.setProperty(k, c[k]); });
+    $('rodape').textContent = 'Dúvidas sobre o seu seguro? Fale com a ' + corr + '. Os seus dados são tratados pela ' + corr + ' e não ficam guardados neste aparelho.';
+  }
+  function invalido(t){ $('invTxt').textContent = t || 'Este link não está mais válido. Peça um link novo à sua corretora.'; mostra('invalido'); }
+
+  function desenha(j){
+    aplicaMarca(j.marca);
+    $('ola').textContent = 'Olá' + (j.cliente ? ', ' + j.cliente : '') + '!';
+    $('boas').textContent = j.boas_vindas || ('Você é muito especial para a ' + corr + '. Aqui estão as informações dos seus seguros com a gente.');
+    const ap = j.apolices || [];
+    $('lista').innerHTML = ap.length ? ap.map(a => {
+      const anual = Number(a.premio_anual) || 0, mensal = /anual/i.test(a.forma_pagamento || '') ? 0 : anual / 12;
+      const fim = a.fim && new Date(a.fim + 'T23:59:59') < new Date(Date.now() + 30*864e5);
+      return `<article class="caixa seguro">
+        <h2>${esc(a.tipo || 'Seguro')}${fim ? '<span class="tag fim">renova em breve</span>' : '<span class="tag">em vigor</span>'}</h2>
+        <div class="seg">${esc(a.seguradora || '')}${a.numero ? ' · apólice ' + esc(a.numero) : ''}</div>
+        <div class="linhas">
+          ${a.inicio || a.fim ? `<div class="linha"><span>Vigência</span><b>${esc(data(a.inicio) || '—')} até ${esc(data(a.fim) || '—')}</b></div>` : ''}
+          ${anual ? `<div class="linha"><span>Custo</span><b>${mensal ? esc(brl(mensal)) + ' por mês<br><small style="font-weight:400;color:var(--ink-soft)">' + esc(brl(anual)) + ' por ano</small>' : esc(brl(anual)) + ' por ano'}</b></div>` : ''}
+          ${a.forma_pagamento ? `<div class="linha"><span>Pagamento</span><b>${esc(a.forma_pagamento)}</b></div>` : ''}
+          ${Number(a.capital) ? `<div class="linha"><span>Capital segurado</span><b>${esc(brl(a.capital))}</b></div>` : ''}
+        </div>
+        ${(a.coberturas || []).length ? `<div style="font-weight:600;font-size:15px">O que está coberto</div><ul class="cob">${a.coberturas.map(c => `<li><span>${esc(c.nome)}</span>${Number(c.valor) ? `<b>${esc(brl(c.valor))}</b>` : ''}</li>`).join('')}</ul>` : ''}
+        ${a.tem_documento ? `<button type="button" data-baixar="${esc(a.id)}">Baixar a minha apólice (PDF)</button>` : '<div class="sub" style="font-size:14px">O documento desta apólice ainda não está disponível aqui. Peça à corretora.</div>'}
+      </article>`; }).join('')
+      : '<div class="caixa">Não encontramos seguros em vigor no seu nome. Fale com a ' + esc(corr) + '.</div>';
+    $('lista').querySelectorAll('[data-baixar]').forEach(b => b.addEventListener('click', async () => {
+      b.disabled = true; const t = b.textContent; b.textContent = 'Preparando…'; $('msg2').textContent = '';
+      const r = await chama({ acao:'baixar', nascimento:nasc, apolice:b.dataset.baixar });
+      b.disabled = false; b.textContent = t;
+      if(r.ok && r.j.url && /^https:\/\//.test(r.j.url)){ const l = document.createElement('a'); l.href = r.j.url; l.rel = 'noopener'; document.body.appendChild(l); l.click(); l.remove(); }
+      else $('msg2').textContent = r.j.error || 'Não consegui baixar agora. Tente de novo.';
+    }));
+    mostra('painel');
+  }
+
+  $('form').addEventListener('submit', async () => {
+    const v = $('nasc').value; if(!v){ $('msg').textContent = 'Digite a sua data de nascimento.'; return; }
+    const b = $('entrar'); b.disabled = true; b.textContent = 'Conferindo…'; $('msg').textContent = '';
+    const r = await chama({ acao:'entrar', nascimento:v });
+    b.disabled = false; b.textContent = 'Ver os meus seguros';
+    if(r.ok){ nasc = v; desenha(r.j); return; }
+    if(r.j.marca) aplicaMarca(r.j.marca);
+    if(r.j.error && /não está mais válido/.test(r.j.error)) return invalido(r.j.error);
+    $('msg').textContent = r.j.error || 'Não consegui conferir agora. Tente de novo.';
+  });
+  $('sair').addEventListener('click', () => { nasc = ''; $('lista').innerHTML = ''; $('nasc').value = ''; mostra('confirmar'); });
+
+  (async () => {
+    if(!token) return invalido('Este endereço está incompleto. Abra o link exatamente como a sua corretora enviou.');
+    try{
+      const r = await chama({ acao:'marca' });
+      if(!r.ok) return invalido(r.j.error);
+      aplicaMarca(r.j.marca); mostra('confirmar'); $('nasc').focus();
+    }catch(e){ invalido('Não consegui abrir agora. Confira a sua internet e tente de novo.'); }
+  })();
+})();
+</script>
+</body>
+</html>

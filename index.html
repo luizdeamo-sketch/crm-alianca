@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611040823">
+<meta name="app-build" content="202611050936">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -3274,6 +3274,63 @@ async function pvProtecao(body, p){
   pvOportunidades(p); pvFluxoCard(p); pvApolices(p); pvDocumentos(p);
 }
 
+// ============ PORTAL DO CLIENTE (pedido da Bravita, 05/11/2026) ============
+// A corretora manda ao cliente um link só dele (portal.html#t=…): com a marca da corretora, ele vê as apólices em vigor e baixa o PDF,
+// depois de confirmar a data de nascimento. O token só existe na mensagem; no banco fica o hash (crm_portal_links). Um link ativo por
+// cliente: gerar um novo cancela o anterior. Quem lê os dados para o cliente é a função portal-cliente, com só os campos permitidos.
+const PORTAL_EV = { abriu:'abriu o link', entrou:'entrou e viu os seguros', baixou:'baixou a apólice', errou_nascimento:'errou a data de nascimento', bloqueado:'bloqueado por erros seguidos' };
+async function portalHash(t){ const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+function portalToken(){ const b = crypto.getRandomValues(new Uint8Array(32)); return btoa(String.fromCharCode(...b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+const portalUrl = t => location.origin + location.pathname.replace(/[^/]*$/, '') + 'portal.html#t=' + t;
+async function portalDialog(p){
+  if(!p) return;
+  const [pe, lk, ap] = await Promise.all([
+    sb.from('crm_pessoas').select('nome,telefone,data_nascimento').eq('id', p.id).maybeSingle(),
+    sb.from('crm_portal_links').select('id,created_at,criado_por,expira_em,revogado_em,acessos,ultimo_acesso').eq('pessoa_id', p.id).order('created_at',{ascending:false}),
+    sb.from('crm_apolices').select('id,status,arquivo_apolice').eq('pessoa_id', p.id)]);
+  if(lk.error){ showToast(/crm_portal|relation|schema cache/i.test(lk.error.message||'') ? 'O Portal do cliente está sendo instalado. Tente de novo em instantes.' : 'Erro: '+lk.error.message); return; }
+  const pd = pe.data || {}, links = lk.data || [], ativo = links.find(l=>!l.revogado_em && new Date(l.expira_em) > new Date());
+  const vig = (ap.data||[]).filter(a=>!/cancel/i.test(a.status||'')), semPdf = vig.filter(a=>!a.arquivo_apolice).length;
+  let evs = []; if(ativo){ const r = await sb.from('crm_portal_eventos').select('evento,em,detalhe').eq('link_id', ativo.id).order('em',{ascending:false}).limit(8); evs = r.data || []; }
+  const dh = s => s ? new Date(s).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+  const avisos = [ !pd.data_nascimento ? '<b>Falta a data de nascimento</b> no cadastro: o cliente confirma por ela para entrar. Preencha em Editar cadastro antes de enviar.' : '',
+    !vig.length ? 'Este cliente ainda não tem apólice em vigor cadastrada: o portal vai mostrar "nenhum seguro em vigor".' : '',
+    semPdf ? `${semPdf} apólice(s) sem o PDF anexado: o cliente vê os dados, mas não consegue baixar o documento.` : '' ].filter(Boolean);
+  const box = dlgOpen(`<div class="om-title"><div><h3>Portal do cliente — ${escapeHtml(p.nome)}</h3><div class="om-sub">Um link só dele, com a marca da corretora: vê as apólices em vigor (vigência, custo, coberturas) e baixa o PDF. Para entrar, confirma a data de nascimento.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body">
+      ${avisos.map(a=>`<div class="hint" style="margin:0 0 8px;padding:8px 10px;border-radius:8px;background:#fdf3e3;color:#6b4a00;font-size:13px">${a}</div>`).join('')}
+      <div id="pt-novo"></div>
+      ${ativo ? `<div class="es-box" style="margin:8px 0"><b>Link ativo</b> desde ${escapeHtml(dh(ativo.created_at))}${ativo.criado_por?' · por '+escapeHtml(ativo.criado_por):''} · vale até ${escapeHtml(dh(ativo.expira_em).slice(0,10))}
+          <div class="hint" style="margin:4px 0 0">${ativo.acessos ? `O cliente entrou ${ativo.acessos} vez(es) · último acesso em ${escapeHtml(dh(ativo.ultimo_acesso))}` : 'O cliente ainda não entrou.'}</div>
+          ${evs.length ? `<div style="margin-top:6px;font-size:12.5px;color:var(--ink-soft)">${evs.map(e=>`${escapeHtml(dh(e.em))} · ${escapeHtml(PORTAL_EV[e.evento]||e.evento)}${e.detalhe?' ('+escapeHtml(e.detalhe)+')':''}`).join('<br>')}</div>` : ''}
+          <div style="margin-top:8px"><button type="button" class="om-cancel" id="pt-cancelar">Cancelar este link</button></div></div>` : '<div class="hint" style="margin:6px 0">Nenhum link ativo para este cliente.</div>'}
+      <div class="om-err" id="pt-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Fechar</button><button class="om-save" id="pt-gerar"${pd.data_nascimento?'':' disabled title="Preencha a data de nascimento do cliente antes"'}>${ativo?'Gerar link novo (o atual para de funcionar)':'Gerar o link do portal'}</button></div>`, true);
+  const err = box.querySelector('#pt-err'), agora = ()=>new Date().toISOString(), por = curUserName()||null;
+  // gerar e cancelar passam por funções do banco que conferem corretora e papel (perfil "leitura" não envia o portal)
+  const bc = box.querySelector('#pt-cancelar');
+  if(bc) bc.addEventListener('click', async ()=>{ if(!confirm('Cancelar o link? O cliente deixa de conseguir abrir o portal até você mandar um link novo.')) return;
+    const { error } = await sb.rpc('crm_portal_cancelar', { p_pessoa:p.id }); if(error){ err.textContent = error.message; return; } dlgClose(); showToast('Link do portal cancelado.'); });
+  box.querySelector('#pt-gerar').addEventListener('click', async ev=>{
+    if(ativo && !confirm('Gerar um link novo? O link que o cliente já tem para de funcionar.')) return;
+    ev.target.disabled = true; err.textContent = '';
+    const tk = portalToken();
+    const { error } = await sb.rpc('crm_portal_gerar', { p_pessoa:p.id, p_hash: await portalHash(tk) });   // cancela o anterior e cria o novo de uma vez
+    if(error){ err.textContent = error.message; ev.target.disabled = false; return; }
+    const url = portalUrl(tk), nome1 = String(pd.nome||p.nome||'').trim().split(/\s+/)[0] || '';
+    let nomeCorr = ''; try{ nomeCorr = (JSON.parse(localStorage.getItem('tc_marca')||'{}').nome_exibicao || '').trim(); }catch(x){}
+    const msg = `Olá${nome1?', '+nome1.charAt(0).toUpperCase()+nome1.slice(1).toLowerCase():''}! ${nomeCorr?'A '+nomeCorr+' preparou':'Preparamos'} um espaço só seu com as informações dos seus seguros: vigência, custo, coberturas e o documento da apólice para baixar.\n\n${url}\n\nPara entrar, é só confirmar a sua data de nascimento. Este link é pessoal: não encaminhe para outras pessoas.`;
+    const wa = waLink(pd.telefone || p.telefone);
+    box.querySelector('#pt-novo').innerHTML = `<div class="es-box" style="margin:0 0 8px;border-color:var(--brand)"><b>Link pronto.</b> Mande agora para o cliente: por segurança o link aparece só esta vez (o sistema guarda apenas uma assinatura dele). Se perder, gere outro.
+      <textarea readonly rows="7" style="width:100%;margin-top:8px;border:1px solid var(--border);border-radius:6px;padding:8px;font-family:inherit;font-size:13px">${escapeHtml(msg)}</textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button type="button" class="om-save" id="pt-copiar">Copiar mensagem</button>${wa?`<a class="om-cancel" style="text-decoration:none;display:inline-flex;align-items:center" target="_blank" rel="noopener" href="${escapeHtml(wa+'?text='+encodeURIComponent(msg))}">Enviar pelo WhatsApp</a>`:''}</div></div>`;
+    box.querySelector('#pt-copiar').addEventListener('click', async b=>{ try{ await navigator.clipboard.writeText(msg); b.target.textContent = 'Copiado ✓'; }catch(x){ showToast('Não consegui copiar; selecione o texto e copie.'); } });
+    ev.target.textContent = 'Link gerado ✓';
+    try{ await sb.from('crm_atividades').insert({ pessoa_id:p.id, tipo:'outro', data_hora:agora(), resumo:'Portal do cliente: link enviado', resultado:'Enviado', responsavel:por }); }catch(x){}
+  });
+}
+document.addEventListener('click', e=>{ const b = e.target.closest && e.target.closest('[data-portal-cliente]'); if(b){ const p = window._curPerson; if(p) portalDialog(p); else showToast('Abra a ficha do cliente.'); } });
+
 // ============ CONSULTORIA DE RC (pedido da Amanda, 03/11/2026) ============
 // Um cadastro, quatro frentes: o que já existe do cliente vem preenchido (com a origem), o que for respondido aqui grava no cadastro
 // (crm_pessoas) e aparece no Vida. O que é só do RC fica em crm_rc (um por cliente). Nenhum campo é obrigatório.
@@ -4362,7 +4419,7 @@ async function pvApolices(p){
   if(anl && (anl.linhas||[]).length){ anlHave(anl.linhas).forEach(k=>have.add(k)); const cv = anlCapVida(anl.linhas); if(cv>0) cap = cv; }
   const covDetRowsAll = [];
   rows.forEach(a=>(a.coberturas_detalhe||[]).forEach(c=> covDetRowsAll.push({...c, apolice:a.tipo_seguro, seguradora:a.seguradora})));
-  host.innerHTML = `<div class="ql">Apólices do cliente (${rows.length})</div>
+  host.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div class="ql" style="margin:0">Apólices do cliente (${rows.length})</div><button type="button" class="om-cancel" data-portal-cliente title="Um link só do cliente, com a marca da corretora, para ele ver as apólices e baixar o PDF">📨 Portal do cliente</button></div>
     ${rows.length?`<table class="ca-table"><thead><tr><th>Produto</th><th>Seguradora</th><th>Vigência</th><th>Prêmio</th><th>Origem / vínculo</th><th>Status</th><th>Documento</th><th></th></tr></thead><tbody>${rows.map(a=>{ const d = daysTo(a.data_vencimento); return `<tr><td>${escapeHtml(a.tipo_seguro||'—')}</td><td>${escapeHtml(a.seguradora||'—')}</td><td>${fmtDate(a.data_emissao)||'—'} → <b>${fmtDate(a.data_vencimento)||'—'}</b>${d!==null&&d>=0&&d<=60?` <span class="tagx warn">${d}d</span>`:''}</td><td>${fmtMoney(a.valor_premio)}</td><td>${escapeHtml(CA_ORIGENS[a.origem_apolice]||a.origem_apolice||'—')} · ${escapeHtml(a.vinculo_comercial||'—')}</td><td>${escapeHtml(caStatusLabel(caEfetivo(a)))}</td><td>${a.arquivo_apolice?`<button type="button" class="om-save" style="padding:4px 10px;font-size:12px;white-space:nowrap" data-viewdoc="${escapeHtml(a.arquivo_apolice)}">Abrir apólice</button>`:`<button type="button" class="om-cancel" style="padding:4px 10px;font-size:12px;white-space:nowrap" data-attachapo="${a.id}">＋ Anexar documento</button>`}</td><td><a href="#" data-editapo="${a.id}">editar</a></td></tr>`; }).join('')}</tbody></table>`:'<div class="hint">Nenhuma apólice vinculada. Use “Anexar apólice” no topo ou a Central de Apólices.</div>'}
     ${covDetRowsAll.length?(()=>{ const tot = covDetTotal(covDetRowsAll); return `<div class="ql" style="margin-top:12px">Coberturas conforme os documentos</div>
     <table class="ca-table"><thead><tr><th>Cobertura</th><th>Capital Segurado (R$)</th><th>Prêmio Mensal (R$)</th><th>Apólice</th><th>Observação</th></tr></thead><tbody>${covDetRowsAll.map(c=>`<tr><td>${escapeHtml(c.nome||'—')}</td><td>${fmtMoney(c.capital)}</td><td>${fmtMoney(c.premio)}</td><td>${escapeHtml(c.apolice||'—')}${c.seguradora?' · '+escapeHtml(c.seguradora):''}</td><td>${escapeHtml(c.obs||'')}</td></tr>`).join('')}
@@ -10791,11 +10848,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611040823"></script>
-<script src="painel.js?v=202611040823"></script>
-<script src="cobranca.js?v=202611040823"></script>
-<script src="cadastro.js?v=202611040823"></script>
-<script src="contrato.js?v=202611040823"></script>
-<script src="guarda.js?v=202611040823"></script>
+<script src="plataforma.js?v=202611050936"></script>
+<script src="painel.js?v=202611050936"></script>
+<script src="cobranca.js?v=202611050936"></script>
+<script src="cadastro.js?v=202611050936"></script>
+<script src="contrato.js?v=202611050936"></script>
+<script src="guarda.js?v=202611050936"></script>
 </body>
 </html>

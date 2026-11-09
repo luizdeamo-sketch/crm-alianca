@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611091624">
+<meta name="app-build" content="202611091638">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -1113,7 +1113,11 @@ document.getElementById('btn-reset-save').addEventListener('click', async ()=>{
   setTimeout(()=>{ document.getElementById('reset-screen').style.display='none'; mfaGate(); }, 1200);
 });
 document.getElementById('btn-app').addEventListener('click', ()=> window.open('app/', '_blank', 'noopener'));
-document.getElementById('btn-logout').addEventListener('click', async ()=>{ try{ if(window.ACOMP && ACOMP.flush) await ACOMP.flush(); }catch(e){} await sb.auth.signOut({ scope:'local' }); location.reload(); });
+document.getElementById('btn-logout').addEventListener('click', async ()=>{ try{ if(window.ACOMP && ACOMP.flush) await ACOMP.flush(); }catch(e){} await sb.auth.signOut({ scope:'local' });
+  // 09/11/2026: ao sair, a tela de entrada volta neutra (antes ficava ?c=<corretora> no endereço e a marca dela, e quem queria
+  // entrar com outro e-mail, como a gestora da plataforma, continuava vendo a corretora anterior)
+  try{ localStorage.removeItem('tc_marca'); localStorage.removeItem('tc_slug'); }catch(e){}
+  location.replace(location.pathname + (/[?&]painel=1/.test(location.search) ? '?painel=1' : '')); });
 async function checkSession(){ const { data } = await sb.auth.getSession(); if(data.session){ mfaGate(); } }
 
 // ===== Verificação em 2 etapas (código do aplicativo autenticador) =====
@@ -11439,11 +11443,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611091624"></script>
-<script src="painel.js?v=202611091624"></script>
-<script src="cobranca.js?v=202611091624"></script>
-<script src="cadastro.js?v=202611091624"></script>
-<script src="contrato.js?v=202611091624"></script>
-<script src="guarda.js?v=202611091624"></script>
+<script src="plataforma.js?v=202611091638"></script>
+<script src="painel.js?v=202611091638"></script>
+<script src="cobranca.js?v=202611091638"></script>
+<script src="cadastro.js?v=202611091638"></script>
+<script src="contrato.js?v=202611091638"></script>
+<script src="guarda.js?v=202611091638"></script>
 </body>
 </html>

@@ -885,10 +885,42 @@ Qualquer coisa, estou por aqui. Boas vendas! 🚀`;
   }
 
   window.TorrePainel = { abrir, fechar };
-  // link antigo do painel (plataforma.html) traz ?painel=1: abre depois do login
+  // link do painel (plataforma.html) traz ?painel=1: abre depois do login.
+  // 09/11/2026: o navegador da Amanda tinha o login da CallMed salvo e este endereço abria a CallMed. Agora, por aqui, quem não é
+  // gestor da plataforma nunca vê a corretora: uma tela cobre tudo e oferece sair e entrar com o e-mail de gestor.
   if (/[?&]painel=1/.test(location.search)) {
-    const tentar = (n) => { if (typeof sb === 'undefined') return setTimeout(() => tentar(n), 300);
-      sb.auth.getSession().then(({ data }) => { if (data && data.session) abrir(); else if (n < 40) setTimeout(() => tentar(n + 1), 1500); }); };
-    tentar(0);
+    let capa = null;
+    const cobrir = (html) => {
+      if (!capa) { capa = document.createElement('div'); capa.id = 'tc-painel-capa'; capa.setAttribute('role', 'dialog'); capa.setAttribute('aria-label', 'Painel da Plataforma');
+        capa.style.cssText = 'position:fixed;inset:0;z-index:9990;background:#f6f6f3;display:flex;align-items:center;justify-content:center;padding:16px;font:15px/1.5 "Segoe UI",system-ui,sans-serif;color:#1f2933';
+        document.body.appendChild(capa); }
+      capa.innerHTML = `<div style="background:#fff;border:1px solid #e4e6e2;border-radius:14px;padding:28px 24px;width:100%;max-width:560px;text-align:center">${html}</div>`;
+    };
+    const descobrir = () => { if (capa) { capa.remove(); capa = null; } };
+    const checar = async () => {
+      if (typeof sb === 'undefined' || !document.body) return setTimeout(checar, 300);
+      const { data } = await sb.auth.getSession();
+      const s = data && data.session;
+      if (!s) { descobrir(); return setTimeout(checar, 1500); }   // tela de login do sistema: espera a pessoa entrar
+      // nível do login lido do próprio token (sem ida ao servidor). Ainda na confirmação em 2 etapas (ou cadastrando): deixa a tela
+      // livre para terminar; sem as 2 etapas o banco não entrega dado nenhum da corretora
+      let aal = null; try { aal = (await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data; } catch (e) { /* segue */ }
+      if (!aal || aal.currentLevel !== 'aal2') { descobrir(); return setTimeout(checar, 1500); }
+      cobrir('Conferindo o seu acesso de gestor…');                // cobre antes de perguntar ao banco: nada da corretora aparece por trás
+      const { data: dono } = await sb.rpc('crm_dono_plataforma');
+      if (dono === true) { descobrir(); abrir(); return; }
+      cobrir(`<h2 style="margin:0 0 8px;font-size:20px;color:#111827">Este endereço é do Painel da Plataforma</h2>
+        <p style="margin:0 0 16px;color:#5d6871">Este navegador está conectado como <b>${esc((s.user && s.user.email) || '')}</b>, que é um acesso de corretora, não de gestor da plataforma. Por isso a corretora não é aberta aqui.</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button type="button" id="tc-capa-sair" style="border:0;background:#111827;color:#fff;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer">Sair e entrar com o e-mail de gestor</button>
+          <a href="./" style="border:1px solid #d5d8d2;border-radius:8px;padding:10px 16px;color:#111827;text-decoration:none">Abrir o sistema da corretora</a></div>`);
+      capa.querySelector('#tc-capa-sair').addEventListener('click', async () => {
+        if (window.TorreGuarda && window.TorreGuarda.pendentes && window.TorreGuarda.pendentes().length && !confirm('Há algo digitado e ainda não salvo. Sair mesmo assim?')) return;
+        try { await sb.auth.signOut({ scope: 'local' }); } catch (e) { /* sai do mesmo jeito */ }
+        try { localStorage.removeItem('tc_marca'); localStorage.removeItem('tc_slug'); } catch (e) { /* nada */ }
+        location.replace(location.pathname + '?painel=1');
+      });
+    };
+    checar();
   }
 })();

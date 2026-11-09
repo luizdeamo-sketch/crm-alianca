@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611091120">
+<meta name="app-build" content="202611091127">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -2810,7 +2810,7 @@ const OPP_PILAR_DE = {'RC Profissional':'Carreira','Vida':'Renda','Vida em grupo
 const OPP_STATUS = [['aberta','Aberta'],['ganha','Ganha'],['perdida','Perdida'],['pausada','Pausada']];
 const DIAG_ESSENCIAL = [['status','Status do diagnóstico','select',['em_aberto','parcial','completo']],['renda_mensal_valor_exato','Renda mensal (R$)','number'],['despesas_mensais','Despesas mensais (R$)','number'],['dependentes','Nº de dependentes','number'],
   ['dependentes_idades','Idade dos dependentes','text'],['valor_bens_totais','Patrimônio total bruto (R$)','number'],['patrimonio_financeiro','Patrimônio financeiro (R$)','number'],['dividas_valor','Dívidas / financiamentos (R$)','number'],
-  ['tem_plano_saude','Plano de saúde?','boolean'],['valor_cheque_mensal','Quanto pode investir em proteção (R$/mês)','number'],['objetivo_seguro_vida','Objetivo do seguro de vida','text'],['preocupacoes','Maior preocupação','text']];
+  ['tem_seguro_vida','Tem seguro de vida?','sim_quais'],['tem_plano_saude','Plano de saúde?','boolean'],['valor_cheque_mensal','Quanto pode investir em proteção (R$/mês)','number'],['objetivo_seguro_vida','Objetivo do seguro de vida','text'],['preocupacoes','Maior preocupação','text']];
 const DIAG_SAUDE = ['peso','altura','fuma','tem_doenca_grave','qual_doenca_grave','usa_medicamentos_continuos','quais_medicamentos','pratica_esportes','quais_esportes','usa_motocicleta','ja_ficou_internado','motivo_internacao','realizou_cirurgia','motivo_cirurgia','historico_familiar_doencas'];
 
 function curUserName(){ try{ return localStorage.getItem('crm_nome') || localStorage.getItem('sg_who') || (window._userEmail||'').split('@')[0] || 'Equipe'; }catch(e){ return 'Equipe'; } }
@@ -3130,11 +3130,11 @@ function iaAguarde(host, on, texto){
 const FLOW = { open:false, p:null, step:0, st:[], t:null, autoLer:false, f4org:null };
 const FLOW_STEPS = [
   {k:'docs',    n:'Fase 1', t:'Upload e cadastro',        s:'Apólices e arquivos do cliente',    host:'fl-docs',    hosts:['fl-docs']},
-  {k:'dados',   n:'',       t:'Dados do cliente',         s:'Gênero, nascimento, contato',       host:'fl-dados',   hosts:['fl-dados']},
-  {k:'analise', n:'Fase 2', t:'Analisar documentos',      s:'Tabela das apólices',               host:'pp-analise', hosts:['pp-analise']},
-  {k:'diag',    n:'Fase 3', t:'Diagnóstico',              s:'Ficha, comparativo e necessidade',  host:'pp-diag',    hosts:['pp-diag','pp-fase3']},
-  {k:'cot',     n:'Fase 4', t:'Cotações e plano',         s:'O melhor de cada seguradora',       host:'pp-fase4',   hosts:['pp-fase4']},
-  {k:'apres',   n:'Fase 5', t:'Apresentação',             s:'Modelo e PDF',                      host:'pp-fase5',   hosts:['pp-fase5']}];
+  {k:'dados',   n:'Fase 2', t:'Dados do cliente',         s:'Gênero, nascimento, contato',       host:'fl-dados',   hosts:['fl-dados']},
+  {k:'analise', n:'Fase 3', t:'Analisar documentos',      s:'Tabela das apólices',               host:'pp-analise', hosts:['pp-analise']},
+  {k:'diag',    n:'Fase 4', t:'Diagnóstico',              s:'Ficha, comparativo e necessidade',  host:'pp-diag',    hosts:['pp-diag','pp-fase3']},
+  {k:'cot',     n:'Fase 5', t:'Cotações e plano',         s:'O melhor de cada seguradora',       host:'pp-fase4',   hosts:['pp-fase4']},
+  {k:'apres',   n:'Fase 6', t:'Apresentação',             s:'Modelo e PDF',                      host:'pp-fase5',   hosts:['pp-fase5']}];
 const flLabel = x => x.n ? x.n+' · '+x.t : x.t;
 // etapas "concluídas" (✓) a partir do que já está salvo no banco
 async function flowStatus(p){
@@ -3206,7 +3206,7 @@ async function flowDocs(p){
     sb.from('crm_apolices').select('id,seguradora,tipo_seguro,data_emissao,data_vencimento,status,arquivo_apolice').eq('pessoa_id', p.id).order('data_vencimento',{ascending:true})]);
   const docs = dcs || [], rows = aps || [];
   host.innerHTML = `<div class="ql">Fase 1 · Upload e cadastro <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— apólices e arquivos de ${escapeHtml(p.nome.split(' ')[0])}, para o estudo</small></div>
-    <div class="hint" style="margin-bottom:10px">Solte aqui todas as apólices e documentos do cliente <b>de uma vez</b>. O sistema lê só o básico (nome, CPF, telefone e nascimento) e mostra o resumo da leitura; os documentos ficam mantidos neste cadastro. Em seguida, complete os <b>Dados do cliente</b>; a <b>Fase 2</b> lê as coberturas de cada apólice. Cliente sem apólice? <a href="#" id="fl-pular">pule para o Diagnóstico (Fase 3)</a>.</div>
+    <div class="hint" style="margin-bottom:10px">Solte aqui todas as apólices e documentos do cliente <b>de uma vez</b>. O sistema lê só o básico (nome, CPF, telefone e nascimento) e mostra o resumo da leitura; os documentos ficam mantidos neste cadastro. Em seguida, complete os <b>Dados do cliente</b>; a <b>Fase 3</b> lê as coberturas de cada apólice. Cliente sem apólice? <a href="#" id="fl-pular">pule para o Diagnóstico (Fase 4)</a>.</div>
     <div class="dz" id="fl-dz">Arraste aqui as apólices e documentos (várias de uma vez) ou clique<input type="file" id="fl-file" accept=".pdf,image/*,.xlsx,.xls" multiple hidden></div>
     ${docs.length?`<div class="ql" style="margin-top:12px">Documentos anexados (${docs.length})</div><div style="overflow-x:auto"><table class="ca-table"><thead><tr><th>Documento</th><th>Tipo</th><th>Enviado por</th><th>Data</th><th></th></tr></thead><tbody>${docs.map(d=>`<tr><td>${escapeHtml(d.nome_arquivo||'—')}</td><td>${escapeHtml(d.categoria||'—')}</td><td>${escapeHtml(d.enviado_por||'—')}</td><td>${fmtDate(d.created_at)}</td><td style="white-space:nowrap">${d.path?`<button type="button" class="om-save" style="padding:4px 10px;font-size:12px" data-fl-doc="${escapeHtml(d.path)}">Abrir</button> `:''}<button type="button" class="om-cancel" style="padding:4px 10px;font-size:12px;color:var(--red)" data-fl-deldoc="${d.id}" title="Excluir este documento do cadastro">Excluir</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:8px 10px;margin-top:10px">Nenhum documento anexado ainda.</div>'}
     ${rows.length?`<div class="ql" style="margin-top:12px">Apólices registradas (${rows.length})</div><div style="overflow-x:auto"><table class="ca-table"><thead><tr><th>Seguradora</th><th>Produto</th><th>Emissão</th><th>Vigência até</th><th>Status</th><th>Documento</th></tr></thead><tbody>${rows.map(a=>`<tr><td>${escapeHtml(a.seguradora||'—')}</td><td>${escapeHtml(a.tipo_seguro||'—')}</td><td>${fmtDate(a.data_emissao)||'—'}</td><td>${fmtDate(a.data_vencimento)||'—'}</td><td>${escapeHtml(caStatusLabel(caEfetivo(a)))}</td><td style="white-space:nowrap">${a.arquivo_apolice?`<button type="button" class="om-save" style="padding:4px 10px;font-size:12px" data-fl-doc="${escapeHtml(a.arquivo_apolice)}">Abrir apólice</button> `:'<span style="color:var(--ink-faint)">sem arquivo</span> '}<button type="button" class="om-cancel" style="padding:4px 10px;font-size:12px;color:var(--red)" data-fl-delapo="${a.id}" title="Excluir esta apólice do cadastro">Excluir</button></td></tr>`).join('')}</tbody></table></div>`:''}`;
@@ -3247,8 +3247,8 @@ async function flowDados(p){
   const resumoHtml = ()=>{ const idade = pvIdade({data_nascimento:d.data_nascimento});
     const chip = (rot,val)=> val ? `<span class="tag"><b>${rot}:</b> ${escapeHtml(String(val))}</span>` : `<span class="tag" style="background:#fde4e4;color:#c23636">${rot}: faltando</span>`;
     return chip('Nome',d.nome)+chip('CPF',d.cpf)+chip('Telefone',d.telefone)+chip('Gênero',SEXO_L[d.sexo])+chip('Nascimento',d.data_nascimento?fmtDate(d.data_nascimento)+(idade!=null?' · '+idade+' anos':''):'')+chip('Profissão',d.profissao); };
-  el.innerHTML = `<div class="ql">Cadastro do cliente · dados pessoais</div>
-    <div class="hint" style="margin-bottom:8px">Aqui ficam só os dados pessoais. Renda, patrimônio, família, ADN e saúde ficam juntos em uma única ficha, no diagnóstico (Fase 3), para a análise geral.</div>
+  el.innerHTML = `<div class="ql">Fase 2 · Dados do cliente</div>
+    <div class="hint" style="margin-bottom:8px">Aqui ficam só os dados pessoais. Renda, patrimônio, família, ADN e saúde ficam juntos em uma única ficha, no diagnóstico (Fase 4), para a análise geral.</div>
     <div id="fd-resumo" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${resumoHtml()}</div>
     <div class="ql">Dados pessoais <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— vêm do upload, do cadastro manual ou da carteira; complete o que faltar</small></div>
     <div class="fgrid">
@@ -3259,7 +3259,7 @@ async function flowDados(p){
       <label class="fl"><span>Data de nascimento (idade calculada)</span><input type="date" id="fd-nasc" value="${v('data_nascimento')}"></label>
       <label class="fl"><span>Profissão</span><input id="fd-prof" value="${v('profissao')}"></label>
       <label class="fl"><span>E-mail</span><input id="fd-email" value="${v('email')}"></label></div>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" class="om-save" id="fd-save">Salvar dados do cliente</button><button type="button" class="om-cancel" id="fd-f2">Analisar os documentos (Fase 2)</button><button type="button" class="om-cancel" id="fd-f3">Ir direto para o diagnóstico (Fase 3)</button><span id="fd-st" class="hint" style="margin:0"></span></div>`;
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" class="om-save" id="fd-save">Salvar dados do cliente</button><button type="button" class="om-cancel" id="fd-f2">Analisar os documentos (Fase 3)</button><button type="button" class="om-cancel" id="fd-f3">Ir direto para o diagnóstico (Fase 4)</button><span id="fd-st" class="hint" style="margin:0"></span></div>`;
   const salvar = async ()=>{
     const g = id=>el.querySelector('#'+id).value.trim(), st = el.querySelector('#fd-st');
     const nome = g('fd-nome'); if(!nome){ st.textContent = 'Informe o nome completo.'; return false; }
@@ -3685,7 +3685,7 @@ async function rcSalvar(silencioso){
 }
 // ============ FASE 4 · COTAÇÕES E PLANO NOVO (leitura manual por enquanto) ============
 // Tabela de cotações recebidas (todas as seguradoras), marcação em Solução 1 (completa) e Solução 2 (necessária), vínculo com a apólice
-// substituída (# da Fase 2) e totais fixos. Cotação nova entra pelo formulário "Nova cotação" (o arquivo fica salvo no cadastro).
+// substituída (# da Fase 3) e totais fixos. Cotação nova entra pelo formulário "Nova cotação" (o arquivo fica salvo no cadastro).
 const F4_MIN = ['Morte','Invalidez','Doenças Graves','Diária de internação hospitalar','Assistência funeral'];
 function f4Blank(){ return {cat:'Morte', seg:'', cob:'', sub:'', cap:'', prem:'', prazo:'', uti:'', nota:'', motivo:'', s1:false, s2:false, subst:''}; }
 // ============ FASE 5 · GERAR APRESENTAÇÃO (modelos do protótipo da Amanda) ============
@@ -3772,9 +3772,9 @@ function f5Faltas(m, X){
   const f = [], c = X.cli, sel = n=>X.cot.filter(r=>r['s'+n]);
   if(!c.nome) f.push({t:'Nome do cliente', go:'pp-diag'});
   if(m==='luiz'){ if(!c.nasc) f.push({t:'Data de nascimento', go:'pp-diag'}); if(!(c.padrao>0)) f.push({t:'Padrão de vida mensal (renda, gastos ou renda desejada)', go:'pp-diag', core:true}); if(!(c.pat>0)) f.push({t:'Patrimônio bruto', go:'pp-diag'});
-    if(!sel(1).length) f.push({t:'Cotações marcadas na Solução 1 (Fase 4)', go:'pp-fase4', core:true}); if(!sel(2).length) f.push({t:'Cotações marcadas na Solução 2 (Fase 4)', go:'pp-fase4', core:true}); }
+    if(!sel(1).length) f.push({t:'Cotações marcadas na Solução 1 (Fase 5)', go:'pp-fase4', core:true}); if(!sel(2).length) f.push({t:'Cotações marcadas na Solução 2 (Fase 5)', go:'pp-fase4', core:true}); }
   else { if(!c.nasc) f.push({t:'Data de nascimento', go:'pp-diag'}); if(!c.prof) f.push({t:'Profissão', go:'pp-diag'}); if(!c.segAtual) f.push({t:'Proteção atual (seguradora)', go:'pp-analise'});
-    if(!X.hasPol) f.push({t:'Apólices lançadas e confirmadas (Fase 2)', go:'pp-analise', core:true}); const okSol = X.solSub===3 ? (sel(1).length||sel(2).length) : sel(X.solSub).length; if(!okSol) f.push({t:'Cotações marcadas na '+(X.solSub===3?'Solução 1 ou 2':'Solução '+X.solSub)+' (Fase 4)', go:'pp-fase4', core:true}); }
+    if(!X.hasPol) f.push({t:'Apólices lançadas e confirmadas (Fase 3)', go:'pp-analise', core:true}); const okSol = X.solSub===3 ? (sel(1).length||sel(2).length) : sel(X.solSub).length; if(!okSol) f.push({t:'Cotações marcadas na '+(X.solSub===3?'Solução 1 ou 2':'Solução '+X.solSub)+' (Fase 5)', go:'pp-fase4', core:true}); }
   return f;
 }
 // ---- cálculos e blocos do modelo "não possui proteção" ----
@@ -3870,10 +3870,10 @@ function f5Deck(m, X, opt){
       `<div class="dk-an"><div><div class="chip">UM BEM MATERIAL</div><h3>Carro popular</h3><p>Valor do bem: ${f0(carro)}</p>${carSvg}${bx('#f4f5f9','#00125e','SEGURO DO CARRO · '+taxa+'% AO ANO',f0(carro)+' × '+taxa+'%',carro*tx,'#000b3d')}</div>
         <div><div class="chip">UMA VIDA</div><h3>Você e a sua família</h3><p>Valor protegido: a soma dos capitais segurados de cada solução</p>${famSvg}<div style="display:flex;gap:3mm">${[['SOLUÇÃO 1 · MAIS COMPLETA',s1],['SOLUÇÃO 2 · A NECESSÁRIA',s2]].map(a=>`<div style="flex:1">${bx('#eef0ff','#0018fc',a[0],fm(a[1])+' × '+taxa+'%',a[1]*tx,'#0018fc')}</div>`).join('')}</div></div></div>`);
     // 4 · proposta
-    const col4 = (l,title,cls)=>`<div><div class="dk-ch ${cls}"><b>${title}</b></div>${l.length?l.map(r=>`<div class="dk-it"><div class="t"><b>${nomeCat(r)}</b></div><div class="c"><b>${capTxt(r)}</b>${capSub(r)?`<small>${esc(capSub(r))}</small>`:''}</div></div>`).join(''):'<div class="dk-it"><div class="t"><span>Nenhuma cobertura marcada (Fase 4).</span></div></div>'}<div class="dk-sum ${cls}"><div><small>SOMA DOS CAPITAIS SEGURADOS</small></div><b>${fm(sumCap(l))}</b></div><div class="dk-inv"><small>INVESTIMENTO MENSAL</small><b>${fm(sumPrem(l))}</b><span> /mês</span></div></div>`;
+    const col4 = (l,title,cls)=>`<div><div class="dk-ch ${cls}"><b>${title}</b></div>${l.length?l.map(r=>`<div class="dk-it"><div class="t"><b>${nomeCat(r)}</b></div><div class="c"><b>${capTxt(r)}</b>${capSub(r)?`<small>${esc(capSub(r))}</small>`:''}</div></div>`).join(''):'<div class="dk-it"><div class="t"><span>Nenhuma cobertura marcada (Fase 5).</span></div></div>'}<div class="dk-sum ${cls}"><div><small>SOMA DOS CAPITAIS SEGURADOS</small></div><b>${fm(sumCap(l))}</b></div><div class="dk-inv"><small>INVESTIMENTO MENSAL</small><b>${fm(sumPrem(l))}</b><span> /mês</span></div></div>`;
     page('Proposta','As duas soluções e o investimento mensal de cada uma',`<div class="dk-g2">${col4(sel(1),'SOLUÇÃO 1 · MAIS COMPLETA','dk-gd')}${col4(sel(2),'SOLUÇÃO 2 · A NECESSÁRIA','dk-gp')}</div>`);
     // 5 · detalhamento
-    const det = (n,title,cls)=>{ const l = sel(n); return `<div><div class="dk-ch ${cls}"><b>${title}</b></div><table class="dk-t dk-f2"><colgroup><col style="width:36%"><col style="width:24%"><col style="width:21%"><col style="width:19%"></colgroup><thead><tr><th>COBERTURA</th><th class="r">CAPITAL SEGURADO</th><th class="r">PRÊMIO MENSAL</th><th>SEGURADORA</th></tr></thead><tbody>${l.length?l.map(r=>`<tr><td><b>${nomeCat(r)}</b>${r.sub?`<div style="font-size:6pt;color:#4a5270">${esc(r.sub)}</div>`:''}</td><td class="r"><b>${capTxt(r)}</b>${capSub(r)?`<div style="font-size:5.8pt;color:#4a5270">${esc(capSub(r))}</div>`:''}</td><td class="r"><b style="color:#6f4f12">${fm(r.prem)}</b></td><td>${esc(r.seg||'')}</td></tr>`).join(''):'<tr><td colspan="4">Nenhuma cobertura marcada (Fase 4).</td></tr>'}<tr class="tot"><td>TOTAL</td><td class="r">${fm(sumCap(l))}</td><td class="r">${fm(sumPrem(l))}</td><td></td></tr></tbody></table></div>`; };
+    const det = (n,title,cls)=>{ const l = sel(n); return `<div><div class="dk-ch ${cls}"><b>${title}</b></div><table class="dk-t dk-f2"><colgroup><col style="width:36%"><col style="width:24%"><col style="width:21%"><col style="width:19%"></colgroup><thead><tr><th>COBERTURA</th><th class="r">CAPITAL SEGURADO</th><th class="r">PRÊMIO MENSAL</th><th>SEGURADORA</th></tr></thead><tbody>${l.length?l.map(r=>`<tr><td><b>${nomeCat(r)}</b>${r.sub?`<div style="font-size:6pt;color:#4a5270">${esc(r.sub)}</div>`:''}</td><td class="r"><b>${capTxt(r)}</b>${capSub(r)?`<div style="font-size:5.8pt;color:#4a5270">${esc(capSub(r))}</div>`:''}</td><td class="r"><b style="color:#6f4f12">${fm(r.prem)}</b></td><td>${esc(r.seg||'')}</td></tr>`).join(''):'<tr><td colspan="4">Nenhuma cobertura marcada (Fase 5).</td></tr>'}<tr class="tot"><td>TOTAL</td><td class="r">${fm(sumCap(l))}</td><td class="r">${fm(sumPrem(l))}</td><td></td></tr></tbody></table></div>`; };
     page('Detalhamento das soluções','Página de apoio: coberturas, capital segurado, prêmio mensal e seguradora',`<div class="dk-g2">${det(1,'SOLUÇÃO 1 · MAIS COMPLETA','dk-gd')}${det(2,'SOLUÇÃO 2 · A NECESSÁRIA','dk-gp')}</div><p style="font-size:6.6pt;color:#4a5270;margin-top:4mm">Prêmios mensais estimados conforme as cotações das seguradoras, sujeitos à análise de risco e à atualização anual. Os totais somam todas as coberturas; diária e DIT contados × 30 dias.</p>`);
   } else {
     const idade = f5Idade(c.nasc), hoje = new Date();
@@ -3883,7 +3883,7 @@ function f5Deck(m, X, opt){
       `<div class="dk-bar">${[[c.sexo==='Feminino'?'Segurada':'Segurado',c.nome||'—'],['Data de nascimento',(dtBR(c.nasc)||'—')+(idade!==''?' · '+idade+' anos':'')],['Profissão',c.prof||'—'],['Proteção atual',c.segAtual||'—']].map(f=>`<div><small>${esc(f[0])}</small><b>${esc(f[1])}</b></div>`).join('')}</div>
        <div class="dk-sec"><span>O que você possui hoje</span><small>Coluna em destaque: pontos de atenção indicados pela consultora</small></div>
        <table class="dk-t"><thead><tr><th>COBERTURA</th><th class="r">CAPITAL SEGURADO</th><th class="r">PRÊMIO MENSAL</th><th>VIGÊNCIA</th><th>PONTOS DE ATENÇÃO · CONSULTORA</th></tr></thead><tbody>
-       ${X.apol.map(r=>`<tr><td style="border-left:1mm solid ${r.tipo==='Vitalícia'?'#32dfb6':/^ok/i.test(r.obs||'')?'#00125e':'#0018fc'}"><b>${esc(r.cob||'—')}</b></td><td class="r" style="${r.cap===''?'color:#7a400f;font-weight:700':''}">${r.cap===''?'não lido':fm(r.cap)}</td><td class="r" style="${r.prem===''?'color:#7a400f;font-weight:700':''}">${r.prem===''?'não lido':fm(r.prem)}</td><td style="${alertOf(r)?'color:#0018fc;font-weight:700':''}">${r.tipo==='Vitalícia'?'Vitalício':'Até '+dtBR(r.vig)}</td><td style="background:#eef0ff;font-size:7.2pt">${esc(r.obs||'')}</td></tr>`).join('')||'<tr><td colspan="5">Nenhuma apólice cadastrada na Fase 2.</td></tr>'}
+       ${X.apol.map(r=>`<tr><td style="border-left:1mm solid ${r.tipo==='Vitalícia'?'#32dfb6':/^ok/i.test(r.obs||'')?'#00125e':'#0018fc'}"><b>${esc(r.cob||'—')}</b></td><td class="r" style="${r.cap===''?'color:#7a400f;font-weight:700':''}">${r.cap===''?'não lido':fm(r.cap)}</td><td class="r" style="${r.prem===''?'color:#7a400f;font-weight:700':''}">${r.prem===''?'não lido':fm(r.prem)}</td><td style="${alertOf(r)?'color:#0018fc;font-weight:700':''}">${r.tipo==='Vitalícia'?'Vitalício':'Até '+dtBR(r.vig)}</td><td style="background:#eef0ff;font-size:7.2pt">${esc(r.obs||'')}</td></tr>`).join('')||'<tr><td colspan="5">Nenhuma apólice cadastrada na Fase 3.</td></tr>'}
        <tr class="tot"><td>Total</td><td class="r">${fm(somaCap(X.apol))}</td><td class="r">${fm(X.apol.reduce((a,r)=>a+(Number(r.prem)||0),0))}</td><td colspan="2" style="font-weight:400;font-size:6.6pt;color:#4a5270">Soma de todas as coberturas atuais (capital segurado e prêmio mensal).</td></tr></tbody></table>`);
     // 2 · substituição
     const l = X.solSub===3 ? X.cot.filter(r=>r.s1||r.s2) : X.cot.filter(r=>r['s'+X.solSub]);
@@ -4026,18 +4026,18 @@ async function f5DownloadPdf(html, nome){
     pdf.save(nome);
   } finally { box.remove(); }
 }
-const F5_IR = {'pp-analise':'Ir para a Fase 2','pp-diag':'Ir para o Diagnóstico (Fase 3)','pp-fase3':'Ir para o Diagnóstico (Fase 3)','pp-fase4':'Ir para a Fase 4'};
+const F5_IR = {'pp-analise':'Ir para a Fase 3','pp-diag':'Ir para o Diagnóstico (Fase 4)','pp-fase3':'Ir para o Diagnóstico (Fase 4)','pp-fase4':'Ir para a Fase 5'};
 async function pvFase5(p){
   const host = document.getElementById('pp-fase5'); if(!host) return;
   const opt = {carro:100000, taxaCarro:4}; let modeloEsc = 'auto';
   const draw = async ()=>{
-    host.innerHTML = '<div class="ql">Fase 5 · Apresentação</div><div class="op-more">Verificando os dados…</div>';
+    host.innerHTML = '<div class="ql">Fase 6 · Apresentação</div><div class="op-more">Verificando os dados…</div>';
     const X = await f5Context(p); const auto = X.hasPol?'fern':'luiz'; const m = modeloEsc==='auto'?auto:modeloEsc; const f = f5Faltas(m, X);
     const card = (k,t,s)=>`<button type="button" class="om-cancel" data-modelo="${k}" style="text-align:left;padding:10px 12px;flex:1;min-width:260px;${m===k?'border:2px solid var(--brand);background:var(--brand-soft)':''}"><b>${t}</b><br><small style="font-weight:400">${s}</small>${auto===k?'<br><small style="color:var(--brand)">Sugerido pelo sistema</small>':''}${m===k?'<br><small style="color:var(--green)"><b>Selecionado</b></small>':''}</button>`;
-    host.innerHTML = `<div class="ql">Fase 5 · Apresentação <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— PDF no modelo do exemplo; o sistema sugere o modelo e você escolhe</small></div>
+    host.innerHTML = `<div class="ql">Fase 6 · Apresentação <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— PDF no modelo do exemplo; o sistema sugere o modelo e você escolhe</small></div>
       <div class="hint" style="margin-bottom:8px">Cliente <b>sem apólice</b>: <b>Modelo não possui proteção (proposta)</b>, 5 páginas. Cliente <b>com apólice</b>: <b>Modelo já possui proteção (comparativo/melhoria)</b>, 3 páginas. Saúde, CPF e telefone não saem na apresentação.</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">${card('luiz','Modelo não possui proteção (proposta)','Cliente sem apólice · proposta do zero · 5 páginas')}${card('fern','Modelo já possui proteção (comparativo/melhoria)','Cliente com apólice · comparativo e melhorias · 3 páginas')}</div>
-      <div class="hint" style="margin-top:6px">${modeloEsc==='auto'?(X.hasPol?'Motivo da sugestão: há apólice lançada na Fase 2.':'Motivo da sugestão: nenhuma apólice lançada na Fase 2.'):'Escolhido por você. <a href="#" id="f5-auto">Voltar ao sugerido</a>'}</div>
+      <div class="hint" style="margin-top:6px">${modeloEsc==='auto'?(X.hasPol?'Motivo da sugestão: há apólice lançada na Fase 3.':'Motivo da sugestão: nenhuma apólice lançada na Fase 3.'):'Escolhido por você. <a href="#" id="f5-auto">Voltar ao sugerido</a>'}</div>
       ${m==='luiz'?`<div class="fgrid" style="margin-top:8px;max-width:520px"><label class="fl"><span>Página "Proteger um bem ou uma vida?": valor do carro (R$)</span><input type="number" id="f5-carro" value="${opt.carro}"></label><label class="fl"><span>Taxa anual do seguro do carro (%)</span><input type="number" step="0.1" id="f5-taxa" value="${opt.taxaCarro}"></label></div>`:''}
       <div style="margin-top:10px">${f.length?`<div class="hint" id="f5-falta" style="background:var(--amber-soft);border-radius:8px;padding:8px 10px"><b>Faltam dados para esta apresentação ficar completa:</b><ul style="margin:4px 0 0 18px">${f.map((x,i)=>`<li>${escapeHtml(x.t)} <a href="#" data-goto="${x.go}">${escapeHtml(F5_IR[x.go]||'ir para a tela certa')}</a></li>`).join('')}</ul></div>`:'<div class="hint" style="background:var(--green-soft);color:var(--green);border-radius:8px;padding:8px 10px">Todos os dados necessários estão preenchidos.</div>'}</div>
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">${f5NomeCampo('f5-nome-pdf')}<button class="om-save" id="f5-baixar">Baixar PDF</button><button class="om-cancel" id="f5-gerar">Imprimir ou salvar como PDF</button><span id="f5-st" style="font-size:12px;color:var(--ink-faint)">"Baixar PDF" gera o arquivo direto. "Imprimir" abre a janela do navegador (A4 paisagem, sem margens).</span></div>`;
@@ -4118,8 +4118,8 @@ async function pvFase4(p){
     e.innerHTML = col('Solução 1 · mais completa',a)+col('Solução 2 · a necessária',b)+(hp?`<div style="flex:1;min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px"><b>Hoje (apólices atuais)</b><div class="hint">Soma dos capitais segurados</div><div style="font-size:18px;font-weight:700">${f0(hc)}</div><div style="margin-top:6px;font-size:12px;color:var(--ink-soft)">Prêmio mensal atual</div><div style="font-size:18px;font-weight:700">${fm(h)}</div></div>`:''); };
   const draw = ()=>{
     host.innerHTML = `<style>.f4-t input[type=text],.f4-t input[type=number],.f4-t input[type=date],.f4-t select{width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 6px;font:inherit}.f4-t input.unread{background:#eef0ff;border-color:#0018fc}.f4-t td{padding:3px 4px}</style>
-      <div class="ql">Fase 4 · Cotações e plano <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— lance as cotações das seguradoras, marque em quais soluções entram e veja os totais</small></div>
-      <div class="hint" style="margin-bottom:8px">As cotações lidas ficam na tabela abaixo, que você pode editar. Marque em <b>Sol. 1</b> (mais completa) e <b>Sol. 2</b> (a necessária) em quais soluções cada cotação entra. Se o cliente tem apólice, diga qual linha da Fase 2 cada cotação substitui. Os totais aparecem fixos embaixo.</div>
+      <div class="ql">Fase 5 · Cotações e plano <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— lance as cotações das seguradoras, marque em quais soluções entram e veja os totais</small></div>
+      <div class="hint" style="margin-bottom:8px">As cotações lidas ficam na tabela abaixo, que você pode editar. Marque em <b>Sol. 1</b> (mais completa) e <b>Sol. 2</b> (a necessária) em quais soluções cada cotação entra. Se o cliente tem apólice, diga qual linha da Fase 3 cada cotação substitui. Os totais aparecem fixos embaixo.</div>
       <div class="ql" style="margin-top:8px">Cotações · área de upload</div>
       <div class="hint" style="margin-bottom:8px">Arraste aqui as cotações de todas as seguradoras (PDF, print ou foto), várias de uma vez. O sistema lê seguradora, produto, capital e prêmio e coloca na tabela abaixo; o que não for lido fica em laranja para você conferir e completar.</div>
       <div class="dz" id="f4-dz">Arraste as cotações aqui, ou clique (PDF ou imagem)<input type="file" id="f4-file" accept=".pdf,image/*" multiple hidden></div>
@@ -4133,13 +4133,13 @@ async function pvFase4(p){
       ${avisos.length?`<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:8px 10px;margin-bottom:8px"><b>Pontos de atenção</b><ul style="margin:4px 0 0 18px">${avisos.map(a=>`<li>${escapeHtml(a)}</li>`).join('')}</ul></div>`:''}
       <div class="ql" style="margin-top:12px">Cotações recebidas</div>
       <div style="margin-bottom:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" class="om-cancel" id="f4-org">↕ Organizar pela numeração</button><span class="hint" style="margin:0">Digite a posição de cada cobertura em <b>#</b> (é a ordem em que saem na apresentação) e tecle Enter ou clique aqui.</span></div>
-      <div style="overflow-x:auto"><table class="f4-t" style="min-width:1500px;border-collapse:collapse"><thead><tr><th style="width:56px">#</th><th style="min-width:170px;text-align:left">Categoria</th><th style="width:110px">Seguradora</th><th style="min-width:170px">Cobertura (nome na proposta)</th><th style="width:130px">Detalhe do produto</th><th style="width:110px">Capital</th><th style="width:100px">Prêmio mensal</th><th style="width:100px">Prazo</th><th style="width:80px">UTI (R$/dia)</th><th style="min-width:180px">Descrição para o cliente</th><th style="min-width:160px">Melhoria / motivo</th><th style="width:50px">Sol. 1</th><th style="width:50px">Sol. 2</th><th style="width:90px">Substitui (# Fase 2)</th><th style="width:34px"></th></tr></thead><tbody>
+      <div style="overflow-x:auto"><table class="f4-t" style="min-width:1500px;border-collapse:collapse"><thead><tr><th style="width:56px">#</th><th style="min-width:170px;text-align:left">Categoria</th><th style="width:110px">Seguradora</th><th style="min-width:170px">Cobertura (nome na proposta)</th><th style="width:130px">Detalhe do produto</th><th style="width:110px">Capital</th><th style="width:100px">Prêmio mensal</th><th style="width:100px">Prazo</th><th style="width:80px">UTI (R$/dia)</th><th style="min-width:180px">Descrição para o cliente</th><th style="min-width:160px">Melhoria / motivo</th><th style="width:50px">Sol. 1</th><th style="width:50px">Sol. 2</th><th style="width:90px">Substitui (# Fase 3)</th><th style="width:34px"></th></tr></thead><tbody>
       ${rows.length?f4Group(rows.map((r,i)=>`<tr data-i="${i}"><td><input type="number" min="1" step="1" data-f="ord" title="Posição na apresentação. Digite e tecle Enter (ou clique em Organizar pela numeração)" style="text-align:center" value="${Number(r.ord)>0?Number(r.ord):i+1}"></td><td><select data-f="cat">${ANL_CATS.map(c=>`<option ${c===r.cat?'selected':''}>${c}</option>`).join('')}</select></td><td><input type="text" data-f="seg" value="${escapeHtml(r.seg||'')}"></td><td><input type="text" data-f="cob" value="${escapeHtml(r.cob||'')}"></td><td><input type="text" data-f="sub" value="${escapeHtml(r.sub||'')}"></td>
         <td><input type="number" step="0.01" data-f="cap" class="${r.cap===''?'unread':''}" value="${r.cap}"></td><td><input type="number" step="0.01" data-f="prem" class="${r.prem===''?'unread':''}" value="${r.prem}"></td><td><input type="text" data-f="prazo" value="${escapeHtml(r.prazo||'')}"></td><td><input type="number" step="0.01" data-f="uti" value="${r.uti===''||r.uti==null?'':r.uti}"></td>
         <td><input type="text" data-f="nota" value="${escapeHtml(r.nota||'')}"></td><td><input type="text" data-f="motivo" value="${escapeHtml(r.motivo||'')}"></td><td style="text-align:center"><input type="checkbox" data-f="s1" ${r.s1?'checked':''}></td><td style="text-align:center"><input type="checkbox" data-f="s2" ${r.s2?'checked':''}></td>
         <td><input type="text" data-f="subst" placeholder="ex.: 2,3" value="${escapeHtml(r.subst||'')}"></td><td><button type="button" class="om-cancel icon-btn" data-del="${i}" title="Remover">×</button></td></tr>`)):'<tr><td colspan="15" style="color:var(--ink-faint)">Nenhuma cotação ainda. Suba as cotações acima ou adicione uma linha.</td></tr>'}
       </tbody></table></div>
-      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end"><button class="om-cancel" id="f4-add">＋ Adicionar cotação</button><button class="om-cancel" id="f4-clear" style="color:var(--red)">Limpar todas as cotações</button><button class="om-save" id="f4-salvar">Salvar informações</button><button class="om-cancel" id="f4-prox">Ir para a Fase 5 · Apresentação</button>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end"><button class="om-cancel" id="f4-add">＋ Adicionar cotação</button><button class="om-cancel" id="f4-clear" style="color:var(--red)">Limpar todas as cotações</button><button class="om-save" id="f4-salvar">Salvar informações</button><button class="om-cancel" id="f4-prox">Ir para a Fase 6 · Apresentação</button>
         ${apol.length?`<label class="fl" style="min-width:260px"><span>Solução usada na proposta de substituição</span><select id="f4-sol"><option value="1" ${solSub===1?'selected':''}>Solução 1</option><option value="2" ${solSub===2?'selected':''}>Solução 2</option><option value="3" ${solSub===3?'selected':''}>As duas soluções (1 e 2)</option></select></label>`:''}</div>
       <div class="hint" style="margin-top:6px">O prêmio da diária inclui o adicional de UTI. Os totais somam todas as coberturas marcadas; diária e DIT contados × 30 dias (o valor de UTI não entra na soma).</div>
       <div id="f4-warn"></div>
@@ -4218,7 +4218,7 @@ async function pvFase4(p){
   autoSubst(); draw();
 }
 // ============ FASE 3 · DIAGNÓSTICO: o que você tem × o que você precisa ============
-// Necessidade vem da régua oficial (calcAnaliseCompleta, com os dados do cliente/ADN); "o que tem" vem da tabela da Fase 2.
+// Necessidade vem da régua oficial (calcAnaliseCompleta, com os dados do cliente/ADN); "o que tem" vem da tabela da Fase 3.
 // Sem apólice analisada: mostra só o que o cliente precisa, sem comparativo.
 const F3_ORD = ['Morte','Invalidez','Doenças Graves','Diária de internação hospitalar','Assistência funeral','Cirurgias','Fratura óssea','DIT'];
 const F3_KEYS = {'Morte':['morte','sucessao'],'Invalidez':['ipa','invalidez_doenca'],'Doenças Graves':['doencas_graves'],'Diária de internação hospitalar':['dih'],'DIT':['dit'],'Cirurgias':['cirurgias'],'Fratura óssea':['fratura_ossea'],'Assistência funeral':['funeral_individual','funeral_familiar']};
@@ -4255,17 +4255,17 @@ async function pvFase3(p){
   host.innerHTML = head + `
     <div class="hint" style="margin-bottom:8px">Representatividade financeira de <b>${escapeHtml(p.nome)}</b> — necessidade calculada com os dados do cliente (régua oficial). Padrão de vida usado: <b>${fmtMoney(padrao)}/mês</b>.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${card(fmtMoney(padrao),'Padrão de vida (mensal)')}${card(deps.length+' dependente(s)','Dependentes')}${card(fmtMoney(educ),'Educação até a idade-limite')}${card(fmtMoney(liq.valor),'Custos de inventário')}${card(fmtMoney(Number(e.patrimonio_bruto)||0),'Patrimônio bruto')}</div>
-    ${!temApolice?'<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:8px 10px;margin-bottom:8px">Cliente sem apólice analisada: mostrando <b>só o que ele precisa</b>, sem comparativo. Para comparar, preencha e confirme a Fase 2 acima.</div>':(an&&an.confirmada?'':'<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:8px 10px;margin-bottom:8px">A tabela da Fase 2 ainda <b>não foi confirmada</b>: confira os valores antes de apresentar.</div>')}
+    ${!temApolice?'<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:8px 10px;margin-bottom:8px">Cliente sem apólice analisada: mostrando <b>só o que ele precisa</b>, sem comparativo. Para comparar, preencha e confirme a Fase 3 acima.</div>':(an&&an.confirmada?'':'<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:8px 10px;margin-bottom:8px">A tabela da Fase 3 ainda <b>não foi confirmada</b>: confira os valores antes de apresentar.</div>')}
     <div style="overflow-x:auto"><table class="ca-table" style="min-width:${temApolice?980:560}px"><thead><tr><th>Cobertura</th><th>Necessidade</th>${temApolice?'<th>Hoje (apólices)</th><th>Situação</th><th>Falta cobrir</th><th>Prêmio hoje (mês)</th><th>Alerta</th><th>Ponto de atenção</th>':''}<th>Sugestão</th></tr></thead><tbody>
       ${rows.map(r=>`<tr><td><b>${escapeHtml(r.cat)}</b></td><td>${fmtMoney(r.need)}${r.dy}</td>${temApolice?`<td>${r.cap?fmtMoney(r.cap)+r.dy:'—'}</td><td><b style="color:${r.s[2]}">${r.s[1]}</b></td><td>${r.gap?fmtMoney(r.gap)+r.dy:'—'}</td><td>${r.prem?fmtMoney(r.prem):'—'}</td><td>${r.alerta?'<span class="tagx warn">'+escapeHtml(r.alerta)+'</span>':''}</td><td><small>${escapeHtml(r.ponto)}</small></td>`:''}<td><small>${escapeHtml(r.sug)}</small></td></tr>`).join('')}
       <tr style="font-weight:700;background:#f6f7fc"><td>Total (diária e DIT × 30 dias)</td><td>${fmtMoney(T.need)}</td>${temApolice?`<td>${fmtMoney(T.cap)}</td><td>${T.sem} sem · ${T.ins} insuf.</td><td>${fmtMoney(T.gap)}</td><td>${fmtMoney(T.prem)}</td><td></td><td></td>`:''}<td></td></tr></tbody></table></div>
-    <div class="hint" style="margin-top:6px">Situação: <b>Sem cobertura</b> = nada lançado na Fase 2; <b>Insuficiente</b> = tem menos de 90% da necessidade; <b>Adequada</b> = 90% ou mais. Diária e DIT são valores por dia: nas somas são contados × 30 dias.</div>
-    ${(()=>{ const B = f5Blocos(e.repr_blocos, manualVida, ctRows, educ, liq.valor); return `<div class="es-box" style="margin-top:10px"><div class="ql">Representatividade financeira · o que entra nos PDFs <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— o PDF do diagnóstico (Fase 3) e a apresentação (Fase 5) mostram só o que estiver marcado</small></div>
+    <div class="hint" style="margin-top:6px">Situação: <b>Sem cobertura</b> = nada lançado na Fase 3; <b>Insuficiente</b> = tem menos de 90% da necessidade; <b>Adequada</b> = 90% ou mais. Diária e DIT são valores por dia: nas somas são contados × 30 dias.</div>
+    ${(()=>{ const B = f5Blocos(e.repr_blocos, manualVida, ctRows, educ, liq.valor); return `<div class="es-box" style="margin-top:10px"><div class="ql">Representatividade financeira · o que entra nos PDFs <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— o PDF do diagnóstico (Fase 4) e a apresentação (Fase 6) mostram só o que estiver marcado</small></div>
       <label class="rd"><input type="checkbox" id="f3-b-vida" ${B.vida?'checked':''}> <b>Seguro de vida</b> (se você não estiver aqui)</label>
       <label class="rd"><input type="checkbox" id="f3-b-em" ${B.em_vida?'checked':''}> <b>Seguro em vida</b> (se estiver aqui, mas sem poder trabalhar)</label>
       <div class="hint" style="margin-top:4px">${B.escolhido?'Escolha da consultora.':'Marcação sugerida pelo sistema.'} Se só um estiver marcado, ele ocupa a página inteira. Pelo menos um precisa ficar marcado.</div></div>`; })()}
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">${f5NomeCampo('f3-nome-pdf')}<button class="om-save" id="f3-pdf">Baixar PDF · Diagnóstico (Fase 3)</button><button class="om-save" id="f3-save">Salvar informações</button><button class="om-cancel" id="f3-prox">Ir para a Fase 4 · Cotações e plano</button></div>`;
-  host.querySelector('#f3-save').addEventListener('click', ()=>{ showToast('Informações salvas. Esta tela é calculada com o que está salvo nas Fases 2 e 3.'); pvFase3(p); });
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">${f5NomeCampo('f3-nome-pdf')}<button class="om-save" id="f3-pdf">Baixar PDF · Diagnóstico (Fase 4)</button><button class="om-save" id="f3-save">Salvar informações</button><button class="om-cancel" id="f3-prox">Ir para a Fase 5 · Cotações e plano</button></div>`;
+  host.querySelector('#f3-save').addEventListener('click', ()=>{ showToast('Informações salvas. Esta tela é calculada com o que está salvo nas Fases 3 e 4.'); pvFase3(p); });
   const bv = host.querySelector('#f3-b-vida'), be = host.querySelector('#f3-b-em');
   const salvaBlocos = async (quem)=>{
     if(!bv.checked && !be.checked){ (quem===bv?be:bv).checked = true; showToast('Pelo menos uma das duas precisa ficar marcada.'); }
@@ -4276,7 +4276,7 @@ async function pvFase3(p){
   const pdfBtn = host.querySelector('#f3-pdf'); pdfBtn.addEventListener('click', async ()=>{
     pdfBtn.disabled = true; const lb = pdfBtn.textContent; pdfBtn.textContent = 'Gerando…';
     try{ const X = await f5Context(p);
-      await f5DownloadPdf(f5DeckFase34(X, {rows, T, temApolice}, await f5Emissao(p.id)), f5NomeArq('f3-nome-pdf', f5FileName('Fases3e4_Diagnostico', p.nome))); f5NomeLimpar('f3-nome-pdf'); showToast('PDF das Fases 3 e 4 baixado'); }
+      await f5DownloadPdf(f5DeckFase34(X, {rows, T, temApolice}, await f5Emissao(p.id)), f5NomeArq('f3-nome-pdf', f5FileName('Fase4_Diagnostico', p.nome))); f5NomeLimpar('f3-nome-pdf'); showToast('PDF do Diagnóstico (Fase 4) baixado'); }
     catch(e){ showToast('Não consegui gerar o PDF: '+(e.message||e)); }
     pdfBtn.disabled = false; pdfBtn.textContent = lb; });
 }
@@ -4310,20 +4310,20 @@ async function pvAnalise(p){
   const totals = ()=>{ const c = somaCap(rows), pr = rows.reduce((s,r)=>s+(Number(r.prem)||0),0);
     const a = document.getElementById('an-tc'), b = document.getElementById('an-tp'); if(a) a.textContent = fmt(c); if(b) b.textContent = fmt(pr); };
   const msg = ()=>{ const el = document.getElementById('an-msg'); if(!el) return;
-    el.innerHTML = confirmada ? `<div class="hint" style="background:var(--green-soft);color:var(--green);border-radius:8px;padding:8px 10px"><b>Análise confirmada e salva no cadastro.</b> Siga para a Fase 3 · Diagnóstico. <button class="om-save" id="an-prox" style="margin-left:8px;padding:4px 10px;font-size:12px">Ir para a Fase 3 · Diagnóstico</button></div>` : (iniciada?'<div class="hint">Edições salvas automaticamente — falta <b>Confirmar análise</b>.</div>':'');
+    el.innerHTML = confirmada ? `<div class="hint" style="background:var(--green-soft);color:var(--green);border-radius:8px;padding:8px 10px"><b>Análise confirmada e salva no cadastro.</b> Siga para a Fase 4 · Diagnóstico. <button class="om-save" id="an-prox" style="margin-left:8px;padding:4px 10px;font-size:12px">Ir para a Fase 4 · Diagnóstico</button></div>` : (iniciada?'<div class="hint">Edições salvas automaticamente — falta <b>Confirmar análise</b>.</div>':'');
     const b = document.getElementById('an-prox'); if(b) b.addEventListener('click', ()=>{ pvGotoSection('pp-diag'); }); };
   const draw = ()=>{
     host.innerHTML = `<style>.an-t input,.an-t select{width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 6px;font:inherit}.an-t input.unread{background:#eef0ff;border-color:#0018fc}.an-t td{padding:3px 4px}</style>
-      <div class="ql">Fase 2 · Analisar documentos <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— preencha o que está escrito na apólice, cobertura por cobertura</small></div>
+      <div class="ql">Fase 3 · Analisar documentos <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— preencha o que está escrito na apólice, cobertura por cobertura</small></div>
       <div style="margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" class="om-save" id="an-ia-anex" style="padding:6px 12px;font-size:13px">Ler as apólices anexadas</button><label class="om-cancel" style="cursor:pointer;display:inline-block;padding:6px 12px;font-size:13px">Escolher arquivos<input type="file" id="an-ia-file" accept=".pdf,image/*" multiple hidden></label><span id="an-ia-st" class="hint" style="margin:0">Leia de uma vez todas as apólices já anexadas ao cliente, ou escolha um ou mais arquivos (PDF ou foto). O sistema preenche a tabela abaixo; confira antes de confirmar.</span></div><div id="an-ia-log"></div>
-      <div class="hint" style="margin-bottom:8px">Você também pode preencher à mão. O que ainda não foi preenchido fica em <b style="color:#c06a00">laranja</b>. Cliente sem apólice? Não há o que analisar nesta etapa — <a href="#" id="an-pular">pular para o diagnóstico (Fase 3)</a>.</div>
+      <div class="hint" style="margin-bottom:8px">Você também pode preencher à mão. O que ainda não foi preenchido fica em <b style="color:#c06a00">laranja</b>. Cliente sem apólice? Não há o que analisar nesta etapa — <a href="#" id="an-pular">pular para o diagnóstico (Fase 4)</a>.</div>
       ${rows.length?`<div style="overflow-x:auto"><table class="an-t" style="min-width:1050px;border-collapse:collapse"><thead><tr><th style="width:34px">#</th><th style="min-width:200px;text-align:left">Cobertura (nome técnico)</th><th style="min-width:190px;text-align:left">Categoria</th><th style="width:130px">Capital segurado</th><th style="width:130px">Prêmio mensal (com IOF)</th><th style="width:110px">Prazo</th><th style="width:140px">Vigência até</th><th style="min-width:180px;text-align:left">Observação</th><th style="width:34px"></th></tr></thead><tbody>
         ${rows.map((r,i)=>`<tr data-i="${i}"><td>${i+1}</td><td><input data-f="cob" value="${escapeHtml(r.cob||'')}"></td><td><select data-f="cat">${ANL_CATS.concat([ANL_OUTRO]).map(c=>`<option ${c===r.cat?'selected':''}>${c}</option>`).join('')}</select></td>
           <td><input type="number" step="0.01" data-f="cap" class="${r.cap===''?'unread':''}" value="${r.cap}"></td><td><input type="number" step="0.01" data-f="prem" class="${r.prem===''?'unread':''}" value="${r.prem}"></td>
           <td><select data-f="tipo"><option ${r.tipo==='Vitalícia'?'selected':''}>Vitalícia</option><option ${r.tipo==='Temporária'?'selected':''}>Temporária</option></select></td><td><input type="date" data-f="vig" class="${r.vig?'':'unread'}" value="${r.vig||''}"></td>
           <td><input data-f="obs" value="${escapeHtml(r.obs||'')}"></td><td><button type="button" class="om-cancel icon-btn" data-del="${i}" title="Remover linha">×</button></td></tr>`).join('')}
         </tbody><tfoot><tr style="font-weight:700;background:#f6f7fc"><td colspan="3">Soma das apólices</td><td id="an-tc"></td><td id="an-tp"></td><td colspan="4"></td></tr></tfoot></table></div>`:'<div class="hint">Nenhuma cobertura lançada ainda. Use "Adicionar cobertura" para preencher a tabela manualmente.</div>'}
-      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="om-cancel" id="an-add">＋ Adicionar cobertura</button>${rows.length?f5NomeCampo('an-nome-pdf')+'<button class="om-cancel" id="an-pdf">Baixar PDF · Fase 2</button><button class="om-save" id="an-conf">Confirmar análise</button>':''}</div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="om-cancel" id="an-add">＋ Adicionar cobertura</button>${rows.length?f5NomeCampo('an-nome-pdf')+'<button class="om-cancel" id="an-pdf">Baixar PDF · Fase 3</button><button class="om-save" id="an-conf">Confirmar análise</button>':''}</div>
       <div id="an-msg" style="margin-top:8px"></div>
       <div class="hint" style="margin-top:6px">Categoria "Outro (não entra na análise)" serve para RC Profissional, Vida em Grupo e outros ramos. O "Proteção atual" e o "Capital de vida já segurado" acima passam a vir desta tabela.</div>`;
     totals(); msg();
@@ -4391,7 +4391,7 @@ async function pvAnalise(p){
       const dados = rows.filter(r=>r.cob || (r.cap!=='' && r.cap!=null) || (r.prem!=='' && r.prem!=null));
       if(!dados.length){ showToast('Preencha ao menos uma cobertura para gerar o PDF.'); return; }
       pf.disabled = true; const lb = pf.textContent; pf.textContent = 'Gerando…';
-      try{ await f5DownloadPdf(f5DeckFase2(dados, await f5Emissao(p.id)), f5NomeArq('an-nome-pdf', f5FileName('Fase2_Analise', p.nome))); f5NomeLimpar('an-nome-pdf'); showToast('PDF da Fase 2 baixado'); }
+      try{ await f5DownloadPdf(f5DeckFase2(dados, await f5Emissao(p.id)), f5NomeArq('an-nome-pdf', f5FileName('Fase3_Analise', p.nome))); f5NomeLimpar('an-nome-pdf'); showToast('PDF da Fase 3 baixado'); }
       catch(e){ showToast('Não consegui gerar o PDF: '+(e.message||e)); }
       pf.disabled = false; pf.textContent = lb; });
     const pl = host.querySelector('#an-pular'); if(pl) pl.addEventListener('click', e=>{ e.preventDefault(); pvGotoSection('pp-diag'); });
@@ -4473,7 +4473,7 @@ async function pvApolices(p){
   const { data } = await sb.from('crm_apolices').select('*').eq('pessoa_id',p.id).order('data_vencimento',{ascending:true});
   const rows = data||[]; const have = new Set(); rows.forEach(a=>(a.coberturas||[]).forEach(c=>have.add(c)));
   let cap = rows.filter(a=>a.status!=='cancelada' && /vida/i.test(a.tipo_seguro||'')).reduce((t,a)=>t+(Number(a.valor_cobertura)||0),0);
-  // a tabela da Fase 2 (Analisar documentos) passa a alimentar "Proteção atual" e "Capital de vida já segurado"
+  // a tabela da Fase 3 (Analisar documentos) passa a alimentar "Proteção atual" e "Capital de vida já segurado"
   const { data: anl } = await sb.from('crm_analise_apolices').select('linhas').eq('pessoa_id',p.id).maybeSingle();
   if(anl && (anl.linhas||[]).length){ anlHave(anl.linhas).forEach(k=>have.add(k)); const cv = anlCapVida(anl.linhas); if(cv>0) cap = cv; }
   const covDetRowsAll = [];
@@ -4553,6 +4553,11 @@ async function syncFunilComOpp(pid, etapaKey, obs){
 function pvDiagField(k, v, def){
   const val = v==null ? '' : v;
   if(def[2]==='boolean') return `<label class="fl"><span>${def[1]}</span><select data-dg="${k}"><option value="">—</option><option value="true" ${val===true?'selected':''}>Sim</option><option value="false" ${val===false?'selected':''}>Não</option></select></label>`;
+  // "Tem seguro de vida?" (pedido da Amanda, 09/11/2026): Sim/Não e, se sim, quais. Grava em um campo só ("Sim: MAG, Prudential").
+  if(def[2]==='sim_quais'){ const s = String(val).trim(), nao = /^n[aã]o\b/i.test(s), sim = !!s && !nao, quais = nao ? '' : /^sim\b/i.test(s) ? s.replace(/^sim\s*[:\-–—]?\s*/i,'') : s;   // texto antigo livre ("Tenho MAG") vira Sim + quais, sem perder nada
+    return `<label class="fl"><span>${def[1]}</span><select data-sq="${k}"><option value="">—</option><option ${sim?'selected':''}>Sim</option><option ${nao?'selected':''}>Não</option></select></label>
+      <label class="fl" data-sq-box="${k}" style="${sim?'':'display:none'}"><span>Qual ou quais? <small style="color:var(--ink-faint)">seguradora e produto</small></span><input type="text" data-sq-txt="${k}" placeholder="Ex.: MAG Vida Inteira, Prudential" value="${escapeHtml(quais)}"></label>
+      <input type="hidden" data-dg="${k}" value="${escapeHtml(s)}">`; }
   if(def[2]==='select') return `<label class="fl"><span>${def[1]}</span><select data-dg="${k}"><option value="">—</option>${def[3].map(o=>`<option ${val===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
   return `<label class="fl"><span>${def[1]}</span><input data-dg="${k}" type="${def[2]==='number'?'number':'text'}" step="any" value="${escapeHtml(String(val))}"></label>`;
 }
@@ -4655,7 +4660,7 @@ const JORNADA_EVOLUTIVA = [
   ['Renda', ['renda_fontes','renda_estimada','renda_mensal_faixa','valor_mensal_educacao_filhos']],
   ['Patrimônio', ['patrimonio_bens','patrimonio_dividas','patrimonio_projetos','patrimonio_liquidez','faz_reserva_financeira','tem_investimentos','detalhes_investimentos']],
   ['Família', ['responsabilidades','familia_padrao_vida']],
-  ['Legado', ['tem_seguro_vida','protecao_percebida_adequada','visao_seguro_vida','objetivos_educacao','objetivos_patrimonio','objetivos_sucessao','objetivos_aposentadoria','objetivos_outros']],
+  ['Legado', ['protecao_percebida_adequada','visao_seguro_vida','objetivos_educacao','objetivos_patrimonio','objetivos_sucessao','objetivos_aposentadoria','objetivos_outros']],
 ];
 async function pvDiagnostico(p){
   const host = document.getElementById('pp-diag'); if(!host) return;
@@ -4673,7 +4678,7 @@ async function pvDiagnostico(p){
   const avanc = all.filter(f=>!essKeys.includes(f.name) && !DIAG_SAUDE.includes(f.name) && !jornadaKeys.has(f.name) && f.name!=='preenchido_por');
   const imc = (row.peso && row.altura) ? (Number(row.peso)/((Number(row.altura)/100)*(Number(row.altura)/100))).toFixed(1) : null;
   const idadeP = pvIdade(p);
-  host.innerHTML = `<div class="ql">Fase 3 · Diagnóstico <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— as perguntas ao cliente; salve e siga para o comparativo logo abaixo</small></div>
+  host.innerHTML = `<div class="ql">Fase 4 · Diagnóstico <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— as perguntas ao cliente; salve e siga para o comparativo logo abaixo</small></div>
     <div class="ql" style="margin-top:4px">Dados pessoais <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— vêm do cadastro; complete aqui o que faltar (salva junto com o diagnóstico)</small></div>
     <div class="fgrid" style="margin-bottom:10px">
       <label class="fl"><span>Estado civil</span><select id="dgp-estado_civil"><option value="">—</option>${['solteiro','casado','união estável','divorciado','viúvo'].map(o=>`<option ${p.estado_civil===o?'selected':''}>${o}</option>`).join('')}</select></label>
@@ -4688,7 +4693,7 @@ async function pvDiagnostico(p){
       ${solteiro && semDep ? '<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:6px 10px;margin-top:6px">Cliente solteiro(a) e sem dependentes: o cálculo do seguro de vida (escola + inventário) fica em R$ 0. Se a pessoa quiser seguro de vida, digite o capital neste campo.</div>' : '<div class="hint" style="margin-top:6px">Se preenchido, vira a necessidade de Morte no diagnóstico e substitui a "Opção ideal" na representatividade financeira.</div>'}</div>`; })()}
     <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600">Saúde e subscrição <small style="color:var(--ink-faint);font-weight:400">— dado sensível: preencher só quando necessário para cotação (LGPD)</small></summary>
       <div class="fgrid" style="margin-top:8px">${DIAG_SAUDE.map(k=>pvDiagField(k, row[k], defOf(k))).join('')}</div><div class="hint" id="dg-imc">${imc?`IMC calculado: <b>${imc}</b>`:''}</div></details>
-    <details style="margin-top:8px" open><summary style="cursor:pointer;font-weight:600">ADN completo <small style="color:var(--ink-faint);font-weight:400">— usado no cálculo da Análise (Fase 3) e da apresentação (Fase 5)</small></summary>
+    <details style="margin-top:8px" open><summary style="cursor:pointer;font-weight:600">ADN completo <small style="color:var(--ink-faint);font-weight:400">— usado no cálculo da Análise (Fase 4) e da apresentação (Fase 6)</small></summary>
       <div style="margin-top:8px">${pdAdnAvancadoHtml(row)}</div></details>
     <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">Processo evolutivo <small style="color:var(--ink-faint);font-weight:400">— Carreira → Renda → Patrimônio → Família → Legado</small></summary>
       <div style="margin-top:8px">${JORNADA_EVOLUTIVA.map(([label,keys])=>`<div class="ql" style="margin-top:10px">${label}</div><div class="fgrid">${keys.map(k=>pvDiagField(k, row[k], defOf(k))).join('')}</div>`).join('')}</div></details>
@@ -4696,6 +4701,10 @@ async function pvDiagnostico(p){
       <div class="fgrid" style="margin-top:8px">${avanc.map(f=>pvDiagField(f.name, row[f.name], [f.name,f.label,f.type,f.options])).join('')}</div></details>`:''}
     <div style="margin-top:10px"><button class="om-save" id="dg-save">Salvar informações</button> <button class="om-cancel" id="dg-prox">Ir para o comparativo (abaixo)</button> <button class="om-cancel" id="dg-ficha" title="Exporta tudo o que está preenchido neste diagnóstico">Ficha técnica (PDF)</button> <small style="color:var(--ink-faint)">${row.preenchido_por?'Última edição por '+escapeHtml(row.preenchido_por):''}</small></div>`;
   pdBindAvancado(host);
+  // Sim/Não + quais → um valor só no campo escondido que o Salvar lê
+  host.querySelectorAll('[data-sq]').forEach(sel=>{ const k = sel.dataset.sq, box = host.querySelector(`[data-sq-box="${k}"]`), txt = host.querySelector(`[data-sq-txt="${k}"]`), out = host.querySelector(`input[data-dg="${k}"]`);
+    const upd = ()=>{ box.style.display = sel.value==='Sim' ? '' : 'none'; const q = txt.value.trim(); out.value = sel.value==='Sim' ? (q ? 'Sim: '+q : 'Sim') : sel.value; };
+    sel.addEventListener('change', ()=>{ upd(); if(sel.value==='Sim') txt.focus(); }); txt.addEventListener('input', upd); });
   // Dados pessoais: guarda o que a tela mostrou ao abrir. Ao salvar, só vai para o cadastro o que a pessoa mudou aqui;
   // campo vazio que ela não tocou não apaga o que já está no cadastro (a tela pode estar aberta desde antes de outra edição).
   const dgpIni = {}; ['estado_civil','sexo','data_nascimento','profissao'].forEach(k=>{ dgpIni[k] = document.getElementById('dgp-'+k).value.trim(); });
@@ -7821,7 +7830,7 @@ async function impRun(){
 }
 // ============ UPLOAD DE DOCUMENTOS — FASE 1 (fluxo da Amanda, 01/10/2026) ============
 // Arrasta documentos → lê cada um (nome, CPF, telefone, nascimento, tipo do documento) → resumo na tela →
-// acha o cadastro pelo CPF (ou cria) → anexa os arquivos. Não lê coberturas (isso é a Fase 2).
+// acha o cadastro pelo CPF (ou cria) → anexa os arquivos. Não lê coberturas (isso é a Fase 3).
 // Campo não lido fica vazio; o sistema nunca inventa e nunca trava o salvamento. "Quem indicou" não é obrigatório.
 function fase1Tipo(name, text){
   const t = text||'';
@@ -8206,7 +8215,7 @@ function caForm(file, f, found){
     box.querySelector('#ca-novo').style.display = v==='novo' ? 'grid' : 'none'; box.querySelector('#ca-busca').style.display = v==='buscar' ? 'block' : 'none'; };
   box.querySelectorAll('input[name="ca-pes"]').forEach(r=>r.addEventListener('change', showPes)); showPes();
   const hint = ()=>{ const v = box.querySelector('input[name="ca-tipo"]:checked').value;
-    box.querySelector('#ca-hint').textContent = (v==='estudo'||v==='concorrente') ? '→ Apólice existente: fica na aba Proteção do cliente (Fase 2, análise) e NÃO conta como venda da Aliança.' : (v==='nova' ? '→ Conta como nova venda da Aliança nos indicadores de produção.' : '→ Apólice existente/carteira: não conta como nova venda.');
+    box.querySelector('#ca-hint').textContent = (v==='estudo'||v==='concorrente') ? '→ Apólice existente: fica na aba Proteção do cliente (Fase 3, análise) e NÃO conta como venda da Aliança.' : (v==='nova' ? '→ Conta como nova venda da Aliança nos indicadores de produção.' : '→ Apólice existente/carteira: não conta como nova venda.');
     const vs = box.querySelector('#ca-vinc'); if(!vs.dataset.touched){ vs.value = (v==='estudo'||v==='concorrente') ? 'Outra corretora' : 'Aliança'; }
     const mv = box.querySelector('#ca-mov'); if(v==='nova') mv.value = 'nova'; };
   box.querySelector('#ca-vinc').addEventListener('change', e=>{ e.target.dataset.touched = '1'; });
@@ -8257,7 +8266,7 @@ async function caSave(file, f){
     const capTotal = Object.values(covVals).reduce((a,b)=>a+b,0) || null;
     const num = id=>{ const v = g(id); return v==='' ? null : Number(v); };
     if(tipo==='estudo' || tipo==='concorrente'){
-      // apólice existente do cliente (outra corretora / direto com a seguradora): entra como apólice + documento (aparece em "Apólices do cliente" e na Fase 2) — sem contar como venda (vínculo ≠ Aliança)
+      // apólice existente do cliente (outra corretora / direto com a seguradora): entra como apólice + documento (aparece em "Apólices do cliente" e na Fase 3) — sem contar como venda (vínculo ≠ Aliança)
       if(pessoaId){
         const { data: ap2 } = await sb.from('crm_apolices').insert({ pessoa_id:pessoaId, numero_apolice:g('ca-num')||null, seguradora:g('ca-seg'), tipo_seguro:g('ca-prod'),
           data_emissao:g('ca-ini')||null, data_vencimento:g('ca-fim')||null, valor_premio:num('ca-prem'), valor_cobertura:capTotal, status:'ativa',
@@ -11430,11 +11439,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611091120"></script>
-<script src="painel.js?v=202611091120"></script>
-<script src="cobranca.js?v=202611091120"></script>
-<script src="cadastro.js?v=202611091120"></script>
-<script src="contrato.js?v=202611091120"></script>
-<script src="guarda.js?v=202611091120"></script>
+<script src="plataforma.js?v=202611091127"></script>
+<script src="painel.js?v=202611091127"></script>
+<script src="cobranca.js?v=202611091127"></script>
+<script src="cadastro.js?v=202611091127"></script>
+<script src="contrato.js?v=202611091127"></script>
+<script src="guarda.js?v=202611091127"></script>
 </body>
 </html>

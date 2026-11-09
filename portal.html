@@ -9,41 +9,99 @@
 <title>Seus seguros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Portal do cliente do CRM Aliança (05/11/2026): o cliente final da corretora vê as apólices dele e baixa o PDF.
-   As cores vêm da marca da corretora; sem marca, as do CRM Aliança. Nada fica guardado no navegador. */
-:root{ --brand:#9c7518; --brand-soft:#f7f1e3; --navy:#111827; --ink:#1f2933; --ink-soft:#5d6871; --bg:#f6f6f3; --surface:#fff; --border:#e4e6e2; --ok:#1f7a4d; --err:#9e2f24; }
+/* Portal do cliente do CRM Aliança (05/11/2026; mais completo em 09/11/2026, pedido do Luiz): o cliente final da corretora vê um
+   resumo de todos os seguros (custo por mês, proteção, próxima renovação), cada apólice com as coberturas, carência e franquia,
+   baixa o PDF de cada uma e salva o resumo inteiro em PDF. As cores vêm da marca da corretora. Nada fica guardado no navegador. */
+:root{ --brand:#8a6714; --brand-soft:#f7f1e3; --navy:#111827; --ink:#1f2933; --ink-soft:#5d6871; --bg:#f6f6f3; --surface:#fff; --border:#e4e6e2; --ok:#1f7a4d; --warn:#8a5a00; --err:#9e2f24; }
 *{ box-sizing:border-box; }
-body{ margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Inter, "Segoe UI", system-ui, sans-serif; }
-header{ background:var(--surface); border-bottom:1px solid var(--border); padding:16px; display:flex; align-items:center; gap:14px; }
+body{ margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Inter, "Segoe UI", system-ui, sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+header{ background:var(--surface); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 header img{ max-height:44px; max-width:180px; object-fit:contain; }
 header .nome{ font-weight:700; font-size:18px; color:var(--navy); }
-main{ padding:20px 16px 40px; display:grid; gap:16px; }
-h1{ margin:0; font-size:clamp(22px, 2.2vw + 14px, 32px); color:var(--navy); line-height:1.25; }
+header .acoes{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+main{ padding:20px 16px 40px; display:grid; gap:20px; }
+h1{ margin:0; font-size:clamp(24px, 2.2vw + 14px, 34px); color:var(--navy); line-height:1.2; }
+h2.secao{ margin:0; font-size:18px; color:var(--navy); }
 .sub{ margin:4px 0 0; color:var(--ink-soft); }
-.caixa{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; }
-.grade{ display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+.caixa{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; }
 label{ display:grid; gap:6px; font-weight:600; font-size:15px; }
 input{ font:inherit; padding:12px; border:1px solid var(--border); border-radius:10px; min-height:48px; width:100%; max-width:320px; }
-button{ font:inherit; font-weight:600; min-height:48px; padding:0 20px; border-radius:10px; border:0; background:var(--brand); color:#fff; cursor:pointer; }
+button{ font:inherit; font-weight:600; min-height:44px; padding:0 18px; border-radius:10px; border:0; background:var(--brand); color:#fff; cursor:pointer; }
 button.sec{ background:var(--surface); color:var(--navy); border:1px solid var(--border); }
 button:disabled{ opacity:.6; cursor:default; }
+button:focus-visible, input:focus-visible{ outline:3px solid var(--brand); outline-offset:2px; }
 .msg{ min-height:22px; color:var(--err); font-size:15px; }
-.seguro h2{ margin:0 0 2px; font-size:19px; color:var(--navy); }
-.seguro .seg{ color:var(--ink-soft); font-size:14px; }
-.linhas{ display:grid; gap:8px; margin:14px 0; }
-.linha{ display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid var(--border); padding-bottom:8px; font-size:15px; flex-wrap:wrap; }
-.linha span:first-child{ color:var(--ink-soft); }
-.linha b{ text-align:right; }
-.cob{ margin:4px 0 14px; padding:0; list-style:none; display:grid; gap:6px; font-size:15px; }
-.cob li{ display:flex; justify-content:space-between; gap:12px; background:var(--brand-soft); border-radius:8px; padding:8px 10px; flex-wrap:wrap; }
-.tag{ display:inline-block; font-size:12px; font-weight:600; padding:2px 10px; border-radius:999px; background:#e5f3ec; color:var(--ok); margin-left:6px; vertical-align:middle; }
-.tag.fim{ background:#fdf0dc; color:#8a5a00; }
-footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:13px; }
 .oculto{ display:none !important; }
+
+/* resumo */
+.resumo{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+.kpi{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; display:grid; gap:2px; align-content:start; }
+.kpi .rot{ font-size:14px; color:var(--ink-soft); font-weight:500; }
+.kpi .val{ font-size:clamp(22px, 1.2vw + 16px, 28px); font-weight:700; color:var(--navy); line-height:1.2; }
+.kpi .det{ font-size:14px; color:var(--ink-soft); }
+.kpi.destaque{ background:var(--navy); border-color:var(--navy); }
+.kpi.destaque .rot, .kpi.destaque .det{ color:#fff; }
+.kpi.destaque .val{ color:#fff; }
+.areas{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.area{ display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; padding:6px 12px; border-radius:999px; background:var(--brand-soft); color:var(--navy); border:1px solid var(--border); }
+.area::before{ content:"✓"; color:var(--brand); font-weight:700; }
+
+/* cada seguro */
+.grade{ display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 440px), 1fr)); align-items:start; }
+.seguro{ display:grid; gap:14px; }
+.seguro .topo{ display:flex; gap:12px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; }
+.seguro h3{ margin:0; font-size:20px; color:var(--navy); line-height:1.25; }
+.seguro .seg{ color:var(--ink-soft); font-size:14px; }
+.tag{ display:inline-block; font-size:14px; font-weight:600; padding:3px 10px; border-radius:999px; background:#e5f3ec; color:var(--ok); white-space:nowrap; }
+.tag.fim{ background:#fdf0dc; color:var(--warn); }
+.numeros{ display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 175px), 1fr)); }
+.num{ background:var(--bg); border-radius:12px; padding:10px 12px; min-width:0; }
+.num .rot{ font-size:14px; color:var(--ink-soft); }
+.num .val{ font-size:18px; font-weight:700; color:var(--navy); line-height:1.3; overflow-wrap:anywhere; }
+.num .det{ font-size:14px; color:var(--ink-soft); }
+.barra{ height:6px; background:var(--border); border-radius:99px; overflow:hidden; margin-top:6px; }
+.barra i{ display:block; height:100%; background:var(--brand); border-radius:99px; }
+.cobs h4{ margin:0 0 6px; font-size:16px; color:var(--navy); }
+.cobs .itens{ display:grid; column-gap:24px; grid-template-columns:repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.cob{ display:grid; grid-template-columns:1fr auto; gap:2px 12px; padding:10px 0; border-top:1px solid var(--border); }
+.pm{ display:none !important; }
+.cob .n{ font-weight:600; font-size:15px; }
+.cob .v{ font-weight:700; text-align:right; white-space:nowrap; }
+.cob .v small{ display:block; font-weight:400; font-size:14px; color:var(--ink-soft); }
+.cob .o{ grid-column:1 / -1; font-size:15px; color:var(--ink-soft); }
+.chips{ grid-column:1 / -1; display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.chip{ font-size:14px; font-weight:600; padding:2px 10px; border-radius:999px; background:#fdf0dc; color:var(--warn); }
+.doc{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.nota{ font-size:14px; color:var(--ink-soft); }
+footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:14px; }
+#cabImpressao{ display:none; }
+
+@media print{
+  @page{ margin:14mm; }
+  body{ background:#fff; font-size:12.5px; }
+  header .acoes, #msg2, .doc button{ display:none !important; }
+  .pm{ display:block !important; }
+  header{ border:0; padding:0 0 8px; }
+  main{ padding:0; gap:14px; }
+  #cabImpressao{ display:block; font-size:12px; color:var(--ink-soft); }
+  .caixa, .kpi{ border-color:#d8dbd6; break-inside:avoid; }
+  .grade{ grid-template-columns:1fr; }
+  .seguro{ break-inside:avoid; }
+  .kpi.destaque{ background:#fff; border-color:var(--navy); }
+  .kpi.destaque .rot, .kpi.destaque .det{ color:var(--ink-soft); }
+  .kpi.destaque .val{ color:var(--navy); }
+  footer{ padding:12px 0 0; }
+}
 </style>
 </head>
 <body>
-<header><img id="logo" alt="" class="oculto"><span class="nome" id="nomeCorr"></span></header>
+<header>
+  <img id="logo" alt="" class="oculto"><span class="nome" id="nomeCorr"></span>
+  <div class="acoes oculto" id="acoes">
+    <button type="button" id="pdf" title="Abre a impressão: escolha &quot;Salvar como PDF&quot;">Salvar resumo em PDF</button>
+    <button type="button" class="sec" id="sair">Sair</button>
+  </div>
+</header>
 <main>
   <section id="carregando" class="caixa">Abrindo…</section>
 
@@ -57,14 +115,16 @@ footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:13px; }
     </form>
   </section>
 
-  <section id="painel" class="oculto" style="display:grid;gap:16px">
+  <section id="painel" class="oculto" style="display:grid;gap:20px">
     <div>
+      <div id="cabImpressao"></div>
       <h1 id="ola"></h1>
       <p class="sub" id="boas"></p>
     </div>
+    <div id="resumoBox"></div>
     <div class="grade" id="lista"></div>
     <div class="msg" id="msg2" role="alert"></div>
-    <div><button class="sec" id="sair" type="button">Sair</button></div>
+    <p class="nota">Este é um resumo para consulta. O que vale são as condições da apólice de cada seguro; em caso de dúvida, fale com a corretora.</p>
   </section>
 
   <section id="invalido" class="caixa oculto"><h1>Link indisponível</h1><p class="sub" id="invTxt"></p></section>
@@ -75,14 +135,65 @@ footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:13px; }
   'use strict';
   const URL_FN = 'https://iuotvottnailofxbaynx.supabase.co/functions/v1/portal-cliente', ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1b3R2b3R0bmFpbG9meGJheW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1Mjg2NjMsImV4cCI6MjEwODEwNDY2M30._0FhywQ4Vq3km5Rl4tHEPtCLBVom4VAGaXG3X3nrUyQ';
   const $ = id => document.getElementById(id);
-  const mostra = id => ['carregando','confirmar','painel','invalido'].forEach(s => $(s).classList.toggle('oculto', s !== id));
+  const mostra = id => { ['carregando','confirmar','painel','invalido'].forEach(s => $(s).classList.toggle('oculto', s !== id)); $('acoes').classList.toggle('oculto', id !== 'painel'); };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const brl = v => v == null || v === '' || isNaN(Number(v)) ? '' : Number(v).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  const n = v => v == null || v === '' || isNaN(Number(v)) ? 0 : Number(v);
+  const brl = v => n(v).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  const brlCurto = v => { v = n(v); return v >= 1e6 ? 'R$ ' + (v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:2}) + ' mi' : brl(v).replace(/,00$/, ''); };
   const data = d => d ? String(d).slice(0,10).split('-').reverse().join('/') : '';
+  const dia = d => d ? new Date(String(d).slice(0,10) + 'T12:00:00') : null;
+  const hoje = () => { const h = new Date(); h.setHours(12,0,0,0); return h; };
+  const diasAte = d => d ? Math.round((dia(d) - hoje()) / 864e5) : null;
   // o token vem só depois do # (não vai para o servidor da página, nem para logs, nem para o histórico de outros sites)
   const m = location.hash.match(/[#&]t=([A-Za-z0-9_-]{40,64})/);
   const token = m ? m[1] : '';
-  let nasc = '', corr = 'a sua corretora';
+  let nasc = '', corr = 'a sua corretora', cliente = '';
+
+  // o que cada cobertura faz, em palavras simples (texto geral; o que vale é a apólice)
+  const EXPLICA = [
+    [/inc[eê]ndio|raio|explos/i, 'Protege o imóvel e os bens em caso de incêndio, raio ou explosão.'],
+    [/responsabilidade\s*civil\s*(familiar|do\s*morador|residencial)/i, 'Paga danos que você ou a sua família causarem sem querer a outras pessoas.'],
+    [/morte\s*(ou|e)\s*invalidez/i, 'Paga o valor em caso de falecimento ou de invalidez permanente, conforme a apólice.'],
+    [/morte\s*acident/i, 'Valor a mais para os beneficiários se o falecimento for por acidente.'],
+    [/invalidez.*acident|\bipa\b/i, 'Paga até este valor se um acidente deixar sequela permanente, total ou parcial.'],
+    [/invalidez.*doen|\bifpd\b|\bilpd\b/i, 'Antecipa o valor se uma doença deixar você sem poder trabalhar de forma permanente.'],
+    [/doen[cç]as?\s*graves?/i, 'Paga o valor no diagnóstico de uma das doenças graves listadas na apólice.'],
+    [/\bdit\b|incapacidade\s*tempor|afastamento/i, 'Paga uma diária enquanto você estiver afastado do trabalho por doença ou acidente.'],
+    [/reembolso/i, 'Reembolsa as despesas cobertas, até este valor.'],
+    [/\bdih\b|di[aá]ria.*interna[cç][aã]o/i, 'Paga uma diária por dia de internação no hospital.'],
+    [/cirurgi/i, 'Paga um valor quando você passa por uma cirurgia coberta.'],
+    [/fratura/i, 'Paga um valor em caso de fratura por acidente.'],
+    [/funeral/i, 'Cuida das despesas do funeral.'],
+    [/c[oô]njuge/i, 'Proteção estendida ao cônjuge.'],
+    [/filho/i, 'Proteção estendida aos filhos.'],
+    [/morte|vida/i, 'Valor pago aos beneficiários em caso de falecimento.'],
+    [/responsabilidade\s*civil|\brc\b|erro\s*profissional/i, 'Protege você se alguém pedir indenização por um erro na sua atividade profissional.'],
+    [/roubo|furto/i, 'Cobre roubo ou furto qualificado dos bens.'],
+    [/danos\s*el[eé]tricos/i, 'Cobre aparelhos danificados por queda de energia ou curto-circuito.'],
+    [/vendaval|granizo/i, 'Cobre danos por vendaval, granizo e fenômenos parecidos.'],
+    [/assist[eê]ncia/i, 'Serviços de assistência (chaveiro, encanador, guincho e outros, conforme a apólice).'],
+  ];
+  const ehVida = tipo => /vida|prestamista|acidentes?\s*pessoais/i.test(tipo || '');
+  // "básica" só é a cobertura de morte nos seguros de vida (no residencial, a básica é incêndio)
+  const basicaVida = (nome, tipo) => /b[aá]sica/i.test(nome || '') && !/inc[eê]ndio/i.test(nome || '') && ehVida(tipo);
+  const explica = (nome, tipo) => { if(basicaVida(nome, tipo)) return 'Valor pago aos beneficiários em caso de falecimento.'; for(const [re, t] of EXPLICA) if(re.test(nome || '')) return t; return ''; };
+  const ehDiaria = nome => /di[aá]ria|\bdit\b|\bdih\b|incapacidade\s*tempor/i.test(nome || '');
+  // capital "padrão" de cada tipo, quando a apólice não traz as coberturas uma a uma
+  const capTipo = tipo => /vida|prestamista|acidentes?\s*pessoais/i.test(tipo || '') ? ['Capital segurado', 'Valor pago aos beneficiários em caso de falecimento, conforme a apólice.']
+    : /resid|condom|empres|patrim|im[oó]vel/i.test(tipo || '') ? ['Valor do imóvel e dos bens segurados', 'Limite máximo de indenização do seguro.']
+    : /auto|carro|ve[ií]culo|moto/i.test(tipo || '') ? ['Valor do veículo segurado', 'Limite de indenização em caso de perda total ou roubo.']
+    : /\brc\b|responsabilidade/i.test(tipo || '') ? ['Limite de indenização', 'Valor máximo que o seguro paga por reclamação, conforme a apólice.']
+    : ['Capital segurado', 'Valor máximo de indenização, conforme a apólice.'];
+  const AREAS = [
+    ['Vida e família', (a, cs) => ehVida(a.tipo) || cs.some(c => /morte/i.test(c.nome))],
+    ['Renda em caso de afastamento', (a, cs) => /\bdit\b|renda/i.test(a.tipo || '') || cs.some(c => /\bdit\b|incapacidade|afastamento|\bdih\b|interna/i.test(c.nome))],
+    ['Invalidez e doenças graves', (a, cs) => cs.some(c => /invalidez|\bipa\b|doen[cç]as?\s*graves?/i.test(c.nome))],
+    ['Casa e bens', (a) => /resid|condom|patrim|im[oó]vel|equip/i.test(a.tipo || '')],
+    ['Veículo', (a) => /auto|carro|ve[ií]culo|moto/i.test(a.tipo || '')],
+    ['Empresa', (a) => /empres/i.test(a.tipo || '')],
+    ['Atividade profissional', (a, cs) => /\brc\b|responsabilidade/i.test(a.tipo || '') || cs.some(c => /responsabilidade\s*civil/i.test(c.nome))],
+    ['Saúde', (a) => /sa[uú]de|odonto/i.test(a.tipo || '')],
+  ];
 
   async function chama(corpo){
     const r = await fetch(URL_FN, { method:'POST', headers:{ 'Content-Type':'application/json', apikey:ANON, Authorization:'Bearer '+ANON }, body: JSON.stringify({ token, ...corpo }), cache:'no-store', credentials:'omit' });
@@ -97,33 +208,81 @@ footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:13px; }
     if(mc.logo_url && mc.logo_url.indexOf('https://iuotvottnailofxbaynx.supabase.co/storage/v1/object/public/') === 0){ const i = $('logo'); i.src = mc.logo_url; i.alt = mc.nome || ''; i.classList.remove('oculto'); }
     // cores da corretora como ficam em "Minha corretora": principal (botões) e escura (títulos); o fundo claro sai da principal
     const c = mc.cores || {}, raiz = document.documentElement.style, hex = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
-    if(hex(c.principal)){ raiz.setProperty('--brand', c.principal); raiz.setProperty('--brand-soft', c.principal + '14'); }
-    if(hex(c.escura)) raiz.setProperty('--navy', c.escura);
+    // botão com texto branco: se a cor da corretora for clara demais (contraste < 4,5:1), escurece até passar
+    if(hex(c.principal)){ raiz.setProperty('--brand', legivel(c.principal)); raiz.setProperty('--brand-soft', c.principal + '14'); }
+    if(hex(c.escura)) raiz.setProperty('--navy', legivel(c.escura, 7));   // títulos e o cartão do custo: precisa de mais contraste
     $('rodape').textContent = 'Dúvidas sobre o seu seguro? Fale com a ' + corr + '. Os seus dados são tratados pela ' + corr + ' e não ficam guardados neste aparelho.';
   }
+  function lum(h){ return [1,3,5].map(i => parseInt(h.substr(i,2),16)/255).map(v => v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4)).reduce((t,v,i) => t + v*[.2126,.7152,.0722][i], 0); }
+  function legivel(h, alvo){ alvo = alvo || 4.5; let rgb = [1,3,5].map(i => parseInt(h.substr(i,2),16)); for(let k = 0; k < 20 && 1.05/(lum(h)+.05) < alvo; k++){ rgb = rgb.map(v => Math.round(v*.9)); h = '#' + rgb.map(v => v.toString(16).padStart(2,'0')).join(''); } return h; }
   function invalido(t){ $('invTxt').textContent = t || 'Este link não está mais válido. Peça um link novo à sua corretora.'; mostra('invalido'); }
+
+  // custo: o prêmio do cadastro é o do ano; o cliente vê primeiro quanto dá por mês (pedido do Luiz: o anual assusta)
+  const mensal = a => n(a.premio_anual) / 12;
+  // capital de vida de uma apólice: a cobertura de morte (não a acidental), senão o capital do seguro de vida
+  function capVida(a, cs){
+    const mt = cs.find(c => (/morte/i.test(c.nome) || basicaVida(c.nome, a.tipo)) && !/acident|c[oô]njuge|filho/i.test(c.nome) && n(c.valor));
+    if(mt) return n(mt.valor);
+    return ehVida(a.tipo) ? n(a.capital) : 0;
+  }
+
+  function resumo(todas){
+    // vencida ainda sem renovação lançada aparece no cartão dela, mas não entra nas contas do resumo
+    const ap = todas.filter(a => !a.fim || diasAte(a.fim) >= 0);
+    if(!ap.length) return '';
+    const totMes = ap.reduce((s, a) => s + mensal(a), 0);
+    const vida = ap.reduce((s, a) => s + capVida(a, a.coberturas || []), 0);
+    const bens = ap.filter(a => /resid|condom|empres|patrim|im[oó]vel|auto|carro|ve[ií]culo|moto|equip/i.test(a.tipo || '')).reduce((s, a) => s + n(a.capital), 0);
+    const prox = ap.filter(a => a.fim && diasAte(a.fim) >= 0).sort((x, y) => String(x.fim).localeCompare(String(y.fim)))[0];
+    const areas = AREAS.filter(([, f]) => ap.some(a => f(a, a.coberturas || []))).map(([t]) => t);
+    const k = [];
+    const tudoMensal = ap.every(a => /mensal/i.test(a.forma_pagamento || ''));
+    if(totMes) k.push(`<div class="kpi destaque"><span class="rot">${tudoMensal ? 'Você paga por mês' : 'Custo médio por mês'}</span><span class="val">${esc(brl(totMes))}</span><span class="det">somando todos os seguros · ${esc(brl(totMes * 12))} por ano</span></div>`);
+    if(vida) k.push(`<div class="kpi"><span class="rot">Proteção para a família</span><span class="val">${esc(brlCurto(vida))}</span><span class="det">capital de vida, em caso de falecimento</span></div>`);
+    if(bens) k.push(`<div class="kpi"><span class="rot">Patrimônio protegido</span><span class="val">${esc(brlCurto(bens))}</span><span class="det">imóveis, bens e veículos</span></div>`);
+    if(prox){ const d = diasAte(prox.fim); k.push(`<div class="kpi"><span class="rot">Próxima renovação</span><span class="val">${esc(data(prox.fim))}</span><span class="det">${esc(prox.tipo || 'Seguro')} · ${d === 0 ? 'hoje' : d === 1 ? 'amanhã' : 'em ' + d + ' dias'}</span></div>`); }
+    return `<section class="caixa" style="display:grid;gap:12px" aria-labelledby="tResumo">
+      <div><h2 class="secao" id="tResumo">Resumo da sua proteção · ${ap.length} seguro${ap.length === 1 ? '' : 's'}</h2><div class="nota">${esc([...new Set(ap.map(a => a.seguradora).filter(Boolean))].join(' · '))}</div></div>
+      <div class="resumo">${k.join('')}</div>
+      ${areas.length ? `<div><div class="nota" style="font-weight:600;color:var(--navy)">Você está protegido(a) em</div><div class="areas">${areas.map(t => `<span class="area">${esc(t)}</span>`).join('')}</div></div>` : ''}
+    </section>`;
+  }
+
+  function cartao(a){
+    const cs = a.coberturas || [], dFim = diasAte(a.fim), renova = a.fim && dFim != null && dFim <= 30;
+    const ini = dia(a.inicio), fim = dia(a.fim);
+    const pct = ini && fim && fim > ini ? Math.max(0, Math.min(100, Math.round((Date.now() - ini) / (fim - ini) * 100))) : null;
+    const anual = n(a.premio_anual), mes = mensal(a), forma = String(a.forma_pagamento || '').trim();
+    const nums = [];
+    if(anual) nums.push(`<div class="num"><div class="rot">${/mensal/i.test(forma) ? 'Você paga por mês' : 'Custo médio por mês'}</div><div class="val">${esc(brl(mes))}</div><div class="det">${esc(brl(anual))} por ano${forma ? ' · pagamento ' + esc(forma.toLowerCase()) : ''}</div></div>`);
+    if(n(a.capital)) nums.push(`<div class="num"><div class="rot">${/vida|prestamista|acidentes?\s*pessoais/i.test(a.tipo || '') ? 'Capital segurado' : 'Valor segurado'}</div><div class="val">${esc(brl(a.capital))}</div></div>`);
+    if(a.fim) nums.push(`<div class="num"><div class="rot">Vigência</div><div class="val">até ${esc(data(a.fim))}</div><div class="det">${a.inicio ? 'desde ' + esc(data(a.inicio)) : ''}${dFim != null && dFim >= 0 ? (a.inicio ? ' · ' : '') + 'faltam ' + dFim + ' dia' + (dFim === 1 ? '' : 's') : ''}</div>${pct != null ? `<div class="barra" role="img" aria-label="${pct}% da vigência"><i style="width:${pct}%"></i></div>` : ''}</div>`);
+    const linhas = cs.length ? cs.map(c => {
+      const ex = explica(c.nome, a.tipo), di = ehDiaria(c.nome);
+      const chips = [c.carencia ? 'Carência: ' + c.carencia : '', c.franquia ? 'Franquia: ' + c.franquia : ''].filter(Boolean);
+      return `<div class="cob"><span class="n">${esc(c.nome)}</span><span class="v">${n(c.valor) ? esc(brl(c.valor)) + (di ? '<small>por dia</small>' : '') : '<small>incluída</small>'}${n(c.premio_mensal) ? `<small class="pm">${esc(brl(c.premio_mensal))}/mês</small>` : ''}</span>
+        ${ex ? `<span class="o">${esc(ex)}</span>` : ''}${chips.length ? `<span class="chips">${chips.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</span>` : ''}</div>`; }).join('')
+      : n(a.capital) ? `<div class="cob"><span class="n">${esc(capTipo(a.tipo)[0])}</span><span class="v">${esc(brl(a.capital))}</span><span class="o">${esc(capTipo(a.tipo)[1])}</span></div>` : '';
+    return `<article class="caixa seguro">
+      <div class="topo"><div><h3>${esc(a.tipo || 'Seguro')}</h3><div class="seg">${esc(a.seguradora || '')}${a.numero ? ' · apólice ' + esc(a.numero) : ''}</div></div>
+        ${renova ? `<span class="tag fim">${dFim < 0 ? 'vigência encerrada' : 'renova em breve'}</span>` : '<span class="tag">em vigor</span>'}</div>
+      ${nums.length ? `<div class="numeros">${nums.join('')}</div>` : ''}
+      ${linhas ? `<div class="cobs"><h4>O que está coberto${cs.length ? ' (' + cs.length + ')' : ''}</h4><div class="itens">${linhas}</div></div>` : ''}
+      <div class="doc">${a.tem_documento ? `<button type="button" class="sec" data-baixar="${esc(a.id)}">Baixar a apólice (PDF)</button>` : '<span class="nota">O documento desta apólice ainda não está disponível aqui. Peça à corretora.</span>'}</div>
+    </article>`;
+  }
 
   function desenha(j){
     aplicaMarca(j.marca);
-    $('ola').textContent = 'Olá' + (j.cliente ? ', ' + j.cliente : '') + '!';
+    cliente = j.cliente || '';
+    $('ola').textContent = 'Olá' + (cliente ? ', ' + cliente : '') + '!';
     $('boas').textContent = j.boas_vindas || ('Você é muito especial para a ' + corr + '. Aqui estão as informações dos seus seguros com a gente.');
     const ap = j.apolices || [];
-    $('lista').innerHTML = ap.length ? ap.map(a => {
-      const anual = Number(a.premio_anual) || 0, mensal = /anual/i.test(a.forma_pagamento || '') ? 0 : anual / 12;
-      const fim = a.fim && new Date(a.fim + 'T23:59:59') < new Date(Date.now() + 30*864e5);
-      return `<article class="caixa seguro">
-        <h2>${esc(a.tipo || 'Seguro')}${fim ? '<span class="tag fim">renova em breve</span>' : '<span class="tag">em vigor</span>'}</h2>
-        <div class="seg">${esc(a.seguradora || '')}${a.numero ? ' · apólice ' + esc(a.numero) : ''}</div>
-        <div class="linhas">
-          ${a.inicio || a.fim ? `<div class="linha"><span>Vigência</span><b>${esc(data(a.inicio) || '—')} até ${esc(data(a.fim) || '—')}</b></div>` : ''}
-          ${anual ? `<div class="linha"><span>Custo</span><b>${mensal ? esc(brl(mensal)) + ' por mês<br><small style="font-weight:400;color:var(--ink-soft)">' + esc(brl(anual)) + ' por ano</small>' : esc(brl(anual)) + ' por ano'}</b></div>` : ''}
-          ${a.forma_pagamento ? `<div class="linha"><span>Pagamento</span><b>${esc(a.forma_pagamento)}</b></div>` : ''}
-          ${Number(a.capital) ? `<div class="linha"><span>Capital segurado</span><b>${esc(brl(a.capital))}</b></div>` : ''}
-        </div>
-        ${(a.coberturas || []).length ? `<div style="font-weight:600;font-size:15px">O que está coberto</div><ul class="cob">${a.coberturas.map(c => `<li><span>${esc(c.nome)}</span>${Number(c.valor) ? `<b>${esc(brl(c.valor))}</b>` : ''}</li>`).join('')}</ul>` : ''}
-        ${a.tem_documento ? `<button type="button" data-baixar="${esc(a.id)}">Baixar a minha apólice (PDF)</button>` : '<div class="sub" style="font-size:14px">O documento desta apólice ainda não está disponível aqui. Peça à corretora.</div>'}
-      </article>`; }).join('')
+    $('resumoBox').innerHTML = resumo(ap);
+    $('lista').innerHTML = ap.length ? ap.map(cartao).join('')
       : '<div class="caixa">Não encontramos seguros em vigor no seu nome. Fale com a ' + esc(corr) + '.</div>';
+    $('pdf').classList.toggle('oculto', !ap.length);
+    $('cabImpressao').textContent = 'Resumo dos seguros' + (cliente ? ' de ' + cliente : '') + ' · ' + corr + ' · emitido em ' + new Date().toLocaleDateString('pt-BR');
     $('lista').querySelectorAll('[data-baixar]').forEach(b => b.addEventListener('click', async () => {
       b.disabled = true; const t = b.textContent; b.textContent = 'Preparando…'; $('msg2').textContent = '';
       const r = await chama({ acao:'baixar', nascimento:nasc, apolice:b.dataset.baixar });
@@ -144,7 +303,17 @@ footer{ padding:0 16px 32px; color:var(--ink-soft); font-size:13px; }
     if(r.j.error && /não está mais válido/.test(r.j.error)) return invalido(r.j.error);
     $('msg').textContent = r.j.error || 'Não consegui conferir agora. Tente de novo.';
   });
-  $('sair').addEventListener('click', () => { nasc = ''; $('lista').innerHTML = ''; $('nasc').value = ''; mostra('confirmar'); });
+  // PDF de tudo: a impressão do navegador ("Salvar como PDF") com uma folha arrumada; nada sai do aparelho
+  // o token sai do endereço já no clique (não depende do beforeprint, que alguns celulares não disparam) e volta depois
+  $('pdf').addEventListener('click', () => { const ant = location.href; history.replaceState(null, '', location.pathname + location.search); try{ window.print(); } finally { setTimeout(() => history.replaceState(null, '', ant), 1500); } });
+  // o rodapé da impressão traz o endereço da página: tira o token (#t=…) enquanto imprime, para o PDF repassado não levar a chave
+  let enderecoCompleto = '';
+  addEventListener('beforeprint', () => { enderecoCompleto = location.href; history.replaceState(null, '', location.pathname + location.search); });
+  addEventListener('afterprint', () => { if(enderecoCompleto) history.replaceState(null, '', enderecoCompleto); enderecoCompleto = ''; });
+  // sair (e sair da página) apaga da tela tudo o que é do cliente
+  const limpa = () => { nasc = ''; cliente = ''; ['lista','resumoBox','ola','boas','cabImpressao'].forEach(id => { $(id).textContent = ''; }); $('nasc').value = ''; };
+  $('sair').addEventListener('click', () => { limpa(); mostra('confirmar'); });
+  addEventListener('pagehide', limpa);
 
   (async () => {
     if(!token) return invalido('Este endereço está incompleto. Abra o link exatamente como a sua corretora enviou.');

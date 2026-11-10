@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611091638">
+<meta name="app-build" content="202611100921">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -563,7 +563,7 @@ window.ALIANCA = {
     <div id="view-admin" class="view" style="overflow-y:auto; padding:30px 36px;">
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:4px;">
         <h2 style="margin:0;">Admin</h2>
-        <div id="adm-tabs" class="seg-toggle"><button type="button" class="active" data-at="aud">Auditoria</button><button type="button" data-at="usr">Usuários e acessos</button></div>
+        <div id="adm-tabs" class="seg-toggle"><button type="button" class="active" data-at="usr">Usuários e acessos</button><button type="button" data-at="aud">Auditoria</button></div>
       </div>
       <div class="hint" style="margin:0 0 14px">Quem mexeu em quê, quando e com qual valor, e quem pode entrar no sistema. Visível só para o master.</div>
       <div class="hint" id="adm-bkp" style="margin:-6px 0 12px"></div>
@@ -11233,12 +11233,14 @@ checkSession();
 </script>
 <script>
 // ============ ADMIN: usuários e acessos + auditoria (só master) ============
-const ADM = { tab:'aud', off:0, pag:100, rows:[], total:0, usr:[], f:{u:'',t:'',a:'',de:'',ate:'',q:''}, tabelas:[] };
+const ADM = { tab:'usr', off:0, pag:100, rows:[], total:0, usr:[], f:{u:'',t:'',a:'',de:'',ate:'',q:''}, tabelas:[] };
 const ADM_TAB_NOMES = { crm_pessoas:'Cadastro de pessoas', crm_apolices:'Apólices', crm_prospeccao:'Prospecção', crm_vendas:'Vendas realizadas', crm_nao_vendas:'Vendas não realizadas', crm_demandas:'Demandas', crm_sugestoes:'Sugestões', crm_agenda:'Agenda', crm_reunioes:'Reuniões', crm_atividades:'Atividades', crm_funil:'Funil', crm_documentos:'Documentos', crm_estudos:'Estudos de proteção', crm_analise_apolices:'Análise de apólices', crm_redes_sociais:'Redes sociais', crm_acoes:'Ações', crm_meta_comercial:'Orçamento comercial', crm_metas:'Metas e parâmetros', crm_config:'Configurações', crm_usuarios:'Usuários e acessos', crm_ata_entregaveis:'Ata de entregáveis', crm_ata_semanal:'Ata semanal', crm_base_conhecimento:'Base de conhecimento', crm_inteligencia:'Inteligência', crm_diagnostico:'Diagnóstico', crm_pendencias_ceo:'Pendências do CEO', crm_comercial_produtos:'Produtos comerciais' };
 const admTab = t=> ADM_TAB_NOMES[t] || t;
 const admAcao = a=> a==='INSERT' ? 'Criou' : a==='UPDATE' ? 'Alterou' : a==='DELETE' ? 'Excluiu' : a;
 const admDh = iso=>{ const d = new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); };
 function admVal(v, n){ if(v===null || v===undefined) return '—'; let s = typeof v==='object' ? JSON.stringify(v) : String(v); if(s==='') return '(vazio)'; return s.length>(n||110) ? s.slice(0,n||110)+'…' : s; }
+// 10/11/2026: o que o banco grava como "postgres" é a manutenção feita pela Capacity Case (ex.: limpeza de exemplos)
+const admQuem = u => !u ? '—' : /^(postgres|supabase_admin|service_role)$/i.test(u) ? 'Sistema (Capacity Case)' : u;
 function admResumo(r){
   const a = r.antes||{}, d = r.depois||{};
   if(r.acao==='UPDATE') return Object.keys(d).map(k=>`<div class="adm-ch"><b>${escapeHtml(k)}</b>: <span class="old">${escapeHtml(admVal(a[k]))}</span> → <span class="new">${escapeHtml(admVal(d[k]))}</span></div>`).join('');
@@ -11265,7 +11267,7 @@ function admPintarAud(){
   const ini = ADM.total ? ADM.off+1 : 0, fim = ADM.off+ADM.rows.length;
   document.getElementById('adm-aud-info').textContent = `${ini}–${fim} de ${ADM.total} registro(s)${q?` · ${rows.length} com “${ADM.f.q}” nesta página`:''}`;
   document.getElementById('adm-prev').disabled = ADM.off<=0; document.getElementById('adm-next').disabled = fim>=ADM.total;
-  box.innerHTML = rows.length ? `<table class="adm-t"><thead><tr><th>Quando</th><th>Quem</th><th>O quê</th><th>Onde</th><th>Detalhe (antes → depois)</th></tr></thead><tbody>${rows.map(r=>`<tr class="adm-row" data-id="${r.id}"><td>${escapeHtml(admDh(r.em))}</td><td>${escapeHtml(r.usuario_email||'—')}</td><td><span class="adm-ac ${r.acao}">${admAcao(r.acao)}</span></td><td>${escapeHtml(admTab(r.tabela))}${r.registro?`<div class="hint" style="margin:0">${escapeHtml(String(r.registro).slice(0,12))}</div>`:''}</td><td>${admResumo(r)}</td></tr>`).join('')}</tbody></table>` : '<div class="es-box"><div class="hint">Nenhum registro com esses filtros.</div></div>';
+  box.innerHTML = rows.length ? `<table class="adm-t"><thead><tr><th>Quando</th><th>Quem</th><th>O quê</th><th>Onde</th><th>Detalhe (antes → depois)</th></tr></thead><tbody>${rows.map(r=>`<tr class="adm-row" data-id="${r.id}"><td>${escapeHtml(admDh(r.em))}</td><td>${escapeHtml(admQuem(r.usuario_email))}</td><td><span class="adm-ac ${r.acao}">${admAcao(r.acao)}</span></td><td>${escapeHtml(admTab(r.tabela))}${r.registro?`<div class="hint" style="margin:0">${escapeHtml(String(r.registro).slice(0,12))}</div>`:''}</td><td>${admResumo(r)}</td></tr>`).join('')}</tbody></table>` : '<div class="es-box"><div class="hint">Nenhum registro com esses filtros.</div></div>';
 }
 function admCsv(rows){
   const esc = v=>{ const s = v==null ? '' : (typeof v==='object' ? JSON.stringify(v) : String(v)); return '"'+s.replace(/"/g,'""')+'"'; };
@@ -11285,7 +11287,7 @@ async function admAudHtml(){
   const usuarios = [...new Set((us||[]).map(x=>x.usuario_email).filter(Boolean))].sort();
   const tabs = Object.keys(ADM_TAB_NOMES).sort((a,b)=>admTab(a).localeCompare(admTab(b),'pt-BR'));
   return `<div class="adm-filtros">
-    <label>Quem<select id="adm-f-u"><option value="">Todos</option>${usuarios.map(u=>`<option ${ADM.f.u===u?'selected':''}>${escapeHtml(u)}</option>`).join('')}</select></label>
+    <label>Quem<select id="adm-f-u"><option value="">Todos</option>${usuarios.map(u=>`<option value="${escapeHtml(u)}" ${ADM.f.u===u?'selected':''}>${escapeHtml(admQuem(u))}</option>`).join('')}</select></label>
     <label>Onde<select id="adm-f-t"><option value="">Todas as telas e tabelas</option>${tabs.map(t=>`<option value="${t}" ${ADM.f.t===t?'selected':''}>${escapeHtml(admTab(t))}</option>`).join('')}</select></label>
     <label>O quê<select id="adm-f-a"><option value="">Tudo</option><option value="INSERT" ${ADM.f.a==='INSERT'?'selected':''}>Criou</option><option value="UPDATE" ${ADM.f.a==='UPDATE'?'selected':''}>Alterou</option><option value="DELETE" ${ADM.f.a==='DELETE'?'selected':''}>Excluiu</option></select></label>
     <label>De<input type="date" id="adm-f-de" value="${ADM.f.de}"></label><label>Até<input type="date" id="adm-f-ate" value="${ADM.f.ate}"></label>
@@ -11367,7 +11369,7 @@ document.addEventListener('click', async e=>{
   if(e.target.closest('#adm-prev')){ ADM.off = Math.max(0, ADM.off-ADM.pag); admCarregarAud(); return; }
   if(e.target.closest('#adm-next')){ ADM.off += ADM.pag; admCarregarAud(); return; }
   if(e.target.closest('#adm-csv')){ admExportar(); return; }
-  const row = e.target.closest('.adm-row'); if(row){ const r = ADM.rows.find(x=>String(x.id)===row.dataset.id); if(r) dlgOpen(`<h3 style="margin-top:0">${admAcao(r.acao)} · ${escapeHtml(admTab(r.tabela))}</h3><div class="hint">${escapeHtml(admDh(r.em))} · ${escapeHtml(r.usuario_email||'')} · registro ${escapeHtml(String(r.registro||''))}</div><div class="adm-json"><div><b>Antes</b><pre>${escapeHtml(r.antes?JSON.stringify(r.antes,null,2):'—')}</pre></div><div><b>Depois</b><pre>${escapeHtml(r.depois?JSON.stringify(r.depois,null,2):'—')}</pre></div></div><div style="text-align:right;margin-top:10px"><button class="adm-b" onclick="dlgClose()">Fechar</button></div>`, true); return; }
+  const row = e.target.closest('.adm-row'); if(row){ const r = ADM.rows.find(x=>String(x.id)===row.dataset.id); if(r) dlgOpen(`<h3 style="margin-top:0">${admAcao(r.acao)} · ${escapeHtml(admTab(r.tabela))}</h3><div class="hint">${escapeHtml(admDh(r.em))} · ${escapeHtml(admQuem(r.usuario_email))} · registro ${escapeHtml(String(r.registro||''))}</div><div class="adm-json"><div><b>Antes</b><pre>${escapeHtml(r.antes?JSON.stringify(r.antes,null,2):'—')}</pre></div><div><b>Depois</b><pre>${escapeHtml(r.depois?JSON.stringify(r.depois,null,2):'—')}</pre></div></div><div style="text-align:right;margin-top:10px"><button class="adm-b" onclick="dlgClose()">Fechar</button></div>`, true); return; }
   if(e.target.closest('#adm-mfa-obrig')){ const on = e.target.closest('#adm-mfa-obrig').checked; if(on && !confirm('Ligar a obrigatoriedade? Antes confirme que VOCÊ já ativou a sua 2ª etapa; quem não ativou será levado a cadastrar no próximo acesso.')){ e.target.closest('#adm-mfa-obrig').checked=false; return; } const { error } = await sb.rpc('crm_admin_mfa_obrigatorio', { p_on:on }); showToast(error?('Erro: '+error.message):(on?'2 etapas obrigatória para todos.':'2 etapas voltou a ser opcional.')); return; }
   const mr = e.target.closest('.adm-mfa-reset'); if(mr){ if(!confirm('Remover a 2ª etapa de '+mr.dataset.e+'? A pessoa precisará cadastrar o código de novo.')) return; const { error } = await sb.rpc('crm_admin_mfa_reset', { p_email:mr.dataset.e }); showToast(error?('Erro: '+error.message):'2ª etapa removida.'); renderAdmin(); return; }
   if(e.target.closest('#adm-gerar')){ document.getElementById('adm-n-senha').value = admSenhaAleatoria(); return; }
@@ -11443,11 +11445,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611091638"></script>
-<script src="painel.js?v=202611091638"></script>
-<script src="cobranca.js?v=202611091638"></script>
-<script src="cadastro.js?v=202611091638"></script>
-<script src="contrato.js?v=202611091638"></script>
-<script src="guarda.js?v=202611091638"></script>
+<script src="plataforma.js?v=202611100921"></script>
+<script src="painel.js?v=202611100921"></script>
+<script src="cobranca.js?v=202611100921"></script>
+<script src="cadastro.js?v=202611100921"></script>
+<script src="contrato.js?v=202611100921"></script>
+<script src="guarda.js?v=202611100921"></script>
 </body>
 </html>

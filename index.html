@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611100921">
+<meta name="app-build" content="202611100945">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -1481,6 +1481,8 @@ const ORC_LINHAS = [
   {k:'cus', l:'Custos fixos', f:'m', agg:'sum'},
   {k:'res', l:'RESULTADO ESTIMADO', f:'m', agg:'sum', b:1, sinal:1} ];
 const orcFmt = (v,f,sinal)=>{ const s = f==='n' ? orcN(v) : orcM(v); return sinal && v>0.5 ? '+'+s : s; };
+// eixo do gráfico em valor curto (R$ 12 mil, R$ 1,2 mi). Vivia no Analítico, que saiu em 03/11; sem ela o gráfico quebrava (erro de 09/11)
+const anaCurto = v=>{ v = Number(v)||0; return v>=1e6 ? 'R$ '+(v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mi' : v>=1e3 ? 'R$ '+Math.round(v/1e3).toLocaleString('pt-BR')+' mil' : 'R$ '+Math.round(v); };
 function orcGrafico(calc){
   const W = 1000, H = 230, ml = 56, mb = 28, mt = 14, n = calc.length || 1, bw = (W-ml-12)/n, mx = Math.max(1, ...calc.map(c=>Math.max(c.tot, c.meta)))*1.1, Y = v=> mt + (H-mt-mb)*(1-v/mx);
   const ticks = [0,.25,.5,.75,1].map(t=>{ const v = mx*t; return `<line x1="${ml}" x2="${W-6}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity="${t?0.12:0.3}"/><text x="${ml-6}" y="${Y(v)+4}" text-anchor="end" font-size="10" fill="currentColor" fill-opacity=".6">${anaCurto(v)}</text>`; }).join('');
@@ -11445,11 +11447,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611100921"></script>
-<script src="painel.js?v=202611100921"></script>
-<script src="cobranca.js?v=202611100921"></script>
-<script src="cadastro.js?v=202611100921"></script>
-<script src="contrato.js?v=202611100921"></script>
-<script src="guarda.js?v=202611100921"></script>
+<script src="plataforma.js?v=202611100945"></script>
+<script src="painel.js?v=202611100945"></script>
+<script src="cobranca.js?v=202611100945"></script>
+<script src="cadastro.js?v=202611100945"></script>
+<script src="contrato.js?v=202611100945"></script>
+<script src="guarda.js?v=202611100945"></script>
 </body>
 </html>

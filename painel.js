@@ -75,7 +75,15 @@
 
   async function abrir(aba) {
     const { data: dono } = await sb.rpc('crm_dono_plataforma');
-    if (dono !== true) { alert('O Painel da Plataforma é só para o dono da plataforma.'); return; }
+    if (dono !== true) {
+      // 10/11/2026: o painel exige a confirmação em 2 etapas. Gestor que ainda não cadastrou é levado a cadastrar.
+      let gestor = false; try { gestor = (await sb.rpc('crm_sou_gestor_plataforma')).data === true; } catch (e) { /* segue */ }
+      if (gestor && typeof window.mfaCadastro === 'function') {
+        if (confirm('Para abrir o Painel da Plataforma é preciso ativar a confirmação em 2 etapas (leva 1 minuto, com o Google Authenticator ou o Microsoft Authenticator no celular). Ativar agora?')) window.mfaCadastro();
+        return;
+      }
+      alert('O Painel da Plataforma é só para os gestores da plataforma.'); return;
+    }
     estilo();
     if (!raiz) { raiz = document.createElement('div'); raiz.id = 'tc-painel'; raiz.setAttribute('role', 'dialog'); raiz.setAttribute('aria-label', 'Painel da Plataforma'); document.body.appendChild(raiz); }
     raiz.style.display = 'block'; document.documentElement.style.overflow = 'hidden';
@@ -905,7 +913,19 @@ Qualquer coisa, estou por aqui. Boas vendas! 🚀`;
       // nível do login lido do próprio token (sem ida ao servidor). Ainda na confirmação em 2 etapas (ou cadastrando): deixa a tela
       // livre para terminar; sem as 2 etapas o banco não entrega dado nenhum da corretora
       let aal = null; try { aal = (await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data; } catch (e) { /* segue */ }
-      if (!aal || aal.currentLevel !== 'aal2') { descobrir(); return setTimeout(checar, 1500); }
+      if (!aal || (aal.currentLevel !== 'aal2' && aal.nextLevel === 'aal2')) { descobrir(); return setTimeout(checar, 1500); }   // no meio do código
+      if (aal.currentLevel !== 'aal2') {
+        // login sem as 2 etapas cadastradas: gestor é levado a cadastrar (o painel exige, 10/11/2026); quem não é gestor cai no aviso abaixo
+        cobrir('Conferindo o seu acesso de gestor…');
+        let gestor = false; try { gestor = (await sb.rpc('crm_sou_gestor_plataforma')).data === true; } catch (e) { /* segue */ }
+        if (gestor) {
+          cobrir(`<h2 style="margin:0 0 8px;font-size:20px;color:#111827">Ative a confirmação em 2 etapas</h2>
+            <p style="margin:0 0 16px;color:#5d6871">O Painel da Plataforma mexe em todas as corretoras, por isso só abre com a confirmação em 2 etapas. Leva 1 minuto: instale o Google Authenticator ou o Microsoft Authenticator no celular e leia o QR code.</p>
+            <button type="button" id="tc-capa-mfa" style="border:0;background:#111827;color:#fff;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer">Ativar agora</button>`);
+          capa.querySelector('#tc-capa-mfa').addEventListener('click', () => { descobrir(); if (typeof window.mfaCadastro === 'function') window.mfaCadastro(); });
+          return;
+        }
+      }
       cobrir('Conferindo o seu acesso de gestor…');                // cobre antes de perguntar ao banco: nada da corretora aparece por trás
       const { data: dono } = await sb.rpc('crm_dono_plataforma');
       if (dono === true) { descobrir(); abrir(); return; }

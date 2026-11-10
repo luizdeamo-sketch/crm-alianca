@@ -279,7 +279,12 @@
       p.title = 'O que cada plano entrega e qual é o seu'; p.addEventListener('click', abrirPlanos);
       who.insertBefore(p, who.firstChild.nextSibling);
     }
-    if (MARCA.dono_plataforma && !document.getElementById('btn-plataforma')) {
+    // gestor que ainda não ativou as 2 etapas também vê o botão: ao clicar, o painel pede o cadastro (10/11/2026)
+    if (!MARCA.dono_plataforma && MARCA.sou_gestor === undefined) {
+      MARCA.sou_gestor = false;
+      sb.rpc('crm_sou_gestor_plataforma').then(({ data }) => { if (data === true && MARCA) { MARCA.sou_gestor = true; aplicarMarca(); } }, () => {});
+    }
+    if ((MARCA.dono_plataforma || MARCA.sou_gestor) && !document.getElementById('btn-plataforma')) {
       const a = document.createElement('button'); a.id = 'btn-plataforma'; a.type = 'button'; a.textContent = '🏢 Plataforma';
       a.title = 'Painel da Plataforma: corretoras, planos e acessos (sem dados de clientes)';
       a.addEventListener('click', () => { if (window.TorrePainel) window.TorrePainel.abrir(); else window.open('plataforma.html', '_blank'); });   // painel dentro do sistema (painel.js)

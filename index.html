@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611100945">
+<meta name="app-build" content="202611111623">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -830,6 +830,10 @@ window.ALIANCA = {
   .dlg-card.wide{ max-width:780px;}
   .dlg-body{ overflow:auto; padding:14px 22px;}
   .fgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 14px;}
+  /* perguntas de Sim/Não do Diagnóstico: pergunta à esquerda, qual/motivo ao lado (11/11/2026) */
+  .dg-sn-lista{ margin-top:10px; border-top:1px solid var(--border); }
+  .dg-sn{ display:grid; grid-template-columns:minmax(200px, 320px) minmax(0, 1fr); gap:6px 16px; align-items:end; padding:8px 0; border-bottom:1px solid var(--border); }
+  @media (max-width:640px){ .dg-sn{ grid-template-columns:1fr; } }
   .fl{ display:flex; flex-direction:column; gap:3px; font-size:10.5px; font-family:'Inter',sans-serif; text-transform:uppercase; color:var(--ink-faint);}
   .fl.full{ grid-column:1 / -1;}
   .fl input, .fl select{ border:1px solid var(--border); border-radius:6px; padding:7px 9px; font-size:13px; font-family:'Inter',sans-serif; text-transform:none; color:var(--ink); background:var(--surface);}
@@ -1821,7 +1825,10 @@ async function vdRegistrar(r){
   const novoDigitado = String(VD.draft[r.id]||'').trim();
   if(r.registrado_em && !novoDigitado){ showToast('Escreva em “Novo registro” o que aconteceu agora e clique em Registrar.'); return; }
   const novo = novoDigitado || String(r.historico||'').trim();
-  if(!r.canal){ showToast('Escolha o canal do contato (WhatsApp, Ligação, E-mail...) antes de registrar.'); return; }
+  // sem canal escolhido: usa o último que a pessoa usou (11/11/2026: a Amanda batia nesse aviso a cada registro) e avisa qual foi
+  if(!r.canal){ let ult = ''; try{ ult = localStorage.getItem('vd_ultimo_canal:'+(window._userEmail||''))||''; }catch(e){}
+    if(!ult){ showToast('Escolha o canal do contato (WhatsApp, Ligação, E-mail...) antes de registrar.'); return; }
+    r.canal = ult; await vdSalvarCampo('crm_prospeccao', r.id, 'canal', ult); }
   if(r.status==='Agendou reunião' && (!r.retorno_data || !vdHora(r.retorno_hora))){ showToast('Para "Agendou reunião", informe a data e a hora da reunião: a Agenda usa esses dados.'); return; }
   if(r.status==='Interesse futuro' && !r.motivo){ showToast('Para "Interesse futuro", escolha o motivo (por exemplo, Financeiro).'); return; }
   const sem = r.status==='Sem interesse', fim = sem || r.status==='Virou cliente';
@@ -2618,12 +2625,14 @@ window.addEventListener('beforeunload', e=>{ if(typeof vdRascunhos==='function' 
       else if(k==='cpf' || k==='telefone' || k==='origem' || k==='nome' || k==='historico' || k==='proxima_acao' || k==='canal' || k==='estrategia' || k==='motivo') v = v.trim()===''?null:v;
       r[k] = v; if(k==='nome' && v==null) r.nome = '';
       vdSalvarCampo('crm_prospeccao', r.id, k, k==='nome'&&v==null ? '' : v);
+      if(k==='canal' && v){ try{ localStorage.setItem('vd_ultimo_canal:'+(window._userEmail||''), v); }catch(e){} }
       if(k==='proxima_acao' && vdAcaoSugereDesmarcar(r, v) && confirm('A reunião não aconteceu?\n\nPara a próxima ação "'+v+'" valer, o status sai de "Agendou reunião" e passa para "Desmarcou reunião". Depois, informe em "Retornar em" a data desta nova ação.\n\nOK = mudar o status   |   Cancelar = manter a reunião marcada')){
         r.status = 'Desmarcou reunião'; vdSalvarCampo('crm_prospeccao', r.id, 'status', r.status);
         showToast('Status mudou para "Desmarcou reunião". Informe a data do retorno desta nova ação.'); vdDraw(); return; }
       if(k==='nome' || k==='cpf' || k==='telefone') vdTentaLigar('crm_prospeccao', r, r.nome, r.cpf, r.telefone);
       if(k==='status' && v==='Interesse futuro') showToast('Escolha o motivo e quando retomar (3 meses, 6 meses ou 1 ano). No dia, o contato volta para a sua lista.');
-      if(k==='status' && v==='Sem interesse') showToast('Escreva o motivo em “Novo registro” e clique em Registrar: o contato vai para Vendas não realizadas.');
+      if(k==='status' && v==='Sem interesse'){ showToast('Conte o motivo no campo “Novo registro” (já está aberto) e clique em Registrar: o contato vai para Vendas não realizadas.');
+        setTimeout(()=>{ const ta = document.querySelector('textarea[data-nr="'+r.id+'"]'); if(ta){ ta.scrollIntoView({block:'center', behavior:'smooth'}); ta.focus(); ta.style.boxShadow = '0 0 0 3px rgba(27,95,199,.35)'; } }, 150); }
       if(k==='status' && v==='Agendou reunião' && (!r.retorno_data || !vdHora(r.retorno_hora))) showToast('Informe a data e a hora da reunião: a Agenda usa esses dados.');
       if(k==='status' || k==='retorno_data' || k==='retorno_hora' || k==='motivo'){ vdDraw(); }
       return;
@@ -4556,13 +4565,22 @@ async function syncFunilComOpp(pid, etapaKey, obs){
     OP.dirty = true;
   }catch(e){ console.warn('sync funil', e); }
 }
+// Perguntas de Sim/Não do Diagnóstico (pedido da Amanda, 11/11/2026): uma por linha, a pergunta à esquerda e o "qual/motivo" ao lado
+const DIAG_SN_ESS = [['tem_seguro_vida',null],['tem_plano_saude',null]];
+const DIAG_SN_SAUDE = [['fuma',null],['tem_doenca_grave','qual_doenca_grave'],['usa_medicamentos_continuos','quais_medicamentos'],['pratica_esportes','quais_esportes'],['usa_motocicleta',null],['ja_ficou_internado','motivo_internacao'],['realizou_cirurgia','motivo_cirurgia']];
+function dgLinhaSN(k, det, row, defDe){
+  const d = defDe(k), esq = pvDiagField(k, row[k], d);
+  // sim_quais já traz o "Qual ou quais?" ao lado; para as outras, o campo de detalhe vai na coluna da direita
+  const dir = d[2]==='sim_quais' ? '' : (det ? pvDiagField(det, row[det], defDe(det)) : '<span></span>');
+  return `<div class="dg-sn">${esq}${dir}</div>`;
+}
 function pvDiagField(k, v, def){
   const val = v==null ? '' : v;
   if(def[2]==='boolean') return `<label class="fl"><span>${def[1]}</span><select data-dg="${k}"><option value="">—</option><option value="true" ${val===true?'selected':''}>Sim</option><option value="false" ${val===false?'selected':''}>Não</option></select></label>`;
   // "Tem seguro de vida?" (pedido da Amanda, 09/11/2026): Sim/Não e, se sim, quais. Grava em um campo só ("Sim: MAG, Prudential").
   if(def[2]==='sim_quais'){ const s = String(val).trim(), nao = /^n[aã]o\b/i.test(s), sim = !!s && !nao, quais = nao ? '' : /^sim\b/i.test(s) ? s.replace(/^sim\s*[:\-–—]?\s*/i,'') : s;   // texto antigo livre ("Tenho MAG") vira Sim + quais, sem perder nada
     return `<label class="fl"><span>${def[1]}</span><select data-sq="${k}"><option value="">—</option><option ${sim?'selected':''}>Sim</option><option ${nao?'selected':''}>Não</option></select></label>
-      <label class="fl" data-sq-box="${k}" style="${sim?'':'display:none'}"><span>Qual ou quais? <small style="color:var(--ink-faint)">seguradora e produto</small></span><input type="text" data-sq-txt="${k}" placeholder="Ex.: MAG Vida Inteira, Prudential" value="${escapeHtml(quais)}"></label>
+      <label class="fl" data-sq-box="${k}" style="${sim?'':'display:none'}"><span>${def[3] ? escapeHtml(def[3]) : 'Qual ou quais? <small style="color:var(--ink-faint)">seguradora e produto</small>'}</span><input type="text" data-sq-txt="${k}" placeholder="${def[3] ? '' : 'Ex.: MAG Vida Inteira, Prudential'}" value="${escapeHtml(quais)}"></label>
       <input type="hidden" data-dg="${k}" value="${escapeHtml(s)}">`; }
   if(def[2]==='select') return `<label class="fl"><span>${def[1]}</span><select data-dg="${k}"><option value="">—</option>${def[3].map(o=>`<option ${val===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
   return `<label class="fl"><span>${def[1]}</span><input data-dg="${k}" type="${def[2]==='number'?'number':'text'}" step="any" value="${escapeHtml(String(val))}"></label>`;
@@ -4693,12 +4711,15 @@ async function pvDiagnostico(p){
       ${fld('dgp-conjuge_nome','Nome do cônjuge',conj?conj.nome:'')}${fld('dgp-conjuge_nasc','Data de nascimento do cônjuge',conj&&conj.data_nascimento?conj.data_nascimento:'','date')}
     </div>
     <div class="hint" style="margin:-4px 0 10px">A data de nascimento do cônjuge e a dos filhos (em dependentes, mais abaixo) entram em <b>Família e herdeiros</b> e geram o lembrete de aniversário.</div>
-    <div class="fgrid">${DIAG_ESSENCIAL.map(d=>pvDiagField(d[0], row[d[0]], d)).join('')}</div>
+    <div class="fgrid">${DIAG_ESSENCIAL.filter(d=>!DIAG_SN_ESS.some(([k])=>k===d[0])).map(d=>pvDiagField(d[0], row[d[0]], d)).join('')}</div>
+    <div class="dg-sn-lista">${DIAG_SN_ESS.map(([k,det])=>dgLinhaSN(k, det, row, n=>DIAG_ESSENCIAL.find(d=>d[0]===n)||defOf(n))).join('')}</div>
     ${(()=>{ const solteiro = !p.estado_civil || p.estado_civil==='solteiro', semDep = !(Number(row.dependentes)>0); return `<div class="es-box" style="margin-top:12px"><div class="ql">Seguro de vida · capital manual <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">— opcional</small></div>
       <label class="fl" style="max-width:340px"><span>Capital de seguro de vida, manual (R$, opcional)</span><input type="number" step="1000" min="0" data-dg="capital_vida_manual" value="${row.capital_vida_manual==null?'':row.capital_vida_manual}"></label>
       ${solteiro && semDep ? '<div class="hint" style="background:var(--amber-soft);border-radius:8px;padding:6px 10px;margin-top:6px">Cliente solteiro(a) e sem dependentes: o cálculo do seguro de vida (escola + inventário) fica em R$ 0. Se a pessoa quiser seguro de vida, digite o capital neste campo.</div>' : '<div class="hint" style="margin-top:6px">Se preenchido, vira a necessidade de Morte no diagnóstico e substitui a "Opção ideal" na representatividade financeira.</div>'}</div>`; })()}
     <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600">Saúde e subscrição <small style="color:var(--ink-faint);font-weight:400">— dado sensível: preencher só quando necessário para cotação (LGPD)</small></summary>
-      <div class="fgrid" style="margin-top:8px">${DIAG_SAUDE.map(k=>pvDiagField(k, row[k], defOf(k))).join('')}</div><div class="hint" id="dg-imc">${imc?`IMC calculado: <b>${imc}</b>`:''}</div></details>
+      <div class="fgrid" style="margin-top:8px">${['peso','altura'].map(k=>pvDiagField(k, row[k], defOf(k))).join('')}</div>
+      <div class="dg-sn-lista">${DIAG_SN_SAUDE.map(([k,det])=>dgLinhaSN(k, det, row, n=>n==='usa_motocicleta' ? [n,'Usa motocicleta?','sim_quais','Para quê? (trabalho, lazer)'] : defOf(n))).join('')}</div>
+      <div class="fgrid" style="margin-top:8px">${DIAG_SAUDE.filter(k=>!['peso','altura'].includes(k) && !DIAG_SN_SAUDE.some(([a,b])=>a===k||b===k)).map(k=>pvDiagField(k, row[k], defOf(k))).join('')}</div><div class="hint" id="dg-imc">${imc?`IMC calculado: <b>${imc}</b>`:''}</div></details>
     <details style="margin-top:8px" open><summary style="cursor:pointer;font-weight:600">ADN completo <small style="color:var(--ink-faint);font-weight:400">— usado no cálculo da Análise (Fase 4) e da apresentação (Fase 6)</small></summary>
       <div style="margin-top:8px">${pdAdnAvancadoHtml(row)}</div></details>
     <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">Processo evolutivo <small style="color:var(--ink-faint);font-weight:400">— Carreira → Renda → Patrimônio → Família → Legado</small></summary>
@@ -10922,12 +10943,14 @@ checkSession();
 
   // mensagens do sistema (toast) e erros
   const RE_ERRO = /^erro|n[aã]o (consegui|foi poss|aceit|encontr)|preench|informe|escolh|escrev|selecion|falt|inv[aá]lid|obrigat|permita|primeiro|antes de/i;
+  // confirmação de que deu certo ("Escolha salva", "Informações salvas") não é recusa: antes contava como erro e chamava o balão
+  const RE_OK = /salv[ao]s?|registrad[ao]s?|atualizad[ao]s?|marcad[ao] como/i;
   let ultimoSalvo = 0;
   const _toast = window.showToast;
   if(typeof _toast === 'function'){
     window.showToast = function(msg){
       try{
-        const m = String(msg||''), erro = RE_ERRO.test(m);
+        const m = String(msg||''), erro = RE_ERRO.test(m) && !RE_OK.test(m);
         uso('aviso', mascarar(m), { erro });
         if(erro) duvida('recusa');
         else if(/salv|criad|registrad|agendad|anotad|atualizad/i.test(m)) ultimoSalvo = Date.now();
@@ -11447,11 +11470,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611100945"></script>
-<script src="painel.js?v=202611100945"></script>
-<script src="cobranca.js?v=202611100945"></script>
-<script src="cadastro.js?v=202611100945"></script>
-<script src="contrato.js?v=202611100945"></script>
-<script src="guarda.js?v=202611100945"></script>
+<script src="plataforma.js?v=202611111623"></script>
+<script src="painel.js?v=202611111623"></script>
+<script src="cobranca.js?v=202611111623"></script>
+<script src="cadastro.js?v=202611111623"></script>
+<script src="contrato.js?v=202611111623"></script>
+<script src="guarda.js?v=202611111623"></script>
 </body>
 </html>

@@ -351,7 +351,8 @@
     p = document.createElement('button'); p.id = 'tc-guarda-pill'; p.type = 'button';
     p.title = 'Há alterações que ainda não foram salvas. Clique (ou Ctrl+S) para salvar.';
     p.textContent = '💾 Salvar alterações';
-    p.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:99999;font:600 14px "Segoe UI",system-ui,sans-serif;padding:10px 18px;border-radius:999px;border:0;background:var(--brand,#9c7518);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer';
+    // no canto inferior esquerdo (11/11/2026: no meio da tela ele ficava na frente dos campos; o canto direito é do balão)
+    p.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:99999;font:600 13px "Segoe UI",system-ui,sans-serif;padding:8px 14px;max-width:calc(100vw - 120px);border-radius:999px;border:0;background:var(--brand,#9c7518);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer';
     p.onclick = salvarPeloAtalho;
     document.body.appendChild(p);
   }

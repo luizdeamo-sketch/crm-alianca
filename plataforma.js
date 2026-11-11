@@ -155,8 +155,10 @@
       location.replace(location.pathname + '?c=' + encodeURIComponent(slugDoLink));
     });
   }
+  // a tela de entrada espera a marca do link (index.html, classe tc-marca-espera): libera assim que a marca estiver aplicada
+  const liberarEntrada = () => document.documentElement.classList.remove('tc-marca-espera');
   async function marcaDoLink() {
-    if (!slugDoLink || MODO_PAINEL) return;
+    if (!slugDoLink || MODO_PAINEL) return liberarEntrada();
     if (typeof sb === 'undefined') return setTimeout(marcaDoLink, 200);
     try {
       const { data: s } = await sb.auth.getSession(); if (s && s.session) return;   // logado: vale a corretora do usuário
@@ -164,7 +166,7 @@
       if (!data) return;
       try { localStorage.setItem('tc_marca', JSON.stringify(data)); localStorage.setItem('tc_slug', data.slug); } catch (e) { /* nada */ }
       MARCA = data; aplicarMarca(); MARCA = null;
-    } catch (e) { /* sem rede: fica a marca padrão */ }
+    } catch (e) { /* sem rede: fica a marca padrão */ } finally { liberarEntrada(); }
   }
   marcaDoLink();
 

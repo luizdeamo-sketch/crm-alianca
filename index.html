@@ -1,10 +1,14 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+<!-- link próprio da corretora (?c=): a tela de entrada só aparece depois que a marca dela chega (11/11/2026: no Ctrl+F5 a
+     Amanda via 1 segundo da entrada genérica do CRM Aliança antes da Aliança). Se a marca demorar, aparece mesmo assim em 2,5 s. -->
+<script>(function(){ if(/[?&]c=[a-z0-9-]/i.test(location.search)){ var h=document.documentElement; h.classList.add('tc-marca-espera'); setTimeout(function(){ h.classList.remove('tc-marca-espera'); }, 2500); } })();</script>
+<style>html.tc-marca-espera #login-screen{ visibility:hidden; }</style>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611111623">
+<meta name="app-build" content="202611111631">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -11470,11 +11474,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611111623"></script>
-<script src="painel.js?v=202611111623"></script>
-<script src="cobranca.js?v=202611111623"></script>
-<script src="cadastro.js?v=202611111623"></script>
-<script src="contrato.js?v=202611111623"></script>
-<script src="guarda.js?v=202611111623"></script>
+<script src="plataforma.js?v=202611111631"></script>
+<script src="painel.js?v=202611111631"></script>
+<script src="cobranca.js?v=202611111631"></script>
+<script src="cadastro.js?v=202611111631"></script>
+<script src="contrato.js?v=202611111631"></script>
+<script src="guarda.js?v=202611111631"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611111631">
+<meta name="app-build" content="202611121107">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -1825,8 +1825,23 @@ async function vdRegistrar(r){
   if(!r) return;
   const nome = String(r.nome||'').trim(); if(!nome && !r.pessoa_id){ showToast('Informe o nome do contato antes de registrar.'); return; }
   if(!r.pessoa_id){ r._lig = false; await vdTentaLigar('crm_prospeccao', r, r.nome, r.cpf, r.telefone); }
+  // contato digitado direto na Prospecção e que não existe no cadastro: cria o cadastro e liga (12/11/2026: a Bravita marcou
+  // "Virou cliente" e o sistema respondeu "não entrou no histórico do cliente" porque nunca criava a ficha)
+  if(!r.pessoa_id && nome){
+    try{
+      const row = { nome, origem:'Prospecção'+(r.origem?' · '+String(r.origem).trim():'') };
+      if(window.guiaProduto) row.tipo = 'outro';   // no produto não se presume que o contato é médico
+      const cpfD = dOnly(r.cpf||''); if(cpfD.length===11) row.cpf = cpfD.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+      if(String(r.telefone||'').trim()) row.telefone = String(r.telefone).trim();
+      const { data: np, error } = await sb.from('crm_pessoas').insert(row).select('*').single(); if(error) throw error;
+      const { error: e1 } = await sb.from('crm_prospeccao').update({ pessoa_id:np.id, updated_at:new Date().toISOString() }).eq('id', r.id); if(e1) throw e1;
+      r.pessoa_id = np.id; try{ OP.pessoas.push(np); OP.dirty = true; }catch(e){}
+    }catch(e){ showToast('Não consegui criar o cadastro deste contato: '+(e.message||e)+'. O registro fica só na Prospecção.'); }
+  }
   VD.draft = VD.draft || {};
   const novoDigitado = String(VD.draft[r.id]||'').trim();
+  // link "blob:" (copiado de um PDF aberto no navegador, ex.: portal da seguradora) só existe naquela aba: avisa antes de gravar
+  if(/\bblob:https?:/i.test(novoDigitado) && !confirm('O link que você colou (começa com "blob:") só funciona no seu navegador e some quando a aba fecha.\n\nPara guardar a apólice, baixe o PDF e envie em Proteção › Apólices do cliente.\n\nRegistrar o texto mesmo assim?')) return;
   if(r.registrado_em && !novoDigitado){ showToast('Escreva em “Novo registro” o que aconteceu agora e clique em Registrar.'); return; }
   const novo = novoDigitado || String(r.historico||'').trim();
   // sem canal escolhido: usa o último que a pessoa usou (11/11/2026: a Amanda batia nesse aviso a cada registro) e avisa qual foi
@@ -11474,11 +11489,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611111631"></script>
-<script src="painel.js?v=202611111631"></script>
-<script src="cobranca.js?v=202611111631"></script>
-<script src="cadastro.js?v=202611111631"></script>
-<script src="contrato.js?v=202611111631"></script>
-<script src="guarda.js?v=202611111631"></script>
+<script src="plataforma.js?v=202611121107"></script>
+<script src="painel.js?v=202611121107"></script>
+<script src="cobranca.js?v=202611121107"></script>
+<script src="cadastro.js?v=202611121107"></script>
+<script src="contrato.js?v=202611121107"></script>
+<script src="guarda.js?v=202611121107"></script>
 </body>
 </html>

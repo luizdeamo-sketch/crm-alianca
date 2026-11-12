@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611121203">
+<meta name="app-build" content="202611121212">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -324,7 +324,7 @@ window.ALIANCA = {
 <div id="app">
   <header>
     <div class="brand"><div class="hdr-brand"><b class="tc-marca">CRM Aliança<span class="tc-sep"> · </span><span class="tc-nm">by Capacity Case</span></b><small>Carreira, renda, patrimônio e legado.</small></div><img class="hdr-logo" src="assets/logo-icone.png" alt="CRM Aliança"><span class="hdr-title" id="hdr-title" style="display:none">Aliança</span><span class="info-ico" id="hdr-info" tabindex="0" title="Cada cliente é um parceiro — toda a jornada dele numa linha do tempo: faixa do funil comercial + uma linha por produto. Clique na faixa do funil para marcar/desmarcar uma etapa na data; clique no nome para abrir o cadastro completo.">ⓘ</span></div>
-    <form class="pq" id="pq-form" role="search" autocomplete="off" hidden><span class="pq-ico" aria-hidden="true">✨</span><input id="pq-in" type="search" maxlength="600" placeholder="Pergunte aqui: tire qualquer dúvida do sistema" aria-label="Pergunte aqui: tire qualquer dúvida do sistema"><button type="submit">Perguntar</button></form><button type="button" class="pq-mini" id="pq-mini" hidden title="Pergunte aqui: tire qualquer dúvida do sistema">✨ Dúvida?</button>
+    <form class="pq" id="pq-form" role="search" autocomplete="off" hidden><span class="pq-ico" aria-hidden="true">✨</span><input id="pq-in" type="search" maxlength="600" placeholder="Pergunte aqui: tire qualquer dúvida do sistema" aria-label="Pergunte aqui: tire qualquer dúvida do sistema"><button type="submit">Perguntar</button></form><button type="button" class="pq-mini" id="pq-mini" hidden title="Pergunte aqui: tire qualquer dúvida do sistema">✨ Pergunte aqui</button>
     <div class="hdr-navy"><svg class="shield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg></div><div class="who"><span id="who-email"></span><button id="btn-app" type="button" title="CRM Aliança no celular: versão enxuta para a rua (buscar cliente, Hoje, resumo do dia por IA e registrar reunião). Abre em outra aba; no celular, use Adicionar à tela inicial.">📱 App</button><button id="btn-backup" title="Baixar uma cópia de todos os dados">Backup</button><button id="btn-logout">Sair</button></div>
   </header>
 
@@ -10388,7 +10388,7 @@ function hdrNavyAjustar(){
   const h = document.querySelector('#app header'), w = h && h.querySelector('.who'), n = h && h.querySelector('.hdr-navy'); if(!w || !n) return;
   const precisa = h.getBoundingClientRect().right - w.getBoundingClientRect().left;
   // com o "Pergunte aqui" no cabeçalho, a faixa encolhe para só os botões do canto (o campo não pode ficar por baixo dela)
-  const pq = h.querySelector('#pq-form'), comPq = pq && !pq.hidden && getComputedStyle(pq).display !== 'none';
+  const pq = h.querySelector('#pq-form'), comPq = (pq && !pq.hidden && getComputedStyle(pq).display !== 'none') || h.classList.contains('pq-compacto');
   n.style.width = Math.max(comPq ? 0 : Math.max(470, h.clientWidth*0.36), precisa/0.86 + 24) + 'px';   // a diagonal ocupa os 14% da esquerda da faixa
 }
 window.addEventListener('resize', hdrNavyAjustar);
@@ -11513,8 +11513,10 @@ header .pq[hidden]{ display:none; }
 header .pq .pq-ico{ font-size:15px; }
 header .pq input{ flex:1; min-width:0; border:0; background:transparent; font:500 14.5px 'Inter',sans-serif; color:var(--ink); padding:8px 4px; outline:none; }
 header .pq button{ border:0; border-radius:999px; background:var(--brand,#9c7518); color:#fff; font:600 13.5px 'Inter',sans-serif; padding:9px 16px; cursor:pointer; white-space:nowrap; }
-header .pq-mini{ display:none; border:1.5px solid var(--brand,#9c7518); background:#fff; color:var(--ink); border-radius:999px; font:600 13px 'Inter',sans-serif; padding:7px 12px; margin:0 8px; cursor:pointer; white-space:nowrap; }
+header .pq-mini{ position:relative; z-index:1; display:none; border:1.5px solid var(--brand,#9c7518); background:#fff; color:var(--ink); border-radius:999px; font:600 13px 'Inter',sans-serif; padding:7px 12px; margin:0 8px; cursor:pointer; white-space:nowrap; }
 @media (max-width:900px){ header .pq{ display:none !important; } header .pq-mini:not([hidden]){ display:inline-flex; } }
+/* sem espaço para o campo inteiro (título da tela, e-mail e botões do canto): vira o botão "✨ Dúvida?" */
+header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:not([hidden]){ display:inline-flex; }
 #pq-painel{ position:fixed; z-index:9600; top:72px; right:16px; width:min(560px, calc(100vw - 32px)); max-height:calc(100vh - 100px); display:flex; flex-direction:column; background:#fff; border:1px solid var(--border,#e4e6e2); border-radius:16px; box-shadow:0 18px 50px rgba(17,24,39,.22); font:14.5px/1.5 'Inter',sans-serif; color:var(--ink); }
 #pq-painel[hidden]{ display:none; }
 #pq-painel .pq-cab{ display:flex; align-items:center; gap:8px; padding:12px 14px; border-bottom:1px solid var(--border,#e4e6e2); }
@@ -11539,8 +11541,16 @@ header .pq-mini{ display:none; border:1.5px solid var(--brand,#9c7518); backgrou
   const PQ = { hist:[], ocupado:false };
   const $ = id => document.getElementById(id);
   const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function mostrarCampo(){ const f = $('pq-form'), m = $('pq-mini'); if(f) f.hidden = false; if(m) m.hidden = false; try{ hdrNavyAjustar(); }catch(e){} }
-  window.addEventListener('resize', ()=>{ try{ hdrNavyAjustar(); }catch(e){} });
+  // o campo só fica inteiro se sobrar espaço de verdade entre a marca e os botões do canto; senão vira o botão compacto
+  function caber(){
+    const h = document.querySelector('#app header'), b = h && h.querySelector('.brand'), w = h && h.querySelector('.who'); if(!h || !b || !w) return;
+    const livre = w.getBoundingClientRect().left - b.getBoundingClientRect().right - 36;
+    h.classList.toggle('pq-compacto', livre < 340);
+    try{ hdrNavyAjustar(); }catch(e){}
+  }
+  function mostrarCampo(){ const f = $('pq-form'), m = $('pq-mini'); if(f) f.hidden = false; if(m) m.hidden = false; caber(); }
+  window.addEventListener('resize', caber);
+  try{ const h = document.querySelector('#app header'); new MutationObserver(()=>requestAnimationFrame(caber)).observe(h, { childList:true, subtree:true, characterData:true }); }catch(e){}
   // aparece depois do login (o cabeçalho só existe com a pessoa dentro)
   const t = setInterval(()=>{ if(window._userEmail){ clearInterval(t); mostrarCampo(); } }, 700);
   function painel(){
@@ -11598,11 +11608,11 @@ header .pq-mini{ display:none; border:1.5px solid var(--brand,#9c7518); backgrou
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611121203"></script>
-<script src="painel.js?v=202611121203"></script>
-<script src="cobranca.js?v=202611121203"></script>
-<script src="cadastro.js?v=202611121203"></script>
-<script src="contrato.js?v=202611121203"></script>
-<script src="guarda.js?v=202611121203"></script>
+<script src="plataforma.js?v=202611121212"></script>
+<script src="painel.js?v=202611121212"></script>
+<script src="cobranca.js?v=202611121212"></script>
+<script src="cadastro.js?v=202611121212"></script>
+<script src="contrato.js?v=202611121212"></script>
+<script src="guarda.js?v=202611121212"></script>
 </body>
 </html>

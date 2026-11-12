@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611121222">
+<meta name="app-build" content="202611121307">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -266,6 +266,15 @@ window.ALIANCA = {
   .gp-pe{ margin-top:18px; color:var(--ink-faint); font-size:13.5px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .gp-cont{ font-size:10.5px; opacity:.8; }
   @media (max-width:760px){ #view-comeco{ padding:16px !important; } .gp-h{ font-size:20px; } }
+/* Mensagens do ano (12/11/2026) */
+.msg-regra{background:#fff8e6;border:1px solid #f0d48a;color:#6b4e00;border-radius:10px;padding:10px 12px;margin:0 0 14px;font-size:13.5px;line-height:1.5}
+.msg-intro div:last-child{line-height:1.6}
+.msg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.msg-card{border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.msg-card-t{font-weight:700;color:var(--ink)} .msg-card-d{font-size:12.5px;color:var(--ink-soft)} .msg-card-q{font-size:12.5px;color:var(--ink-faint);margin-bottom:6px}
+.msg-card .vd-btn{align-self:flex-start}
+#msg-enviei.pulse{box-shadow:0 0 0 3px rgba(34,160,90,.35)}
+@media (max-width:760px){ #view-mensagens{ padding:16px !important; } }
 </style>
 
 
@@ -330,6 +339,7 @@ window.ALIANCA = {
 
   <nav id="rail">
     <button class="nav-btn" data-view="hoje" title="Hoje: renovações, avisos e o que fazer hoje"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg><span>Hoje</span></button>
+    <button class="nav-btn" data-view="mensagens" title="Mensagens do ano: aniversários, datas especiais e quem está sem conversa, com a mensagem pronta"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5h16v11H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Mensagens</span></button>
     <button class="nav-btn" data-view="comeco" style="display:none" title="Primeiros passos: do cadastro à primeira mensagem de renovação"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20.5V4.5"/><path d="M5 5h11l-2.5 3.5L16 12H5"/></svg><span>Primeiros passos <small class="gp-cont"></small></span></button>
     <button class="nav-btn" data-view="indicadores" title="Indicadores do funil e da produção"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l3.5-4.5"/><circle cx="12" cy="16" r="1.25"/><path d="M4 19.5h16"/></svg><span>Indicadores</span></button>
     <button class="nav-btn active" data-view="operacao"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.25"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.5"/><path d="M15.5 14.2c2.6-.3 4.5 1.3 5 4.3"/></svg><span>Aliança</span></button>
@@ -348,6 +358,7 @@ window.ALIANCA = {
   <div class="view-container">
 
     <div id="view-hoje" class="view" style="overflow-y:auto; padding:22px 28px;"><div class="hj-cab"><h2>Hoje — o que preciso fazer</h2><div class="om-sub" id="hj-data"></div></div><div id="hj-body"><div class="op-more">Carregando...</div></div></div>
+    <div id="view-mensagens" class="view" style="overflow-y:auto; padding:22px 28px;"><div class="hj-cab"><h2>Mensagens — fique presente na vida do cliente</h2><div class="om-sub">O CRM lembra a hora certa de falar com cada cliente e deixa a mensagem pronta para você enviar pelo seu WhatsApp.</div></div><div id="msg-body"><div class="op-more">Carregando...</div></div></div>
     <div id="view-comeco" class="view" style="overflow-y:auto; padding:26px 32px;"><div id="comeco-body" class="gp"></div></div>
 
     <div id="view-operacao" class="view active">
@@ -987,7 +998,7 @@ const SUPABASE_URL = window.ALIANCA.supabaseUrl;          // vem da configuraç�
 const SUPABASE_ANON_KEY = window.ALIANCA.supabaseAnonKey;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ storageKey:'tc-alianca-auth' } });
 // módulos do cliente: os desligados ficam escondidos (não apagados: outras telas ainda podem chamar o botão)
-const aliancaModuloLigado = v => !window.ALIANCA.modulos || v==='admin' || window.ALIANCA.modulos.includes(v);
+const aliancaModuloLigado = v => !window.ALIANCA.modulos || v==='admin' || v==='mensagens' || window.ALIANCA.modulos.includes(v);
 document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ if(!aliancaModuloLigado(b.dataset.view)){ b.style.display = 'none'; b.dataset.off = '1'; } });
 // módulos por usuário (crm_usuarios.modulos; vazio = todos). O master sempre vê tudo. Roda depois do login.
 // módulos da corretora (plano contratado; crm_corretores.modulos; vazio = todos): valem até para o master.
@@ -995,7 +1006,7 @@ document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ if(!aliancaModuloL
 window.TC_MODULOS = null;
 const tcModulo = k => !Array.isArray(window.TC_MODULOS) || window.TC_MODULOS.includes(k);
 function tcAplicarModulosCorretora(){   // Admin e Sugestões ficam sempre no menu
-  document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(!['admin','sugestoes','hoje','comeco'].includes(v) && !tcModulo(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+  document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(!['admin','sugestoes','hoje','comeco','mensagens'].includes(v) && !tcModulo(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
   if(!tcModulo('premium')) document.querySelectorAll('#op-f-class option[value="premium"], #op-f-class option[value="fidelizado"]').forEach(o=>o.remove());
   document.body.classList.toggle('tc-sem-agenda-externa', !tcModulo('agenda_externa'));
 }
@@ -1005,7 +1016,7 @@ async function aliancaModulosDoUsuario(email){
     if(mc && mc.data && Array.isArray(mc.data.recursos)){ window.TC_MODULOS = mc.data.recursos; tcAplicarModulosCorretora(); }   // recursos = telas e IA dos módulos contratados (Vendas, Carteira, Gestão), calculados no banco
     const lista = (u && u.modulos) || [];   // módulos por usuário (vazio = todos os da corretora); o master vê todos os da corretora
     if(master !== true && lista.length){
-      document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(!['admin','sugestoes','hoje','comeco'].includes(v) && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
+      document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ const v = b.dataset.view; if(!['admin','sugestoes','hoje','comeco','mensagens'].includes(v) && !lista.includes(v)){ b.style.display = 'none'; b.dataset.off = '1'; } });
     }
     const ativo = document.querySelector('.nav-btn.active');
     if(!ativo || ativo.dataset.off){ const p = document.querySelector('.nav-btn[data-view]:not([data-off]):not(#nav-admin)'); if(p) p.click(); }
@@ -2702,6 +2713,7 @@ document.querySelectorAll('.nav-btn[data-view]').forEach(btn=>{
     if(btn.dataset.view === 'admin') renderAdmin();
     if(btn.dataset.view === 'comeco') guiaRender();
     if(btn.dataset.view === 'hoje') opHojeDialog(HJ.mine);
+    if(btn.dataset.view === 'mensagens') renderMensagens();
   });
 });
 function goToPersonView(personId, tab){
@@ -3057,7 +3069,7 @@ async function pvOppsResumo(p){
 // ---- HISTÓRICO (linha do tempo única + registrar atividade) ----
 async function pvHistorico(body, p){
   const opps = (await sb.from('crm_oportunidades').select('id,produto,status').eq('pessoa_id',p.id).eq('status','aberta')).data || [];
-  body.innerHTML = `<div class="es-box"><div class="ql">Registrar atividade</div><div class="fgrid">
+  body.innerHTML = `<div class="es-box"><div class="ql">Registrar atividade</div><div class="msg-regra" style="margin:4px 0 10px">📝 <b>Falou com o cliente? Registre aqui, sempre.</b> Ligação, WhatsApp, encontro: é o registro que atualiza a situação do cliente e faz o CRM avisar você na hora certa da próxima conversa.</div><div class="fgrid">
       <label class="fl"><span>Tipo</span><select id="at-tipo">${TIPOS_ATIV.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select></label>
       ${fld('at-data','Data e hora',new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16),'datetime-local')}
       <label class="fl"><span>Oportunidade (opcional)</span><select id="at-opp"><option value="">—</option>${opps.map(o=>`<option value="${o.id}">${escapeHtml(o.produto)}</option>`).join('')}</select></label>
@@ -6383,8 +6395,29 @@ async function ensurePessoas(){
   // corretora sem nenhum cliente (1ª importação): sem esta trava, cada linha da planilha buscava o cadastro de novo (320 linhas = 20 s)
   if(!OP.pessoas.length && !(OP._vazioAte > Date.now())){ OP.pessoas = await opFetchAll('crm_pessoas','id,nome,crm,crm_uf,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes',['nome','id']); if(!OP.pessoas.length) OP._vazioAte = Date.now() + 60000; }
 }
-async function findPessoas({cpf, crm, crm_uf, nome, telefone}){
+// Busca no BANCO, na hora, quem pode ser a mesma pessoa (12/11/2026, caso Cristiane na Bravita): a lista OP.pessoas é carregada uma vez
+// e fica velha se outra aba ou outra pessoa cadastrou alguém depois; sem isto o sistema criava um segundo cadastro da mesma cliente.
+async function pessoasDoBanco({cpf, nome, telefone}){
+  const COLS = 'id,nome,crm,crm_uf,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes';
+  const d = dOnly(cpf), tk = normNome(nome), ph = dOnly(telefone).slice(-8), qs = [];
+  if(d.length===11) qs.push(sb.from('crm_pessoas').select(COLS).in('cpf', [d, fmtCPF(d)]).limit(20));
+  // vogal vira "_" (um caractere qualquer): acha "Cristiane" e "Cristiâne", "Jose" e "José"
+  const pat = t=>'%'+t.replace(/[aeiouc]/g,'_')+'%';
+  if(tk.length>=2) qs.push(sb.from('crm_pessoas').select(COLS).ilike('nome', pat(tk[0])).ilike('nome', pat(tk[tk.length-1])).limit(50));
+  else if(tk.length===1 && tk[0].length>=4) qs.push(sb.from('crm_pessoas').select(COLS).ilike('nome', pat(tk[0])).limit(50));
+  if(ph.length===8) qs.push(sb.from('crm_pessoas').select(COLS).ilike('telefone', '%'+ph.slice(0,4)+'%'+ph.slice(4)+'%').limit(20));
+  if(!qs.length) return;
+  const rs = await Promise.all(qs), byId = new Map(OP.pessoas.map((p,i)=>[p.id,i]));
+  rs.forEach(r=>{ if(r.error) throw r.error; (r.data||[]).forEach(p=>{ if(byId.has(p.id)) OP.pessoas[byId.get(p.id)] = {...OP.pessoas[byId.get(p.id)], ...p}; else { byId.set(p.id, OP.pessoas.length); OP.pessoas.push(p); OP.dirty = true; } }); });
+}
+// planilhas grandes: recarrega a lista inteira UMA vez no começo (em vez de 3 buscas por linha)
+async function pessoasRecarregar(){
+  const COLS = 'id,nome,crm,crm_uf,especialidade,tipo,cpf,telefone,tags,classificacao,proxima_acao,proxima_data,proximo_responsavel,data_nascimento,datas_relevantes';
+  OP.pessoas = await opFetchAll('crm_pessoas', COLS, ['nome','id']); OP._vazioAte = OP.pessoas.length ? 0 : Date.now() + 60000; OP.dirty = true;
+}
+async function findPessoas({cpf, crm, crm_uf, nome, telefone}, opt){
   await ensurePessoas();
+  if(!(opt && opt.semBanco)){ try{ await pessoasDoBanco({cpf, nome, telefone}); }catch(e){ console.warn('busca no banco', e); } }
   const d = dOnly(cpf), tk = normNome(nome), key = tk.join(' '), ph = dOnly(telefone).slice(-9);
   const uf = (crm_uf||'').toUpperCase();
   const out = [];
@@ -7842,7 +7875,7 @@ async function impPreview(){
   const res = document.getElementById('imp-result');
   if(IMP.map.nome<0 || IMP.map.seguradora<0 || IMP.map.produto<0){ res.innerHTML = '<div class="om-err">Mapeie ao menos: nome do cliente, seguradora e produto.</div>'; return; }
   res.innerHTML = '<div class="op-more">Cruzando com os cadastros...</div>';
-  await ensurePessoas(); const vincSim = document.getElementById('imp-sim').checked;
+  await pessoasRecarregar(); const vincSim = document.getElementById('imp-sim').checked;
   const cell = (r,k)=> IMP.map[k]>=0 ? r[IMP.map[k]] : '';
   const cache = new Map(), items = []; let novos = new Map(), vinc = 0, sim = 0;
   const existing = new Set((await opFetchAll('crm_apolices','pessoa_id,numero_apolice,seguradora,tipo_seguro,data_emissao',['id'])).map(a=>[a.pessoa_id,a.seguradora,a.numero_apolice||a.tipo_seguro+'|'+a.data_emissao].join('#').toLowerCase()));
@@ -7853,7 +7886,7 @@ async function impPreview(){
     const key = (dOnly(cpf).length===11 ? dOnly(cpf) : normNome(nome).join(' '));
     let pes = cache.get(key);
     if(pes===undefined){
-      const found = await findPessoas({cpf, nome}); const forte = found.find(isStrong), fraco = found.find(x=>!isStrong(x));
+      const found = await findPessoas({cpf, nome}, {semBanco:true}); const forte = found.find(isStrong), fraco = found.find(x=>!isStrong(x));
       if(forte){ pes = {id:forte.id, nome:forte.nome}; vinc++; } else if(fraco && vincSim){ pes = {id:fraco.id, nome:fraco.nome, similar:true}; sim++; } else { pes = {novo:key, nome, cpf}; novos.set(key, pes); }
       cache.set(key, pes);
     }
@@ -7989,6 +8022,7 @@ async function caFase1(files, fixed, opts){
       <div class="hint" style="margin-bottom:8px">Resumo: ${docs.map((d,i)=>`Documento ${i+1} é ${/^[AEIOU]/i.test(d.tipo.l)?'uma':'um'} <b>${escapeHtml(d.tipo.l)}</b>${d.pessoas[0].nome||d.pessoas[0].cpf?` — ${escapeHtml(d.multi?d.pessoas.length+' pessoas':[d.pessoas[0].nome,d.pessoas[0].cpf].filter(Boolean).join(' · '))}`:''}`).join(' · ')}</div>
       <label class="fl" style="max-width:320px"><span>Profissão padrão para cadastros novos</span><select id="f1-tipo">${tipoOptions(tcPerfilPadrao())}</select></label>
       <div style="margin-top:10px">${html}</div>
+      ${docs.some(d=>d.tipo.cat==='planilha')?`<div class="hint" style="color:var(--amber-ink);border:1px solid var(--amber-ink);border-radius:8px;padding:8px;margin-bottom:8px"><b>Atenção: planilha não vira apólice.</b> O arquivo Excel fica guardado como <b>documento</b> no cadastro, mas a apólice <b>não</b> aparece na ficha nem no Portal do cliente. Para registrar a apólice, envie o <b>PDF da apólice</b> (ou use Central de Apólices › Importar planilha de apólices).</div>`:''}
       <div class="hint">Leitura das coberturas da apólice (cobertura, capital segurado, prêmio) fica para a próxima fase. "Quem indicou" não é obrigatório.</div>
       <div class="om-err" id="f1-err"></div></div>
     <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar tudo</button><button class="om-save" id="f1-save">Salvar e anexar</button></div>`;
@@ -8032,7 +8066,7 @@ async function caFase1(files, fixed, opts){
         ultimo = pessoaId;
       }
       OP.pessoas.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR')); OP.dirty = true; CA.loaded = false;
-      dlgClose(); showToast(`${nDocs} documento(s) anexado(s) · ${nCad} cadastro(s) novo(s)${falhas?` · ${falhas} com erro`:''}`);
+      dlgClose(); showToast(`${nDocs} documento(s) anexado(s) · ${nCad} cadastro(s) novo(s)${falhas?` · ${falhas} com erro`:''}${docs.some(d=>d.tipo.cat==='planilha')?' · a planilha ficou como documento: a apólice ainda não está cadastrada':''}`);
       if(ativos.length===1 && ultimo){ if(opts && opts.abrirFluxo && !fixed) vdAbrirConsultoria(ultimo, 1, true); else goToPersonView(ultimo,'protecao'); } else if(fixed && FLOW.open) flowRefresh(); else renderCentral(true);
     }catch(e){ err.textContent = 'Erro ao salvar: '+(e.message||e)+' (parte pode já ter sido gravada — confira o cadastro).'; btn.disabled = false; btn.textContent = 'Salvar e anexar'; }
   });
@@ -9585,7 +9619,7 @@ async function ctPreview(){
   const res = document.getElementById('ct-result');
   if(CT.map.nome<0){ res.innerHTML = '<div class="om-err">Indique qual coluna é o nome.</div>'; return; }
   ctExpandir();   // apólices lado a lado viram uma linha por apólice (só se a IA encontrou e a caixa está marcada)
-  res.innerHTML = '<div class="op-more">Cruzando com os cadastros...</div>'; await ensurePessoas();
+  res.innerHTML = '<div class="op-more">Cruzando com os cadastros...</div>'; await pessoasRecarregar();
   const novos = [], existentes = [], revisar = [], problemas = [], leves = []; const seenKey = new Set(), porChave = new Map();
   const conf = { linhas:0, comNome:0, semContato:0, comApo:0, apoSemVenc:0 };   // o que a planilha tem (quadro da prévia)
   for(let li=0; li<CT.rows.length; li++){
@@ -9595,7 +9629,7 @@ async function ctPreview(){
     conf.comNome++; if(!o.telefone && !o.cpf) conf.semContato++; if(n.apo){ conf.comApo++; if(!n.apo.vencimento) conf.apoSemVenc++; }
     n.avisos.forEach(a=>leves.push({linha, nome:o.nome, motivo:a}));
     const temCpf = !!o.cpf, tel = dOnly(o.telefone).slice(-9);
-    const found = await findPessoas({cpf:o.cpf, crm:o.crm, nome:o.nome, telefone:o.telefone});
+    const found = await findPessoas({cpf:o.cpf, crm:o.crm, nome:o.nome, telefone:o.telefone}, {semBanco:true});
     // nome idêntico com outro CPF no cadastro é homônimo, não a mesma pessoa
     let forte = found.find(x=> isStrong(x) && !(temCpf && x.why==='nome idêntico' && dOnly(x.cpf) && dOnly(x.cpf)!==dOnly(o.cpf))), via = forte ? forte.why : '';
     // sem CPF na linha: o telefone normalizado também identifica a pessoa
@@ -9741,6 +9775,17 @@ async function prospPessoa(pid, btn){
   try{
     const ja = await prospJaNaLista([pid]);
     if(ja.has(pid)){ showToast('Já estava na Prospecção: abri a linha.'); vdIrPara('pro', ja.get(pid)); return; }
+    // 12/11/2026 (caso Cristiane): linha antiga da mesma pessoa ligada a outro cadastro ou sem cadastro — junta em vez de criar outra "Novo"
+    const d = dOnly(p.cpf), qs = [];
+    if(d.length===11) qs.push(sb.from('crm_prospeccao').select('id,pessoa_id,nome,status').in('cpf', [d, fmtCPF(d)]).limit(5));
+    const tk = normNome(p.nome); if(tk.length>=2) qs.push(sb.from('crm_prospeccao').select('id,pessoa_id,nome,status').ilike('nome', '%'+tk[0].replace(/[aeiouc]/g,'_')+'%'+tk[tk.length-1].replace(/[aeiouc]/g,'_')+'%').limit(5));
+    const velhas = (await Promise.all(qs)).flatMap(r=>r.data||[]);
+    const mesma = velhas.find(r=>r.pessoa_id!==pid && (!r.pessoa_id || !OP.pessoas.some(x=>x.id===r.pessoa_id)));
+    if(mesma && confirm('Já existe na Prospecção uma linha de "'+(mesma.nome||'')+'" ('+(mesma.status||'sem status')+').\n\nÉ a mesma pessoa? OK = ligar essa linha a este cadastro e abrir. Cancelar = criar uma linha nova.')){ await sb.from('crm_prospeccao').update({ pessoa_id:pid, updated_at:new Date().toISOString() }).eq('id', mesma.id);
+      showToast('Já havia uma linha desta pessoa na Prospecção ('+(mesma.status||'')+'): liguei ao cadastro e abri.'); vdIrPara('pro', mesma.id); return; }
+    // quem já é cliente não volta como "Novo" sem a corretora querer (ex.: para vender outro seguro)
+    const { count: nApo } = await sb.from('crm_apolices').select('id', { count:'exact', head:true }).eq('pessoa_id', pid);
+    if(nApo && !confirm(p.nome+' já é cliente (tem '+nApo+' apólice'+(nApo>1?'s':'')+').\n\nCriar mesmo assim uma linha nova na Prospecção, para oferecer outro seguro?')){ return; }
     const { data, error } = await sb.from('crm_prospeccao').insert(prospLinha(p, prospOrigemDe(p))).select('id').single(); if(error) throw error;
     showToast('Criei a linha em Vendas > Prospecção.'); vdIrPara('pro', data.id);
   }catch(e){ showToast('Erro ao enviar para a Prospecção: '+(e.message||e)); }
@@ -9827,6 +9872,122 @@ async function lembAbrirLista(r){
   dlgOpen(`<div class="om-title"><div><h3>${escapeHtml(r.titulo)}</h3><div class="om-sub">Clientes do público desta data. Toque em 💬 para abrir o WhatsApp com a mensagem pronta.</div></div><button data-close>✕</button></div>
     <div class="dlg-body" style="max-height:60vh;overflow:auto">${(data||[]).map(x=>{ const wa = waLink(x.telefone); return `<div class="rec"><b>${escapeHtml(x.nome)}</b> <small style="color:var(--ink-faint)">${escapeHtml(x.telefone||'sem telefone')}</small><span style="float:right">${wa?`<a class="om-cancel vd-btn" target="_blank" rel="noopener" href="${wa}?text=${encodeURIComponent(lembTexto(modelo,{nome:x.nome}))}">💬 WhatsApp</a>`:''}</span></div>`; }).join('')||'<div class="hint">Nenhum cliente neste público.</div>'}</div>
     <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Fechar</button></div>`, true);
+}
+// ============ MENSAGENS DO ANO (12/11/2026, pedido do Luiz) ============
+// O CRM acompanha o ano de cada cliente (aniversário dele e da família, Ano Novo, Páscoa, Dia da Mulher, das Mães, dos Pais, Natal,
+// 3/6/9/12 meses da apólice nova, 90 dias sem conversa) e deixa a mensagem pronta. ✨ pede à IA (função mensagem-cliente) uma versão
+// pessoal para aquele cliente. Quem envia é o corretor, pelo WhatsApp dele; "Enviei" registra no histórico (crm_atividades) e marca
+// o lembrete como feito (crm_avisos), e assim o cliente sai da lista e o sistema sabe quando foi a última conversa.
+const MSG = { modelos:null, enviados:new Set(), itens:[] };
+const MSG_PADRAO = {
+  sem_contato:'Oi, {primeiro_nome}! Faz um tempinho que a gente não conversa e lembrei de você. Como estão as coisas por aí? Sigo por aqui cuidando da sua proteção; qualquer novidade na sua vida, me conta. Abraço, {corretor}.',
+  livre:'Oi, {primeiro_nome}! Passando para saber como você está. Sigo por aqui cuidando da sua proteção; qualquer novidade, me conta. Abraço, {corretor}.',
+  pascoa:'Oi, {primeiro_nome}! Passando para te desejar uma Feliz Páscoa, com paz e um tempo bom com quem você gosta. Seguimos por aqui cuidando da sua proteção; qualquer novidade na sua vida, me conta. Abraço, {corretor}.'
+};
+async function msgModelos(){
+  if(MSG.modelos) return MSG.modelos;
+  const { data } = await sb.from('crm_mensagens_modelo').select('corretor_id,momento,texto,ativo');
+  const m = {}; (data||[]).filter(x=>x.ativo!==false && x.texto).forEach(x=>{ if(!m[x.momento] || x.corretor_id) m[x.momento] = x.texto; });   // o modelo da corretora vence o padrão
+  return MSG.modelos = m;
+}
+const msgOcasiao = r => r.tipo==='data_comemorativa' ? r.momento : (/^rel90:/.test(r.chave) ? 'sem_contato' : (r.momento || 'livre'));
+const msgQuando = d => d===0 ? '<span class="tagx warn">hoje</span>' : (d<0 ? `<span class="tagx bad">${-d} dia${-d===1?'':'s'} atrás</span>` : `<span class="tagx">em ${d} dia${d===1?'':'s'}</span>`);
+function msgLinha(it){
+  const feito = MSG.enviados.has(it.chaveAviso);
+  return `<div class="rec hj-row" data-msgk="${escapeHtml(it.chaveAviso)}"><a href="#" data-openp="${it.pessoa_id}" style="font-weight:600;color:var(--brand)">${escapeHtml(it.nome)}</a> <small style="color:var(--ink-faint)">${escapeHtml(it.titulo)}</small>
+    <span class="hj-dir">${it.quando||''}${feito ? '<span class="tagx">✔ enviada</span>' : `<button class="om-cancel vd-btn" data-msgw="${escapeHtml(it.chaveAviso)}">✍️ Escrever mensagem</button>`}</span></div>`;
+}
+async function renderMensagens(){
+  const host = document.getElementById('msg-body'); if(!host) return;
+  host.innerHTML = '<div class="op-more">Carregando...</div>';
+  const [lr, av] = await Promise.all([
+    sb.rpc('crm_lembretes', { p_dias:370 }),
+    sb.from('crm_avisos').select('chave').eq('status','feito').like('chave','msg:%').gte('feito_em', new Date(Date.now()-400*864e5).toISOString())]);
+  if(lr.error){ host.innerHTML = '<div class="om-err">Não consegui carregar as datas: '+escapeHtml(lr.error.message)+'</div>'; return; }
+  MSG.enviados = new Set((av.data||[]).map(x=>x.chave));
+  const L = lr.data || [];
+  const pessoal = L.filter(r=>r.pessoa_id && !/^rel90:/.test(r.chave) && daysTo(r.data_ref)!==null && daysTo(r.data_ref)<=30)
+    .map(r=>({ ...r, ocasiao:msgOcasiao(r), chaveAviso:'msg:'+r.chave, quando:msgQuando(daysTo(r.data_ref)) }));
+  const semConversa = L.filter(r=>/^rel90:/.test(r.chave) && daysTo(r.data_ref)!==null && daysTo(r.data_ref)<=0)
+    .map(r=>({ ...r, ocasiao:'sem_contato', chaveAviso:'msg:'+r.chave, quando:'' }));
+  const camp = []; const vistas = new Set();
+  L.filter(r=>r.tipo==='data_comemorativa').sort((a,b)=>String(a.data_ref).localeCompare(String(b.data_ref))).forEach(r=>{
+    const k = (r.extra && r.extra.campanha) || r.momento; if(vistas.has(k) || daysTo(r.data_ref) < -3) return; vistas.add(k); camp.push(r); });
+  MSG.itens = pessoal.concat(semConversa);
+  const box = (titulo, n, html, dica)=>`<div class="es-box"><div class="ql">${titulo} <span class="tagx" style="margin-left:6px">${n}</span></div>${dica?`<div class="hint" style="margin:2px 0 8px">${dica}</div>`:''}${html||'<div class="hint">Nada por aqui agora.</div>'}</div>`;
+  const cards = camp.map(r=>{ const d = daysTo(r.data_ref), q = (r.extra && r.extra.qtd) || 0;
+    return `<div class="msg-card"><div class="msg-card-t">${escapeHtml(String(r.titulo).replace(/ \(\d+ clientes\)$/,''))}</div><div class="msg-card-d">${fmtDate(r.data_ref)} · ${d<=0?'é agora':('faltam '+d+' dia'+(d===1?'':'s'))}</div>
+      <div class="msg-card-q">${q} cliente${q===1?'':'s'}</div><button class="om-cancel vd-btn" data-msgcamp="${escapeHtml(r.chave)}">Abrir lista</button></div>`; }).join('');
+  host.innerHTML = `
+    <div class="es-box msg-intro"><div class="ql">Como funciona</div>
+      <div>O CRM acompanha o ano de cada cliente e avisa a hora de falar com ele: <b>aniversário</b> dele e da família, <b>Ano Novo, Páscoa, Dia da Mulher, Dia das Mães, Dia dos Pais e Natal</b>, os <b>3, 6, 9 e 12 meses</b> de uma apólice nova e quem está há <b>mais de 90 dias sem conversa</b>.
+      Cada mensagem já vem pronta. Toque em <b>✨ Deixar mais pessoal</b> e a IA reescreve para aquele cliente, lembrando das apólices dele e perguntando da vida dele. Você lê, ajusta do seu jeito e envia pelo seu WhatsApp.</div></div>
+    <div class="msg-regra">📝 <b>Falou com o cliente? Registre no CRM.</b> Ligação, WhatsApp, café, encontro no corredor: tudo. É o registro que atualiza a situação do cliente e faz o sistema avisar você na hora certa da próxima conversa. Aqui, o botão <b>✔ Enviei</b> já registra. Fora daqui, use <b>Registrar atividade</b> na ficha do cliente.</div>
+    ${box('Para mandar agora (próximos 30 dias)', pessoal.length, pessoal.map(msgLinha).join(''), 'Aniversários, família e acompanhamento das apólices novas.')}
+    ${box('Faz tempo que vocês não conversam (90 dias ou mais)', semConversa.length, semConversa.slice(0,40).map(msgLinha).join('') + (semConversa.length>40?`<div class="hint">+${semConversa.length-40} outros. Conforme você registra as conversas, a lista diminui.</div>`:''), 'Uma mensagem simples, só para saber como a pessoa está.')}
+    <div class="es-box"><div class="ql">Datas especiais do ano</div><div class="hint" style="margin:2px 0 8px">Cada data mostra os clientes certos (ex.: Dia da Mulher só para as clientes). Abra a lista perto da data.</div><div class="msg-cards">${cards || '<div class="hint">Nenhuma data com clientes no próximo ano.</div>'}</div></div>`;
+  host.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); goToPersonView(a.dataset.openp); }));
+  host.querySelectorAll('[data-msgw]').forEach(b=>b.addEventListener('click', ()=>{ const it = MSG.itens.find(x=>x.chaveAviso===b.dataset.msgw); if(it) msgEscrever(it, renderMensagens); }));
+  host.querySelectorAll('[data-msgcamp]').forEach(b=>b.addEventListener('click', ()=>{ const r = camp.find(x=>x.chave===b.dataset.msgcamp); if(r) msgLista(r); }));
+}
+async function msgLista(r){
+  const titulo = String(r.titulo).replace(/ \(\d+ clientes\)$/,'');
+  const { data, error } = await sb.rpc('crm_destinatarios', { p_publico:(r.extra && r.extra.publico) || 'todos' });
+  if(error){ showToast('Não consegui abrir a lista: '+error.message); return; }
+  const itens = (data||[]).map(x=>({ pessoa_id:x.pessoa_id, nome:x.nome, telefone:x.telefone, tipo:'data_comemorativa', momento:r.momento, ocasiao:r.momento, titulo, data_ref:r.data_ref, chaveAviso:'msg:'+r.chave+':'+x.pessoa_id }))
+    .sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+  const desenhar = ()=>{ const feitos = itens.filter(i=>MSG.enviados.has(i.chaveAviso)).length;
+    dlgOpen(`<div class="om-title"><div><h3>${escapeHtml(titulo)} · ${fmtDate(r.data_ref)}</h3><div class="om-sub">${itens.length} cliente${itens.length===1?'':'s'} · ${feitos} mensagem${feitos===1?'':'s'} enviada${feitos===1?'':'s'}. Toque em ✍️ para escrever a de cada um.</div></div><button data-close>✕</button></div>
+      <div class="dlg-body" style="max-height:62vh;overflow:auto">${itens.map(msgLinha).join('') || '<div class="hint">Nenhum cliente neste público.</div>'}</div>
+      <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Fechar</button></div>`, true);
+    const box = document.getElementById('dlg');
+    box.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); dlgClose(); goToPersonView(a.dataset.openp); }));
+    box.querySelectorAll('[data-msgw]').forEach(b=>b.addEventListener('click', ()=>{ const it = itens.find(x=>x.chaveAviso===b.dataset.msgw); if(it) msgEscrever(it, desenhar); }));
+  };
+  desenhar();
+}
+async function msgEscrever(it, depois){
+  const modelos = await msgModelos();
+  const base = modelos[it.ocasiao] || MSG_PADRAO[it.ocasiao] || modelos.relacionamento || MSG_PADRAO.livre;
+  const inicial = lembTexto(base, { nome:it.nome, extra:it.extra||{} });
+  const wa = waLink(it.telefone);
+  dlgOpen(`<div class="om-title"><div><h3>Mensagem para ${escapeHtml(lembPrimeiroNome(it.nome))}</h3><div class="om-sub">${escapeHtml(it.titulo||'')}</div></div><button data-close>✕</button></div>
+    <div class="dlg-body">
+      <textarea id="msg-txt" rows="8" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px;font:inherit;line-height:1.5">${escapeHtml(inicial)}</textarea>
+      <div class="sg-row" style="margin-top:8px;gap:10px;flex-wrap:wrap;align-items:center"><button class="om-cancel" id="msg-ia">✨ Deixar mais pessoal</button><span class="hint" id="msg-st">A IA reescreve para este cliente: cita as apólices dele e pergunta da vida dele.</span></div>
+      <div class="hint" style="margin-top:8px">Leia antes de enviar e ajuste do seu jeito: quem conhece o cliente é você. Nada é enviado sozinho.</div>
+      <div class="om-err" id="msg-err"></div></div>
+    <div class="om-foot"><button class="om-cancel" id="msg-copiar">Copiar texto</button><span style="flex:1"></span>
+      ${wa ? '<button class="om-cancel" id="msg-wa">Abrir no WhatsApp</button>' : '<span class="hint" style="align-self:center">Sem telefone no cadastro: copie o texto.</span>'}
+      <button class="om-save" id="msg-enviei">✔ Enviei — registrar</button></div>`, true);
+  const box = document.getElementById('dlg'), txt = box.querySelector('#msg-txt'), st = box.querySelector('#msg-st'), err = box.querySelector('#msg-err');
+  box.querySelector('#msg-ia').addEventListener('click', async e=>{
+    const b = e.currentTarget; if(b.disabled) return; b.disabled = true; st.textContent = 'Escrevendo…'; err.textContent = '';
+    try{
+      const rascunho = txt.value.trim() !== inicial.trim() ? txt.value.trim() : '';
+      const { data, error } = await sb.functions.invoke('mensagem-cliente', { body:{ pessoa_id:it.pessoa_id, ocasiao:it.ocasiao, familiar:(it.extra && it.extra.familiar) || null, rascunho, corretor:curUserName() } });
+      if(error){ let m = error.message; try{ const j = await error.context.json(); if(j && j.error) m = j.error; }catch(_){} throw new Error(m); }
+      if(!data || !data.mensagem) throw new Error((data && data.error) || 'sem resposta');
+      txt.value = data.mensagem; st.textContent = 'Pronto. Leia e ajuste se quiser; pode pedir outra versão.'; b.textContent = '✨ Outra versão';
+    }catch(x){ err.textContent = 'Não consegui escrever agora: '+(x.message||x)+'. O texto pronto continua valendo.'; st.textContent = ''; }
+    finally{ b.disabled = false; }
+  });
+  box.querySelector('#msg-copiar').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(txt.value); showToast('Texto copiado.'); }catch(_){ txt.select(); document.execCommand('copy'); showToast('Texto copiado.'); } });
+  const bwa = box.querySelector('#msg-wa');
+  if(bwa) bwa.addEventListener('click', ()=>{ window.open(wa+'?text='+encodeURIComponent(txt.value), '_blank', 'noopener'); box.querySelector('#msg-enviei').classList.add('pulse'); st.textContent = 'Mandou? Toque em ✔ Enviei para registrar.'; });
+  box.querySelector('#msg-enviei').addEventListener('click', async e=>{
+    const b = e.currentTarget; if(b.disabled) return; b.disabled = true; err.textContent = '';
+    const agora = new Date().toISOString(), texto = txt.value.trim();
+    const a1 = await sb.from('crm_atividades').insert({ pessoa_id:it.pessoa_id, tipo:'whatsapp', data_hora:agora, resumo:'Mensagem enviada ('+(it.titulo||'relacionamento')+'): '+texto.slice(0,400), resultado:'Enviada', responsavel:curUserName()||null });
+    if(a1.error){ err.textContent = 'Não consegui registrar: '+a1.error.message; b.disabled = false; return; }
+    const tipoAviso = ['aniversario','aniversario_familiar','relacionamento','data_comemorativa'].includes(it.tipo) ? it.tipo : 'relacionamento';
+    const a2 = await sb.from('crm_avisos').insert({ chave:it.chaveAviso, tipo:tipoAviso, pessoa_id:it.pessoa_id, data_aviso:it.data_ref || ymdToday(), titulo:it.titulo||'Mensagem', status:'feito', feito_em:agora, feito_por:curUserName()||null });
+    if(a2.error && !/duplicate|unique/i.test(a2.error.message||'')) console.warn('aviso da mensagem', a2.error);
+    // o lembrete original (aniversário, 3/6/9/12 meses) também sai do Hoje
+    if(it.chave && it.tipo!=='data_comemorativa') await sb.from('crm_avisos').insert({ chave:it.chave, tipo:tipoAviso, pessoa_id:it.pessoa_id, data_aviso:it.data_ref || ymdToday(), titulo:it.titulo||'Mensagem', status:'feito', feito_em:agora, feito_por:curUserName()||null }).then(()=>{}, ()=>{});
+    MSG.enviados.add(it.chaveAviso); OP.dirty = true;
+    dlgClose(); showToast('Registrado no histórico de '+lembPrimeiroNome(it.nome)+'.'); if(depois) depois();
+  });
 }
 // ===== Confirmação automática da reunião: a Prospecção ("Agendou reunião") ou a Agenda criam o compromisso e o banco monta
 // a régua de lembretes em crm_envios (confirmação, 3/2/1 dia antes às 9h, 1 hora antes e na hora). Sem API de WhatsApp:
@@ -10030,7 +10191,7 @@ document.getElementById('comeco-body').addEventListener('change', async ev=>{
 });
 function menuEnxuto(on){
   const rail = document.getElementById('rail'), mais = document.getElementById('nav-mais'); if(!rail || !mais) return;
-  const fica = ['hoje','operacao','sugestoes','admin'].concat(tcModulo('central') ? ['central'] : []);
+  const fica = ['hoje','mensagens','operacao','sugestoes','admin'].concat(tcModulo('central') ? ['central'] : []);
   rail.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('nav-extra', !!on && !fica.includes(b.dataset.view)));
   const op = rail.querySelector('.nav-btn[data-view="operacao"] span'); if(op){ if(!op.dataset.orig) op.dataset.orig = op.textContent; op.textContent = on ? 'Clientes' : op.dataset.orig; }
   rail.classList.toggle('enxuto', !!on); if(!on) rail.classList.remove('aberto');
@@ -11613,11 +11774,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611121222"></script>
-<script src="painel.js?v=202611121222"></script>
-<script src="cobranca.js?v=202611121222"></script>
-<script src="cadastro.js?v=202611121222"></script>
-<script src="contrato.js?v=202611121222"></script>
-<script src="guarda.js?v=202611121222"></script>
+<script src="plataforma.js?v=202611121307"></script>
+<script src="painel.js?v=202611121307"></script>
+<script src="cobranca.js?v=202611121307"></script>
+<script src="cadastro.js?v=202611121307"></script>
+<script src="contrato.js?v=202611121307"></script>
+<script src="guarda.js?v=202611121307"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611121212">
+<meta name="app-build" content="202611121222">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -11558,7 +11558,7 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
     p = document.createElement('div'); p.id = 'pq-painel'; p.setAttribute('role','dialog'); p.setAttribute('aria-label','Pergunte aqui'); p.hidden = true;
     p.innerHTML = '<div class="pq-cab"><span aria-hidden="true">✨</span><b>Pergunte aqui</b><button type="button" id="pq-fechar" aria-label="Fechar">✕</button></div>'
       + '<div class="pq-conv" id="pq-conv" aria-live="polite"></div>'
-      + '<form class="pq-pe" id="pq-form2" autocomplete="off"><input id="pq-in2" maxlength="600" placeholder="Pergunte outra coisa…" aria-label="Pergunte outra coisa"><button type="submit">Perguntar</button></form>'
+      + '<form class="pq-pe" id="pq-form2" autocomplete="off"><input id="pq-in2" maxlength="600" placeholder="Escreva a sua dúvida…" aria-label="Escreva a sua dúvida"><button type="submit">Perguntar</button></form>'
       + '<div class="pq-nota">A IA explica como usar o sistema. Não mande dados de clientes aqui.</div>';
     document.body.appendChild(p);
     $('pq-fechar').addEventListener('click', ()=>{ p.hidden = true; });
@@ -11578,8 +11578,13 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
       if(!clicar(v)) throw 0;
     }catch(e){ showToast('Essa tela não está no seu plano ou no seu acesso.'); }
   }
+  const EXEMPLOS = ['Por onde eu começo?', 'Como mando o Portal do cliente?', 'Como importo a minha planilha?', 'Como registro um contato na Prospecção?'];
   function desenhar(){
     const c = $('pq-conv'); if(!c) return;
+    // painel aberto sem pergunta: explica e oferece exemplos para clicar (antes abria vazio e parecia que não havia nada)
+    if(!PQ.hist.length){ c.innerHTML = '<div class="pq-ia">Oi! Eu explico como usar o CRM Aliança: onde fica cada coisa e o passo a passo. Escreva a sua dúvida aqui embaixo ou toque num exemplo:<div class="pq-ir">'
+      + EXEMPLOS.map(x=>'<button type="button" data-pq-ex="'+esc(x)+'">'+esc(x)+'</button>').join('') + '</div></div>';
+      c.querySelectorAll('[data-pq-ex]').forEach(b=>b.addEventListener('click', ()=>perguntar(b.dataset.pqEx))); return; }
     c.innerHTML = PQ.hist.map((h,i)=>'<div class="pq-eu">'+esc(h.p)+'</div>'
       + (h.r==null ? '<div class="pq-ia">Pensando…</div>'
         : '<div class="pq-ia">'+esc(h.r)+((h.ir&&h.ir.length)||h.sug ? '<div class="pq-ir">'+(h.ir||[]).map(x=>'<button type="button" data-pq-ir="'+esc(x.destino)+'">'+esc(x.rotulo)+' →</button>').join('')
@@ -11603,16 +11608,16 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
     }catch(e){ item.r = 'Não consegui responder agora. Confira a internet e tente de novo.'; item.sug = true; }
     PQ.ocupado = false; desenhar(); const i2 = $('pq-in2'); if(i2) i2.focus();
   }
-  document.addEventListener('submit', e=>{ if(e.target.id!=='pq-form') return; e.preventDefault(); const i = $('pq-in'); const v = i.value.trim(); if(!v){ i.focus(); return; } if(PQ.ocupado){ showToast('Espere a resposta anterior terminar.'); return; } i.value = ''; perguntar(v); });
+  document.addEventListener('submit', e=>{ if(e.target.id!=='pq-form') return; e.preventDefault(); const i = $('pq-in'); const v = i.value.trim(); if(!v){ const p = painel(); p.hidden = false; desenhar(); setTimeout(()=>{ const i2 = $('pq-in2'); if(i2) i2.focus(); }, 50); return; } if(PQ.ocupado){ showToast('Espere a resposta anterior terminar.'); return; } i.value = ''; perguntar(v); });
   document.addEventListener('click', e=>{ if(e.target.closest('#pq-mini')){ const p = painel(); p.hidden = false; desenhar(); setTimeout(()=>{ const i2 = $('pq-in2'); if(i2) i2.focus(); }, 50); } });
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611121212"></script>
-<script src="painel.js?v=202611121212"></script>
-<script src="cobranca.js?v=202611121212"></script>
-<script src="cadastro.js?v=202611121212"></script>
-<script src="contrato.js?v=202611121212"></script>
-<script src="guarda.js?v=202611121212"></script>
+<script src="plataforma.js?v=202611121222"></script>
+<script src="painel.js?v=202611121222"></script>
+<script src="cobranca.js?v=202611121222"></script>
+<script src="cadastro.js?v=202611121222"></script>
+<script src="contrato.js?v=202611121222"></script>
+<script src="guarda.js?v=202611121222"></script>
 </body>
 </html>

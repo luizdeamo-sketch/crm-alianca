@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611121107">
+<meta name="app-build" content="202611121114">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -4591,7 +4591,8 @@ function dgLinhaSN(k, det, row, defDe){
   const d = defDe(k), esq = pvDiagField(k, row[k], d);
   // sim_quais já traz o "Qual ou quais?" ao lado; para as outras, o campo de detalhe vai na coluna da direita
   const dir = d[2]==='sim_quais' ? '' : (det ? pvDiagField(det, row[det], defDe(det)) : '<span></span>');
-  return `<div class="dg-sn">${esq}${dir}</div>`;
+  // 12/11/2026 (Vitória): o campo da direita fica sempre no lugar e só libera para digitar com "Sim" — antes uns apareciam e outros não
+  return `<div class="dg-sn"${det && d[2]==='boolean' ? ` data-sn-k="${k}" data-sn-det="${det}"` : ''}>${esq}${dir}</div>`;
 }
 function pvDiagField(k, v, def){
   const val = v==null ? '' : v;
@@ -4599,7 +4600,7 @@ function pvDiagField(k, v, def){
   // "Tem seguro de vida?" (pedido da Amanda, 09/11/2026): Sim/Não e, se sim, quais. Grava em um campo só ("Sim: MAG, Prudential").
   if(def[2]==='sim_quais'){ const s = String(val).trim(), nao = /^n[aã]o\b/i.test(s), sim = !!s && !nao, quais = nao ? '' : /^sim\b/i.test(s) ? s.replace(/^sim\s*[:\-–—]?\s*/i,'') : s;   // texto antigo livre ("Tenho MAG") vira Sim + quais, sem perder nada
     return `<label class="fl"><span>${def[1]}</span><select data-sq="${k}"><option value="">—</option><option ${sim?'selected':''}>Sim</option><option ${nao?'selected':''}>Não</option></select></label>
-      <label class="fl" data-sq-box="${k}" style="${sim?'':'display:none'}"><span>${def[3] ? escapeHtml(def[3]) : 'Qual ou quais? <small style="color:var(--ink-faint)">seguradora e produto</small>'}</span><input type="text" data-sq-txt="${k}" placeholder="${def[3] ? '' : 'Ex.: MAG Vida Inteira, Prudential'}" value="${escapeHtml(quais)}"></label>
+      <label class="fl" data-sq-box="${k}"><span>${def[3] ? escapeHtml(def[3]) : 'Qual ou quais? <small style="color:var(--ink-faint)">seguradora e produto</small>'}</span><input type="text" data-sq-txt="${k}" placeholder="${sim ? (def[3] ? '' : 'Ex.: MAG Vida Inteira, Prudential') : 'Responda Sim para preencher'}" value="${escapeHtml(quais)}" ${sim?'':'disabled'}></label>
       <input type="hidden" data-dg="${k}" value="${escapeHtml(s)}">`; }
   if(def[2]==='select') return `<label class="fl"><span>${def[1]}</span><select data-dg="${k}"><option value="">—</option>${def[3].map(o=>`<option ${val===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
   return `<label class="fl"><span>${def[1]}</span><input data-dg="${k}" type="${def[2]==='number'?'number':'text'}" step="any" value="${escapeHtml(String(val))}"></label>`;
@@ -4749,8 +4750,13 @@ async function pvDiagnostico(p){
   pdBindAvancado(host);
   // Sim/Não + quais → um valor só no campo escondido que o Salvar lê
   host.querySelectorAll('[data-sq]').forEach(sel=>{ const k = sel.dataset.sq, box = host.querySelector(`[data-sq-box="${k}"]`), txt = host.querySelector(`[data-sq-txt="${k}"]`), out = host.querySelector(`input[data-dg="${k}"]`);
-    const upd = ()=>{ box.style.display = sel.value==='Sim' ? '' : 'none'; const q = txt.value.trim(); out.value = sel.value==='Sim' ? (q ? 'Sim: '+q : 'Sim') : sel.value; };
+    const ph = txt.getAttribute('placeholder')==='Responda Sim para preencher' ? (k==='tem_seguro_vida' ? 'Ex.: MAG Vida Inteira, Prudential' : '') : txt.getAttribute('placeholder');
+    const upd = ()=>{ const s = sel.value==='Sim'; txt.disabled = !s; txt.placeholder = s ? ph : 'Responda Sim para preencher'; const q = txt.value.trim(); out.value = s ? (q ? 'Sim: '+q : 'Sim') : sel.value; };
     sel.addEventListener('change', ()=>{ upd(); if(sel.value==='Sim') txt.focus(); }); txt.addEventListener('input', upd); });
+  // perguntas de Sim/Não com detalhe ao lado: o detalhe só libera com "Sim" (se já tinha algo escrito, continua liberado)
+  host.querySelectorAll('.dg-sn[data-sn-k]').forEach(lin=>{ const sel = lin.querySelector(`[data-dg="${lin.dataset.snK}"]`), det = lin.querySelector(`[data-dg="${lin.dataset.snDet}"]`); if(!sel || !det) return;
+    const ph = det.placeholder || ''; const upd = ()=>{ const livre = sel.value==='true' || !!det.value.trim(); det.disabled = !livre; det.placeholder = livre ? ph : 'Responda Sim para preencher'; };
+    sel.addEventListener('change', ()=>{ upd(); if(sel.value==='true') det.focus(); }); upd(); });
   // Dados pessoais: guarda o que a tela mostrou ao abrir. Ao salvar, só vai para o cadastro o que a pessoa mudou aqui;
   // campo vazio que ela não tocou não apaga o que já está no cadastro (a tela pode estar aberta desde antes de outra edição).
   const dgpIni = {}; ['estado_civil','sexo','data_nascimento','profissao'].forEach(k=>{ dgpIni[k] = document.getElementById('dgp-'+k).value.trim(); });
@@ -10963,7 +10969,7 @@ checkSession();
   // mensagens do sistema (toast) e erros
   const RE_ERRO = /^erro|n[aã]o (consegui|foi poss|aceit|encontr)|preench|informe|escolh|escrev|selecion|falt|inv[aá]lid|obrigat|permita|primeiro|antes de/i;
   // confirmação de que deu certo ("Escolha salva", "Informações salvas") não é recusa: antes contava como erro e chamava o balão
-  const RE_OK = /salv[ao]s?|registrad[ao]s?|atualizad[ao]s?|marcad[ao] como/i;
+  const RE_OK = /\bsalv[ao]s?\b|\bregistrad[ao]s?\b|\batualizad[ao]s?\b|\bmarcad[ao] como\b/i;
   let ultimoSalvo = 0;
   const _toast = window.showToast;
   if(typeof _toast === 'function'){
@@ -11489,11 +11495,11 @@ document.addEventListener('change', async e=>{
   const { error } = await sb.from('crm_usuarios').upsert({email:em, nome, papel, atualizado_em:new Date().toISOString()},{onConflict:'email'}); showToast(error ? 'Erro: '+error.message : 'Salvo ✓');
 });
 </script>
-<script src="plataforma.js?v=202611121107"></script>
-<script src="painel.js?v=202611121107"></script>
-<script src="cobranca.js?v=202611121107"></script>
-<script src="cadastro.js?v=202611121107"></script>
-<script src="contrato.js?v=202611121107"></script>
-<script src="guarda.js?v=202611121107"></script>
+<script src="plataforma.js?v=202611121114"></script>
+<script src="painel.js?v=202611121114"></script>
+<script src="cobranca.js?v=202611121114"></script>
+<script src="cadastro.js?v=202611121114"></script>
+<script src="contrato.js?v=202611121114"></script>
+<script src="guarda.js?v=202611121114"></script>
 </body>
 </html>

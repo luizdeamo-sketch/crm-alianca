@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611131209">
+<meta name="app-build" content="202611131213">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -311,8 +311,14 @@ window.ALIANCA = {
 .kb-dia{padding:0 24px 16px;overflow-x:auto} .kb-dia table{border-collapse:collapse;font-size:13px;min-width:100%}
 .kb-dia th,.kb-dia td{border-bottom:1px solid var(--border);padding:7px 10px;text-align:center;white-space:nowrap} .kb-dia tbody th,.kb-dia thead th:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
 .kb-dia thead th small{display:block;font-weight:400;color:var(--ink-faint)} .kb-dia .kb-tot{font-weight:700;background:var(--bg)}
-@media (max-width:760px){ .kb-placar,.kb-demo{margin-left:12px;margin-right:12px} .kb-barra-top,.kb-board,.kb-dia{padding-left:12px;padding-right:12px} .kb-col{flex-basis:84vw;min-width:84vw;max-height:none} }
+@media (max-width:760px){ .kb-placar,.kb-demo{margin-left:12px;margin-right:12px} .kb-barra-top,.kb-topo,.kb-board,.kb-dia{padding-left:12px;padding-right:12px} .kb-topo input{width:100%} .kb-col{flex-basis:84vw;min-width:84vw;max-height:none} }
 .login-outra{background:#fff7e0;border:1px solid #d7aa42;color:#3d2e05;border-radius:10px;padding:12px;font-size:13.5px;line-height:1.45;text-align:left}
+.kb-topo{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:10px 24px;font-size:13px}
+.kb-sem{font-weight:700;color:var(--ink);margin-right:4px}
+.kb-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 10px;color:var(--ink-soft);white-space:nowrap} .kb-chip b{color:var(--ink)}
+.kb-mini-barra{width:70px;height:6px;background:var(--border);border-radius:6px;overflow:hidden;display:inline-block} .kb-mini-barra span{display:block;height:100%;background:#16a34a}
+.kb-topo input{border:1px solid var(--border);border-radius:10px;padding:6px 10px;font:inherit;width:180px}
+.kb-topo .om-save,.kb-topo .om-cancel{padding:6px 12px}
 </style>
 
 
@@ -9981,7 +9987,7 @@ async function kbIniciar(minha){
   if(filtros && !document.getElementById('kb-modo')){
     const seg = document.createElement('div'); seg.id = 'kb-modo'; seg.className = 'kb-seg';
     seg.innerHTML = '<button type="button" data-kbm="lista">Lista</button><button type="button" data-kbm="kanban">Kanban</button>';
-    filtros.insertBefore(seg, hoje || null);
+    filtros.insertBefore(seg, filtros.firstChild);   // primeiro da barra: fica no mesmo lugar na Lista e no Kanban (13/11/2026, pedido do Luiz)
     seg.addEventListener('click', e=>{ const b = e.target.closest('[data-kbm]'); if(!b) return; KB.modo = b.dataset.kbm; try{ localStorage.setItem('kb_modo', KB.modo); }catch(_){} kbAoAbrir(); });
   }
   const sc = document.getElementById('op-scroll');
@@ -10042,20 +10048,23 @@ async function kbRender(recarregar){
   const fora = KB.rows.filter(r=>KB_FORA.includes(r.status)).length;
   const fimSem = new Date(P.seg+'T12:00:00'); fimSem.setDate(fimSem.getDate()+4);
   const pct = Math.min(100, Math.round(P.contatos / Math.max(1,KB.meta) * 100));
-  const placar = `<div class="kb-placar">
-      <div class="kb-pl-t"><b>Semana de ${fmtDate(P.seg).slice(0,5)} a ${fmtDate(kbIso(fimSem)).slice(0,5)}</b><span class="hint" style="margin:0">Meta: ${KB.meta} contatos por semana <a href="#" id="kb-meta">trocar</a></span></div>
-      <div class="kb-pl-n"><div><b>${P.lista}</b> de ${KB.meta}<small>na lista</small></div><div><b>${P.contatos}</b><small>contatos registrados</small></div><div><b>${P.reunioes}</b><small>reuniões marcadas</small></div><div><b>${P.propostas}</b><small>propostas</small></div><div><b>${P.clientes}</b><small>viraram clientes</small></div></div>
-      <div class="kb-barra" title="${P.contatos} de ${KB.meta} contatos"><span style="width:${pct}%"></span></div></div>`;
-  const barra = `<div class="kb-barra-top"><input id="kb-busca" placeholder="Buscar no quadro..." value="${escapeHtml(KB.busca)}">
-      <div class="kb-seg kb-vista"><button type="button" data-kbv="quadro" class="${KB.vista==='quadro'?'on':''}">Quadro</button><button type="button" data-kbv="dia" class="${KB.vista==='dia'?'on':''}">Resumo por dia</button></div>
-      <span style="flex:1"></span><button class="om-cancel" id="kb-novo">+ Indicação</button><button class="om-save" id="kb-montar">📋 Montar a lista da semana</button></div>`;
+  // placar e botões numa linha só (13/11/2026: o Luiz achou o placar grande demais)
+  const chip = (n, txt, tit)=>`<span class="kb-chip" title="${tit||''}"><b>${n}</b> ${txt}</span>`;
+  const barra = `<div class="kb-topo">
+      <span class="kb-sem" title="Versão de apresentação: só a corretora Demonstração vê este quadro">🔒 Semana ${fmtDate(P.seg).slice(0,5)}–${fmtDate(kbIso(fimSem)).slice(0,5)}</span>
+      ${chip(P.lista+'/'+KB.meta, 'na lista', 'Meta da semana: '+KB.meta+' contatos')}${chip(P.contatos, 'contatos')}${chip(P.reunioes, 'reuniões')}${chip(P.propostas, 'propostas')}${chip(P.clientes, 'clientes')}
+      <span class="kb-mini-barra" title="${P.contatos} de ${KB.meta} contatos"><span style="width:${pct}%"></span></span><a href="#" id="kb-meta" title="Trocar a meta da semana">meta</a>
+      <span style="flex:1"></span>
+      <input id="kb-busca" placeholder="Buscar..." value="${escapeHtml(KB.busca)}">
+      <div class="kb-seg kb-vista"><button type="button" data-kbv="quadro" class="${KB.vista==='quadro'?'on':''}">Quadro</button><button type="button" data-kbv="dia" class="${KB.vista==='dia'?'on':''}">Por dia</button></div>
+      <button class="om-cancel" id="kb-novo">+ Indicação</button><button class="om-save" id="kb-montar">📋 Montar a lista</button></div>`;
   let corpo;
   if(KB.vista==='dia') corpo = await kbResumoDia(por);
   else corpo = `<div class="kb-board">${KB_COLS.map(c=>{ const l = por[c.k], extra = c.k==='lista' ? `<span class="kb-meta${l.length>=KB.meta?' ok':''}">${l.length} de ${KB.meta}</span>` : `<span class="kb-n">${l.length}</span>`;
       return `<div class="kb-col" data-kbcol="${c.k}"><div class="kb-col-h" style="--kbc:${c.cor}"><span class="kb-dot"></span><b>${c.t}</b>${extra}</div>${c.dica?`<div class="kb-col-d">${c.dica}</div>`:''}
         <div class="kb-col-b">${l.slice(0,150).map(kbCartao).join('') || '<div class="kb-vazio">Arraste um cartão para cá</div>'}${l.length>150?`<div class="hint">+${l.length-150} (use a busca)</div>`:''}</div></div>`; }).join('')}</div>
       <div class="hint" style="padding:6px 24px 14px">${fora} contato(s) com "Sem interesse" ou "Interesse futuro" ficam fora do quadro (estão em Vendas › Prospecção). Arraste o cartão ou use ⇄ para mudar de coluna; a mudança vale também na Prospecção e vai para o histórico.</div>`;
-  host.innerHTML = '<div class="kb-demo">Versão de apresentação: só a corretora Demonstração vê este quadro.</div>' + placar + barra + corpo;
+  host.innerHTML = barra + corpo;
   kbLigar(host);
 }
 function kbLigar(host){
@@ -12104,11 +12113,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611131209"></script>
-<script src="painel.js?v=202611131209"></script>
-<script src="cobranca.js?v=202611131209"></script>
-<script src="cadastro.js?v=202611131209"></script>
-<script src="contrato.js?v=202611131209"></script>
-<script src="guarda.js?v=202611131209"></script>
+<script src="plataforma.js?v=202611131213"></script>
+<script src="painel.js?v=202611131213"></script>
+<script src="cobranca.js?v=202611131213"></script>
+<script src="cadastro.js?v=202611131213"></script>
+<script src="contrato.js?v=202611131213"></script>
+<script src="guarda.js?v=202611131213"></script>
 </body>
 </html>

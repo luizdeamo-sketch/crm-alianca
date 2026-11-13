@@ -117,7 +117,7 @@
       const cAtual = new URLSearchParams(location.search).get('c');
       // link de OUTRA corretora com alguém já logado neste navegador (ex.: o Luiz abrindo pelo Painel): avisa e oferece trocar,
       // em vez de cair calado na corretora do login (03/11/2026: "clico na Bravita e me leva para a Demonstração")
-      if (slugDoLink && data.slug && slugDoLink !== data.slug && !MODO_PAINEL) linkDeOutra(data);
+      if (slugDoLink && data.slug && slugDoLink !== data.slug && !MODO_PAINEL && !window._tcLinkResolvido) linkDeOutra(data);   // _tcLinkResolvido: a pessoa já escolheu na tela de login
       else if (data.slug && cAtual !== data.slug && !MODO_PAINEL && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash);
       aplicarMarca();
       carregarEtapas();

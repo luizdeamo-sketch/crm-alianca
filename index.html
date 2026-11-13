@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611131202">
+<meta name="app-build" content="202611131209">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -312,6 +312,7 @@ window.ALIANCA = {
 .kb-dia th,.kb-dia td{border-bottom:1px solid var(--border);padding:7px 10px;text-align:center;white-space:nowrap} .kb-dia tbody th,.kb-dia thead th:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
 .kb-dia thead th small{display:block;font-weight:400;color:var(--ink-faint)} .kb-dia .kb-tot{font-weight:700;background:var(--bg)}
 @media (max-width:760px){ .kb-placar,.kb-demo{margin-left:12px;margin-right:12px} .kb-barra-top,.kb-board,.kb-dia{padding-left:12px;padding-right:12px} .kb-col{flex-basis:84vw;min-width:84vw;max-height:none} }
+.login-outra{background:#fff7e0;border:1px solid #d7aa42;color:#3d2e05;border-radius:10px;padding:12px;font-size:13.5px;line-height:1.45;text-align:left}
 </style>
 
 
@@ -1113,6 +1114,26 @@ document.getElementById('btn-login').addEventListener('click', async ()=>{
   if(!email || !password){ errEl.textContent = 'Preencha email e senha.'; return; }
   const res = await sb.auth.signInWithPassword({ email, password });
   if(res.error){ errEl.textContent = res.error.message; return; }
+  // 13/11/2026 (Amanda): abriu o link da Aliança e o navegador preencheu o Gmail, que é de outra corretora (Demonstração).
+  // Antes ela entrava na outra e via só uma faixa; agora o login pergunta na hora, antes de abrir qualquer tela.
+  try{
+    const slugLink = (new URLSearchParams(location.search).get('c')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+    if(slugLink && !/[?&]painel=1/.test(location.search)){
+      const { data: minha } = await sb.rpc('crm_minha_corretora');
+      if(minha && minha.slug && minha.slug !== slugLink){
+        let nomeLink = slugLink; try{ const { data: m } = await sb.rpc('crm_marca_publica', { p_slug: slugLink }); if(m && m.nome_exibicao) nomeLink = m.nome_exibicao; }catch(_){}
+        const box = document.createElement('div'); box.className = 'login-outra';
+        box.innerHTML = '<b>Este e-mail não é da '+escapeHtml(nomeLink)+'.</b> O e-mail <b>'+escapeHtml(email)+'</b> entra na <b>'+escapeHtml(minha.nome_exibicao||minha.slug)+'</b>. Para entrar na '+escapeHtml(nomeLink)+', use o e-mail cadastrado nela.'
+          +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button type="button" class="om-save" data-lo="trocar">Usar outro e-mail</button><button type="button" class="om-cancel" data-lo="ficar">Entrar na '+escapeHtml(minha.nome_exibicao||minha.slug)+'</button></div>';
+        errEl.textContent = ''; errEl.appendChild(box);
+        const escolha = await new Promise(ok=>box.addEventListener('click', e=>{ const o = e.target.closest('[data-lo]'); if(o) ok(o.dataset.lo); }));
+        box.remove();
+        if(escolha==='trocar'){ await sb.auth.signOut({ scope:'local' }); const pe = document.getElementById('login-pass'), em = document.getElementById('login-email'); pe.value = ''; em.value = ''; em.focus(); return; }
+        window._tcLinkResolvido = true;
+        if(window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(minha.slug) + location.hash);
+      }
+    }
+  }catch(e){ /* sem a checagem, segue o login normal (a faixa de "link de outra corretora" continua valendo) */ }
   mfaGate();
 });
 document.getElementById('btn-forgot').addEventListener('click', async ()=>{
@@ -12083,11 +12104,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611131202"></script>
-<script src="painel.js?v=202611131202"></script>
-<script src="cobranca.js?v=202611131202"></script>
-<script src="cadastro.js?v=202611131202"></script>
-<script src="contrato.js?v=202611131202"></script>
-<script src="guarda.js?v=202611131202"></script>
+<script src="plataforma.js?v=202611131209"></script>
+<script src="painel.js?v=202611131209"></script>
+<script src="cobranca.js?v=202611131209"></script>
+<script src="cadastro.js?v=202611131209"></script>
+<script src="contrato.js?v=202611131209"></script>
+<script src="guarda.js?v=202611131209"></script>
 </body>
 </html>

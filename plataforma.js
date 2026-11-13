@@ -113,6 +113,16 @@
       MARCA = data;
       const bk = document.getElementById('btn-backup'); if (bk) bk.style.display = data.sou_admin ? '' : 'none';   // cópia completa só para o administrador (o banco também barra)
       try { localStorage.setItem('tc_marca', JSON.stringify({ nome_exibicao: data.nome_exibicao, logo_url: data.logo_url, cores: data.cores })); if (data.slug) localStorage.setItem('tc_slug', data.slug); } catch (e) { /* sem armazenamento */ }
+      // entrou pela tela neutra (sem ?c=): o login está na chave geral; passa para a chave desta corretora e recarrega no link dela
+      // (13/11/2026: uma sessão por corretora, para o Gmail de uma não derrubar o e-mail da outra em outra aba)
+      try {
+        const base = 'tc-alianca-auth', nova = base + ':' + data.slug;
+        if (data.slug && !MODO_PAINEL && window._tcChave === base && localStorage.getItem(base)) {
+          localStorage.setItem(nova, localStorage.getItem(base)); localStorage.removeItem(base);
+          try { sb.auth.stopAutoRefresh && sb.auth.stopAutoRefresh(); } catch (e) { /* nada */ }
+          location.replace(location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash); return;
+        }
+      } catch (e) { /* sem armazenamento: segue na chave geral */ }
       // o endereço passa a mostrar o link próprio da corretora (fica certo nos favoritos)
       const cAtual = new URLSearchParams(location.search).get('c');
       // link de OUTRA corretora com alguém já logado neste navegador (ex.: o Luiz abrindo pelo Painel): avisa e oferece trocar,
@@ -148,7 +158,13 @@
     document.body.appendChild(f);
     f.addEventListener('click', async (e) => {
       const o = e.target.closest('[data-o]'); if (!o) return;
-      if (o.dataset.o === 'ficar') { f.remove(); if (minha.slug && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(minha.slug) + location.hash); return; }
+      if (o.dataset.o === 'ficar') {
+        f.remove();
+        // o login fica guardado por corretora (13/11/2026): leva a sessão para a chave da corretora deste e-mail e abre o link dela
+        try { const atual = window._tcChave || 'tc-alianca-auth', nova = 'tc-alianca-auth:' + minha.slug;
+          if (minha.slug && atual !== nova && localStorage.getItem(atual)) { localStorage.setItem(nova, localStorage.getItem(atual)); localStorage.removeItem(atual); try { sb.auth.stopAutoRefresh && sb.auth.stopAutoRefresh(); } catch (_) { /* nada */ }
+            location.replace(location.pathname + '?c=' + encodeURIComponent(minha.slug) + location.hash); return; } } catch (_) { /* segue */ }
+        if (minha.slug && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(minha.slug) + location.hash); return; }
       if (window.TorreGuarda && window.TorreGuarda.pendentes && window.TorreGuarda.pendentes().length && !confirm('Há algo digitado e ainda não salvo. Sair mesmo assim?')) return;
       try { await sb.auth.signOut({ scope: 'local' }); } catch (err) { /* sai do mesmo jeito */ }
       try { localStorage.removeItem('tc_marca'); localStorage.removeItem('tc_slug'); } catch (err) { /* nada */ }

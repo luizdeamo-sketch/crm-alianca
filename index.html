@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611131220">
+<meta name="app-build" content="202611131227">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -1054,7 +1054,7 @@ const ICO = {"sun": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\
 
 const SUPABASE_URL = window.ALIANCA.supabaseUrl;          // vem da configuração do cliente (topo da página)
 const SUPABASE_ANON_KEY = window.ALIANCA.supabaseAnonKey;
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ storageKey:'tc-alianca-auth' } });
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ storageKey:(function(){var b='tc-alianca-auth',s=location.search,k='',n=b;try{if(/[?&]painel=1/.test(s))k='painel';else{k=(new URLSearchParams(s).get('c')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');if(!k)k=(localStorage.getItem('tc_slug')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');}n=k?b+':'+k:b;if(n!==b&&!localStorage.getItem(n)&&localStorage.getItem(b)){localStorage.setItem(n,localStorage.getItem(b));localStorage.removeItem(b);}}catch(e){}window._tcChave=n;return n;})() } });
 // módulos do cliente: os desligados ficam escondidos (não apagados: outras telas ainda podem chamar o botão)
 const aliancaModuloLigado = v => !window.ALIANCA.modulos || v==='admin' || v==='mensagens' || window.ALIANCA.modulos.includes(v);
 document.querySelectorAll('.nav-btn[data-view]').forEach(b=>{ if(!aliancaModuloLigado(b.dataset.view)){ b.style.display = 'none'; b.dataset.off = '1'; } });
@@ -1150,6 +1150,10 @@ document.getElementById('btn-login').addEventListener('click', async ()=>{
         box.remove();
         if(escolha==='trocar'){ await sb.auth.signOut({ scope:'local' }); const pe = document.getElementById('login-pass'), em = document.getElementById('login-email'); pe.value = ''; em.value = ''; em.focus(); return; }
         window._tcLinkResolvido = true;
+        // o login fica guardado por corretora: leva a sessão para a chave da corretora deste e-mail e abre o link dela
+        try{ const atual = window._tcChave || 'tc-alianca-auth', nova = 'tc-alianca-auth:'+minha.slug;
+          if(atual !== nova && localStorage.getItem(atual)){ localStorage.setItem(nova, localStorage.getItem(atual)); localStorage.removeItem(atual); try{ sb.auth.stopAutoRefresh && sb.auth.stopAutoRefresh(); }catch(_){}
+            location.replace(location.pathname + '?c=' + encodeURIComponent(minha.slug)); return; } }catch(_){}
         if(window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(minha.slug) + location.hash);
       }
     }
@@ -1215,7 +1219,7 @@ document.getElementById('btn-app').addEventListener('click', ()=> window.open('a
 document.getElementById('btn-logout').addEventListener('click', async ()=>{ try{ if(window.ACOMP && ACOMP.flush) await ACOMP.flush(); }catch(e){} await sb.auth.signOut({ scope:'local' });
   // 09/11/2026: ao sair, a tela de entrada volta neutra (antes ficava ?c=<corretora> no endereço e a marca dela, e quem queria
   // entrar com outro e-mail, como a gestora da plataforma, continuava vendo a corretora anterior)
-  try{ localStorage.removeItem('tc_marca'); localStorage.removeItem('tc_slug'); }catch(e){}
+  try{ localStorage.removeItem('tc_marca'); localStorage.removeItem('tc_slug'); localStorage.removeItem('tc-alianca-auth'); }catch(e){}
   location.replace(location.pathname + (/[?&]painel=1/.test(location.search) ? '?painel=1' : '')); });
 async function checkSession(){ const { data } = await sb.auth.getSession(); if(data.session){ mfaGate(); } }
 
@@ -12127,11 +12131,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611131220"></script>
-<script src="painel.js?v=202611131220"></script>
-<script src="cobranca.js?v=202611131220"></script>
-<script src="cadastro.js?v=202611131220"></script>
-<script src="contrato.js?v=202611131220"></script>
-<script src="guarda.js?v=202611131220"></script>
+<script src="plataforma.js?v=202611131227"></script>
+<script src="painel.js?v=202611131227"></script>
+<script src="cobranca.js?v=202611131227"></script>
+<script src="cadastro.js?v=202611131227"></script>
+<script src="contrato.js?v=202611131227"></script>
+<script src="guarda.js?v=202611131227"></script>
 </body>
 </html>

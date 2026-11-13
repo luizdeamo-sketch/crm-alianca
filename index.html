@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611131227">
+<meta name="app-build" content="202611131338">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -1247,6 +1247,11 @@ async function mfaCadastro(){
   document.getElementById('mfa-secret').textContent = 'Se não conseguir ler o QR code, digite esta chave no aplicativo: '+data.totp.secret;
 }
 async function mfaGate(){
+  // 13/11/2026 (pedido do Luiz: a Amanda não conseguia entrar): 2 etapas PAUSADAS em toda a plataforma pelo interruptor
+  // crm_mfa_pausado() no banco. Religar = a função voltar a responder false (não precisa publicar o sistema).
+  let pausado=false; try{ pausado = (await sb.rpc('crm_mfa_pausado')).data===true; }catch(e){}
+  window._mfaPausado = pausado;
+  if(pausado){ document.getElementById('mfa-screen').style.display='none'; boot(); return; }
   let aal=null, fat=[];
   try{ const a = await sb.auth.mfa.getAuthenticatorAssuranceLevel(); aal = a.data; const f = await sb.auth.mfa.listFactors(); fat = (f.data && f.data.totp) || []; }catch(e){}
   if(aal && aal.nextLevel==='aal2' && aal.currentLevel!=='aal2' && fat.length){ mfaTela('desafio', fat[0].id); return; }
@@ -12131,11 +12136,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611131227"></script>
-<script src="painel.js?v=202611131227"></script>
-<script src="cobranca.js?v=202611131227"></script>
-<script src="cadastro.js?v=202611131227"></script>
-<script src="contrato.js?v=202611131227"></script>
-<script src="guarda.js?v=202611131227"></script>
+<script src="plataforma.js?v=202611131338"></script>
+<script src="painel.js?v=202611131338"></script>
+<script src="cobranca.js?v=202611131338"></script>
+<script src="cadastro.js?v=202611131338"></script>
+<script src="contrato.js?v=202611131338"></script>
+<script src="guarda.js?v=202611131338"></script>
 </body>
 </html>

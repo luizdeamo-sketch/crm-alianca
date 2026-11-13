@@ -185,7 +185,7 @@
      que só some quando ela fecha; o rascunho NÃO é apagado. O rascunho só some quando o banco confirma que gravou. Sessão vencida abre
      um "Entre de novo aqui mesmo", sem sair da tela. */
   // funções do banco que só LEEM (ou rodam sozinhas ao abrir a tela); todas as outras gravam e são conferidas
-  const SO_LEITURA = /\/rpc\/crm_(is_master|dono_plataforma|corretor_atual|papel|acesso_ok|mfa_ok|mfa_obrigatorio|minha_corretora|minha_cobranca|minhas_faturas|planos_info|limite_info|cadastro_info|contrato_meu|contrato_condicoes|marca_publica|recurso_liberado|config_valor|mensagem_tem_propria|funil_etapas_uso|funil_etapas_padrao|plano_upgrade_previa|agenda_feed_token|gerar_alertas_cadastro|admin_usuarios|admin_acessos|destinatarios|lembretes|backup_exportar|plataforma_(corretoras|faturas|usuarios|contratos|historico|administradores|sugestoes|usuario_buscar|config_ler))(\?|$)/;
+  const SO_LEITURA = /\/rpc\/crm_(is_master|dono_plataforma|corretor_atual|papel|acesso_ok|mfa_ok|mfa_obrigatorio|mfa_pausado|minha_corretora|minha_cobranca|minhas_faturas|planos_info|limite_info|cadastro_info|contrato_meu|contrato_condicoes|marca_publica|recurso_liberado|config_valor|mensagem_tem_propria|funil_etapas_uso|funil_etapas_padrao|plano_upgrade_previa|agenda_feed_token|gerar_alertas_cadastro|admin_usuarios|admin_acessos|destinatarios|lembretes|backup_exportar|plataforma_(corretoras|faturas|usuarios|contratos|historico|administradores|sugestoes|usuario_buscar|config_ler))(\?|$)/;
   const NAO_CONTA = /\/rest\/v1\/(uso_eventos|crm_rascunhos)\b/;
   const GRAV = { ultimoClique: 0, falhas: [], sucessos: [] };
   document.addEventListener('click', (e) => { if (e.isTrusted) GRAV.ultimoClique = Date.now(); }, true);
@@ -271,7 +271,7 @@
           const { error } = await sb.auth.signInWithPassword({ email: window._userEmail, password: d.querySelector('[data-s]').value });
           if (error) throw new Error('E-mail ou senha não conferem.');
           const n = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
-          if (n.data && n.data.nextLevel === 'aal2' && n.data.currentLevel !== 'aal2') {
+          if (!window._mfaPausado && n.data && n.data.nextLevel === 'aal2' && n.data.currentLevel !== 'aal2') {
             const fs = await sb.auth.mfa.listFactors(); fator = fs.data && fs.data.totp && fs.data.totp.find((x) => x.status === 'verified');
             if (fator) { d.querySelector('[data-cod]').style.display = 'grid'; d.querySelector('[data-c]').focus(); btn.disabled = false; return; }
           }

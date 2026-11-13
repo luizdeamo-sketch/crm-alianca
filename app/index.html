@@ -134,7 +134,8 @@ $('t-ok').onclick = async ()=>{
 async function boot(){
   const { data:{ user } } = await sb.auth.getUser(); if(!user){ ir('login', false); return; }
   if(user.user_metadata && user.user_metadata.must_change_password){ ir('troca', false); return; }
-  let aal=null, fat=[]; try{ const a = await sb.auth.mfa.getAuthenticatorAssuranceLevel(); aal = a.data; const f = await sb.auth.mfa.listFactors(); fat = (f.data&&f.data.totp)||[]; }catch(e){}
+  let pausado=false; try{ pausado = (await sb.rpc('crm_mfa_pausado')).data===true; }catch(e){}   // 2 etapas pausadas na plataforma (13/11/2026)
+  let aal=null, fat=[]; if(!pausado) try{ const a = await sb.auth.mfa.getAuthenticatorAssuranceLevel(); aal = a.data; const f = await sb.auth.mfa.listFactors(); fat = (f.data&&f.data.totp)||[]; }catch(e){}
   if(aal && aal.nextLevel==='aal2' && aal.currentLevel!=='aal2' && fat.length){ window._fid = fat[0].id; ir('mfa', false); $('m-code').focus(); return; }
   if(!fat.length){ let ob=false; try{ const r = await sb.rpc('crm_mfa_obrigatorio'); ob = r.data===true; }catch(e){} if(ob){ $('m-h').textContent = 'Ative a verificação em 2 etapas'; $('m-sub').textContent = 'Entre no CRM Aliança pelo computador, ative a verificação em 2 etapas (botão no topo) e volte aqui.'; $('m-corpo').innerHTML = '<div style="margin-top:14px"><button class="btn sec sm" id="m-sair2">Sair</button></div>'; ir('mfa', false); $('m-sair2').onclick = async ()=>{ await sb.auth.signOut({scope:'local'}); location.reload(); }; return; } }
   EU.email = user.email; const { data:u } = await sb.from('crm_usuarios').select('nome').ilike('email', user.email).maybeSingle();

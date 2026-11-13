@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611131213">
+<meta name="app-build" content="202611131220">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -319,6 +319,20 @@ window.ALIANCA = {
 .kb-mini-barra{width:70px;height:6px;background:var(--border);border-radius:6px;overflow:hidden;display:inline-block} .kb-mini-barra span{display:block;height:100%;background:#16a34a}
 .kb-topo input{border:1px solid var(--border);border-radius:10px;padding:6px 10px;font:inherit;width:180px}
 .kb-topo .om-save,.kb-topo .om-cancel{padding:6px 12px}
+/* barra da tela Aliança mais enxuta (13/11/2026, pedido do Luiz): tudo numa linha no computador */
+@media (min-width:961px){
+  .op-filters{ flex-wrap:nowrap; gap:6px; }
+  .op-kpis{ flex-wrap:nowrap; gap:4px; flex:0 1 auto; min-width:0; overflow:hidden; }
+  .op-kpi{ padding:2px 8px; font-size:11.5px; white-space:nowrap; }
+  #op-search{ width:auto; flex:1 1 160px; min-width:120px; }
+  .op-filters .icon-btn{ padding:6px 8px !important; }
+  .op-filters > button, .op-filters .op-period-wrap > button{ white-space:nowrap; padding:6px 9px; }
+  #kb-modo button{ padding:5px 11px; }
+}
+@media (min-width:961px) and (max-width:1750px){
+  #op-import{ font-size:0 !important; gap:0 !important; padding:6px 8px !important; }
+  #op-import .ic{ font-size:15px; }
+}
 </style>
 
 
@@ -12113,11 +12127,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611131213"></script>
-<script src="painel.js?v=202611131213"></script>
-<script src="cobranca.js?v=202611131213"></script>
-<script src="cadastro.js?v=202611131213"></script>
-<script src="contrato.js?v=202611131213"></script>
-<script src="guarda.js?v=202611131213"></script>
+<script src="plataforma.js?v=202611131220"></script>
+<script src="painel.js?v=202611131220"></script>
+<script src="cobranca.js?v=202611131220"></script>
+<script src="cadastro.js?v=202611131220"></script>
+<script src="contrato.js?v=202611131220"></script>
+<script src="guarda.js?v=202611131220"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611121307">
+<meta name="app-build" content="202611131202">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -275,6 +275,43 @@ window.ALIANCA = {
 .msg-card .vd-btn{align-self:flex-start}
 #msg-enviei.pulse{box-shadow:0 0 0 3px rgba(34,160,90,.35)}
 @media (max-width:760px){ #view-mensagens{ padding:16px !important; } }
+/* Kanban da semana (13/11/2026, só Demonstração) */
+.kb-seg{display:inline-flex;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px}
+.kb-seg button{border:0;background:transparent;padding:6px 14px;border-radius:8px;font:inherit;font-weight:600;color:var(--ink-soft);cursor:pointer}
+.kb-seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#view-operacao.kb-on #op-filters-more,#view-operacao.kb-on #op-kpis,#view-operacao.kb-on #op-search,#view-operacao.kb-on #op-ftoggle,#view-operacao.kb-on .op-period-wrap,#view-operacao.kb-on #op-chip{display:none !important}
+#kb-host{overflow:auto;display:flex;flex-direction:column;min-height:0}
+.kb-demo{margin:12px 24px 0;font-size:12px;color:#6b4e00;background:#fff8e6;border:1px dashed #f0d48a;border-radius:8px;padding:6px 10px}
+.kb-placar{margin:12px 24px 0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.kb-pl-t{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;justify-content:space-between}
+.kb-pl-n{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:8px}
+.kb-pl-n div{display:flex;flex-direction:column;font-size:13px;color:var(--ink-soft)} .kb-pl-n b{font-size:22px;color:var(--ink)} .kb-pl-n small{font-size:12px}
+.kb-barra{height:6px;background:var(--bg);border-radius:6px;margin-top:10px;overflow:hidden} .kb-barra span{display:block;height:100%;background:#16a34a}
+.kb-barra-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 24px}
+.kb-barra-top input{border:1px solid var(--border);border-radius:10px;padding:8px 12px;font:inherit;min-width:220px;flex:0 1 320px}
+.kb-board{display:flex;gap:12px;padding:0 24px 8px;overflow-x:auto;align-items:flex-start;flex:0 0 auto}
+.kb-col{flex:1 0 270px;min-width:270px;background:var(--bg);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;max-height:max(420px,calc(100vh - 330px))}
+.kb-col.alvo{outline:2px dashed #0018fc;outline-offset:-2px}
+.kb-col-h{display:flex;align-items:center;gap:8px;padding:10px 12px 4px} .kb-col-h b{flex:1}
+.kb-dot{width:10px;height:10px;border-radius:50%;background:var(--kbc);flex:none;display:inline-block}
+.kb-col-h .kb-dot{background:var(--kbc)} .kb-n,.kb-meta{font-size:12px;font-weight:700;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1px 9px}
+.kb-meta.ok{background:#e8f7ee;border-color:#9fd8b4;color:#0f7a53}
+.kb-col-d{font-size:11.5px;color:var(--ink-faint);padding:0 12px 6px}
+.kb-col-b{overflow-y:auto;padding:4px 8px 10px;display:flex;flex-direction:column;gap:8px}
+.kb-vazio{font-size:12px;color:var(--ink-faint);text-align:center;padding:18px 6px;border:1px dashed var(--border);border-radius:10px}
+.kb-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:4px;cursor:grab;font-size:13px}
+.kb-card.arrastando{opacity:.45}
+.kb-c1{display:flex;align-items:center;gap:6px} .kb-temp{border:0;background:transparent;font-size:16px;cursor:pointer;padding:0;line-height:1}
+.kb-nome{font-weight:700;color:var(--ink);text-decoration:none} .kb-nome:hover{text-decoration:underline}
+.kb-sub{font-size:12px;color:var(--ink-soft)} .kb-ult{font-size:12px;color:var(--ink-soft);background:var(--bg);border-radius:6px;padding:4px 6px}
+.kb-acao{font-size:12.5px;font-weight:600;color:#0018fc} .kb-acao.atras{color:#c0392b}
+.kb-pe{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:2px} .kb-dias{font-size:11.5px;color:var(--ink-faint)}
+.kb-bts{display:flex;gap:2px} .kb-bt{border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:2px 6px;cursor:pointer;text-decoration:none;font-size:13px;line-height:1.3}
+.kb-cand{display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid var(--border)} .kb-cand small{color:var(--ink-faint)}
+.kb-dia{padding:0 24px 16px;overflow-x:auto} .kb-dia table{border-collapse:collapse;font-size:13px;min-width:100%}
+.kb-dia th,.kb-dia td{border-bottom:1px solid var(--border);padding:7px 10px;text-align:center;white-space:nowrap} .kb-dia tbody th,.kb-dia thead th:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+.kb-dia thead th small{display:block;font-weight:400;color:var(--ink-faint)} .kb-dia .kb-tot{font-weight:700;background:var(--bg)}
+@media (max-width:760px){ .kb-placar,.kb-demo{margin-left:12px;margin-right:12px} .kb-barra-top,.kb-board,.kb-dia{padding-left:12px;padding-right:12px} .kb-col{flex-basis:84vw;min-width:84vw;max-height:none} }
 </style>
 
 
@@ -1013,6 +1050,7 @@ function tcAplicarModulosCorretora(){   // Admin e Sugestões ficam sempre no me
 async function aliancaModulosDoUsuario(email){
   try{
     const [{ data: master }, { data: u }, mc] = await Promise.all([ sb.rpc('crm_is_master'), sb.from('crm_usuarios').select('modulos').eq('email', String(email||'').toLowerCase()).maybeSingle(), sb.rpc('crm_minha_corretora').then(r=>r, ()=>({data:null})) ]);
+    if(mc && mc.data && typeof kbIniciar==='function') kbIniciar(mc.data).catch(e=>console.warn('kanban', e));
     if(mc && mc.data && Array.isArray(mc.data.recursos)){ window.TC_MODULOS = mc.data.recursos; tcAplicarModulosCorretora(); }   // recursos = telas e IA dos módulos contratados (Vendas, Carteira, Gestão), calculados no banco
     const lista = (u && u.modulos) || [];   // módulos por usuário (vazio = todos os da corretora); o master vê todos os da corretora
     if(master !== true && lista.length){
@@ -2700,7 +2738,7 @@ document.querySelectorAll('.nav-btn[data-view]').forEach(btn=>{
     opSetHeaderTitle(btn); flowClose();
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById('view-'+btn.dataset.view).classList.add('active');
-    if(btn.dataset.view === 'operacao') renderOperacao();
+    if(btn.dataset.view === 'operacao'){ renderOperacao(); if(typeof kbAoAbrir==='function') kbAoAbrir(); }
     if(btn.dataset.view === 'central') renderCentral();
     if(btn.dataset.view === 'indicadores') renderIndicadores();
     if(btn.dataset.view === 'comercial'){ const t0 = document.querySelector('#com-tabs [data-ct="orc"]'); if(t0) t0.click(); else renderOrcamento(); }
@@ -9873,6 +9911,276 @@ async function lembAbrirLista(r){
     <div class="dlg-body" style="max-height:60vh;overflow:auto">${(data||[]).map(x=>{ const wa = waLink(x.telefone); return `<div class="rec"><b>${escapeHtml(x.nome)}</b> <small style="color:var(--ink-faint)">${escapeHtml(x.telefone||'sem telefone')}</small><span style="float:right">${wa?`<a class="om-cancel vd-btn" target="_blank" rel="noopener" href="${wa}?text=${encodeURIComponent(lembTexto(modelo,{nome:x.nome}))}">💬 WhatsApp</a>`:''}</span></div>`; }).join('')||'<div class="hint">Nenhum cliente neste público.</div>'}</div>
     <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Fechar</button></div>`, true);
 }
+// ============ KANBAN DA SEMANA (13/11/2026, pedido do Luiz; por enquanto SÓ na corretora Demonstração) ============
+// Tela Aliança ganha "Lista | Kanban". Os cartões são os contatos da Prospecção (o mesmo dado: arrastar muda o status lá).
+// Método da semana (MetLife): durante a semana o corretor junta indicações; no domingo monta a lista de quem vai ligar
+// (botão "Montar a lista da semana", meta configurável, padrão 25); quem não foi ligado até sexta volta marcado como
+// "ficou da semana passada". Temperatura (quente, morno, frio) sugerida pelo sistema; o corretor troca com 1 toque.
+const KB = { ativo:false, modo:'lista', vista:'quadro', rows:[], meta:25, busca:'', carregando:false };
+const KB_COLS = [
+  { k:'ind',      t:'Indicações',      cor:'#646b89', dica:'Quem chegou e ainda não entrou na lista da semana' },
+  { k:'lista',    t:'Lista da semana', cor:'#0018fc', dica:'Quem você vai ligar nesta semana' },
+  { k:'liguei',   t:'Liguei',          cor:'#0b7a8a', st:['Em contato','Respondeu'] },
+  { k:'agendou',  t:'Agendou reunião', cor:'#0f7a53', st:['Agendou reunião','Desmarcou reunião'] },
+  { k:'reuniao',  t:'Reunião feita',   cor:'#5b3fd0', st:['Reunião realizada'] },
+  { k:'proposta', t:'Proposta',        cor:'#c8790b', st:['Cotação em andamento','Apresentei cotação'] },
+  { k:'cliente',  t:'Virou cliente',   cor:'#16a34a', st:['Virou cliente'], dica:'Fechados nos últimos 30 dias' },
+];
+const KB_BASE = ['Novo','Retornar','Sem contato', null, ''];
+const KB_FORA = ['Sem interesse','Interesse futuro'];
+const KB_TEMP = { quente:{ i:'🔥', t:'Quente' }, morno:{ i:'🌤️', t:'Morno' }, frio:{ i:'❄️', t:'Frio' } };
+const kbIso = d => { const x = new Date(d); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); };
+// segunda-feira da semana de trabalho: no sábado e no domingo o corretor já monta a lista da semana que vem
+function kbSegunda(){ const d = new Date(); d.setHours(12,0,0,0); const dw = d.getDay(); const delta = dw===0 ? 1 : dw===6 ? 2 : 1-dw; d.setDate(d.getDate()+delta); return kbIso(d); }
+const kbDias = iso => { if(!iso) return null; return Math.floor((Date.now() - new Date(iso).getTime())/864e5); };
+const kbBase = r => KB_BASE.includes(r.status||'');
+const kbSobrou = r => kbBase(r) && r.semana_lista && r.semana_lista < kbSegunda();
+function kbColuna(r){
+  if(KB_FORA.includes(r.status)) return null;
+  if(r.status==='Virou cliente') return (kbDias(r.updated_at)||0) <= 30 ? 'cliente' : null;
+  const c = KB_COLS.find(c=>c.st && c.st.includes(r.status)); if(c) return c.k;
+  return r.semana_lista===kbSegunda() ? 'lista' : 'ind';
+}
+function kbTemp(r){
+  if(r.temperatura && KB_TEMP[r.temperatura]) return r.temperatura;
+  if(['Respondeu','Agendou reunião','Desmarcou reunião','Reunião realizada','Cotação em andamento','Apresentei cotação','Virou cliente'].includes(r.status)) return 'quente';
+  const o = String(r.origem||'');
+  if(/indic/i.test(o)) return 'quente';
+  if(/lista|fri[ao]|base|comprad/i.test(o) || (kbDias(r.updated_at)||0) >= 30) return 'frio';
+  return 'morno';
+}
+const kbQuem = r => { const o = String(r.origem||'').trim(); const m = o.match(/indica(?:ç|c)[ãa]o[:\s·-]*(.+)$/i); return m ? 'Indicado por '+m[1].trim() : o; };
+function kbUltimo(r){ const h = String(r.historico||'').trim(); if(!h) return ''; const ls = h.split(String.fromCharCode(10)); const corpo = /^\[/.test(ls[0]) ? ls.slice(1).join(' ') : ls.join(' '); return corpo.split(/\s*\[\d\d\/\d\d /)[0].trim().slice(0,110); }
+
+async function kbIniciar(minha){
+  KB.ativo = !!(minha && minha.slug==='demonstracao');
+  if(!KB.ativo) return;
+  try{ KB.modo = localStorage.getItem('kb_modo') || 'lista'; }catch(e){}
+  const filtros = document.querySelector('#view-operacao .op-filters'), hoje = document.getElementById('op-hoje');
+  if(filtros && !document.getElementById('kb-modo')){
+    const seg = document.createElement('div'); seg.id = 'kb-modo'; seg.className = 'kb-seg';
+    seg.innerHTML = '<button type="button" data-kbm="lista">Lista</button><button type="button" data-kbm="kanban">Kanban</button>';
+    filtros.insertBefore(seg, hoje || null);
+    seg.addEventListener('click', e=>{ const b = e.target.closest('[data-kbm]'); if(!b) return; KB.modo = b.dataset.kbm; try{ localStorage.setItem('kb_modo', KB.modo); }catch(_){} kbAoAbrir(); });
+  }
+  const sc = document.getElementById('op-scroll');
+  if(sc && !document.getElementById('kb-host')){ const h = document.createElement('div'); h.id = 'kb-host'; h.style.display = 'none'; sc.parentNode.insertBefore(h, sc.nextSibling); }
+  try{ const { data } = await sb.from('crm_config').select('valor').eq('chave','kanban_meta_semana').maybeSingle(); const n = parseInt(data && data.valor, 10); if(n>0) KB.meta = n; }catch(e){}
+  kbAoAbrir();
+}
+function kbAoAbrir(){
+  if(!KB.ativo) return;
+  const kan = KB.modo==='kanban', host = document.getElementById('kb-host'), sc = document.getElementById('op-scroll');
+  document.querySelectorAll('#kb-modo [data-kbm]').forEach(b=>b.classList.toggle('on', b.dataset.kbm===KB.modo));
+  document.getElementById('view-operacao').classList.toggle('kb-on', kan);
+  if(sc) sc.style.display = kan ? 'none' : '';
+  if(host) host.style.display = kan ? '' : 'none';
+  if(kan) kbRender(true);
+}
+async function kbCarregar(){
+  const { data, error } = await sb.from('crm_prospeccao').select('*').order('updated_at', { ascending:false }).limit(5000);
+  if(error) throw error; KB.rows = data || [];
+}
+async function kbPlacar(){
+  const seg = kbSegunda(), ini = new Date(seg+'T00:00:00').toISOString();
+  let contatos = 0;
+  try{ const { count } = await sb.from('crm_atividades').select('id', { count:'exact', head:true }).ilike('resumo','Prospecção ·%').gte('data_hora', ini); contatos = count||0; }catch(e){}
+  const naSemana = r => r.updated_at && r.updated_at >= ini;
+  return { seg, lista: KB.rows.filter(r=>r.semana_lista===seg).length, contatos,
+    reunioes: KB.rows.filter(r=>r.status==='Agendou reunião' && naSemana(r)).length,
+    propostas: KB.rows.filter(r=>['Cotação em andamento','Apresentei cotação'].includes(r.status) && naSemana(r)).length,
+    clientes: KB.rows.filter(r=>r.status==='Virou cliente' && naSemana(r)).length };
+}
+function kbCartao(r){
+  const t = kbTemp(r), T = KB_TEMP[t], dp = kbDias(r.updated_at), hoje = kbIso(new Date());
+  const atras = r.retorno_data && r.retorno_data < hoje && kbColuna(r)!=='cliente';
+  const acao = r.proxima_acao || (VD_ACAO_ST && VD_ACAO_ST[r.status||'Novo']) || '';
+  const quem = kbQuem(r), ult = kbUltimo(r), tel = String(r.telefone||''), wa = waLink(tel);
+  return `<div class="kb-card" draggable="true" data-kbid="${r.id}">
+    <div class="kb-c1"><button type="button" class="kb-temp" data-kbtemp="${r.id}" title="${T.t}${r.temperatura?'':' (sugerido pelo sistema)'} · toque para trocar">${T.i}</button>
+      <a href="#" class="kb-nome" data-kbabrir="${r.id}">${escapeHtml(r.nome||'Sem nome')}</a></div>
+    ${quem?`<div class="kb-sub">${escapeHtml(quem)}</div>`:''}
+    ${kbSobrou(r)?'<div><span class="tagx warn">ficou da semana passada</span></div>':''}
+    ${ult?`<div class="kb-ult">${escapeHtml(ult)}</div>`:''}
+    ${acao && kbColuna(r)!=='cliente'?`<div class="kb-acao${atras?' atras':''}">→ ${escapeHtml(acao)}${r.retorno_data?' '+fmtDate(r.retorno_data).slice(0,5):''}${atras?' <span class="tagx bad">atrasada</span>':''}</div>`:''}
+    <div class="kb-pe"><span class="kb-dias" title="Dias sem mudança neste cartão">${dp==null?'':(dp===0?'hoje':'parado há '+dp+'d')}</span>
+      <span class="kb-bts">${tel?`<a class="kb-bt" href="tel:${escapeHtml(dOnly(tel))}" title="Ligar" data-kbcontato="${r.id}">📞</a>`:''}${wa?`<a class="kb-bt" href="${wa}" target="_blank" rel="noopener" title="Abrir o WhatsApp" data-kbcontato="${r.id}">💬</a>`:''}
+      <button type="button" class="kb-bt" data-kbreg="${r.id}" title="Registrar o que aconteceu">✍️</button><button type="button" class="kb-bt" data-kbmover="${r.id}" title="Mover para outra coluna">⇄</button></span></div></div>`;
+}
+async function kbRender(recarregar){
+  const host = document.getElementById('kb-host'); if(!host || !KB.ativo) return;
+  if(recarregar || !KB.rows.length){ if(!KB.rows.length) host.innerHTML = '<div class="op-more">Carregando o quadro...</div>';
+    try{ await kbCarregar(); }catch(e){ host.innerHTML = '<div class="om-err" style="padding:20px">Não consegui carregar a Prospecção: '+escapeHtml(e.message||String(e))+'</div>'; return; } }
+  const P = await kbPlacar(), q = vdNorm ? vdNorm(KB.busca) : KB.busca.toLowerCase();
+  const vis = KB.rows.filter(r=>!q || (vdNorm ? vdNorm([r.nome,r.telefone,r.origem].join(' ')) : [r.nome,r.telefone,r.origem].join(' ').toLowerCase()).includes(q));
+  const por = {}; KB_COLS.forEach(c=>por[c.k]=[]);
+  vis.forEach(r=>{ const k = kbColuna(r); if(k) por[k].push(r); });
+  const ordTemp = { quente:0, morno:1, frio:2 };
+  por.ind.sort((a,b)=>(kbSobrou(b)-kbSobrou(a)) || (ordTemp[kbTemp(a)]-ordTemp[kbTemp(b)]) || String(b.updated_at).localeCompare(String(a.updated_at)));
+  Object.keys(por).filter(k=>k!=='ind').forEach(k=>por[k].sort((a,b)=>String(a.retorno_data||'9').localeCompare(String(b.retorno_data||'9'))));
+  const fora = KB.rows.filter(r=>KB_FORA.includes(r.status)).length;
+  const fimSem = new Date(P.seg+'T12:00:00'); fimSem.setDate(fimSem.getDate()+4);
+  const pct = Math.min(100, Math.round(P.contatos / Math.max(1,KB.meta) * 100));
+  const placar = `<div class="kb-placar">
+      <div class="kb-pl-t"><b>Semana de ${fmtDate(P.seg).slice(0,5)} a ${fmtDate(kbIso(fimSem)).slice(0,5)}</b><span class="hint" style="margin:0">Meta: ${KB.meta} contatos por semana <a href="#" id="kb-meta">trocar</a></span></div>
+      <div class="kb-pl-n"><div><b>${P.lista}</b> de ${KB.meta}<small>na lista</small></div><div><b>${P.contatos}</b><small>contatos registrados</small></div><div><b>${P.reunioes}</b><small>reuniões marcadas</small></div><div><b>${P.propostas}</b><small>propostas</small></div><div><b>${P.clientes}</b><small>viraram clientes</small></div></div>
+      <div class="kb-barra" title="${P.contatos} de ${KB.meta} contatos"><span style="width:${pct}%"></span></div></div>`;
+  const barra = `<div class="kb-barra-top"><input id="kb-busca" placeholder="Buscar no quadro..." value="${escapeHtml(KB.busca)}">
+      <div class="kb-seg kb-vista"><button type="button" data-kbv="quadro" class="${KB.vista==='quadro'?'on':''}">Quadro</button><button type="button" data-kbv="dia" class="${KB.vista==='dia'?'on':''}">Resumo por dia</button></div>
+      <span style="flex:1"></span><button class="om-cancel" id="kb-novo">+ Indicação</button><button class="om-save" id="kb-montar">📋 Montar a lista da semana</button></div>`;
+  let corpo;
+  if(KB.vista==='dia') corpo = await kbResumoDia(por);
+  else corpo = `<div class="kb-board">${KB_COLS.map(c=>{ const l = por[c.k], extra = c.k==='lista' ? `<span class="kb-meta${l.length>=KB.meta?' ok':''}">${l.length} de ${KB.meta}</span>` : `<span class="kb-n">${l.length}</span>`;
+      return `<div class="kb-col" data-kbcol="${c.k}"><div class="kb-col-h" style="--kbc:${c.cor}"><span class="kb-dot"></span><b>${c.t}</b>${extra}</div>${c.dica?`<div class="kb-col-d">${c.dica}</div>`:''}
+        <div class="kb-col-b">${l.slice(0,150).map(kbCartao).join('') || '<div class="kb-vazio">Arraste um cartão para cá</div>'}${l.length>150?`<div class="hint">+${l.length-150} (use a busca)</div>`:''}</div></div>`; }).join('')}</div>
+      <div class="hint" style="padding:6px 24px 14px">${fora} contato(s) com "Sem interesse" ou "Interesse futuro" ficam fora do quadro (estão em Vendas › Prospecção). Arraste o cartão ou use ⇄ para mudar de coluna; a mudança vale também na Prospecção e vai para o histórico.</div>`;
+  host.innerHTML = '<div class="kb-demo">Versão de apresentação: só a corretora Demonstração vê este quadro.</div>' + placar + barra + corpo;
+  kbLigar(host);
+}
+function kbLigar(host){
+  const bi = host.querySelector('#kb-busca'); if(bi) bi.addEventListener('input', ()=>{ KB.busca = bi.value; clearTimeout(KB._t); KB._t = setTimeout(()=>{ kbRender(false).then(()=>{ const n = document.getElementById('kb-busca'); if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }); }, 250); });
+  host.querySelectorAll('[data-kbv]').forEach(b=>b.addEventListener('click', ()=>{ KB.vista = b.dataset.kbv; kbRender(false); }));
+  const m = host.querySelector('#kb-meta'); if(m) m.addEventListener('click', async e=>{ e.preventDefault();
+    const v = parseInt(prompt('Quantos contatos por semana cada corretor deve fazer? (ex.: 25 = 5 por dia)', String(KB.meta))||'', 10); if(!(v>0 && v<1000)) return;
+    const { error } = await sb.from('crm_config').upsert({ chave:'kanban_meta_semana', valor:String(v), atualizado_em:new Date().toISOString() }, { onConflict:'corretor_id,chave' });
+    if(error){ showToast('Não consegui salvar a meta: '+error.message); return; } KB.meta = v; showToast('Meta da semana: '+v+' contatos.'); kbRender(false); });
+  const nv = host.querySelector('#kb-novo'); if(nv) nv.addEventListener('click', kbNovaIndicacao);
+  const mt = host.querySelector('#kb-montar'); if(mt) mt.addEventListener('click', kbMontarLista);
+  host.querySelectorAll('[data-kbabrir]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); const r = KB.rows.find(x=>x.id===a.dataset.kbabrir); if(!r) return; if(r.pessoa_id) goToPersonView(r.pessoa_id); else vdIrPara('pro', r.id); }));
+  host.querySelectorAll('[data-kbtemp]').forEach(b=>b.addEventListener('click', async ()=>{ const r = KB.rows.find(x=>x.id===b.dataset.kbtemp); if(!r) return;
+    const ordem = ['quente','morno','frio'], nova = ordem[(ordem.indexOf(kbTemp(r))+1)%3];
+    const { error } = await sb.from('crm_prospeccao').update({ temperatura:nova }).eq('id', r.id);
+    if(error){ showToast('Não consegui trocar: '+error.message); return; } r.temperatura = nova; b.textContent = KB_TEMP[nova].i; b.title = KB_TEMP[nova].t+' · toque para trocar'; }));
+  host.querySelectorAll('[data-kbreg]').forEach(b=>b.addEventListener('click', ()=>{ const r = KB.rows.find(x=>x.id===b.dataset.kbreg); if(r) kbRegistrarDialog(r, kbColuna(r)); }));
+  host.querySelectorAll('[data-kbcontato]').forEach(a=>a.addEventListener('click', ()=>{ const r = KB.rows.find(x=>x.id===a.dataset.kbcontato); if(r) setTimeout(()=>{ showToast('Depois da conversa, toque em ✍️ para registrar o que aconteceu.'); }, 800); }));
+  host.querySelectorAll('[data-kbmover]').forEach(b=>b.addEventListener('click', ()=>{ const r = KB.rows.find(x=>x.id===b.dataset.kbmover); if(!r) return;
+    const atual = kbColuna(r);
+    const box = dlgOpen(`<div class="om-title"><div><h3>Mover ${escapeHtml(r.nome||'')}</h3><div class="om-sub">Escolha a coluna</div></div><button data-close>✕</button></div>
+      <div class="dlg-body" style="display:flex;flex-direction:column;gap:6px">${KB_COLS.filter(c=>c.k!==atual).map(c=>`<button class="om-cancel" style="text-align:left" data-kbpara="${c.k}"><span class="kb-dot" style="--kbc:${c.cor};display:inline-block;margin-right:8px"></span>${c.t}</button>`).join('')}</div>`);
+    box.querySelectorAll('[data-kbpara]').forEach(x=>x.addEventListener('click', ()=>{ dlgClose(); kbMover(r, x.dataset.kbpara); })); }));
+  // arrastar e soltar (computador); no celular o botão ⇄ faz o mesmo
+  host.querySelectorAll('.kb-card').forEach(c=>{
+    c.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', c.dataset.kbid); e.dataTransfer.effectAllowed = 'move'; c.classList.add('arrastando'); });
+    c.addEventListener('dragend', ()=>c.classList.remove('arrastando')); });
+  host.querySelectorAll('.kb-col').forEach(col=>{
+    col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('alvo'); });
+    col.addEventListener('dragleave', e=>{ if(!col.contains(e.relatedTarget)) col.classList.remove('alvo'); });
+    col.addEventListener('drop', e=>{ e.preventDefault(); col.classList.remove('alvo'); const id = e.dataTransfer.getData('text/plain'); const r = KB.rows.find(x=>x.id===id); if(r && kbColuna(r)!==col.dataset.kbcol) kbMover(r, col.dataset.kbcol); }); });
+}
+// Indicações e Lista da semana: quem ainda não foi trabalhado só troca de lista. As outras colunas são status da Prospecção: pedem o registro.
+async function kbMover(r, para){
+  if((para==='ind' || para==='lista') && kbBase(r)){
+    const v = para==='lista' ? kbSegunda() : null;
+    const { error } = await sb.from('crm_prospeccao').update({ semana_lista:v, updated_at:new Date().toISOString() }).eq('id', r.id);
+    if(error){ showToast('Não consegui mover: '+error.message); return; }
+    r.semana_lista = v; r.updated_at = new Date().toISOString(); kbRender(false); return;
+  }
+  kbRegistrarDialog(r, para);
+}
+const KB_ST_COL = { ind:['Retornar','Novo'], lista:['Retornar','Novo'], liguei:['Em contato','Respondeu'], agendou:['Agendou reunião','Desmarcou reunião'], reuniao:['Reunião realizada'], proposta:['Cotação em andamento','Apresentei cotação'], cliente:['Virou cliente'] };
+function kbRegistrarDialog(r, para){
+  const ops = KB_ST_COL[para] || [r.status||'Novo'], st0 = ops.includes(r.status) ? r.status : ops[0];
+  let canal = r.canal || ''; if(!canal){ try{ canal = localStorage.getItem('vd_ultimo_canal:'+(window._userEmail||''))||''; }catch(e){} }
+  const amanha = new Date(); amanha.setDate(amanha.getDate()+ (amanha.getDay()===5?3:1));
+  const col = KB_COLS.find(c=>c.k===para) || {};
+  const box = dlgOpen(`<div class="om-title"><div><h3>${escapeHtml(r.nome||'Contato')} → ${escapeHtml(col.t||'')}</h3><div class="om-sub">Registre o que aconteceu: vai para o histórico do cliente e muda o status na Prospecção.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body"><div class="fgrid">
+      <label class="fl"><span>Status</span><select id="kbr-st">${ops.map(s=>`<option${s===st0?' selected':''}>${escapeHtml(s)}</option>`).join('')}</select></label>
+      <label class="fl"><span>Canal</span><select id="kbr-canal"><option value="">Escolha…</option>${Object.keys(VD_CANAIS).map(c=>`<option${c===canal?' selected':''}>${escapeHtml(c)}</option>`).join('')}</select></label>
+      <label class="fl"><span id="kbr-dl">Data do retorno (próxima ação)</span><input type="date" id="kbr-data" value="${r.retorno_data && r.retorno_data>=kbIso(new Date()) ? r.retorno_data : kbIso(amanha)}"></label>
+      <label class="fl" id="kbr-hw"><span>Hora da reunião</span><input type="time" id="kbr-hora" value="${escapeHtml(r.retorno_hora||'')}"></label>
+      <label class="fl full" style="grid-column:1/-1"><span>O que aconteceu? (obrigatório)</span><textarea id="kbr-txt" rows="3" placeholder="Ex.: liguei, ela pediu para falar na sexta à tarde"></textarea></label>
+    </div><div class="om-err" id="kbr-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="kbr-ok">Registrar e mover</button></div>`);
+  const stEl = box.querySelector('#kbr-st'), hw = box.querySelector('#kbr-hw'), dl = box.querySelector('#kbr-dl'), dw = box.querySelector('#kbr-data').closest('label');
+  const ajusta = ()=>{ const s = stEl.value; hw.style.display = s==='Agendou reunião' ? '' : 'none'; dw.style.display = s==='Virou cliente' ? 'none' : ''; dl.textContent = s==='Agendou reunião' ? 'Data da reunião' : 'Data do retorno (próxima ação)'; };
+  stEl.addEventListener('change', ajusta); ajusta();
+  box.querySelector('#kbr-ok').addEventListener('click', async e=>{
+    const b = e.currentTarget, err = box.querySelector('#kbr-err'); err.textContent = '';
+    const st = stEl.value, cn = box.querySelector('#kbr-canal').value, dt = box.querySelector('#kbr-data').value, hr = box.querySelector('#kbr-hora').value, txt = box.querySelector('#kbr-txt').value.trim();
+    if(!cn){ err.textContent = 'Escolha o canal (Ligação, WhatsApp...).'; return; }
+    if(!txt){ err.textContent = 'Conte em uma linha o que aconteceu.'; return; }
+    if(st!=='Virou cliente' && !dt){ err.textContent = 'Informe a data.'; return; }
+    if(st==='Agendou reunião' && !hr){ err.textContent = 'Informe a hora da reunião: a Agenda usa esse dado.'; return; }
+    b.disabled = true; b.textContent = 'Registrando…';
+    const upd = { status:st, canal:cn, proxima_acao: st==='Virou cliente' ? null : (VD_ACAO_ST[st]||'Realizar follow-up'), updated_at:new Date().toISOString() };
+    if(st!=='Virou cliente'){ upd.retorno_data = dt; if(st==='Agendou reunião') upd.retorno_hora = hr; }
+    if(para==='lista') upd.semana_lista = kbSegunda(); else if(para==='ind') upd.semana_lista = null;
+    const { error } = await sb.from('crm_prospeccao').update(upd).eq('id', r.id);
+    if(error){ err.textContent = 'Não consegui salvar: '+error.message; b.disabled = false; b.textContent = 'Registrar e mover'; return; }
+    Object.assign(r, upd); try{ localStorage.setItem('vd_ultimo_canal:'+(window._userEmail||''), cn); }catch(_){}
+    VD.draft = VD.draft || {}; VD.draft[r.id] = txt;
+    await vdRegistrar(r);   // o mesmo registro da Prospecção: histórico do cliente, cadastro, Agenda, Vendas não realizadas, Portal
+    VD.ok = false; dlgClose(); kbRender(true);
+  });
+}
+function kbNovaIndicacao(){
+  const box = dlgOpen(`<div class="om-title"><div><h3>+ Indicação</h3><div class="om-sub">Entra na coluna Indicações. No domingo, monte a lista da semana com quem vai ligar.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body"><div class="fgrid">
+      <label class="fl"><span>Nome (obrigatório)</span><input id="kbn-nome"></label>
+      <label class="fl"><span>Telefone / WhatsApp</span><input id="kbn-tel" placeholder="(11) 99999-9999"></label>
+      <label class="fl"><span>Quem indicou (obrigatório)</span><input id="kbn-quem" placeholder="Nome de quem indicou"></label>
+      <label class="fl"><span>Temperatura</span><select id="kbn-temp"><option value="">Deixar o sistema sugerir (indicação = quente)</option><option value="quente">🔥 Quente</option><option value="morno">🌤️ Morno</option><option value="frio">❄️ Frio</option></select></label>
+      <label class="fl full" style="grid-column:1/-1"><span>Observação</span><textarea id="kbn-obs" rows="2" placeholder="Ex.: é sócio do Dr. Carlos, acabou de ter filho"></textarea></label>
+    </div><div class="om-err" id="kbn-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="kbn-ok">Salvar indicação</button></div>`);
+  box.querySelector('#kbn-ok').addEventListener('click', async e=>{
+    const b = e.currentTarget, err = box.querySelector('#kbn-err'), g = id=>box.querySelector(id).value.trim();
+    const nome = g('#kbn-nome'), tel = g('#kbn-tel'), quem = g('#kbn-quem'), temp = g('#kbn-temp'), obs = g('#kbn-obs');
+    if(!nome){ err.textContent = 'Informe o nome.'; return; } if(!quem){ err.textContent = 'Informe quem indicou.'; return; }
+    const tk = normNome(nome), ph = dOnly(tel).slice(-8);
+    const ja = KB.rows.find(r=>(ph.length===8 && dOnly(r.telefone).slice(-8)===ph) || (tk.length>=2 && normNome(r.nome).join(' ')===tk.join(' ')));
+    if(ja && !confirm('Já existe na Prospecção: '+ja.nome+' ('+(ja.status||'Novo')+').'+String.fromCharCode(10)+String.fromCharCode(10)+'Criar mesmo assim?')) return;
+    b.disabled = true;
+    const agora = new Date(), por = curUserName()||null, nl = String.fromCharCode(10);
+    const row = { nome, telefone:tel||null, origem:'Indicação: '+quem, status:'Novo', contato_em:agora.toISOString(), criado_por:por, proxima_acao:VD_ACAO_ST['Novo']||'Realizar primeiro contato' };
+    if(temp) row.temperatura = temp;
+    if(obs) row.historico = '['+agora.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' · '+(por||'—')+' · indicação]'+nl+obs;
+    const { data, error } = await sb.from('crm_prospeccao').insert(row).select('*').single();
+    if(error){ err.textContent = 'Não consegui salvar: '+error.message; b.disabled = false; return; }
+    KB.rows.unshift(data); VD.ok = false; dlgClose(); showToast('Indicação salva em Indicações.'); kbRender(false);
+  });
+}
+function kbMontarLista(){
+  const seg = kbSegunda(), naLista = KB.rows.filter(r=>r.semana_lista===seg && kbColuna(r)==='lista').length;
+  const ordTemp = { quente:0, morno:1, frio:2 };
+  const cand = KB.rows.filter(r=>kbColuna(r)==='ind').sort((a,b)=>(kbSobrou(b)-kbSobrou(a)) || (ordTemp[kbTemp(a)]-ordTemp[kbTemp(b)]) || String(a.updated_at).localeCompare(String(b.updated_at)));
+  const falta = Math.max(0, KB.meta - naLista);
+  const box = dlgOpen(`<div class="om-title"><div><h3>📋 Montar a lista da semana de ${fmtDate(seg).slice(0,5)}</h3><div class="om-sub">Já na lista: ${naLista} de ${KB.meta}. O sistema marcou os ${Math.min(falta, cand.length)} mais indicados: primeiro quem ficou da semana passada, depois os mais quentes. Desmarque ou marque à vontade.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body" style="max-height:60vh;overflow:auto">${cand.length ? cand.map((r,i)=>`<label class="kb-cand"><input type="checkbox" data-kbc="${r.id}" ${i<falta?'checked':''}> <span>${KB_TEMP[kbTemp(r)].i}</span> <b>${escapeHtml(r.nome||'')}</b> <small>${escapeHtml(kbQuem(r)||'')}</small>${kbSobrou(r)?' <span class="tagx warn">ficou da semana passada</span>':''}</label>`).join('') : '<div class="hint">Não há ninguém em Indicações. Use "+ Indicação" para cadastrar quem você conheceu nesta semana.</div>'}</div>
+    <div class="om-foot"><span class="hint" id="kbm-n" style="align-self:center"></span><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="kbm-ok">Colocar na lista</button></div>`);
+  const conta = ()=>{ const n = box.querySelectorAll('[data-kbc]:checked').length; box.querySelector('#kbm-n').textContent = n+' marcado(s) · a lista fica com '+(naLista+n)+' de '+KB.meta; };
+  box.querySelectorAll('[data-kbc]').forEach(c=>c.addEventListener('change', conta)); conta();
+  box.querySelector('#kbm-ok').addEventListener('click', async e=>{
+    const ids = [...box.querySelectorAll('[data-kbc]:checked')].map(c=>c.dataset.kbc); if(!ids.length){ dlgClose(); return; }
+    e.currentTarget.disabled = true;
+    const { error } = await sb.from('crm_prospeccao').update({ semana_lista:seg, updated_at:new Date().toISOString() }).in('id', ids);
+    if(error){ showToast('Não consegui montar a lista: '+error.message); e.currentTarget.disabled = false; return; }
+    dlgClose(); showToast(ids.length+' na lista da semana. Bom trabalho!'); kbRender(true);
+  });
+}
+// Resumo por dia (como no Flow): a foto de cada noite fica em crm_kanban_dia; hoje é calculado na hora. Começa a contar quando entra no ar.
+async function kbResumoDia(por){
+  let fotos = [];
+  try{ const desde = new Date(Date.now()-29*864e5); const { data, error } = await sb.from('crm_kanban_dia').select('dia,coluna,qtd').gte('dia', kbIso(desde)).order('dia'); if(!error) fotos = data||[]; }catch(e){}
+  const hoje = kbIso(new Date()), dias = [...new Set(fotos.map(f=>f.dia).filter(d=>d!==hoje))].sort().slice(-29).concat([hoje]);
+  const val = (d,k)=> d===hoje ? por[k].length : ((fotos.find(f=>f.dia===d && f.coluna===k)||{}).qtd ?? null);
+  const dm = d=>{ const x = new Date(d+'T12:00:00'); return String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0')+'<small>'+['dom','seg','ter','qua','qui','sex','sáb'][x.getDay()]+'</small>'; };
+  const linhas = KB_COLS.map(c=>`<tr><th><span class="kb-dot" style="--kbc:${c.cor}"></span> ${c.t}</th>${dias.map(d=>{ const v = val(d,c.k); return `<td>${v==null?'·':v}</td>`; }).join('')}</tr>`).join('');
+  const tot = `<tr class="kb-tot"><th>Σ Total</th>${dias.map(d=>{ const vs = KB_COLS.map(c=>val(d,c.k)); return `<td>${vs.every(v=>v==null)?'·':vs.reduce((a,v)=>a+(v||0),0)}</td>`; }).join('')}</tr>`;
+  return `<div class="kb-dia"><table><thead><tr><th>Resumo diário</th>${dias.map(d=>`<th>${dm(d)}</th>`).join('')}</tr></thead><tbody>${linhas}${tot}</tbody></table>
+    <div class="hint" style="margin-top:8px">${dias.length<=1?'O resumo começou a contar hoje: a cada noite o sistema guarda quantos cartões havia em cada coluna.':'Cada noite o sistema guarda quantos cartões havia em cada coluna; a última coluna é hoje, agora.'}</div></div>`;
+}
+// lembrete no Hoje (sábado, domingo e segunda): montar a lista da semana
+async function kbLembreteHoje(host){
+  if(!KB.ativo || !host) return; const dw = new Date().getDay(); if(![0,1,6].includes(dw)) return;
+  try{ if(!KB.rows.length) await kbCarregar(); }catch(e){ return; }
+  const seg = kbSegunda(), n = KB.rows.filter(r=>r.semana_lista===seg && kbColuna(r)==='lista').length; if(n >= KB.meta) return;
+  const div = document.createElement('div'); div.className = 'msg-regra';
+  div.innerHTML = `📋 <b>Hora de montar a lista da semana de ${fmtDate(seg).slice(0,5)}.</b> Ela está com ${n} de ${KB.meta} contatos. <button class="om-save" style="margin-left:8px;padding:4px 12px" id="kb-hj-ir">Montar agora</button>`;
+  host.prepend(div);
+  div.querySelector('#kb-hj-ir').addEventListener('click', ()=>{ KB.modo = 'kanban'; try{ localStorage.setItem('kb_modo','kanban'); }catch(_){} const nb = document.querySelector('.nav-btn[data-view="operacao"]'); if(nb) nb.click(); setTimeout(()=>kbMontarLista(), 900); });
+}
 // ============ MENSAGENS DO ANO (12/11/2026, pedido do Luiz) ============
 // O CRM acompanha o ano de cada cliente (aniversário dele e da família, Ano Novo, Páscoa, Dia da Mulher, das Mães, dos Pais, Natal,
 // 3/6/9/12 meses da apólice nova, 90 dias sem conversa) e deixa a mensagem pronta. ✨ pede à IA (função mensagem-cliente) uma versão
@@ -10362,6 +10670,7 @@ async function opHojeDialog(onlyMine){
     + (avSoltos.length ? sec('Avisos de renovação (30, 15 e 7 dias) de hoje e atrasados', avSoltos.length, avSoltos.map(a=>{ const p = OP.pessoas.find(x=>x.id===a.pessoa_id); if(!p) return ''; const d = daysTo(a.data_aviso); return hojeRow(p, (d<0?`<span class="tagx bad">atrasado ${-d} dia${-d===1?'':'s'}</span>`:`<span class="tagx warn">hoje</span>`)+` ${msgBtn(p.id, a.apolice_id||'')} <button class="om-cancel vd-btn" data-avfeito="${a.id}">Feito</button>`, escapeHtml(a.titulo||'Renovação')); }).join('')) : '')
     + (window.guiaEmCurso ? `<details class="hj-mais"><summary>Mais coisas do dia</summary>${restoDia}</details>` : restoDia)
     + `<div class="sg-row" style="margin-bottom:10px"><label class="chk"><input type="checkbox" id="hj-mine" ${onlyMine?'checked':''}> Só as minhas (${escapeHtml(me)})</label><span style="flex:1"></span><span class="tagx ${nxt<3?'warn':''}">Agenda da semana que vem: ${nxt} compromisso${nxt===1?'':'s'}${nxt<3?' — deixe-a cheia antes de a atual acabar':''}</span></div>`;
+  if(typeof kbLembreteHoje==='function') kbLembreteHoje(document.getElementById('hj-body')).catch(()=>{});
   if(renov.length) guiaEstado().then(e=>{ if(!e.viu_renovacao_em) guiaSalvar({ viu_renovacao_em:new Date().toISOString() }); }).catch(()=>{});
   const b = document.getElementById('hj-body');
   b.querySelectorAll('[data-hjguia]').forEach(x=>x.addEventListener('click', ()=>guiaAbrir()));
@@ -11774,11 +12083,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611121307"></script>
-<script src="painel.js?v=202611121307"></script>
-<script src="cobranca.js?v=202611121307"></script>
-<script src="cadastro.js?v=202611121307"></script>
-<script src="contrato.js?v=202611121307"></script>
-<script src="guarda.js?v=202611121307"></script>
+<script src="plataforma.js?v=202611131202"></script>
+<script src="painel.js?v=202611131202"></script>
+<script src="cobranca.js?v=202611131202"></script>
+<script src="cadastro.js?v=202611131202"></script>
+<script src="contrato.js?v=202611131202"></script>
+<script src="guarda.js?v=202611131202"></script>
 </body>
 </html>

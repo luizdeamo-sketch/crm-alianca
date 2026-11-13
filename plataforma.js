@@ -127,7 +127,18 @@
       const cAtual = new URLSearchParams(location.search).get('c');
       // link de OUTRA corretora com alguém já logado neste navegador (ex.: o Luiz abrindo pelo Painel): avisa e oferece trocar,
       // em vez de cair calado na corretora do login (03/11/2026: "clico na Bravita e me leva para a Demonstração")
-      if (slugDoLink && data.slug && slugDoLink !== data.slug && !MODO_PAINEL && !window._tcLinkResolvido) linkDeOutra(data);   // _tcLinkResolvido: a pessoa já escolheu na tela de login
+      // 13/11/2026 (Amanda abria o link da CallMed e via a Demonstração): link de uma corretora NUNCA mostra outra. O login que estava
+      // guardado aqui (de outra corretora) vai para a chave da corretora dele, e este link volta para a tela de entrada, com o aviso.
+      if (slugDoLink && data.slug && slugDoLink !== data.slug && !MODO_PAINEL && !window._tcLinkResolvido) {
+        try {
+          const atual = window._tcChave || 'tc-alianca-auth', dela = 'tc-alianca-auth:' + data.slug, s = localStorage.getItem(atual);
+          if (s && atual !== dela && !localStorage.getItem(dela)) localStorage.setItem(dela, s);
+          localStorage.removeItem(atual);
+          try { sb.auth.stopAutoRefresh && sb.auth.stopAutoRefresh(); } catch (_) { /* nada */ }
+          sessionStorage.setItem('tc_aviso_outra', JSON.stringify({ email: (data.meu_email || window._userEmail || ''), nome: data.nome_exibicao || data.slug, slug: data.slug }));
+          location.replace(location.pathname + '?c=' + encodeURIComponent(slugDoLink)); return;
+        } catch (_) { linkDeOutra(data); }
+      }
       else if (data.slug && cAtual !== data.slug && !MODO_PAINEL && window.history && history.replaceState) history.replaceState(null, '', location.pathname + '?c=' + encodeURIComponent(data.slug) + location.hash);
       aplicarMarca();
       carregarEtapas();
@@ -138,6 +149,17 @@
   }
   // tela de entrada: a marca do link próprio da corretora (…/crm-alianca/<link> ou ?c=<link>); sem link, a última marca vista neste navegador
   const slugDoLink = (new URLSearchParams(location.search).get('c') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+  // aviso depois de tirar daqui o login de outra corretora (13/11/2026)
+  try {
+    const av = JSON.parse(sessionStorage.getItem('tc_aviso_outra') || 'null');
+    if (av) {
+      sessionStorage.removeItem('tc_aviso_outra');
+      av.nome = String(av.nome || '').replace(/\s*CRM Alian(ç|c)a.*$/i, '') || av.nome;   // "Demonstração CRM Aliança" → "Demonstração"
+      const mostrar = () => { const e = document.getElementById('login-err'); if (!e) return setTimeout(mostrar, 300);
+        e.innerHTML = '<div class="login-outra">Este navegador estava conectado à <b>' + esc(av.nome) + '</b>' + (av.email ? ' (' + esc(av.email) + ')' : '') + '. Ela continua aberta no link dela: <a href="?c=' + encodeURIComponent(av.slug) + '">abrir a ' + esc(av.nome) + '</a>.<br>Para entrar <b>aqui</b>, use o e-mail cadastrado nesta corretora.</div>'; };
+      mostrar();
+    }
+  } catch (_) { /* nada */ }
   // endereço dos gestores da plataforma (…/plataforma.html → ?painel=1): entrada neutra, sem a marca da última corretora vista neste
   // navegador (antes a Amanda via a marca da CallMed ao entrar como gestora)
   if (MODO_PAINEL) {

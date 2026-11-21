@@ -78,7 +78,9 @@
     if (dono !== true) {
       // 10/11/2026: o painel exige a confirmação em 2 etapas. Gestor que ainda não cadastrou é levado a cadastrar.
       let gestor = false; try { gestor = (await sb.rpc('crm_sou_gestor_plataforma')).data === true; } catch (e) { /* segue */ }
-      if (gestor && !window._mfaPausado && typeof window.mfaCadastro === 'function') {
+      // 2 etapas pausadas no sistema: o Painel abre no endereço dele, que pede o código (21/11/2026)
+      if (gestor && window._mfaPausado) { location.href = location.pathname + '?painel=1'; return; }
+      if (gestor && typeof window.mfaCadastro === 'function') {
         if (confirm('Para abrir o Painel da Plataforma é preciso ativar a confirmação em 2 etapas (leva 1 minuto, com o Google Authenticator ou o Microsoft Authenticator no celular). Ativar agora?')) window.mfaCadastro();
         return;
       }
@@ -914,7 +916,7 @@ Qualquer coisa, estou por aqui. Boas vendas! 🚀`;
       // livre para terminar; sem as 2 etapas o banco não entrega dado nenhum da corretora
       let aal = null; try { aal = (await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data; } catch (e) { /* segue */ }
       if (window._mfaPausado === undefined) { descobrir(); return setTimeout(checar, 800); }   // espera o sistema saber se as 2 etapas estão pausadas
-      if (window._mfaPausado) aal = { currentLevel: 'aal2', nextLevel: 'aal2' };            // 2 etapas pausadas (13/11/2026): segue sem o código
+      // 21/11/2026: o Painel voltou a exigir as 2 etapas mesmo com a pausa das corretoras (não há mais atalho aqui)
       if (!aal || (aal.currentLevel !== 'aal2' && aal.nextLevel === 'aal2')) { descobrir(); return setTimeout(checar, 1500); }   // no meio do código
       if (aal.currentLevel !== 'aal2') {
         // login sem as 2 etapas cadastradas: gestor é levado a cadastrar (o painel exige, 10/11/2026); quem não é gestor cai no aviso abaixo

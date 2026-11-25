@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611211638">
+<meta name="app-build" content="202611251145">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -332,6 +332,55 @@ window.ALIANCA = {
 @media (min-width:961px) and (max-width:1750px){
   #op-import{ font-size:0 !important; gap:0 !important; padding:6px 8px !important; }
   #op-import .ic{ font-size:15px; }
+}
+/* Carteira e comissões + segmentos (25/11/2026) */
+.ct-wrap{padding:12px 24px 20px}
+.ct-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.ct-kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.ct-kpi small{font-size:12px;color:var(--ink-soft)} .ct-kpi b{font-size:22px;color:var(--ink)} .ct-kpi span{font-size:11.5px;color:var(--ink-faint)}
+.ct-kpi.ok b{color:#0f7a53}
+.ct-barras{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px;align-items:end;margin-top:10px}
+.ct-mes{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--ink-soft)} .ct-mes b{font-size:12px;color:var(--ink)}
+.ct-col{height:120px;width:100%;max-width:46px;display:flex;flex-direction:column;justify-content:flex-end;background:var(--bg);border-radius:6px;overflow:hidden}
+.ct-b{display:block;width:100%} .ct-b.rec{background:#16a34a} .ct-b.bon{background:#d7aa42}
+.ct-leg{display:inline-block;width:10px!important;height:10px!important;padding:0!important;border:0!important;border-radius:3px;vertical-align:middle;margin:0 3px 0 8px} .ct-leg.rec{background:#16a34a} .ct-leg.bon{background:#d7aa42}
+.ct-tab td.r,.ct-tab th.r,.ca-table td.r,.ca-table th.r{text-align:right;white-space:nowrap}
+.ct-reg input{border:1px solid var(--border);border-radius:8px;padding:5px 8px;font:inherit;width:90px} .ct-reg .ct-seg{width:200px} .ct-reg td small{display:block;color:var(--ink-faint);font-size:11px}
+.seg-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.seg-t{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+.seg-chip{border:1px solid var(--border);background:var(--surface);border-radius:20px;padding:3px 10px;font:inherit;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.seg-chip small{color:var(--ink-faint)} .seg-chip.on{background:var(--brand);color:#fff;border-color:var(--brand)} .seg-chip.on small{color:#fff}
+.seg-acao{border-style:dashed}
+@media (max-width:760px){ .ct-wrap{padding:12px} .ct-barras{gap:3px} .ct-mes b{font-size:10px} }
+/* Carteira v2 (Conselho 25/11/2026) */
+.ct-topo{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.ct-titulo{font-size:19px;color:var(--ink);line-height:1.35} .ct-titulo b{font-size:26px;color:#0f7a53;white-space:nowrap}
+.ct-sub{font-size:14px;color:var(--ink-soft);margin-top:4px}
+.ct-mini{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px;font-size:15px;color:var(--ink-soft)} .ct-mini b{color:var(--ink)}
+.ct-col{max-width:80px!important}
+button.ct-mes{border:0;background:transparent;cursor:pointer;font:inherit;padding:0} .ct-mes small{font-size:13px} .ct-mes b{font-size:13px;white-space:nowrap}
+.ct-lista{display:none}
+.ct-li{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:center;padding:4px 0;font-size:14px}
+.ct-li-b{display:flex;height:12px;background:var(--bg);border-radius:6px;overflow:hidden} .ct-li-b .ct-b{height:100%}
+.ct-li-v{text-align:right} .ct-li-v small{display:block;font-size:12px;color:#9c7518}
+.ct-busca{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft)} .ct-busca input{min-width:220px}
+.ct-tab td small,.ct-rende small{display:block;font-size:12.5px;color:var(--ink-faint);font-weight:400}
+.ct-rende small{color:#9c7518}
+.ct-venc{background:#fdecea;border:1px solid #f3b8b0;color:#7a1d12;border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:14px}
+.ct-off{opacity:.55}
+.ct-edit{border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;margin-left:6px;padding:2px 6px}
+.ct-card{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.ct-card-h{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:end} .ct-card-h small{color:var(--ink-faint);font-size:12px}
+.ct-campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;margin-top:8px}
+.ct-campos input,.ct-campos select,.ct-card-h input{border:1px solid var(--border);border-radius:8px;padding:7px 9px;font:inherit;width:100%}
+.seg-chip{min-height:36px}
+@media (max-width:760px){
+  .ct-barras{display:none!important} .ct-lista{display:block}
+  .ct-titulo{font-size:17px} .ct-titulo b{font-size:23px}
+  .ct-tab,.ct-tab tbody{display:block;min-width:0!important;width:100%!important} .ct-tab thead{display:none} .ct-tab tr{display:block;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;padding:6px 10px}
+  .ct-tab td{display:block;border:0!important;padding:3px 0!important;text-align:left!important}
+  .ct-tab td[data-l]:not(:first-child)::before{content:attr(data-l) ": ";color:var(--ink-faint);font-size:12px}
+  .ct-busca input{min-width:0;width:100%} .ct-busca{flex:1 1 100%}
 }
 </style>
 
@@ -2793,7 +2842,7 @@ document.querySelectorAll('.nav-btn[data-view]').forEach(btn=>{
     opSetHeaderTitle(btn); flowClose();
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById('view-'+btn.dataset.view).classList.add('active');
-    if(btn.dataset.view === 'operacao'){ renderOperacao(); if(typeof kbAoAbrir==='function') kbAoAbrir(); }
+    if(btn.dataset.view === 'operacao'){ Promise.resolve(renderOperacao()).then(()=>{ try{ segRender(); }catch(e){} }); if(typeof kbAoAbrir==='function') kbAoAbrir(); }
     if(btn.dataset.view === 'central') renderCentral();
     if(btn.dataset.view === 'indicadores') renderIndicadores();
     if(btn.dataset.view === 'comercial'){ const t0 = document.querySelector('#com-tabs [data-ct="orc"]'); if(t0) t0.click(); else renderOrcamento(); }
@@ -3063,7 +3112,7 @@ function pvField(label, val, mono){ return `<div class="cf"><label>${label}</lab
 async function pvResumo(body, p){
   const wa = waLink(p.telefone);
   const end = [p.logradouro,p.numero,p.complemento,p.bairro,p.cidade,p.uf,p.cep].filter(Boolean).join(', ');
-  body.innerHTML = `<div class="pv-grid">
+  body.innerHTML = `<div class="es-box" id="pv-carteira"><div class="op-more">Carregando a carteira...</div></div><div class="pv-grid">
     <div class="es-box"><div class="ql">Dados</div><div class="core-fields">
       ${pvField('CPF', escapeHtml(p.cpf||''), true)}${pvField('Telefone', p.telefone?escapeHtml(p.telefone)+(wa?` <a href="${wa}" target="_blank" rel="noopener" title="Abrir WhatsApp">${ICO.chat}</a> <a href="tel:${dOnly(p.telefone)}" title="Ligar">${ICO.phone}</a>`:''):'')}${pvField('E-mail', escapeHtml(p.email||''))}
       ${pvField('Nascimento', p.data_nascimento?fmtDate(p.data_nascimento):'')}${pvField('Profissão / Regime', escapeHtml(p.profissao||'')+(p.regime_trabalho?' · '+escapeHtml(p.regime_trabalho):''))}
@@ -3081,7 +3130,7 @@ async function pvResumo(body, p){
     <div class="sg-row"><input id="ia-pergunta" class="ca-inp" style="flex:1;min-width:220px" placeholder="Ex.: quanto de cobertura de vida esse cliente já tem?"><button class="om-save" id="ia-perguntar">Perguntar</button></div>
     <div id="ia-resposta" style="margin-top:10px"></div>
   </div>`;
-  pvLead(p); pvDemandas(p); pvOppsResumo(p);
+  pvCarteira(p); pvLead(p); pvDemandas(p); pvOppsResumo(p);
   const iaBtn = document.getElementById('ia-perguntar'), iaInp = document.getElementById('ia-pergunta'), iaOut = document.getElementById('ia-resposta');
   const iaAsk = async ()=>{
     const pergunta = iaInp.value.trim(); if(!pergunta) return;
@@ -5429,6 +5478,7 @@ async function renderOperacao(force){
     await opLoadFunilApo();
     const wasLoaded = OP.loaded;
     OP.loaded = true;
+    setTimeout(()=>{ try{ if(typeof segRender==='function') segRender(); }catch(e){} }, 0);   // segmentos e convite de importar só depois de carregar (Conselho 25/11)
     const fe = document.getElementById('op-f-etapa');
     if(fe.options.length<=1) ETAPAS_FUNIL.forEach(e=>{ const o=document.createElement('option'); o.value=e.key; o.textContent='Etapa atual: '+e.label; fe.appendChild(o); });
     const fp = document.getElementById('op-f-produto');
@@ -7622,7 +7672,7 @@ function caApply(){
     if(fseg && r.seguradora!==fseg) return false;
     if(fvinc && (fvinc==='__nova' ? !(r.origem_apolice==='nova' && r.vinculo_comercial==='Aliança') : (r.vinculo_comercial||'Não informado')!==fvinc)) return false;
     if(fpr && r.tipo_seguro!==fpr) return false;
-    if(fv){ if(!r.data_vencimento) return false; const dias = Math.round((new Date(r.data_vencimento)-now)/86400000); if(fv==='vencidas'){ if(dias>=0) return false; } else if(dias<0 || dias>parseInt(fv,10)) return false; }
+    if(fv){ if(!r.data_vencimento) return false; const dias = Math.round((new Date(r.data_vencimento)-now)/86400000); if(fv==='vencidas'){ if(dias>=0 || caEfetivo(r)==='cancelada') return false; } else if(dias<0 || dias>parseInt(fv,10)) return false; }
     if(fent==='pendente' && r.entrega_certificado) return false;
     if(fent==='feita' && !r.entrega_certificado) return false;
     return true;
@@ -7636,7 +7686,9 @@ function caApply(){
   const vendas = CA.data.filter(r=>r.origem_apolice==='nova' && r.vinculo_comercial==='Aliança' && r.status!=='cancelada');
   const vprem = vendas.reduce((t,r)=>t+(Number(r.valor_premio)||0),0);
   const pendEntrega = ativas.filter(r=>r.origem_apolice==='nova' && r.vinculo_comercial==='Aliança' && !r.entrega_certificado).length;
-  document.getElementById('ca-kpis').innerHTML = `<span class="op-kpi" style="background:var(--green-soft)"><b style="color:var(--green)">${vendas.length}</b> novas vendas Aliança · prêmio <b style="color:var(--green)">${fmtMoney(vprem)}</b></span><span class="op-kpi"><b>${CA.data.length}</b> apólices no banco</span><span class="op-kpi"><b>${ativas.length}</b> ativas</span><span class="op-kpi">prêmio anual ativo <b>${fmtMoney(prem)}</b></span><span class="op-kpi" style="background:var(--amber-soft)"><b style="color:var(--amber-ink)">${v60}</b> vencem em até 60 dias</span>${pendEntrega?`<button class="op-kpi" id="ca-pend-entrega" style="border:none;cursor:pointer;background:var(--amber-soft)"><b style="color:var(--amber-ink)">${pendEntrega}</b> aguardando entrega do certificado</button>`:''}<span class="op-kpi">exibindo <b>${rows.length}</b></span>`;
+  const v30 = ativas.filter(r=>r.data_vencimento && (new Date(r.data_vencimento)-now)/86400000 <= 30).length, vencidas = CA.data.filter(r=>caEfetivo(r)==='vencida').length;
+  document.getElementById('ca-kpis').innerHTML = `<button class="op-kpi" data-cav="30" style="border:none;cursor:pointer;background:var(--amber-soft)" title="Mostrar as que vencem em 30 dias"><b style="color:var(--amber-ink)">${v30}</b> vencem em 30 dias</button><button class="op-kpi" data-cav="vencidas" style="border:none;cursor:pointer" title="Mostrar as vencidas"><b>${vencidas}</b> vencidas</button>${vendas.length?`<span class="op-kpi"><b>${vendas.length}</b> vendas novas · prêmio <b>${fmtMoney(vprem)}</b></span>`:''}<span class="op-kpi"><b>${CA.data.length}</b> apólices no banco</span><span class="op-kpi"><b>${ativas.length}</b> ativas</span><span class="op-kpi">prêmio anual ativo <b>${fmtMoney(prem)}</b></span><span class="op-kpi" style="background:var(--amber-soft)"><b style="color:var(--amber-ink)">${v60}</b> vencem em até 60 dias</span>${pendEntrega?`<button class="op-kpi" id="ca-pend-entrega" style="border:none;cursor:pointer;background:var(--amber-soft)"><b style="color:var(--amber-ink)">${pendEntrega}</b> aguardando entrega do certificado</button>`:''}<span class="op-kpi">exibindo <b>${rows.length}</b></span>`;
+  document.getElementById('ca-kpis').onclick = e=>{ const b = e.target.closest('[data-cav]'); if(!b) return; const sel = document.getElementById('ca-f-venc'); sel.value = sel.value===b.dataset.cav ? '' : b.dataset.cav; caApply(); };
   document.getElementById('ca-count').textContent = '';
   const th = (key,label)=>`<th class="sortable" data-k="${key}">${label}${CA.sort.k===key?(CA.sort.dir>0?' ▲':' ▼'):''}</th>`;
   document.getElementById('ca-list').innerHTML = rows.length ? `<table class="ca-table"><thead><tr>${th('cliente','Cliente')}${th('seguradora','Seguradora')}${th('tipo_seguro','Produto')}${th('numero_apolice','Nº')}${th('data_vencimento','Vigência')}${th('valor_premio','Prêmio anual')}${th('status','Status')}<th>Origem</th><th>Vínculo</th><th>Entrega</th><th></th></tr></thead><tbody id="ca-body"></tbody></table><div class="op-more" id="ca-more"></div>` : '<div class="op-more">Nenhuma apólice encontrada. Arraste um PDF, ou use “Importar planilha” para carregar sua base.</div>';
@@ -10008,13 +10060,13 @@ const kbQuem = r => { const o = String(r.origem||'').trim(); const m = o.match(/
 function kbUltimo(r){ const h = String(r.historico||'').trim(); if(!h) return ''; const ls = h.split(String.fromCharCode(10)); const corpo = /^\[/.test(ls[0]) ? ls.slice(1).join(' ') : ls.join(' '); return corpo.split(/\s*\[\d\d\/\d\d /)[0].trim().slice(0,110); }
 
 async function kbIniciar(minha){
-  KB.ativo = !!(minha && minha.slug==='demonstracao');
+  KB.ativo = !!minha;   // 25/11/2026: Kanban e Carteira liberados para todas as corretoras (antes só a Demonstração)
   if(!KB.ativo) return;
   try{ KB.modo = localStorage.getItem('kb_modo') || 'lista'; }catch(e){}
   const filtros = document.querySelector('#view-operacao .op-filters'), hoje = document.getElementById('op-hoje');
   if(filtros && !document.getElementById('kb-modo')){
     const seg = document.createElement('div'); seg.id = 'kb-modo'; seg.className = 'kb-seg';
-    seg.innerHTML = '<button type="button" data-kbm="lista">Lista</button><button type="button" data-kbm="kanban">Kanban</button>';
+    seg.innerHTML = '<button type="button" data-kbm="lista">Lista</button><button type="button" data-kbm="kanban">Kanban</button><button type="button" data-kbm="carteira" title="Clientes ativos, em prospecção e quanto cada um rende de comissão">Carteira</button>';
     filtros.insertBefore(seg, filtros.firstChild);   // primeiro da barra: fica no mesmo lugar na Lista e no Kanban (13/11/2026, pedido do Luiz)
     seg.addEventListener('click', e=>{ const b = e.target.closest('[data-kbm]'); if(!b) return; KB.modo = b.dataset.kbm; try{ localStorage.setItem('kb_modo', KB.modo); }catch(_){} kbAoAbrir(); });
   }
@@ -10025,12 +10077,14 @@ async function kbIniciar(minha){
 }
 function kbAoAbrir(){
   if(!KB.ativo) return;
-  const kan = KB.modo==='kanban', host = document.getElementById('kb-host'), sc = document.getElementById('op-scroll');
+  const kan = KB.modo==='kanban' || KB.modo==='carteira', host = document.getElementById('kb-host'), sc = document.getElementById('op-scroll');
   document.querySelectorAll('#kb-modo [data-kbm]').forEach(b=>b.classList.toggle('on', b.dataset.kbm===KB.modo));
   document.getElementById('view-operacao').classList.toggle('kb-on', kan);
   if(sc) sc.style.display = kan ? 'none' : '';
   if(host) host.style.display = kan ? '' : 'none';
-  if(kan) kbRender(true);
+  try{ segRender(); }catch(e){}
+  if(!document.getElementById('view-operacao').classList.contains('active')) return;   // não carrega no login se a pessoa está em outra tela
+  if(KB.modo==='carteira') ctRender(host); else if(kan) kbRender(true);
 }
 async function kbCarregar(){
   const { data, error } = await sb.from('crm_prospeccao').select('*').order('updated_at', { ascending:false }).limit(5000);
@@ -10079,7 +10133,7 @@ async function kbRender(recarregar){
   // placar e botões numa linha só (13/11/2026: o Luiz achou o placar grande demais)
   const chip = (n, txt, tit)=>`<span class="kb-chip" title="${tit||''}"><b>${n}</b> ${txt}</span>`;
   const barra = `<div class="kb-topo">
-      <span class="kb-sem" title="Versão de apresentação: só a corretora Demonstração vê este quadro">🔒 Semana ${fmtDate(P.seg).slice(0,5)}–${fmtDate(kbIso(fimSem)).slice(0,5)}</span>
+      <span class="kb-sem">Semana ${fmtDate(P.seg).slice(0,5)}–${fmtDate(kbIso(fimSem)).slice(0,5)}</span>
       ${chip(P.lista+'/'+KB.meta, 'na lista', 'Meta da semana: '+KB.meta+' contatos')}${chip(P.contatos, 'contatos')}${chip(P.reunioes, 'reuniões')}${chip(P.propostas, 'propostas')}${chip(P.clientes, 'clientes')}
       <span class="kb-mini-barra" title="${P.contatos} de ${KB.meta} contatos"><span style="width:${pct}%"></span></span><a href="#" id="kb-meta" title="Trocar a meta da semana">meta</a>
       <span style="flex:1"></span>
@@ -10238,6 +10292,275 @@ async function kbLembreteHoje(host){
   div.innerHTML = `📋 <b>Hora de montar a lista da semana de ${fmtDate(seg).slice(0,5)}.</b> Ela está com ${n} de ${KB.meta} contatos. <button class="om-save" style="margin-left:8px;padding:4px 12px" id="kb-hj-ir">Montar agora</button>`;
   host.prepend(div);
   div.querySelector('#kb-hj-ir').addEventListener('click', ()=>{ KB.modo = 'kanban'; try{ localStorage.setItem('kb_modo','kanban'); }catch(_){} const nb = document.querySelector('.nav-btn[data-view="operacao"]'); if(nb) nb.click(); setTimeout(()=>kbMontarLista(), 900); });
+}
+// ============ CARTEIRA E COMISSÕES (25/11/2026, pedido do Luiz; revisado pelo Conselho no mesmo dia) ============
+// Para o corretor independente: clientes ativos, em prospecção e quanto cada cliente rende de comissão, mês a mês.
+// Tudo é ESTIMATIVA (dito na tela) e tudo é editável:
+//   regra por seguradora (e, se quiser, por tipo de produto) em crm_comissao_regras: bônus da 1ª parcela (agenciamento) em % do prêmio
+//   mensal, dividido em N parcelas a partir de X meses depois da emissão; comissão de 1º ano, do 2º ao N-ésimo ano e vitalícia depois.
+//   Cada apólice pode ter a própria regra (campanha, produto) em crm_apolices.comissao_regra, que vale mais que a da seguradora.
+// Conta: prêmio mensal = prêmio anual ÷ 12 (forma de pagamento anual: a comissão entra uma vez por ano, no mês de aniversário).
+// Nas parcelas do bônus, o bônus substitui a comissão daquele mês. Bônus só em apólice nova (não em carteira trazida, renovação ou estudo).
+// Supõe que a apólice segue ativa (vida costuma renovar); a apólice cancelada ou vencida sai da conta.
+const CRT = { apo:[], regras:[], prosp:0, busca:'', carregado:false, carregando:null };
+const CRT_SUGESTAO = { agenciamento_pct:100, bonus_parcelas:1, mes_bonus:1, ano1_pct:40, anos2_pct:8, anos2_ate:4, vitalicio_pct:5 };   // ponto de partida (edite)
+const ctMoney = v => (Number(v)||0).toLocaleString('pt-BR', { style:'currency', currency:'BRL', maximumFractionDigits:0 });
+const ctYm = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const ctMesNome = ym => { const [y,m] = ym.split('-'); return ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][+m-1]+'/'+y.slice(2); };
+const ctChave = s => String(s||'').trim().toLowerCase();
+const ctMesesEntre = (a, b) => { const [ya,ma] = a.split('-').map(Number), [yb,mb] = b.split('-').map(Number); return (yb-ya)*12 + (mb-ma); };
+const ctPodeEditar = () => window._isMaster === true;
+async function ctRegras(){
+  const { data } = await sb.from('crm_comissao_regras').select('id,seguradora,tipo_seguro,agenciamento_pct,bonus_parcelas,mes_bonus,ano1_pct,anos2_pct,anos2_ate,vitalicio_pct,comissao_pct');
+  CRT.regras = data || []; return CRT.regras;
+}
+// a regra que vale para a apólice: a da própria apólice > seguradora + produto > seguradora
+function ctRegraDe(a){
+  if(a.comissao_regra && typeof a.comissao_regra==='object' && Object.keys(a.comissao_regra).length) return { ...a.comissao_regra, origem:'apólice' };
+  const s = ctChave(a.seguradora), t = ctChave(a.tipo_seguro);
+  const r = CRT.regras.find(x=>ctChave(x.seguradora)===s && ctChave(x.tipo_seguro)===t && t) || CRT.regras.find(x=>ctChave(x.seguradora)===s && !ctChave(x.tipo_seguro));
+  return r ? { ...r, ano1_pct: r.ano1_pct ?? r.comissao_pct, origem:'seguradora' } : null;
+}
+const ctNova = a => !['carteira','importada','estudo','concorrente','existente'].includes(String(a.origem_apolice||'')) && String(a.tipo_movimento||'') !== 'renovacao';
+const ctAnual = a => /anual|vista|única|unica/i.test(String(a.forma_pagamento||''));
+// quanto a apólice paga num mês (ym): { rec, bonus }
+function ctNoMes(a, r, ym){
+  if(!a.data_emissao || !r) return { rec:0, bonus:0 };
+  const e = String(a.data_emissao).slice(0,7), k = ctMesesEntre(e, ym); if(k < 0) return { rec:0, bonus:0 };
+  const premAno = Number(a.valor_premio)||0, premMes = premAno/12;
+  const ini = Number(r.mes_bonus ?? 1), parc = Math.max(1, Number(r.bonus_parcelas)||1), ag = Number(r.agenciamento_pct)||0;
+  if(ag && ctNova(a) && k >= ini && k < ini+parc) return { rec:0, bonus: premMes*ag/100/parc };
+  const ano = Math.floor(k/12) + 1, ate = Number(r.anos2_ate)||4;
+  const pct = ano===1 ? r.ano1_pct : ano<=ate ? r.anos2_pct : r.vitalicio_pct; if(pct == null || pct === '') return { rec:0, bonus:0 };
+  if(ctAnual(a)) return { rec: k % 12 === 0 ? premAno*Number(pct)/100 : 0, bonus:0 };
+  return { rec: premMes*Number(pct)/100, bonus:0 };
+}
+const ctAtiva = a => caEfetivo(a)==='ativa';
+function ctProximos12(){ const d = new Date(); d.setDate(1); return Array.from({ length:12 }, (_,i)=>{ const x = new Date(d); x.setMonth(x.getMonth()+i); return ctYm(x); }); }
+async function ctCarregar(forcar){
+  if(CRT.carregado && !forcar) return;
+  if(CRT.carregando) return CRT.carregando;
+  CRT.carregando = (async ()=>{
+    const [apo, pr] = await Promise.all([
+      opFetchAll('crm_apolices','id,pessoa_id,seguradora,tipo_seguro,valor_premio,forma_pagamento,origem_apolice,tipo_movimento,comissao_regra,data_emissao,data_vencimento,status,crm_pessoas(nome,tags)',['id']),
+      sb.from('crm_prospeccao').select('id', { count:'exact', head:true }).not('status','in','("Virou cliente","Sem interesse")'),
+      ctRegras()]);
+    CRT.apo = apo || []; CRT.prosp = pr.count || 0; CRT.carregado = true;
+  })();
+  try{ await CRT.carregando; } finally { CRT.carregando = null; }
+}
+function ctCalc(){
+  const meses = ctProximos12(), hojeYm = meses[0], hoje = new Date(new Date().toDateString());
+  const seg = (document.getElementById('op-f-tag')||{}).value || '';
+  const porCli = new Map(), linha = meses.map(ym=>({ ym, rec:0, bonus:0 })), semRegra = new Set(), vencidas = [];
+  CRT.apo.forEach(a=>{
+    if(seg && !((a.crm_pessoas && a.crm_pessoas.tags)||[]).includes(seg)) return;
+    const ef = caEfetivo(a);
+    if(ef==='vencida'){ const d = Math.round((new Date(a.data_vencimento+'T12:00:00')-hoje)/864e5); if(d >= -60) vencidas.push({ a, d }); return; }
+    if(ef!=='ativa') return;
+    const r = ctRegraDe(a); if(!r) semRegra.add(ctChave(a.seguradora)+'|'+(a.seguradora||''));
+    let x = porCli.get(a.pessoa_id);
+    if(!x){ x = { pessoa_id:a.pessoa_id, nome:(a.crm_pessoas&&a.crm_pessoas.nome)||'?', apos:[], total:0, rec:0, bonus:0, mesBonus:null, prox:null, semRegra:0 }; porCli.set(a.pessoa_id, x); }
+    x.apos.push(a); if(!r) x.semRegra++;
+    meses.forEach((ym,i)=>{ const v = ctNoMes(a, r, ym); linha[i].rec += v.rec; linha[i].bonus += v.bonus; x.rec += v.rec; x.bonus += v.bonus; if(v.bonus && !x.mesBonus) x.mesBonus = ym; });
+    if(a.data_vencimento && (!x.prox || a.data_vencimento < x.prox)) x.prox = a.data_vencimento;
+  });
+  const cli = [...porCli.values()]; cli.forEach(x=>{ x.total = x.rec + x.bonus; });
+  const total = linha.reduce((t,m)=>t+m.rec+m.bonus,0), rec = linha.reduce((t,m)=>t+m.rec,0), bonus = linha.reduce((t,m)=>t+m.bonus,0);
+  const prox = linha.find(m=>m.bonus>0);
+  return { meses, linha, cli, total, rec, bonus, prox, semRegra:[...semRegra].map(s=>s.split('|')[1]).filter(Boolean), vencidas, hojeYm, seg };
+}
+async function ctRender(host){
+  if(!host) host = document.getElementById('kb-host'); if(!host) return;
+  if(!CRT.carregado) host.innerHTML = '<div class="op-more">Carregando a carteira...</div>';
+  try{ await ctCarregar(); }catch(e){ if(KB.modo==='carteira') host.innerHTML = '<div class="om-err" style="padding:20px">Não consegui carregar a carteira: '+escapeHtml(e.message||String(e))+'</div>'; return; }
+  if(KB.modo!=='carteira') return;   // a pessoa trocou de modo enquanto carregava
+  ctDesenhar(host);
+}
+function ctDesenhar(host){
+  const C = ctCalc(), maxMes = Math.max(1, ...C.linha.map(m=>m.rec+m.bonus)), q = ctChave(CRT.busca);
+  const dias = d => d ? Math.round((new Date(d+'T12:00:00') - new Date(new Date().toDateString()))/864e5) : null;
+  const lista = C.cli.filter(x=>!q || ctChave(x.nome).includes(q) || x.apos.some(a=>ctChave(a.seguradora).includes(q) || ctChave(a.tipo_seguro).includes(q))).sort((a,b)=>b.total-a.total);
+  const seguros = x => x.apos.map(a=>escapeHtml((a.tipo_seguro||'Seguro')+' · '+(a.seguradora||'?'))).join(', ');
+  const rende = x => `<b>${x.rec ? ctMoney(x.rec/12)+'/mês' : (x.semRegra ? '<span class="tagx warn">sem regra</span>' : '—')}</b>${x.bonus ? `<small>+ ${ctMoney(x.bonus)} de bônus a partir de ${ctMesNome(x.mesBonus)}</small>` : ''}`;
+  const vence = d0 => { const d = dias(d0); return d0 ? fmtDate(d0)+(d!=null && d<=60 ? ` <span class="tagx ${d<=30?'bad':'warn'}">${d<0?'venceu':d+' dias'}</span>` : '') : '—'; };
+  const editar = ctPodeEditar();
+  host.innerHTML = `<div class="ct-wrap">
+    <div class="ct-topo"><div class="ct-titulo">Nos próximos 12 meses você deve receber <b>${ctMoney(C.total)}</b>${C.seg?` <span class="tagx">segmento: ${escapeHtml(C.seg)}</span>`:''}</div>
+      <div class="ct-sub">${ctMoney(C.rec)} de comissão + ${ctMoney(C.bonus)} de bônus da 1ª parcela · estimativa pelas regras que você cadastrou</div>
+      <div class="ct-mini"><span><b>${C.cli.length}</b> clientes ativos</span><span><b>${CRT.prosp}</b> em prospecção <a href="#" id="ct-ir-kb">ver no Kanban</a></span>${C.prox?`<span>próximo bônus: <b>${ctMoney(C.prox.bonus)}</b> em ${ctMesNome(C.prox.ym)}</span>`:''}</div></div>
+    ${C.semRegra.length ? `<div class="msg-regra" style="margin:0 0 12px">⚠️ <b>Sem regra de comissão para: ${C.semRegra.map(escapeHtml).join(', ')}.</b> A comissão dessas apólices entra como zero. ${editar?'<a href="#" class="ct-regras">Cadastrar as regras</a> (já vem com uma sugestão para você conferir).':'Peça ao administrador da corretora para cadastrar as regras.'}</div>` : ''}
+    <div class="es-box"><div class="ql" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">Quanto entra mês a mês <span class="hint" style="margin:0"><span class="ct-leg rec"></span> comissão <span class="ct-leg bon"></span> bônus da 1ª parcela</span><span style="flex:1"></span>${editar?'<button class="om-cancel ct-regras">Regras de comissão</button>':''}</div>
+      <div class="ct-barras">${C.linha.map((m,i)=>{ const t = m.rec+m.bonus; return `<button type="button" class="ct-mes" data-ctm="${i}"><div class="ct-col"><span class="ct-b bon" style="height:${m.bonus/maxMes*100}%"></span><span class="ct-b rec" style="height:${m.rec/maxMes*100}%"></span></div><b>${ctMoney(t)}</b><small>${ctMesNome(m.ym)}</small></button>`; }).join('')}</div>
+      <div class="ct-lista">${C.linha.map(m=>{ const t = m.rec+m.bonus; return `<div class="ct-li"><span class="ct-li-m">${ctMesNome(m.ym)}</span><span class="ct-li-b"><span class="ct-b rec" style="width:${m.rec/maxMes*100}%"></span><span class="ct-b bon" style="width:${m.bonus/maxMes*100}%"></span></span><span class="ct-li-v"><b>${ctMoney(t)}</b>${m.bonus?`<small>${ctMoney(m.bonus)} de bônus</small>`:''}</span></div>`; }).join('')}</div>
+      <div class="hint" id="ct-det" style="margin-top:6px">Toque num mês para ver o detalhe. Estimativa: supõe que as apólices seguem ativas; confira com o extrato da seguradora.</div></div>
+    <div class="es-box"><div class="ql" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">Clientes e quanto cada um rende <span class="tagx">${lista.length}</span><span style="flex:1"></span><label class="ct-busca"><span>Buscar</span><input id="ct-busca" class="ca-inp" placeholder="cliente, seguradora ou seguro" value="${escapeHtml(CRT.busca)}"></label></div>
+      ${C.vencidas.length ? `<div class="ct-venc">🔁 <b>${C.vencidas.length} apólice${C.vencidas.length>1?'s':''} vencida${C.vencidas.length>1?'s':''} nos últimos 60 dias</b> (renovação em risco): ${C.vencidas.slice(0,8).map(v=>`<a href="#" data-openp="${v.a.pessoa_id}">${escapeHtml((v.a.crm_pessoas&&v.a.crm_pessoas.nome)||'?')}</a> <small>(${escapeHtml(v.a.tipo_seguro||'')} · ${escapeHtml(v.a.seguradora||'')})</small>`).join(', ')}${C.vencidas.length>8?' e outras':''}</div>` : ''}
+      <table class="ca-table ct-tab"><thead><tr><th>Cliente</th><th class="r">Quanto rende</th><th>Vence</th></tr></thead><tbody>
+      ${lista.slice(0,300).map(x=>`<tr><td data-l="Cliente"><a href="#" data-openp="${x.pessoa_id}"><b>${escapeHtml(x.nome)}</b></a><small>${seguros(x)}</small></td><td data-l="Quanto rende" class="r ct-rende">${rende(x)}</td><td data-l="Vence">${vence(x.prox)}</td></tr>`).join('') || '<tr><td colspan="3"><div class="hint">Nenhum cliente com apólice em vigor'+(C.seg?' neste segmento':'')+'. Traga a sua carteira em <b>Importar carteira</b> (planilha ou PDFs das apólices).</div></td></tr>'}
+      </tbody></table>${lista.length>300?'<div class="hint">Mostrando os 300 que mais rendem; use a busca.</div>':''}</div>
+  </div>`;
+  host.querySelectorAll('[data-openp]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); goToPersonView(a.dataset.openp); }));
+  const bi = host.querySelector('#ct-busca'); if(bi) bi.addEventListener('input', ()=>{ CRT.busca = bi.value; clearTimeout(CRT._t); CRT._t = setTimeout(()=>{ ctDesenhar(host); const n = host.querySelector('#ct-busca'); if(n){ n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 250); });
+  host.querySelectorAll('.ct-regras').forEach(b=>b.addEventListener('click', e=>{ e.preventDefault(); ctRegrasDialog(()=>{ CRT.carregado = false; ctRender(host); }); }));
+  host.querySelectorAll('[data-ctm]').forEach(b=>b.addEventListener('click', ()=>{ const m = C.linha[+b.dataset.ctm]; const d = host.querySelector('#ct-det');
+    if(d) d.innerHTML = `<b>${ctMesNome(m.ym)}</b>: ${ctMoney(m.rec)} de comissão + ${ctMoney(m.bonus)} de bônus = <b>${ctMoney(m.rec+m.bonus)}</b> (estimativa)`; }));
+  const kb = host.querySelector('#ct-ir-kb'); if(kb) kb.addEventListener('click', e=>{ e.preventDefault(); KB.modo = 'kanban'; try{ localStorage.setItem('kb_modo','kanban'); }catch(_){} kbAoAbrir(); });
+}
+// formulário de uma regra (serve para a seguradora e para a apólice)
+const ctNum = v => { const t = String(v??'').trim().replace(/\./g,'').replace(',','.'); return t==='' ? null : Number(t); };
+const ctFmt = v => v==null || v==='' ? '' : String(v).replace('.',',');
+function ctRegraCampos(r, sug){
+  const ph = k => sug ? 'sugestão: '+ctFmt(CRT_SUGESTAO[k]) : '';
+  return `<div class="ct-campos">
+    <label class="fl"><span>Bônus da 1ª parcela (%)</span><input class="ct-ag" inputmode="decimal" value="${ctFmt(r.agenciamento_pct)}" placeholder="${ph('agenciamento_pct')}"></label>
+    <label class="fl"><span>Bônus em quantas parcelas</span><input class="ct-parc" inputmode="numeric" value="${r.bonus_parcelas??''}" placeholder="${ph('bonus_parcelas')}"></label>
+    <label class="fl"><span>O bônus começa</span><select class="ct-mes">${Array.from({length:13},(_,k)=>`<option value="${k}" ${Number(r.mes_bonus??1)===k?'selected':''}>${k===0?'no mês da emissão':k===1?'no mês seguinte':k+' meses depois'}</option>`).join('')}</select></label>
+    <label class="fl"><span>Comissão no 1º ano (%)</span><input class="ct-a1" inputmode="decimal" value="${ctFmt(r.ano1_pct ?? r.comissao_pct)}" placeholder="${ph('ano1_pct')}"></label>
+    <label class="fl"><span>Do 2º ano até o ano</span><input class="ct-ate" inputmode="numeric" value="${r.anos2_ate??''}" placeholder="${ph('anos2_ate')}"></label>
+    <label class="fl"><span>Comissão nesse período (%)</span><input class="ct-a2" inputmode="decimal" value="${ctFmt(r.anos2_pct)}" placeholder="${ph('anos2_pct')}"></label>
+    <label class="fl"><span>Comissão vitalícia depois (%)</span><input class="ct-vit" inputmode="decimal" value="${ctFmt(r.vitalicio_pct)}" placeholder="${ph('vitalicio_pct')}"></label>
+    ${sug?'<button type="button" class="om-cancel ct-sug" style="align-self:end">Usar a sugestão</button>':''}</div>`;
+}
+function ctLerCampos(el){
+  const v = { agenciamento_pct:ctNum(el.querySelector('.ct-ag').value), bonus_parcelas:ctNum(el.querySelector('.ct-parc').value), mes_bonus:Number(el.querySelector('.ct-mes').value),
+    ano1_pct:ctNum(el.querySelector('.ct-a1').value), anos2_ate:ctNum(el.querySelector('.ct-ate').value), anos2_pct:ctNum(el.querySelector('.ct-a2').value), vitalicio_pct:ctNum(el.querySelector('.ct-vit').value) };
+  const ruim = (v.agenciamento_pct!=null && (isNaN(v.agenciamento_pct)||v.agenciamento_pct<0||v.agenciamento_pct>1000)) || [v.ano1_pct,v.anos2_pct,v.vitalicio_pct].some(x=>x!=null && (isNaN(x)||x<0||x>100))
+    || (v.bonus_parcelas!=null && !(v.bonus_parcelas>=1 && v.bonus_parcelas<=24)) || (v.anos2_ate!=null && !(v.anos2_ate>=2 && v.anos2_ate<=50));
+  return ruim ? null : v;
+}
+function ctLigarSugestao(el){ const b = el.querySelector('.ct-sug'); if(b) b.addEventListener('click', ()=>{ const S = CRT_SUGESTAO;
+  [['.ct-ag','agenciamento_pct'],['.ct-parc','bonus_parcelas'],['.ct-a1','ano1_pct'],['.ct-ate','anos2_ate'],['.ct-a2','anos2_pct'],['.ct-vit','vitalicio_pct']].forEach(([s,k])=>{ const i = el.querySelector(s); if(i && i.value==='') i.value = ctFmt(S[k]); });
+  el.querySelector('.ct-mes').value = String(S.mes_bonus); }); }
+async function ctRegrasDialog(depois){
+  if(!ctPodeEditar()){ showToast('Só o administrador da corretora muda as regras de comissão.'); return; }
+  await ctRegras(); if(!CRT.carregado){ try{ await ctCarregar(); }catch(e){} }
+  const conhecidas = new Set(CRT.regras.map(r=>ctChave(r.seguradora)+'|'+ctChave(r.tipo_seguro)));
+  const faltam = [...new Set(CRT.apo.filter(ctAtiva).map(a=>String(a.seguradora||'').trim()).filter(Boolean))].filter(s=>!conhecidas.has(ctChave(s)+'|'));
+  const itens = CRT.regras.map(r=>({ ...r })).concat(faltam.map(s=>({ seguradora:s, tipo_seguro:'' })));
+  const card = (r,i)=>{ const n = CRT.apo.filter(a=>ctAtiva(a) && ctChave(a.seguradora)===ctChave(r.seguradora) && (!r.tipo_seguro || ctChave(a.tipo_seguro)===ctChave(r.tipo_seguro))).length;
+    return `<div class="ct-card" data-i="${i}" data-id="${r.id||''}"><div class="ct-card-h"><label class="fl"><span>Seguradora</span><input class="ct-seg" value="${escapeHtml(r.seguradora||'')}" placeholder="Nome da seguradora"></label>
+      <label class="fl"><span>Só para o produto (opcional)</span><input class="ct-tipo" value="${escapeHtml(r.tipo_seguro||'')}" placeholder="ex.: Vida, DIT (vazio = todos)"></label><small>${n?n+' apólice'+(n>1?'s':'')+' ativa'+(n>1?'s':''):''}${!r.id?' · <b>sem regra ainda</b>':''}</small></div>${ctRegraCampos(r, !r.id)}</div>`; };
+  const box = dlgOpen(`<div class="om-title"><div><h3>Regras de comissão por seguradora</h3><div class="om-sub">Para estimar quanto cada cliente rende. Tudo é editável; cada apólice também pode ter a própria regra (campanha, produto), na ficha do cliente.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body" style="max-height:66vh;overflow:auto">
+      <div class="hint" style="margin-bottom:10px"><b>Bônus da 1ª parcela</b> (agenciamento): quanto a seguradora paga sobre o 1º prêmio mensal (ex.: 100%, 150%, 200%, 300%), e em quantas parcelas. Nas parcelas do bônus, ele substitui a comissão do mês. Depois vale a comissão do 1º ano, do 2º ao N-ésimo ano e a vitalícia. A <b>sugestão</b> é só um ponto de partida: confira no contrato de cada seguradora.</div>
+      <div id="ct-cards">${itens.map(card).join('')}</div>
+      <button class="om-cancel" id="ct-reg-add" style="margin-top:8px">+ Outra seguradora ou produto</button>
+      <div class="om-err" id="ct-reg-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="ct-reg-ok">Salvar regras</button></div>`, true);
+  box.querySelectorAll('.ct-card').forEach(ctLigarSugestao);
+  box.querySelector('#ct-reg-add').addEventListener('click', ()=>{ const c = box.querySelector('#ct-cards'); c.insertAdjacentHTML('beforeend', card({ seguradora:'', tipo_seguro:'' }, c.children.length)); ctLigarSugestao(c.lastElementChild); c.lastElementChild.querySelector('.ct-seg').focus(); });
+  box.querySelector('#ct-reg-ok').addEventListener('click', async e=>{
+    const b = e.currentTarget, err = box.querySelector('#ct-reg-err'); err.textContent = '';
+    const linhas = [];
+    for(const el of box.querySelectorAll('.ct-card')){
+      const seguradora = el.querySelector('.ct-seg').value.trim(), tipo = el.querySelector('.ct-tipo').value.trim(); if(!seguradora) continue;
+      const v = ctLerCampos(el); if(!v){ err.textContent = 'Confira os números de '+seguradora+': bônus de 0 a 1000%, comissões de 0 a 100%, parcelas de 1 a 24 e "até o ano" de 2 a 50.'; return; }
+      if(v.agenciamento_pct==null && v.ano1_pct==null && v.anos2_pct==null && v.vitalicio_pct==null) continue;   // sem nada preenchido: não grava
+      linhas.push({ id:el.dataset.id||null, row:{ seguradora, tipo_seguro:tipo, agenciamento_pct:v.agenciamento_pct??0, bonus_parcelas:v.bonus_parcelas??1, mes_bonus:v.mes_bonus,
+        ano1_pct:v.ano1_pct, anos2_pct:v.anos2_pct, anos2_ate:v.anos2_ate??4, vitalicio_pct:v.vitalicio_pct, comissao_pct:v.ano1_pct, atualizado_em:new Date().toISOString() } });
+    }
+    const chaves = linhas.map(l=>ctChave(l.row.seguradora)+'|'+ctChave(l.row.tipo_seguro)); if(new Set(chaves).size !== chaves.length){ err.textContent = 'Há duas regras para a mesma seguradora e produto. Junte numa só.'; return; }
+    b.disabled = true; b.textContent = 'Salvando…';
+    try{
+      for(const l of linhas){
+        const ex = l.id || (CRT.regras.find(r=>ctChave(r.seguradora)+'|'+ctChave(r.tipo_seguro)===ctChave(l.row.seguradora)+'|'+ctChave(l.row.tipo_seguro))||{}).id;
+        const r = ex ? await sb.from('crm_comissao_regras').update(l.row).eq('id', ex) : await sb.from('crm_comissao_regras').insert(l.row);
+        if(r.error) throw r.error;
+      }
+      await ctRegras(); dlgClose(); showToast('Regras salvas. A carteira já usa os novos números.'); if(depois) depois();
+    }catch(x){ await ctRegras().catch(()=>{}); err.textContent = 'Não consegui salvar: '+(x.message||x)+(/row-level|policy/i.test(x.message||'')?' (só o administrador da corretora pode mudar as regras)':''); b.disabled = false; b.textContent = 'Salvar regras'; }
+  });
+}
+// regra própria de UMA apólice (campanha, produto): grava em crm_apolices.comissao_regra
+async function ctRegraApoliceDialog(a, depois){
+  const r0 = (a.comissao_regra && typeof a.comissao_regra==='object') ? a.comissao_regra : {};
+  const box = dlgOpen(`<div class="om-title"><div><h3>Comissão desta apólice</h3><div class="om-sub">${escapeHtml((a.tipo_seguro||'Seguro')+' · '+(a.seguradora||''))}. Use quando a campanha ou o produto pagam diferente da regra da seguradora.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body"><div class="ct-card" style="border:0;padding:0">${ctRegraCampos(r0, false)}</div><div class="hint">Deixe tudo vazio e salve para voltar a usar a regra da seguradora.</div><div class="om-err" id="cra-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="cra-ok">Salvar</button></div>`);
+  box.querySelector('#cra-ok').addEventListener('click', async e=>{
+    const v = ctLerCampos(box), err = box.querySelector('#cra-err'); if(!v){ err.textContent = 'Confira os números.'; return; }
+    const vazio = v.agenciamento_pct==null && v.ano1_pct==null && v.anos2_pct==null && v.vitalicio_pct==null;
+    e.currentTarget.disabled = true;
+    const val = vazio ? null : { agenciamento_pct:v.agenciamento_pct??0, bonus_parcelas:v.bonus_parcelas??1, mes_bonus:v.mes_bonus, ano1_pct:v.ano1_pct, anos2_pct:v.anos2_pct, anos2_ate:v.anos2_ate??4, vitalicio_pct:v.vitalicio_pct };
+    const { error } = await sb.from('crm_apolices').update({ comissao_regra:val }).eq('id', a.id);
+    if(error){ err.textContent = 'Não consegui salvar: '+error.message; e.currentTarget.disabled = false; return; }
+    a.comissao_regra = val; CRT.carregado = false; dlgClose(); showToast(vazio ? 'Esta apólice volta a usar a regra da seguradora.' : 'Comissão desta apólice salva.'); if(depois) depois();
+  });
+}
+// Ficha do cliente › Resumo: a carteira dele numa olhada (seguro, seguradora, vencimento e quanto rende)
+async function pvCarteira(p){
+  const host = document.getElementById('pv-carteira'); if(!host) return;
+  const [{ data, error }] = await Promise.all([
+    sb.from('crm_apolices').select('id,seguradora,tipo_seguro,numero_apolice,valor_premio,forma_pagamento,origem_apolice,tipo_movimento,comissao_regra,data_emissao,data_vencimento,status').eq('pessoa_id', p.id).order('data_vencimento', { ascending:true }),
+    ctRegras().catch(()=>[])]);
+  if(error){ host.innerHTML = ''; return; }
+  const apos = data || [], meses = ctProximos12();
+  if(!apos.length){ host.innerHTML = `<div class="ql">Carteira do cliente</div><div class="hint">Nenhuma apólice cadastrada. <a href="#" data-pvgo="protecao">Adicionar em Proteção</a> (PDF da apólice: a IA lê seguradora, produto, prêmio e vencimento).</div>`; }
+  else {
+    let tot = 0;
+    const linhas = apos.map(a=>{ const ef = caEfetivo(a), r = ctRegraDe(a);
+      const v = ef==='ativa' ? meses.reduce((t,ym)=>{ const x = ctNoMes(a, r, ym); return { rec:t.rec+x.rec, bonus:t.bonus+x.bonus }; }, { rec:0, bonus:0 }) : { rec:0, bonus:0 }; tot += v.rec + v.bonus;
+      const d = a.data_vencimento ? Math.round((new Date(a.data_vencimento+'T12:00:00') - new Date(new Date().toDateString()))/864e5) : null;
+      return `<tr${ef!=='ativa'?' class="ct-off"':''}><td data-l="Seguro"><b>${escapeHtml(a.tipo_seguro||'Seguro')}</b> · ${escapeHtml(a.seguradora||'—')}${ef!=='ativa'?' <span class="tagx">'+escapeHtml(ef)+'</span>':''}</td>
+        <td data-l="Vence">${a.data_vencimento?fmtDate(a.data_vencimento):'—'}${d!=null && ef==='ativa' && d<=60?` <span class="tagx ${d<=30?'bad':'warn'}">${d} dias</span>`:''}</td>
+        <td data-l="Rende em 12 meses" class="r">${ef!=='ativa' ? '—' : (!r ? '<span class="tagx warn">sem regra</span>' : ctMoney(v.rec+v.bonus)+(v.bonus?'<small>inclui '+ctMoney(v.bonus)+' de bônus</small>':''))}
+          ${ctPodeEditar() && ef==='ativa' ? `<button type="button" class="ct-edit" data-cra="${a.id}" title="Comissão própria desta apólice (campanha, produto)">✏️</button>` : ''}${r && r.origem==='apólice' ? '<small>regra própria</small>' : ''}</td></tr>`; }).join('');
+    host.innerHTML = `<div class="ql" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">Carteira do cliente <span class="tagx">${apos.filter(ctAtiva).length} em vigor</span><span class="hint" style="margin:0">· deve render ${ctMoney(tot)} nos próximos 12 meses (estimativa)</span><span style="flex:1"></span><a href="#" data-pvgo="protecao">Ver e editar em Proteção</a></div>
+      <table class="ca-table ct-tab"><thead><tr><th>Seguro</th><th>Vence</th><th class="r">Rende em 12 meses</th></tr></thead><tbody>${linhas}</tbody></table>`;
+    host.querySelectorAll('[data-cra]').forEach(b=>b.addEventListener('click', ()=>{ const a = apos.find(x=>x.id===b.dataset.cra); if(a) ctRegraApoliceDialog(a, ()=>pvCarteira(p)); }));
+  }
+  host.querySelectorAll('[data-pvgo]').forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); if(typeof pvGoto==='function') pvGoto(a.dataset.pvgo); }));
+}
+// Segmentos (tags) na tela Aliança: atalhos para filtrar (vale para a Lista e para a Carteira) e marcar vários de uma vez
+function segRender(){
+  const top = document.querySelector('#view-operacao .op-top'); if(!top || typeof OP==='undefined') return;
+  let bar = document.getElementById('seg-bar');
+  if(!bar){ bar = document.createElement('div'); bar.id = 'seg-bar'; bar.className = 'seg-bar'; top.appendChild(bar); }
+  bar.style.display = (typeof KB!=='undefined' && KB.modo==='kanban') ? 'none' : '';
+  if(!OP.loaded){ bar.innerHTML = ''; return; }   // ainda carregando: não diz "comece trazendo a carteira" por engano
+  if(!OP.pessoas.length){
+    bar.innerHTML = `<div class="msg-regra" style="margin:0;flex:1">📥 <b>Comece trazendo a sua carteira.</b> Suba a planilha dos seus clientes ou os PDFs das apólices em <a href="#" id="seg-imp">Importar carteira</a>. Você mesmo faz: os dados ficam só na sua corretora, ninguém mais vê.</div>`;
+    const l = bar.querySelector('#seg-imp'); if(l) l.addEventListener('click', e=>{ e.preventDefault(); const b = document.getElementById('op-import'); if(b) b.click(); });
+    return;
+  }
+  const cont = {}; OP.pessoas.forEach(p=>(p.tags||[]).forEach(t=>{ cont[t] = (cont[t]||0)+1; }));
+  const tops = Object.entries(cont).sort((a,b)=>b[1]-a[1]).slice(0,8), atual = (document.getElementById('op-f-tag')||{}).value || '';
+  bar.innerHTML = `<span class="seg-t">Segmentos:</span>${tops.map(([t,n])=>`<button type="button" class="seg-chip${atual===t?' on':''}" data-seg="${escapeHtml(t)}">${escapeHtml(t)} <small>${n}</small></button>`).join('') || '<span class="hint" style="margin:0">nenhum ainda</span>'}
+    ${KB.modo!=='carteira' ? '<button type="button" class="seg-chip seg-acao" id="seg-marcar" title="Marcar ou tirar um segmento de todos os clientes que estão na lista agora">🏷️ Marcar segmento</button>' : ''}`;
+  bar.querySelectorAll('[data-seg]').forEach(b=>b.addEventListener('click', ()=>{ const sel = document.getElementById('op-f-tag'); if(!sel) return;
+    const v = b.dataset.seg; if(![...sel.options].some(o=>o.value===v)){ const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); }
+    sel.value = sel.value===v ? '' : v; sel.dispatchEvent(new Event('change')); segRender(); if(KB.modo==='carteira') ctRender(); }));
+  const mk = bar.querySelector('#seg-marcar'); if(mk) mk.addEventListener('click', segMarcarDialog);
+}
+function segMarcarDialog(){
+  const alvo = (OP.filtered && OP.filtered.length) ? OP.filtered : [];
+  const box = dlgOpen(`<div class="om-title"><div><h3>🏷️ Marcar segmento</h3><div class="om-sub">Vale para os ${alvo.length} cliente(s) que estão na lista agora (use a busca e os filtros antes para escolher quem).</div></div><button data-close>✕</button></div>
+    <div class="dlg-body"><div class="fgrid">
+      <label class="fl"><span>Segmento</span><input id="seg-nome" maxlength="40" list="seg-lista" placeholder="ex.: Médicos, Empresários, Indicação"><datalist id="seg-lista">${[...new Set(OP.pessoas.flatMap(p=>p.tags||[]))].map(t=>`<option value="${escapeHtml(t)}">`).join('')}</datalist></label>
+      <label class="fl"><span>O que fazer</span><select id="seg-acao"><option value="add">Marcar todos com este segmento</option><option value="del">Tirar este segmento de todos</option></select></label>
+    </div><div class="om-err" id="seg-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="seg-ok">Aplicar</button></div>`);
+  let parar = false; window._dlgOnClose = ()=>{ parar = true; };
+  box.querySelector('#seg-ok').addEventListener('click', async e=>{
+    const nome = box.querySelector('#seg-nome').value.trim().slice(0,40), acao = box.querySelector('#seg-acao').value, err = box.querySelector('#seg-err');
+    if(!nome){ err.textContent = 'Escreva o nome do segmento.'; return; } if(!alvo.length){ err.textContent = 'A lista está vazia.'; return; }
+    const muda = alvo.filter(p=>acao==='add' ? !(p.tags||[]).includes(nome) : (p.tags||[]).includes(nome));
+    if(!muda.length){ dlgClose(); showToast('Nada a mudar: todos já estavam assim.'); return; }
+    if(!confirm((acao==='add'?'Marcar ':'Tirar ')+'o segmento "'+nome+'" '+(acao==='add'?'em ':'de ')+muda.length+' cliente(s)?')) return;
+    e.currentTarget.disabled = true; let feitos = 0, falhas = 0;
+    for(let i=0;i<muda.length && !parar;i+=20){
+      await Promise.all(muda.slice(i,i+20).map(async p=>{
+        const { data: atual } = await sb.from('crm_pessoas').select('tags').eq('id', p.id).maybeSingle();   // relê: não apaga mudança feita por outra pessoa
+        const base = (atual && atual.tags) || p.tags || [];
+        const tags = acao==='add' ? [...new Set([...base, nome])] : base.filter(t=>t!==nome);
+        const { error } = await sb.from('crm_pessoas').update({ tags }).eq('id', p.id); if(error) falhas++; else { p.tags = tags; feitos++; } }));
+      const b = box.querySelector('#seg-ok'); if(b) b.textContent = 'Aplicando… '+(feitos+falhas)+'/'+muda.length;
+    }
+    window._dlgOnClose = null; dlgClose();
+    showToast((acao==='add'?'Segmento marcado em ':'Segmento tirado de ')+feitos+' cliente(s)'+(falhas?' · '+falhas+' com erro':'')+(parar?' (interrompido)':'')+'.');
+    opFillTagFilter(); segRender(); opApplyFilters(true);
+  });
 }
 // ============ MENSAGENS DO ANO (12/11/2026, pedido do Luiz) ============
 // O CRM acompanha o ano de cada cliente (aniversário dele e da família, Ano Novo, Páscoa, Dia da Mulher, das Mães, dos Pais, Natal,
@@ -12141,11 +12464,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611211638"></script>
-<script src="painel.js?v=202611211638"></script>
-<script src="cobranca.js?v=202611211638"></script>
-<script src="cadastro.js?v=202611211638"></script>
-<script src="contrato.js?v=202611211638"></script>
-<script src="guarda.js?v=202611211638"></script>
+<script src="plataforma.js?v=202611251145"></script>
+<script src="painel.js?v=202611251145"></script>
+<script src="cobranca.js?v=202611251145"></script>
+<script src="cadastro.js?v=202611251145"></script>
+<script src="contrato.js?v=202611251145"></script>
+<script src="guarda.js?v=202611251145"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611251145">
+<meta name="app-build" content="202611251201">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -382,6 +382,7 @@ button.ct-mes{border:0;background:transparent;cursor:pointer;font:inherit;paddin
   .ct-tab td[data-l]:not(:first-child)::before{content:attr(data-l) ": ";color:var(--ink-faint);font-size:12px}
   .ct-busca input{min-width:0;width:100%} .ct-busca{flex:1 1 100%}
 }
+.fl-fim{display:inline-flex;gap:8px;flex-wrap:wrap;margin-left:auto;margin-right:8px}
 </style>
 
 
@@ -439,7 +440,7 @@ button.ct-mes{border:0;background:transparent;cursor:pointer;font:inherit;paddin
 
 <div id="app">
   <header>
-    <div class="brand"><div class="hdr-brand"><b class="tc-marca">CRM Aliança<span class="tc-sep"> · </span><span class="tc-nm">by Capacity Case</span></b><small>Carreira, renda, patrimônio e legado.</small></div><img class="hdr-logo" src="assets/logo-icone.png" alt="CRM Aliança"><span class="hdr-title" id="hdr-title" style="display:none">Aliança</span><span class="info-ico" id="hdr-info" tabindex="0" title="Cada cliente é um parceiro — toda a jornada dele numa linha do tempo: faixa do funil comercial + uma linha por produto. Clique na faixa do funil para marcar/desmarcar uma etapa na data; clique no nome para abrir o cadastro completo.">ⓘ</span></div>
+    <div class="brand"><div class="hdr-brand"><b class="tc-marca">CRM Aliança<span class="tc-sep"> · </span><span class="tc-nm">by Capacity Case</span></b><small>Carreira, renda, patrimônio e legado.</small></div><img class="hdr-logo" src="assets/logo-icone.png" alt="CRM Aliança"><span class="hdr-title" id="hdr-title" style="display:none">Aliança</span><span class="info-ico" id="hdr-info" tabindex="0" title="Cada cliente numa linha do tempo: faixa do funil comercial + uma linha por produto. Clique na faixa do funil para marcar/desmarcar uma etapa na data; clique no nome para abrir o cadastro completo.">ⓘ</span></div>
     <form class="pq" id="pq-form" role="search" autocomplete="off" hidden><span class="pq-ico" aria-hidden="true">✨</span><input id="pq-in" type="search" maxlength="600" placeholder="Pergunte aqui: tire qualquer dúvida do sistema" aria-label="Pergunte aqui: tire qualquer dúvida do sistema"><button type="submit">Perguntar</button></form><button type="button" class="pq-mini" id="pq-mini" hidden title="Pergunte aqui: tire qualquer dúvida do sistema">✨ Pergunte aqui</button>
     <div class="hdr-navy"><svg class="shield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg></div><div class="who"><span id="who-email"></span><button id="btn-app" type="button" title="CRM Aliança no celular: versão enxuta para a rua (buscar cliente, Hoje, resumo do dia por IA e registrar reunião). Abre em outra aba; no celular, use Adicionar à tela inicial.">📱 App</button><button id="btn-backup" title="Baixar uma cópia de todos os dados">Backup</button><button id="btn-logout">Sair</button></div>
   </header>
@@ -651,7 +652,7 @@ button.ct-mes{border:0;background:transparent;cursor:pointer;font:inherit;paddin
           <select id="ca-f-status"><option value="">Todos os status</option><option value="ativa">Ativas</option><option value="vencida">Vencidas</option><option value="proposta">Proposta em análise</option><option value="aguardando_emissao">Aguardando emissão</option><option value="encerrada">Encerradas</option><option value="cancelada">Canceladas</option></select>
           <select id="ca-f-seg"><option value="">Todas as seguradoras</option></select>
           <select id="ca-f-prod"><option value="">Todos os produtos</option></select>
-          <select id="ca-f-vinc"><option value="">Todos os vínculos</option><option value="__nova">Só novas vendas Aliança</option><option>Aliança</option><option>Outra corretora</option><option>Direto com seguradora</option><option>Não identificado</option><option>Não informado</option></select>
+          <select id="ca-f-vinc"><option value="">Todos os vínculos</option><option value="__nova">Só vendas novas</option><option value="Aliança">Minha corretora</option><option>Outra corretora</option><option>Direto com seguradora</option><option>Não identificado</option><option>Não informado</option></select>
           <select id="ca-f-venc"><option value="">Qualquer vencimento</option><option value="vencidas">Já vencidas</option><option value="30">Vencem em 30 dias</option><option value="60">Vencem em 60 dias</option><option value="90">Vencem em 90 dias</option></select>
           <select id="ca-f-entrega"><option value="">Entrega: qualquer</option><option value="pendente">Certificado pendente de entrega</option><option value="feita">Já entregue</option></select>
         </div>
@@ -3280,7 +3281,7 @@ async function pvTimeline(p){
   (ativ.data||[]).forEach(a=>ev.push({d:a.data_hora, aid:a.id, i:(ATIV_ICO[a.tipo]||ATIV_ICO.outro), t:`<b>${escapeHtml((TIPOS_ATIV.find(t=>t[0]===a.tipo)||[0,a.tipo])[1])}</b>${a.resultado?' — '+escapeHtml(a.resultado):''}${a.resumo?'<br>'+escapeHtml(a.resumo):''}${a.motivo_perda?'<br><span class="tagx bad">Encerrado: '+escapeHtml(a.motivo_perda)+'</span>':''}${a.proxima_acao?'<br><span class="k">PRÓXIMA</span>'+escapeHtml(a.proxima_acao)+' · '+fmtDate(a.proxima_data)+' · '+escapeHtml(a.proximo_responsavel||''):''}`, who:a.responsavel}));
   (fun.data||[]).forEach(r=>{ const lb = (ETAPAS_FUNIL.find(e=>e.key===r.etapa)||{label:r.etapa}).label; ev.push({d:r.data_inicio||r.data_combinada||r.created_at, i:ICO.funnel, t:`Funil: <b>${lb}</b>${r.observacao?' — '+escapeHtml(r.observacao):''}`}); });
   (est.data||[]).forEach(r=>ev.push({d:r.created_at, i:ICO.search, t:`Estudo aberto — ${escapeHtml(r.tipo_seguro||'apólice')} ${escapeHtml(r.seguradora_atual||'')}`}));
-  (apo.data||[]).forEach(r=>ev.push({d:r.data_emissao||r.created_at, i:ICO.doc, t:`Apólice ${escapeHtml(r.tipo_seguro||'')} — ${escapeHtml(r.seguradora||'')} <span class="tagx">${r.origem_apolice==='nova'?'Nova Aliança':'Existente'}</span>`}));
+  (apo.data||[]).forEach(r=>ev.push({d:r.data_emissao||r.created_at, i:ICO.doc, t:`Apólice ${escapeHtml(r.tipo_seguro||'')} — ${escapeHtml(r.seguradora||'')} <span class="tagx">${r.origem_apolice==='nova'?'Venda nova':'Existente'}</span>`}));
   (doc.data||[]).forEach(r=>ev.push({d:r.created_at, i:ICO.clip, t:`Documento anexado: ${escapeHtml(r.nome_arquivo||'')}`}));
   (inter.data||[]).forEach(r=>ev.push({d:r.data||r.created_at, i:ICO.mic, t:`${escapeHtml(r.tipo||'Interação')}${r.resumo?' — '+escapeHtml(r.resumo):''}`}));
   (trans.data||[]).forEach(r=>ev.push({d:r.data_hora||r.created_at, i:ICO.note, t:`Transcrição${r.resumo_ia?' — '+escapeHtml(r.resumo_ia):''}`}));
@@ -3340,9 +3341,10 @@ async function flowStatus(p){
     sb.from('crm_analise_apolices').select('confirmada').eq('pessoa_id', p.id).maybeSingle(),
     sb.from('crm_estudos').select('renda_mensal,gastos_mensais,renda_desejada_familia').eq('pessoa_id', p.id).order('created_at',{ascending:false}).limit(1).maybeSingle(),
     sb.from('crm_cotacoes_estudo').select('linhas').eq('pessoa_id', p.id).maybeSingle(),
-    sb.from('crm_pessoas').select('sexo,data_nascimento,telefone').eq('id', p.id).maybeSingle()]);
+    sb.from('crm_pessoas').select('sexo,data_nascimento,telefone').eq('id', p.id).maybeSingle(),
+    sb.from('crm_apolices').select('id',{count:'exact',head:true}).eq('pessoa_id', p.id).eq('origem_apolice','nova')]).then(r=>{ FLOW._nova = (r[6] && r[6].count) || 0; return r; });
   const e = es.data || {}, pd = pe.data || {}; const dg = Number(e.renda_mensal)>0 || Number(e.gastos_mensais)>0 || Number(e.renda_desejada_familia)>0;
-  return [ (ap.count||0)+(dc.count||0)>0, !!(pd.sexo && pd.data_nascimento && pd.telefone), !!(an.data && an.data.confirmada), dg, (((ct.data && ct.data.linhas)||[]).some(r=>r.s1)), false ];
+  return [ (ap.count||0)+(dc.count||0)>0, !!(pd.sexo && pd.data_nascimento && pd.telefone), !!(an.data && an.data.confirmada), dg, (((ct.data && ct.data.linhas)||[]).some(r=>r.s1)), (FLOW._nova||0) > 0 ];
 }
 function flowSide(){
   const host = document.getElementById('fl-steps'); if(!host) return;
@@ -3352,9 +3354,9 @@ function flowSide(){
 }
 function flowNav(){
   const nav = document.getElementById('fl-nav'); if(!nav) return; const i = FLOW.step, last = FLOW_STEPS.length-1;
-  nav.innerHTML = `${i>0?`<button type="button" class="om-cancel" id="fl-prev">← ${escapeHtml(flLabel(FLOW_STEPS[i-1]))}</button>`:'<span></span>'}${i<last?`<button type="button" class="om-save" id="fl-next">${escapeHtml(flLabel(FLOW_STEPS[i+1]))} →</button>`:'<button type="button" class="om-cancel" id="fl-end">Concluir e voltar ao cadastro</button>'}`;
+  nav.innerHTML = `${i>0?`<button type="button" class="om-cancel" id="fl-prev">← ${escapeHtml(flLabel(FLOW_STEPS[i-1]))}</button>`:'<span></span>'}${i<last?`<button type="button" class="om-save" id="fl-next">${escapeHtml(flLabel(FLOW_STEPS[i+1]))} →</button>`:'<span class="fl-fim"><button type="button" class="om-save" id="fl-aceitou" title="Cria a apólice nova, marca Virou cliente e registra no histórico">✅ Cliente aceitou</button><button type="button" class="om-cancel" id="fl-recusou">Não aceitou</button></span><button type="button" class="om-cancel" id="fl-end">Concluir e voltar ao cadastro</button>'}`;
   const pv = nav.querySelector('#fl-prev'), nx = nav.querySelector('#fl-next'), en = nav.querySelector('#fl-end');
-  if(pv) pv.addEventListener('click', ()=>flowGo(i-1)); if(nx) nx.addEventListener('click', ()=>flowGo(i+1)); if(en) en.addEventListener('click', ()=>flowClose(true));
+  if(pv) pv.addEventListener('click', ()=>flowGo(i-1)); if(nx) nx.addEventListener('click', ()=>flowGo(i+1)); if(en) en.addEventListener('click', ()=>flowClose(true)); const ac = nav.querySelector('#fl-aceitou'), rc = nav.querySelector('#fl-recusou'); if(ac) ac.addEventListener('click', ()=>flowAceite(FLOW.p)); if(rc) rc.addEventListener('click', ()=>flowRecusa(FLOW.p));
 }
 async function flowStatusRefresh(){ if(!FLOW.open || !FLOW.p) return; try{ FLOW.st = await flowStatus(FLOW.p); }catch(e){ console.warn('flowStatus', e); } flowSide(); }
 function flowGo(i){
@@ -5446,17 +5448,19 @@ const OP_FUNIL_COLS = 'id,pessoa_id,etapa,created_at,data_combinada,data_inicio,
 async function opLoadFunilApo(){
   const [fun, apo] = await Promise.all([
     opFetchAll('crm_funil', OP_FUNIL_COLS, ['id']),
-    opFetchAll('crm_apolices','id,pessoa_id,tipo_seguro,seguradora,status,data_emissao,data_vencimento,valor_premio',['id']),
+    opFetchAll('crm_apolices','id,pessoa_id,tipo_seguro,seguradora,status,data_emissao,data_vencimento,valor_premio,origem_apolice,vinculo_comercial',['id']),
   ]);
   OP.funil = new Map(); fun.forEach(r=>{ if(!OP.funil.has(r.pessoa_id)) OP.funil.set(r.pessoa_id,new Map()); OP.funil.get(r.pessoa_id).set(r.etapa, r); });
-  OP.apo = new Map(); apo.forEach(r=>{ if(!OP.apo.has(r.pessoa_id)) OP.apo.set(r.pessoa_id,[]); OP.apo.get(r.pessoa_id).push(r); });
+  // 25/11/2026 (avaliação "corretor independente"): apólice de concorrente ou só para análise não é do corretor: não faz cliente, não entra em renovação nem em comissão
+  OP.apo = new Map(); apo.filter(apoPropria).forEach(r=>{ if(!OP.apo.has(r.pessoa_id)) OP.apo.set(r.pessoa_id,[]); OP.apo.get(r.pessoa_id).push(r); });
   OP.fid = new Map(); OP.morno = new Map();
   try{ opPremiumRotulo(); }catch(e){}
   opAlertasAtualizar();
   OP.plant = new Map();
   OP.tempCache = null; OP.prosp = new Map();
+  OP.prospAberta = new Set();
   try{ const pp = await opFetchAll('crm_prospeccao','id,pessoa_id,status,updated_at',['id']);
-       pp.forEach(r=>{ if(r.pessoa_id && r.status==='Sem interesse'){ const d = new Date(r.updated_at); const a = OP.prosp.get(r.pessoa_id); if(!a || d>a) OP.prosp.set(r.pessoa_id, d); } }); }catch(e){ console.warn('prospeccao', e); }
+       pp.forEach(r=>{ if(r.pessoa_id && !['Sem interesse','Virou cliente'].includes(r.status)) OP.prospAberta.add(r.pessoa_id); if(r.pessoa_id && r.status==='Sem interesse'){ const d = new Date(r.updated_at); const a = OP.prosp.get(r.pessoa_id); if(!a || d>a) OP.prosp.set(r.pessoa_id, d); } }); }catch(e){ console.warn('prospeccao', e); }
   try{ const dm = await opFetchAll('crm_demandas','id,pessoa_id,status,prazo,created_at,produto,acao',['id']);
        OP.dem = new Map(); dm.forEach(r=>{ if(!OP.dem.has(r.pessoa_id)) OP.dem.set(r.pessoa_id,[]); OP.dem.get(r.pessoa_id).push(r); }); }catch(e){ console.warn('demandas', e); OP.dem = new Map(); }
   OP.dirty = false;
@@ -5556,13 +5560,20 @@ function opApplyFilters(keep, scrollToList){
 const OP_FILTER_IDS = ['op-f-perfil','op-f-class','op-f-tag','op-f-next','op-f-situacao','op-f-etapa','op-f-plantao','op-f-produto','op-f-acao'];
 // ===== Temperatura do lead (calculada na hora, nunca digitada) =====
 const OP_TEMP_DIAS = 90;
-const OP_TEMP = [
+const OP_TEMP_CALLMED = [
   {k:'t_cliente', l:'Cliente', d:'Tem apólice ativa', c:'#0f7a53'},
   {k:'t_morno', l:'Morno', d:'Plantão nos últimos 90 dias e ainda sem apólice', c:'#c8790b'},
   {k:'t_frio', l:'Frio', d:'Lead do COPA, sem contato comercial relevante', c:'#1b5fc7'},
   {k:'t_adorm', l:'Adormecido', d:'Base Aliança sem plantão há mais de 90 dias', c:'#8b90a3'},
   {k:'t_sem', l:'Sem interesse', d:'Disse não na Prospecção (volta a ser abordado depois de 90 dias)', c:'#c23636'},
   {k:'t_none', l:'Sem classificação', d:'Sem origem conhecida (nem base Aliança, nem COPA, nem apólice)', c:'#bdbdbd'} ];
+const OP_TEMP_GEN = [
+  {k:'t_cliente', l:'Cliente', d:'Tem apólice ativa sua', c:'#0f7a53'},
+  {k:'t_prosp', l:'Em prospecção', d:'Está na sua Prospecção (Kanban)', c:'#c8790b'},
+  {k:'t_sem', l:'Sem interesse', d:'Disse não na Prospecção (volta a ser abordado depois de 90 dias)', c:'#c23636'},
+  {k:'t_base', l:'Na base', d:'Contato sem apólice sua e fora da Prospecção', c:'#8b90a3'} ];
+const opEhAliança = () => { const s = window._minhaSlug || (function(){ try{ return localStorage.getItem('tc_slug')||''; }catch(e){ return ''; } })(); return s==='callmed'; };
+const opTempTab = () => opEhAliança() ? OP_TEMP_CALLMED : OP_TEMP_GEN;
 const opIsTempKey = k => typeof k==='string' && (k.indexOf('t_')===0 || k==='inc');
 const opIncompleto = p => !String(p.telefone||'').trim() && !String(p.email||'').trim();
 const OP_COPA_DATA = new Date(2026,3,25);     // dia do evento COPA SAESP: os leads do jogo entram como "Frio" a partir daí
@@ -5571,6 +5582,7 @@ function opTempAt(p, d){
   if(sem){ const s0 = new Date(sem.getFullYear(), sem.getMonth(), sem.getDate()); if(d>=s0 && (d - s0)/DAY < OP_TEMP_DIAS) return 't_sem'; }
   const apos = OP.apo.get(p.id);
   if(apos && apos.some(a=>{ if(a.status==='cancelada') return false; const r = opApoRange(a); return r.start && r.end && r.start<=d && r.end>d; })) return 't_cliente';
+  if(!opEhAliança()) return (OP.prospAberta && OP.prospAberta.has(p.id)) ? 't_prosp' : 't_base';   // plantão e COPA só existem na Aliança
   const pr = OP.plant.get(p.id), pi = pr && pr.primeiro_plantao ? opD(pr.primeiro_plantao) : null, ui = pr && pr.ultimo_plantao ? opD(pr.ultimo_plantao) : null;
   if(ui && (pi ? d>=pi : true) && (d - ui)/DAY <= OP_TEMP_DIAS) return 't_morno';        // entre o 1º plantão e 90 dias depois do último
   if(((p.tags||[]).includes('lead-copa') || p.origem==='Sorteio COPA SAESP') && d>=OP_COPA_DATA) return 't_frio';
@@ -5581,12 +5593,12 @@ function opTemp(p){
   OP.tempCache = OP.tempCache || new Map(); if(OP.tempCache.has(p.id)) return OP.tempCache.get(p.id);
   const h = new Date(); h.setHours(0,0,0,0); const t = opTempAt(p, h); OP.tempCache.set(p.id, t); return t;
 }
-function opTempBadge(p){ const t = OP_TEMP.find(x=>x.k===opTemp(p) && x.k!=='t_none'); const inc = opIncompleto(p);
+function opTempBadge(p){ const t = opTempTab().find(x=>x.k===opTemp(p) && x.k!=='t_none'); const inc = opIncompleto(p);
   return (t?`<span class="cli" style="background:${t.c}1f;color:${t.c}" title="${escapeHtml(t.d)}">${t.l.toUpperCase()}</span>`:'') + (inc?'<span class="cli" style="background:#fdeec4;color:#8a5406" title="Sem telefone nem e-mail: completar o cadastro">SEM CONTATO</span>':''); }
 function opTempRowsHtml(sm){
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const mk = ()=> sm.dayList.map(days=>days.map(()=>0));
-  const cnt = {}; OP_TEMP.forEach(t=>cnt[t.k] = mk()); const tot = mk();
+  const cnt = {}; opTempTab().forEach(t=>cnt[t.k] = mk()); const tot = mk();
   OP.pessoas.forEach(p=>{
     sm.dayList.forEach((days,mi)=>{ const mo = OP.months[mi];
       days.forEach((dt,di)=>{
@@ -5604,7 +5616,7 @@ function opTempRowsHtml(sm){
   const incN = OP.pessoas.filter(opIncompleto).length;
   const mi0 = (()=>{ const i = OP.months.findIndex(m=>hoje>=m.s && hoje<m.e); return i<0 ? 0 : i; })();
   const incRow = opSumRowMonthHtml('<span title="Sem telefone nem e-mail: completar o cadastro">Sem contato (completar)</span>', '#b36b00', OP.months.map((m,i)=> i===mi0 ? incN : 0), 'inc');
-  return OP_TEMP.map(t=>opSumRowHtml(`<span title="${escapeHtml(t.d)}">${t.l}</span>`, t.c, cnt[t.k], sm.dayList, t.k)).join('') + totRow + incRow;
+  return opTempTab().map(t=>opSumRowHtml(`<span title="${escapeHtml(t.d)}">${t.l}</span>`, t.c, cnt[t.k], sm.dayList, t.k)).join('') + totRow + incRow;
 }
 // o que cada visualização mostra para agir com precisão
 function opTempInfo(p){
@@ -5654,7 +5666,7 @@ function opRenderChip(){
   const box = document.getElementById('op-chip'); const sf = OP.sumFilter;
   if(!sf){ box.innerHTML = ''; return; }
   if(opIsTempKey(sf.st)){
-    const tn = sf.st==='inc' ? 'Sem contato (completar)' : OP_TEMP.find(t=>t.k===sf.st).l;
+    const tn = sf.st==='inc' ? 'Sem contato (completar)' : opTempTab().find(t=>t.k===sf.st).l;
     const mo0 = OP.months[sf.mi]; const quando = (sf.st!=='inc' && mo0) ? ' em <b>'+(sf.d ? String(sf.d).padStart(2,'0')+'/'+String(mo0.s.getMonth()+1).padStart(2,'0') : mo0.name+'/'+mo0.yr)+'</b>' : '';
     box.innerHTML = `<span class="op-chip">Filtro de temperatura: <b>${escapeHtml(tn)}</b>${quando} · ${OP.filtered.length} pessoa(s) <button id="op-chip-x" title="Limpar filtro">✕</button></span> <button class="om-save" id="op-fila" style="margin-left:8px" title="Marca “Realizar primeiro contato” para hoje nas 20 primeiras pessoas da lista que têm telefone">Montar fila de hoje (20)</button>`; return; }
   const mo = OP.months[sf.mi];
@@ -5995,7 +6007,7 @@ function opTempLane(p){
   const m0 = OP.months[0], last = OP.months[OP.months.length-1]; if(!m0 || !last) return '';
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   let segs = '', cur = null, ini = null, d = new Date(m0.visS.getFullYear(), m0.visS.getMonth(), m0.visS.getDate());
-  const fimJan = last.visE, push = (k, a, b)=>{ if(!k) return; const t = OP_TEMP.find(x=>x.k===k); if(!t) return;
+  const fimJan = last.visE, push = (k, a, b)=>{ if(!k) return; const t = opTempTab().find(x=>x.k===k); if(!t) return;
     let l = opClamp(opPct(a)), r = opClamp(opPct(b)); if(r<=l) return;
     segs += `<div class="seg tmp${k==='t_none'?' none':''}" style="left:${l}%;width:${Math.max(r-l,0.4)}%;--c:${t.c}" title="${escapeHtml(t.l+' · '+opFmt(a)+' a '+opFmt(new Date(b.getTime()-DAY))+' · '+t.d)}">${escapeHtml(t.l)}</div>`; };
   for(; d < fimJan && d <= hoje; d = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1)){
@@ -7639,7 +7651,7 @@ async function ncSave(){
 }
 
 // ---------- CENTRAL DE APÓLICES = banco completo de apólices ----------
-const CA_ORIGENS = {nova:'Nova Aliança', carteira:'Existente / carteira', estudo:'Existente p/ análise', concorrente:'Existente p/ análise', importada:'Importada'};
+const CA_ORIGENS = {nova:'Venda nova', carteira:'Existente / carteira', estudo:'Existente p/ análise', concorrente:'Existente p/ análise', importada:'Importada'};
 const CA_STATUS = [['ativa','Ativa'],['proposta','Proposta em análise'],['aguardando_emissao','Aguardando emissão'],['encerrada','Encerrada'],['cancelada','Cancelada']];
 const CA = { data:[], filtered:[], shown:0, sort:{k:'data_vencimento', dir:1}, loaded:false };
 const CA_PAGE = 200;
@@ -7884,7 +7896,7 @@ async function caEdit(id, onSaved){
       ${fld('ce-prem','Prêmio anual (R$)',r.valor_premio==null?'':String(r.valor_premio),'number')}
       ${fld('ce-com','Comissão (%)',r.comissao_pct==null?'':String(r.comissao_pct),'number')}${fld('ce-pag','Forma de pagamento',r.forma_pagamento)}
       ${fld('ce-vend','Quem vendeu / origem',r.corretor_origem,'text',true)}
-      <label class="fl"><span>Vínculo comercial</span><select id="ce-vinc"><option value="">—</option>${['Aliança','Outra corretora','Direto com seguradora','Não identificado'].map(o=>`<option ${r.vinculo_comercial===o?'selected':''}>${o}</option>`).join('')}</select></label>
+      <label class="fl"><span>Vínculo comercial</span><select id="ce-vinc"><option value="">—</option>${['Aliança','Outra corretora','Direto com seguradora','Não identificado'].map(o=>`<option value="${o}" ${r.vinculo_comercial===o?'selected':''}>${o==='Aliança'?'Minha corretora':o}</option>`).join('')}</select></label>
       <label class="fl"><span>Tipo de movimento</span><select id="ce-mov"><option value="">—</option>${[['nova','Nova'],['renovacao','Renovação'],['migracao','Migração de corretor']].map(o=>`<option value="${o[0]}" ${r.tipo_movimento===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></label>
       ${fld('ce-tom','Tomador / estipulante',r.tomador)}${fld('ce-benef','Beneficiários',r.beneficiarios)}
       <label class="fl"><span>Status</span><select id="ce-status">${CA_STATUS.map(s=>`<option value="${s[0]}" ${r.status===s[0]?'selected':''}>${s[1]}</option>`).join('')}</select></label>
@@ -7912,8 +7924,8 @@ async function caEdit(id, onSaved){
     const upd = { origem_apolice:g('ce-origem')||null, seguradora:g('ce-seg')||null, tipo_seguro:g('ce-prod')||null, numero_apolice:g('ce-num')||null, tipo_contratacao:g('ce-contr')||null, data_emissao:g('ce-ini')||null, data_vencimento:g('ce-fim')||null,
       valor_premio:n('ce-prem'), valor_cobertura:capTotal, coberturas:covs, coberturas_valores:covVals, coberturas_detalhe:covDet.length?covDet:null, comissao_pct:n('ce-com'), forma_pagamento:g('ce-pag')||null, corretor_origem:g('ce-vend')||null, status:g('ce-status'), observacoes:g('ce-obs')||null, vinculo_comercial:g('ce-vinc')||null, tipo_movimento:g('ce-mov')||null, tomador:g('ce-tom')||null, beneficiarios:g('ce-benef')||null,
       entrega_certificado:entregue, data_entrega:entregue?(g('ce-entrega-data')||ymdToday()):null };
-    if(upd.origem_apolice==='nova' && upd.vinculo_comercial && upd.vinculo_comercial!=='Aliança'){ document.getElementById('ce-err').textContent = 'Incoerente: apólice "Nova Aliança" não pode ter vínculo em "'+upd.vinculo_comercial+'".'; return; }
-    if((upd.origem_apolice==='estudo'||upd.origem_apolice==='concorrente') && upd.vinculo_comercial==='Aliança'){ document.getElementById('ce-err').textContent = 'Incoerente: apólice existente enviada para análise não pode ter vínculo "Aliança".'; return; }
+    if(upd.origem_apolice==='nova' && upd.vinculo_comercial && upd.vinculo_comercial!=='Aliança'){ document.getElementById('ce-err').textContent = 'Incoerente: apólice "Venda nova" não pode ter vínculo em "'+upd.vinculo_comercial+'".'; return; }
+    if((upd.origem_apolice==='estudo'||upd.origem_apolice==='concorrente') && upd.vinculo_comercial==='Aliança'){ document.getElementById('ce-err').textContent = 'Incoerente: apólice existente enviada para análise não pode ter vínculo "Minha corretora".'; return; }
     const { error } = await sb.from('crm_apolices').update(upd).eq('id', id);
     if(error){ document.getElementById('ce-err').textContent = 'Erro: '+error.message; return; }
     Object.assign(r, upd); OP.dirty = true; dlgClose(); showToast('Apólice atualizada');
@@ -8272,7 +8284,7 @@ async function caLote(files){
       <div style="overflow-x:auto"><table class="ca-table cl-tab" style="width:100%"><thead><tr><th></th><th>Cliente</th><th>Vence em</th><th>Seguradora</th><th>Produto</th><th>Prêmio anual</th><th>Arquivo</th></tr></thead>
       <tbody>${lista.map(linha).join('')}</tbody></table></div>
       <div class="om-err" id="cl-err"></div></div>
-    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save hj-q-bt" id="cl-save">Gravar ${lista.filter(r=>!dup(r)).length} apólice${lista.filter(r=>!dup(r)).length===1?'':'s'}</button></div>`;
+    <div class="om-foot"><label class="chk" style="align-self:center" title="Vendas novas contam o bônus da 1ª parcela na Carteira"><input type="checkbox" id="cl-novas"> São vendas novas minhas (recém-fechadas)</label><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save hj-q-bt" id="cl-save">Gravar ${lista.filter(r=>!dup(r)).length} apólice${lista.filter(r=>!dup(r)).length===1?'':'s'}</button></div>`;
   if(!lista.length){ dlgClose(); if(multis.length){ multis.forEach(m=>caQueue.push(m.file)); caNext(); } return; }
   box.querySelector('tbody').addEventListener('change', ev=>{ if(!ev.target.classList.contains('cl-ok')) return; const n = box.querySelectorAll('.cl-ok:checked').length; box.querySelector('#cl-save').textContent = 'Gravar '+n+' apólice'+(n===1?'':'s'); });
   box.querySelector('#cl-save').addEventListener('click', async ev=>{
@@ -8294,7 +8306,7 @@ async function caLote(files){
         const path = await docsUpload(x.r.file, 'apolices');
         const { error: e2 } = await sb.from('crm_apolices').insert({ pessoa_id:pid, seguradora:x.seg||null, tipo_seguro:x.prod||null, numero_apolice:x.r.numero||null,
           data_emissao:x.r.ini||null, data_vencimento:x.fim||null, valor_premio:clPremNum(x.prem), valor_cobertura:x.r.capital===''?null:Number(x.r.capital),
-          status:'ativa', origem_apolice:'carteira', vinculo_comercial:tcModulo('premium') ? 'Aliança' : null, coberturas:x.r.coberturas||[], coberturas_valores:x.r.valores||{}, arquivo_apolice:path,
+          status:'ativa', origem_apolice:(box.querySelector('#cl-novas')||{}).checked ? 'nova' : 'carteira', vinculo_comercial:((box.querySelector('#cl-novas')||{}).checked || tcModulo('premium')) ? 'Aliança' : null, coberturas:x.r.coberturas||[], coberturas_valores:x.r.valores||{}, arquivo_apolice:path,
           observacoes:`Lida em lote de "${x.r.file.name}"${x.r.viaIA?' (com IA)':''}.` });
         if(e2) throw e2; ok++; if(!x.fim) semData++;
       }catch(e){ falhas.push(x.r.file.name+': '+(e.message||e)); }
@@ -8361,8 +8373,8 @@ async function caFormMulti(file, f){
         ${fld('cm-ini','Início da vigência',f.vig_ini,'date')}${fld('cm-fim','Fim da vigência',f.vig_fim,'date')}
         ${fld('cm-cap','Capital / valor de cobertura (R$)',f.capital||'','number')}
         <label class="fl"><span>Status</span><select id="cm-status"><option value="ativa">Ativa</option><option value="proposta">Proposta em análise</option><option value="aguardando_emissao">Aguardando emissão</option></select></label>
-        <label class="fl"><span>Origem</span><select id="cm-origem"><option value="nova">Nova Aliança</option><option value="carteira">Existente / carteira</option><option value="estudo">Existente p/ análise</option><option value="importada">Importada</option></select></label>
-        <label class="fl"><span>Vínculo comercial *</span><select id="cm-vinc"><option value="Aliança">Aliança</option><option value="Outra corretora">Outra corretora</option><option value="Direto com seguradora">Direto com seguradora</option><option value="Não identificado">Não identificado</option></select></label>
+        <label class="fl"><span>Origem</span><select id="cm-origem"><option value="nova">Venda nova</option><option value="carteira">Existente / carteira</option><option value="estudo">Existente p/ análise</option><option value="importada">Importada</option></select></label>
+        <label class="fl"><span>Vínculo comercial *</span><select id="cm-vinc"><option value="Aliança">Minha corretora</option><option value="Outra corretora">Outra corretora</option><option value="Direto com seguradora">Direto com seguradora</option><option value="Não identificado">Não identificado</option></select></label>
         <label class="fl"><span>Profissão padrão p/ cadastros novos</span><select id="cm-tipo">${tipoOptions(tcPerfilPadrao())}</select></label>
       </div><div class="ql" style="margin-top:8px">Coberturas identificadas (aplicadas a todas)</div><div class="cv-grid">${covs}</div></div>
       <div class="q"><div class="ql">2. Pessoas encontradas no documento (${rows.length})</div>
@@ -8441,7 +8453,7 @@ function caForm(file, f, found){
         <label class="fl"><span>Forma de pagamento</span><select id="ca-pag"><option value="">—</option><option>Boleto</option><option>Cartão de crédito</option><option>Débito em conta</option><option>Folha / desconto</option><option>Pix</option></select></label>
         ${fld('ca-vend','Quem vendeu / origem (ex.: corretor, indicação de cliente)','','text',true)}
         <label class="fl"><span>Status</span><select id="ca-status"><option value="ativa">Ativa</option><option value="proposta">Proposta em análise</option><option value="aguardando_emissao">Aguardando emissão</option></select></label>
-        <label class="fl"><span>Vínculo comercial * (quem administra a proteção)</span><select id="ca-vinc"><option value="">Selecione...</option><option>Aliança</option><option>Outra corretora</option><option>Direto com seguradora</option><option>Não identificado</option></select></label>
+        <label class="fl"><span>Vínculo comercial * (quem administra a proteção)</span><select id="ca-vinc"><option value="">Selecione...</option><option value="Aliança">Minha corretora</option><option>Outra corretora</option><option>Direto com seguradora</option><option>Não identificado</option></select></label>
         <label class="fl"><span>Tipo de movimento</span><select id="ca-mov"><option value="nova">Nova</option><option value="renovacao">Renovação</option><option value="migracao">Migração de corretor</option></select></label>
         ${fld('ca-tom','Tomador / estipulante (PJ ou grupo)','')}
         ${fld('ca-benef','Beneficiários','','text',true)}
@@ -8472,8 +8484,8 @@ async function caSave(file, f){
   const tipo = document.querySelector('input[name="ca-tipo"]:checked').value;
   if(!g('ca-seg') || !g('ca-prod')){ err.textContent = 'Informe seguradora e produto.'; return; }
   if(!g('ca-vinc')){ err.textContent = 'Informe o vínculo comercial (Aliança, outra corretora, direto com a seguradora ou não identificado).'; return; }
-  if(tipo==='nova' && g('ca-vinc')!=='Aliança'){ err.textContent = 'Combinação incoerente: uma apólice com vínculo em "'+g('ca-vinc')+'" não pode ser "Nova Aliança". Ajuste a origem ou o vínculo.'; return; }
-  if((tipo==='estudo'||tipo==='concorrente') && g('ca-vinc')==='Aliança'){ err.textContent = 'Combinação incoerente: apólice existente enviada para análise não pode ter vínculo "Aliança". Ajuste o vínculo.'; return; }
+  if(tipo==='nova' && g('ca-vinc')!=='Aliança'){ err.textContent = 'Combinação incoerente: uma apólice com vínculo em "'+g('ca-vinc')+'" não pode ser "Venda nova". Ajuste a origem ou o vínculo.'; return; }
+  if((tipo==='estudo'||tipo==='concorrente') && g('ca-vinc')==='Aliança'){ err.textContent = 'Combinação incoerente: apólice existente enviada para análise não pode ter vínculo "Minha corretora". Ajuste o vínculo.'; return; }
   let sel = (document.querySelector('input[name="ca-pes"]:checked')||{}).value;
   if(sel==='buscar'){ const r = document.querySelector('input[name="ca-pes2"]:checked'); sel = r ? r.value : null; if(!sel){ err.textContent = 'Selecione o cliente na busca.'; return; } }
   if(sel==='novo' && !g('ca-n-nome')){ err.textContent = 'Informe o nome do novo cliente.'; return; }
@@ -8556,7 +8568,7 @@ async function caFormApolices(file, f, found){
         ${opts || '<div class="hint">Nenhum cliente cadastrado encontrado com esses dados.</div>'}
         <label class="pk"><input type="radio" name="cx-pes" value="novo" ${opts && top?'':(opts?'':'checked')}><span><b>Cadastrar como novo cliente</b> ${f.nome?'— '+escapeHtml(f.nome):''}</span></label>
         <div class="fgrid" id="cx-novo" style="display:none">${fld('cx-n-nome','Nome do cliente',f.nome,'text',true)}${fld('cx-n-cpf','CPF',f.cpf)}<label class="fl"><span>Perfil</span><select id="cx-n-tipo">${tipoOptions(f.crm?'medico':'outro')}</select></label></div></div>
-      <label class="fl"><span>Vínculo comercial *</span><select id="cx-vinc"><option value="Outra corretora">Outra corretora</option><option value="Aliança">Aliança</option><option value="Direto com seguradora">Direto com seguradora</option><option value="Não identificado">Não identificado</option></select></label>
+      <label class="fl"><span>Vínculo comercial *</span><select id="cx-vinc"><option value="Outra corretora">Outra corretora</option><option value="Aliança">Minha corretora</option><option value="Direto com seguradora">Direto com seguradora</option><option value="Não identificado">Não identificado</option></select></label>
       <div class="q"><div class="ql">3. As apólices (${rows.length})</div>${rows.map(rowHtml).join('')}</div>
       <div class="om-err" id="cx-err"></div></div>
     <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="cx-save">Salvar apólices marcadas</button></div>`, true);
@@ -8572,7 +8584,7 @@ async function caSaveApolices(file, f, rows, box){
   const vinc = document.getElementById('cx-vinc').value;
   if(!vinc){ err.textContent = 'Informe o vínculo comercial.'; return; }
   if(tipo==='nova' && vinc!=='Aliança'){ err.textContent = 'Incoerente: apólice nova não pode ter vínculo diferente de "Aliança".'; return; }
-  if((tipo==='estudo'||tipo==='concorrente') && vinc==='Aliança'){ err.textContent = 'Incoerente: apólice existente/para análise não pode ter vínculo "Aliança".'; return; }
+  if((tipo==='estudo'||tipo==='concorrente') && vinc==='Aliança'){ err.textContent = 'Incoerente: apólice existente/para análise não pode ter vínculo "Minha corretora".'; return; }
   let sel = (document.querySelector('input[name="cx-pes"]:checked')||{}).value;
   const g = id=>{ const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   if(sel==='novo' && !g('cx-n-nome')){ err.textContent = 'Informe o nome do cliente.'; return; }
@@ -9526,7 +9538,7 @@ let CT = null;
 document.getElementById('op-import').addEventListener('click', ()=>{
   const box = dlgOpen(`<div class="om-title"><div><h3>Importar carteira: clientes e apólices</h3><div class="om-sub">Traga todos os seus clientes e as apólices ativas de uma vez. Só o nome é obrigatório; colunas que você não tiver podem ficar de fora. O sistema cruza cada linha com o cadastro pelo CPF e, sem CPF, pelo telefone (e nome idêntico) e atualiza em vez de duplicar. Cada apólice ativa com vencimento gera os avisos de renovação de 30, 15 e 7 dias.</div></div><button data-close>✕</button></div>
     <div class="dlg-body"><div class="sg-row" style="margin-bottom:10px"><button class="om-save" id="ct-t-pl" type="button">📄 Planilha de clientes</button><button class="om-cancel" id="ct-t-cel" type="button">📱 Contatos do celular (WhatsApp)</button></div>
-    <div id="ct-pl"><div class="es-box" style="margin:0 0 10px"><div class="ql">Em 3 passos</div><div style="font-size:12.5px;line-height:1.6"><b>1.</b> Baixe a planilha padrão. <b>2.</b> Preencha uma linha por apólice (cliente com 2 apólices = 2 linhas com o mesmo CPF; lead sem apólice = 1 linha). <b>3.</b> Envie o arquivo abaixo, confira a prévia e clique em Importar.<br><b>O mínimo da planilha:</b> o <b>nome</b> e o <b>telefone ou CPF</b> de cada pessoa. Quem tem apólice: <b>seguradora, tipo e vencimento</b>, para o sistema avisar a renovação. Sua planilha pode ter outro formato: a IA lê os títulos das colunas e sugere onde vai cada uma.</div>
+    <div id="ct-pl"><div class="es-box" style="margin:0 0 10px"><div class="ql">Em 3 passos</div><div style="font-size:12.5px;line-height:1.6"><b>1.</b> Baixe a planilha padrão. <b>2.</b> Preencha uma linha por apólice (cliente com 2 apólices = 2 linhas com o mesmo CPF; lead sem apólice = 1 linha). <b>3.</b> Envie o arquivo abaixo, confira a prévia e clique em Importar.<br><b>O mínimo da planilha:</b> o <b>nome</b> e o <b>telefone ou CPF</b> de cada pessoa. Quem tem apólice: seguradora, tipo, <b>início da vigência, vencimento e prêmio anual</b>: com eles o sistema avisa a renovação e calcula a sua comissão na Carteira (a Comissão %, se você souber, também ajuda). Sua planilha pode ter outro formato: a IA lê os títulos das colunas e sugere onde vai cada uma.</div>
       <div style="margin-top:8px"><button class="om-save" id="ct-modelo">📥 Baixar planilha padrão (Excel)</button></div></div>
       <div class="hint" style="margin:0 0 10px">Sua planilha é só de <b>apólices</b>, com prêmio, capital, comissão ou vendedor? Use <a href="#" id="ct-ir-apo">Importar apólices (Central de Apólices)</a>.</div></div>
     <div id="ct-guia" hidden class="es-box" style="margin:0 0 10px"><div class="ql">Como exportar os contatos do celular</div>
@@ -9555,7 +9567,7 @@ document.getElementById('op-import').addEventListener('click', ()=>{
         ['1. Uma linha por apólice. Cliente com 2 apólices ocupa 2 linhas, com o mesmo CPF (os dados da pessoa podem ficar só na primeira).'],
         ['2. Lead ou cliente sem apólice: uma linha, com as colunas da apólice em branco.'],
         ['3. O mínimo: o nome e o telefone ou CPF de cada pessoa. O CPF evita duplicar quem já está no sistema; sem CPF, o sistema usa o telefone.'],
-        ['3a. Quem tem apólice: seguradora, tipo e vencimento. Sem vencimento, a apólice entra, mas o sistema não consegue avisar a renovação.'],
+        ['3a. Quem tem apólice: seguradora, tipo, início da vigência, vencimento e prêmio anual. Sem vencimento o sistema não avisa a renovação; sem início e prêmio a Carteira não calcula a sua comissão. Se souber, preencha também a Comissão %.'],
         ['4. Datas no formato dd/mm/aaaa. Valores em reais como 1.850,00. Comissão em %, por exemplo 20.'],
         ['5. Status da apólice: Ativa, Cancelada, Encerrada ou Proposta. Em branco: ativa se o vencimento ainda não passou.'],
         ['6. Apólice ativa com vencimento gera sozinha os avisos de renovação de 30, 15 e 7 dias.'],
@@ -10060,7 +10072,7 @@ const kbQuem = r => { const o = String(r.origem||'').trim(); const m = o.match(/
 function kbUltimo(r){ const h = String(r.historico||'').trim(); if(!h) return ''; const ls = h.split(String.fromCharCode(10)); const corpo = /^\[/.test(ls[0]) ? ls.slice(1).join(' ') : ls.join(' '); return corpo.split(/\s*\[\d\d\/\d\d /)[0].trim().slice(0,110); }
 
 async function kbIniciar(minha){
-  KB.ativo = !!minha;   // 25/11/2026: Kanban e Carteira liberados para todas as corretoras (antes só a Demonstração)
+  KB.ativo = !!minha; window._minhaSlug = (minha && minha.slug) || '';   // 25/11/2026: Kanban e Carteira liberados para todas as corretoras (antes só a Demonstração)
   if(!KB.ativo) return;
   try{ KB.modo = localStorage.getItem('kb_modo') || 'lista'; }catch(e){}
   const filtros = document.querySelector('#view-operacao .op-filters'), hoje = document.getElementById('op-hoje');
@@ -10293,6 +10305,82 @@ async function kbLembreteHoje(host){
   host.prepend(div);
   div.querySelector('#kb-hj-ir').addEventListener('click', ()=>{ KB.modo = 'kanban'; try{ localStorage.setItem('kb_modo','kanban'); }catch(_){} const nb = document.querySelector('.nav-btn[data-view="operacao"]'); if(nb) nb.click(); setTimeout(()=>kbMontarLista(), 900); });
 }
+// ===== Fim da consultoria (25/11/2026, avaliação "corretor independente"): o "sim" do cliente vira apólice, Prospecção e histórico de uma vez =====
+// Antes: a Fase 6 só baixava o PDF e a venda era digitada de novo em Vendas e no cadastro da apólice. Agora "Cliente aceitou" cria a(s)
+// apólice(s) nova(s) com a solução escolhida na Fase 5 (uma por seguradora), marca "Virou cliente" na Prospecção e registra no histórico.
+// A apólice entra na Carteira (com o bônus da 1ª parcela) e no aviso de renovação; o número da apólice e o PDF entram quando chegarem.
+async function flowAceite(p){
+  const { data: ct } = await sb.from('crm_cotacoes_estudo').select('linhas').eq('pessoa_id', p.id).maybeSingle();
+  const rows = (ct && ct.linhas) || [];
+  const grupos = n => { const m = new Map();
+    rows.filter(r=>r['s'+n] && String(r.seg||'').trim()).forEach(r=>{ const k = String(r.seg).trim(); const g = m.get(k) || { seg:k, prem:0, cap:0, cobs:[], cats:new Set() };
+      g.prem += Number(r.prem)||0; g.cap += Number(r.cap)||0; if(r.cob) g.cobs.push(String(r.cob)); if(r.cat) g.cats.add(r.cat); m.set(k, g); });
+    return [...m.values()].map(g=>({ ...g, prod: g.cats.has('Morte') ? 'Vida' : (g.cats.has('Renda') || g.cats.has('DIT') ? 'DIT' : ([...g.cats][0] || 'Vida')) })); };
+  const S = { 1:grupos(1), 2:grupos(2) };
+  if(!S[1].length && !S[2].length){ showToast('Marque na Fase 5 as coberturas da proposta (Solução 1 ou 2) e a seguradora de cada uma.'); flowGo(4); return; }
+  let sol = S[1].length ? 1 : 2; const hoje = ymdToday();
+  const tot = n => S[n].reduce((t,g)=>t+g.prem,0);
+  const box = dlgOpen(`<div class="om-title"><div><h3>✅ Cliente aceitou</h3><div class="om-sub">Cria a apólice nova de cada seguradora com a solução aceita, marca "Virou cliente" na Prospecção e registra no histórico. O número da apólice e o PDF você anexa quando chegarem.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">${[1,2].filter(n=>S[n].length).map(n=>`<label class="chk"><input type="radio" name="fa-sol" value="${n}" ${n===sol?'checked':''}> Solução ${n} · ${S[n].length} seguradora${S[n].length>1?'s':''} · ${fmtMoney(tot(n))}/mês</label>`).join('')}</div>
+      <div id="fa-linhas"></div>
+      <div class="fgrid" style="margin-top:10px"><label class="fl"><span>Início da vigência</span><input type="date" id="fa-ini" value="${hoje}"></label>
+        <label class="fl"><span>Forma de pagamento</span><select id="fa-pag"><option>Mensal</option><option>Anual</option></select></label></div>
+      <div class="om-err" id="fa-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="fa-ok">Registrar a venda</button></div>`, true);
+  const desenha = ()=>{ box.querySelector('#fa-linhas').innerHTML = `<table class="ca-table"><thead><tr><th>Seguradora</th><th>Produto</th><th class="r">Prêmio mensal</th><th>Coberturas</th></tr></thead><tbody>${S[sol].map((g,i)=>`<tr data-i="${i}">
+      <td><input class="fa-seg ca-inp" value="${escapeHtml(g.seg)}"></td><td><input class="fa-prod ca-inp" value="${escapeHtml(g.prod)}" style="width:110px"></td>
+      <td class="r"><input class="fa-prem ca-inp" inputmode="decimal" value="${(Math.round(g.prem*100)/100).toLocaleString('pt-BR',{minimumFractionDigits:2})}" style="width:110px;text-align:right"></td>
+      <td><small>${escapeHtml(g.cobs.slice(0,6).join(', '))}${g.cobs.length>6?'…':''}</small></td></tr>`).join('')}</tbody></table>`; };
+  desenha();
+  box.querySelectorAll('[name="fa-sol"]').forEach(r=>r.addEventListener('change', ()=>{ sol = Number(r.value); desenha(); }));
+  box.querySelector('#fa-ok').addEventListener('click', async e=>{
+    const b = e.currentTarget, err = box.querySelector('#fa-err'); err.textContent = '';
+    const ini = box.querySelector('#fa-ini').value, pag = box.querySelector('#fa-pag').value; if(!ini){ err.textContent = 'Informe o início da vigência.'; return; }
+    const num = v => { const t = String(v||'').trim().replace(/\./g,'').replace(',','.'); return t==='' ? null : Number(t); };
+    const itens = [...box.querySelectorAll('#fa-linhas tr[data-i]')].map(tr=>({ g:S[sol][+tr.dataset.i], seg:tr.querySelector('.fa-seg').value.trim(), prod:tr.querySelector('.fa-prod').value.trim(), prem:num(tr.querySelector('.fa-prem').value) }));
+    const ruim = itens.find(x=>!x.seg || x.prem==null || isNaN(x.prem) || x.prem<=0); if(ruim){ err.textContent = 'Confira a seguradora e o prêmio mensal de cada linha.'; return; }
+    const venc = new Date(ini+'T12:00:00'); venc.setFullYear(venc.getFullYear()+1); venc.setDate(venc.getDate()-1);
+    b.disabled = true; b.textContent = 'Registrando…';
+    try{
+      for(const x of itens){
+        const { error } = await sb.from('crm_apolices').insert({ pessoa_id:p.id, seguradora:x.seg, tipo_seguro:x.prod||'Vida', valor_premio:Math.round(x.prem*12*100)/100, valor_cobertura:x.g.cap||null,
+          data_emissao:ini, data_vencimento:ymd(venc), forma_pagamento:pag, status:'ativa', origem_apolice:'nova', vinculo_comercial:'Aliança', tipo_movimento:'nova',
+          observacoes:'Venda da consultoria (Solução '+sol+'): '+x.g.cobs.slice(0,10).join(', ')+'. Número da apólice e PDF: anexar quando chegarem.' });
+        if(error) throw error;
+      }
+      const agora = new Date().toISOString(), por = curUserName()||null;
+      const { data: pr } = await sb.from('crm_prospeccao').select('id,status').eq('pessoa_id', p.id);
+      for(const r of (pr||[]).filter(r=>!['Virou cliente'].includes(r.status))) await sb.from('crm_prospeccao').update({ status:'Virou cliente', proxima_acao:null, updated_at:agora }).eq('id', r.id);
+      await sb.from('crm_atividades').insert({ pessoa_id:p.id, tipo:'outro', data_hora:agora, resumo:'Cliente aceitou a proposta (Solução '+sol+'): '+itens.map(x=>x.prod+' · '+x.seg+' · '+fmtMoney(x.prem)+'/mês').join('; '), resultado:'Venda fechada', responsavel:por, proxima_acao:'Anexar a apólice e enviar o Portal do cliente', proxima_data:ymdToday(), proximo_responsavel:por });
+      try{ await vdFunilDoStatus({ pessoa_id:p.id, status:'Virou cliente' }); }catch(_){}
+      OP.dirty = true; if(typeof CRT!=='undefined') CRT.carregado = false; VD.ok = false;
+      dlgClose(); showToast('Venda registrada: '+itens.length+' apólice'+(itens.length>1?'s':'')+' na Carteira e "Virou cliente" na Prospecção.');
+      try{ await flowStatusRefresh(); }catch(_){}
+    }catch(x){ err.textContent = 'Não consegui registrar: '+(x.message||x)+' (parte pode já ter sido gravada: confira em Proteção › Apólices do cliente).'; b.disabled = false; b.textContent = 'Registrar a venda'; }
+  });
+}
+async function flowRecusa(p){
+  const box = dlgOpen(`<div class="om-title"><div><h3>Não aceitou</h3><div class="om-sub">Vai para Vendas não realizadas e para o histórico do cliente.</div></div><button data-close>✕</button></div>
+    <div class="dlg-body"><div class="fgrid">
+      <label class="fl"><span>Motivo</span><select id="fr-mot"><option>Preço</option><option>Já tem seguro</option><option>Vai pensar / mais para frente</option><option>Não vê necessidade</option><option>Outro</option></select></label>
+      <label class="fl full" style="grid-column:1/-1"><span>O que ele disse</span><textarea id="fr-txt" rows="3"></textarea></label></div><div class="om-err" id="fr-err"></div></div>
+    <div class="om-foot"><span style="flex:1"></span><button class="om-cancel" data-close>Cancelar</button><button class="om-save" id="fr-ok">Registrar</button></div>`);
+  box.querySelector('#fr-ok').addEventListener('click', async e=>{
+    const mot = box.querySelector('#fr-mot').value, txt = box.querySelector('#fr-txt').value.trim(), futuro = /pensar/i.test(mot);
+    e.currentTarget.disabled = true; const agora = new Date().toISOString(), por = curUserName()||null;
+    try{
+      const { data: pr } = await sb.from('crm_prospeccao').select('id,status').eq('pessoa_id', p.id);
+      const aberta = (pr||[]).find(r=>!['Virou cliente','Sem interesse'].includes(r.status));
+      if(!futuro){ const { error } = await sb.from('crm_nao_vendas').insert({ pessoa_id:p.id, cliente:p.nome, produto:'Proteção (consultoria)', motivo:mot, justificativa:txt||mot, prospeccao_id:aberta?aberta.id:null, data_registro:ymdToday(), criado_por:por }); if(error) throw error; }
+      if(aberta) await sb.from('crm_prospeccao').update({ status: futuro ? 'Interesse futuro' : 'Sem interesse', motivo: futuro ? 'Outro' : null, updated_at:agora }).eq('id', aberta.id);
+      await sb.from('crm_atividades').insert({ pessoa_id:p.id, tipo:'outro', data_hora:agora, resumo:'Proposta não aceita: '+mot+(txt?' · '+txt:''), resultado: futuro ? 'Conversou' : 'Sem interesse', responsavel:por, motivo_perda: futuro ? null : mot });
+      OP.dirty = true; VD.ok = false; dlgClose(); showToast(futuro ? 'Registrado: interesse futuro.' : 'Registrado em Vendas não realizadas.');
+    }catch(x){ box.querySelector('#fr-err').textContent = 'Não consegui registrar: '+(x.message||x); e.currentTarget.disabled = false; }
+  });
+}
+// apólice que é do próprio corretor (não a do concorrente anexada para análise)
+function apoPropria(a){ return !['estudo','concorrente'].includes(String(a.origem_apolice||'')) && !['Outra corretora','Direto com seguradora'].includes(String(a.vinculo_comercial||'')); }
 // ============ CARTEIRA E COMISSÕES (25/11/2026, pedido do Luiz; revisado pelo Conselho no mesmo dia) ============
 // Para o corretor independente: clientes ativos, em prospecção e quanto cada cliente rende de comissão, mês a mês.
 // Tudo é ESTIMATIVA (dito na tela) e tudo é editável:
@@ -10319,7 +10407,11 @@ function ctRegraDe(a){
   if(a.comissao_regra && typeof a.comissao_regra==='object' && Object.keys(a.comissao_regra).length) return { ...a.comissao_regra, origem:'apólice' };
   const s = ctChave(a.seguradora), t = ctChave(a.tipo_seguro);
   const r = CRT.regras.find(x=>ctChave(x.seguradora)===s && ctChave(x.tipo_seguro)===t && t) || CRT.regras.find(x=>ctChave(x.seguradora)===s && !ctChave(x.tipo_seguro));
-  return r ? { ...r, ano1_pct: r.ano1_pct ?? r.comissao_pct, origem:'seguradora' } : null;
+  if(r) return { ...r, ano1_pct: r.ano1_pct ?? r.comissao_pct, origem:'seguradora' };
+  // % de comissão que veio na planilha ou no PDF da apólice: vale como comissão fixa (sem bônus)
+  if(a.comissao_pct != null && a.comissao_pct !== '') { const c = Number(a.comissao_pct); return { agenciamento_pct:0, bonus_parcelas:1, mes_bonus:1, ano1_pct:c, anos2_pct:c, anos2_ate:4, vitalicio_pct:c, origem:'apólice %' }; }
+  // sem nada: usa a regra sugerida para o número não nascer zerado (a tela avisa e oferece ajustar)
+  return { ...CRT_SUGESTAO, origem:'sugestão' };
 }
 const ctNova = a => !['carteira','importada','estudo','concorrente','existente'].includes(String(a.origem_apolice||'')) && String(a.tipo_movimento||'') !== 'renovacao';
 const ctAnual = a => /anual|vista|única|unica/i.test(String(a.forma_pagamento||''));
@@ -10335,14 +10427,14 @@ function ctNoMes(a, r, ym){
   if(ctAnual(a)) return { rec: k % 12 === 0 ? premAno*Number(pct)/100 : 0, bonus:0 };
   return { rec: premMes*Number(pct)/100, bonus:0 };
 }
-const ctAtiva = a => caEfetivo(a)==='ativa';
+const ctAtiva = a => caEfetivo(a)==='ativa' && apoPropria(a);
 function ctProximos12(){ const d = new Date(); d.setDate(1); return Array.from({ length:12 }, (_,i)=>{ const x = new Date(d); x.setMonth(x.getMonth()+i); return ctYm(x); }); }
 async function ctCarregar(forcar){
   if(CRT.carregado && !forcar) return;
   if(CRT.carregando) return CRT.carregando;
   CRT.carregando = (async ()=>{
     const [apo, pr] = await Promise.all([
-      opFetchAll('crm_apolices','id,pessoa_id,seguradora,tipo_seguro,valor_premio,forma_pagamento,origem_apolice,tipo_movimento,comissao_regra,data_emissao,data_vencimento,status,crm_pessoas(nome,tags)',['id']),
+      opFetchAll('crm_apolices','id,pessoa_id,seguradora,tipo_seguro,valor_premio,forma_pagamento,origem_apolice,tipo_movimento,vinculo_comercial,comissao_pct,comissao_regra,data_emissao,data_vencimento,status,crm_pessoas(nome,tags)',['id']),
       sb.from('crm_prospeccao').select('id', { count:'exact', head:true }).not('status','in','("Virou cliente","Sem interesse")'),
       ctRegras()]);
     CRT.apo = apo || []; CRT.prosp = pr.count || 0; CRT.carregado = true;
@@ -10355,13 +10447,13 @@ function ctCalc(){
   const porCli = new Map(), linha = meses.map(ym=>({ ym, rec:0, bonus:0 })), semRegra = new Set(), vencidas = [];
   CRT.apo.forEach(a=>{
     if(seg && !((a.crm_pessoas && a.crm_pessoas.tags)||[]).includes(seg)) return;
-    const ef = caEfetivo(a);
+    const ef = caEfetivo(a); if(!apoPropria(a)) return;
     if(ef==='vencida'){ const d = Math.round((new Date(a.data_vencimento+'T12:00:00')-hoje)/864e5); if(d >= -60) vencidas.push({ a, d }); return; }
     if(ef!=='ativa') return;
-    const r = ctRegraDe(a); if(!r) semRegra.add(ctChave(a.seguradora)+'|'+(a.seguradora||''));
+    const r = ctRegraDe(a); if(r.origem==='sugestão') semRegra.add(ctChave(a.seguradora)+'|'+(a.seguradora||''));
     let x = porCli.get(a.pessoa_id);
     if(!x){ x = { pessoa_id:a.pessoa_id, nome:(a.crm_pessoas&&a.crm_pessoas.nome)||'?', apos:[], total:0, rec:0, bonus:0, mesBonus:null, prox:null, semRegra:0 }; porCli.set(a.pessoa_id, x); }
-    x.apos.push(a); if(!r) x.semRegra++;
+    x.apos.push(a); if(r.origem==='sugestão') x.semRegra++;
     meses.forEach((ym,i)=>{ const v = ctNoMes(a, r, ym); linha[i].rec += v.rec; linha[i].bonus += v.bonus; x.rec += v.rec; x.bonus += v.bonus; if(v.bonus && !x.mesBonus) x.mesBonus = ym; });
     if(a.data_vencimento && (!x.prox || a.data_vencimento < x.prox)) x.prox = a.data_vencimento;
   });
@@ -10382,14 +10474,14 @@ function ctDesenhar(host){
   const dias = d => d ? Math.round((new Date(d+'T12:00:00') - new Date(new Date().toDateString()))/864e5) : null;
   const lista = C.cli.filter(x=>!q || ctChave(x.nome).includes(q) || x.apos.some(a=>ctChave(a.seguradora).includes(q) || ctChave(a.tipo_seguro).includes(q))).sort((a,b)=>b.total-a.total);
   const seguros = x => x.apos.map(a=>escapeHtml((a.tipo_seguro||'Seguro')+' · '+(a.seguradora||'?'))).join(', ');
-  const rende = x => `<b>${x.rec ? ctMoney(x.rec/12)+'/mês' : (x.semRegra ? '<span class="tagx warn">sem regra</span>' : '—')}</b>${x.bonus ? `<small>+ ${ctMoney(x.bonus)} de bônus a partir de ${ctMesNome(x.mesBonus)}</small>` : ''}`;
+  const rende = x => `<b>${x.rec ? ctMoney(x.rec/12)+'/mês' : '—'}</b>${x.semRegra ? ' <span class="tagx warn" title="Calculado com a regra sugerida">sugerida</span>' : ''}${x.bonus ? `<small>+ ${ctMoney(x.bonus)} de bônus a partir de ${ctMesNome(x.mesBonus)}</small>` : ''}`;
   const vence = d0 => { const d = dias(d0); return d0 ? fmtDate(d0)+(d!=null && d<=60 ? ` <span class="tagx ${d<=30?'bad':'warn'}">${d<0?'venceu':d+' dias'}</span>` : '') : '—'; };
   const editar = ctPodeEditar();
   host.innerHTML = `<div class="ct-wrap">
     <div class="ct-topo"><div class="ct-titulo">Nos próximos 12 meses você deve receber <b>${ctMoney(C.total)}</b>${C.seg?` <span class="tagx">segmento: ${escapeHtml(C.seg)}</span>`:''}</div>
       <div class="ct-sub">${ctMoney(C.rec)} de comissão + ${ctMoney(C.bonus)} de bônus da 1ª parcela · estimativa pelas regras que você cadastrou</div>
       <div class="ct-mini"><span><b>${C.cli.length}</b> clientes ativos</span><span><b>${CRT.prosp}</b> em prospecção <a href="#" id="ct-ir-kb">ver no Kanban</a></span>${C.prox?`<span>próximo bônus: <b>${ctMoney(C.prox.bonus)}</b> em ${ctMesNome(C.prox.ym)}</span>`:''}</div></div>
-    ${C.semRegra.length ? `<div class="msg-regra" style="margin:0 0 12px">⚠️ <b>Sem regra de comissão para: ${C.semRegra.map(escapeHtml).join(', ')}.</b> A comissão dessas apólices entra como zero. ${editar?'<a href="#" class="ct-regras">Cadastrar as regras</a> (já vem com uma sugestão para você conferir).':'Peça ao administrador da corretora para cadastrar as regras.'}</div>` : ''}
+    ${C.semRegra.length ? `<div class="msg-regra" style="margin:0 0 12px">⚠️ <b>Usamos a regra sugerida para: ${C.semRegra.map(escapeHtml).join(', ')}</b> (bônus de ${CRT_SUGESTAO.agenciamento_pct}%, comissão de ${CRT_SUGESTAO.ano1_pct}% no 1º ano, ${CRT_SUGESTAO.anos2_pct}% até o ${CRT_SUGESTAO.anos2_ate}º e ${CRT_SUGESTAO.vitalicio_pct}% vitalícia). ${editar?'<a href="#" class="ct-regras">Ajuste para os números da sua seguradora</a>.':'Peça ao administrador da corretora para ajustar as regras.'}</div>` : ''}
     <div class="es-box"><div class="ql" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">Quanto entra mês a mês <span class="hint" style="margin:0"><span class="ct-leg rec"></span> comissão <span class="ct-leg bon"></span> bônus da 1ª parcela</span><span style="flex:1"></span>${editar?'<button class="om-cancel ct-regras">Regras de comissão</button>':''}</div>
       <div class="ct-barras">${C.linha.map((m,i)=>{ const t = m.rec+m.bonus; return `<button type="button" class="ct-mes" data-ctm="${i}"><div class="ct-col"><span class="ct-b bon" style="height:${m.bonus/maxMes*100}%"></span><span class="ct-b rec" style="height:${m.rec/maxMes*100}%"></span></div><b>${ctMoney(t)}</b><small>${ctMesNome(m.ym)}</small></button>`; }).join('')}</div>
       <div class="ct-lista">${C.linha.map(m=>{ const t = m.rec+m.bonus; return `<div class="ct-li"><span class="ct-li-m">${ctMesNome(m.ym)}</span><span class="ct-li-b"><span class="ct-b rec" style="width:${m.rec/maxMes*100}%"></span><span class="ct-b bon" style="width:${m.bonus/maxMes*100}%"></span></span><span class="ct-li-v"><b>${ctMoney(t)}</b>${m.bonus?`<small>${ctMoney(m.bonus)} de bônus</small>`:''}</span></div>`; }).join('')}</div>
@@ -10492,19 +10584,20 @@ async function ctRegraApoliceDialog(a, depois){
 async function pvCarteira(p){
   const host = document.getElementById('pv-carteira'); if(!host) return;
   const [{ data, error }] = await Promise.all([
-    sb.from('crm_apolices').select('id,seguradora,tipo_seguro,numero_apolice,valor_premio,forma_pagamento,origem_apolice,tipo_movimento,comissao_regra,data_emissao,data_vencimento,status').eq('pessoa_id', p.id).order('data_vencimento', { ascending:true }),
+    sb.from('crm_apolices').select('id,seguradora,tipo_seguro,numero_apolice,valor_premio,forma_pagamento,origem_apolice,tipo_movimento,vinculo_comercial,comissao_pct,comissao_regra,data_emissao,data_vencimento,status').eq('pessoa_id', p.id).order('data_vencimento', { ascending:true }),
     ctRegras().catch(()=>[])]);
   if(error){ host.innerHTML = ''; return; }
   const apos = data || [], meses = ctProximos12();
   if(!apos.length){ host.innerHTML = `<div class="ql">Carteira do cliente</div><div class="hint">Nenhuma apólice cadastrada. <a href="#" data-pvgo="protecao">Adicionar em Proteção</a> (PDF da apólice: a IA lê seguradora, produto, prêmio e vencimento).</div>`; }
   else {
     let tot = 0;
-    const linhas = apos.map(a=>{ const ef = caEfetivo(a), r = ctRegraDe(a);
+    const linhas = apos.map(a=>{ const ef = apoPropria(a) ? caEfetivo(a) : 'outro', r = ctRegraDe(a);
       const v = ef==='ativa' ? meses.reduce((t,ym)=>{ const x = ctNoMes(a, r, ym); return { rec:t.rec+x.rec, bonus:t.bonus+x.bonus }; }, { rec:0, bonus:0 }) : { rec:0, bonus:0 }; tot += v.rec + v.bonus;
       const d = a.data_vencimento ? Math.round((new Date(a.data_vencimento+'T12:00:00') - new Date(new Date().toDateString()))/864e5) : null;
+      if(!apoPropria(a)) return `<tr class="ct-off"><td data-l="Seguro"><b>${escapeHtml(a.tipo_seguro||'Seguro')}</b> · ${escapeHtml(a.seguradora||'—')} <span class="tagx">de outro corretor / para análise</span></td><td data-l="Vence">${a.data_vencimento?fmtDate(a.data_vencimento):'—'}</td><td class="r">—</td></tr>`;
       return `<tr${ef!=='ativa'?' class="ct-off"':''}><td data-l="Seguro"><b>${escapeHtml(a.tipo_seguro||'Seguro')}</b> · ${escapeHtml(a.seguradora||'—')}${ef!=='ativa'?' <span class="tagx">'+escapeHtml(ef)+'</span>':''}</td>
         <td data-l="Vence">${a.data_vencimento?fmtDate(a.data_vencimento):'—'}${d!=null && ef==='ativa' && d<=60?` <span class="tagx ${d<=30?'bad':'warn'}">${d} dias</span>`:''}</td>
-        <td data-l="Rende em 12 meses" class="r">${ef!=='ativa' ? '—' : (!r ? '<span class="tagx warn">sem regra</span>' : ctMoney(v.rec+v.bonus)+(v.bonus?'<small>inclui '+ctMoney(v.bonus)+' de bônus</small>':''))}
+        <td data-l="Rende em 12 meses" class="r">${ef!=='ativa' ? '—' : (ctMoney(v.rec+v.bonus)+(v.bonus?'<small>inclui '+ctMoney(v.bonus)+' de bônus</small>':'')+(r.origem==='sugestão'?'<small>regra sugerida</small>':''))}
           ${ctPodeEditar() && ef==='ativa' ? `<button type="button" class="ct-edit" data-cra="${a.id}" title="Comissão própria desta apólice (campanha, produto)">✏️</button>` : ''}${r && r.origem==='apólice' ? '<small>regra própria</small>' : ''}</td></tr>`; }).join('');
     host.innerHTML = `<div class="ql" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">Carteira do cliente <span class="tagx">${apos.filter(ctAtiva).length} em vigor</span><span class="hint" style="margin:0">· deve render ${ctMoney(tot)} nos próximos 12 meses (estimativa)</span><span style="flex:1"></span><a href="#" data-pvgo="protecao">Ver e editar em Proteção</a></div>
       <table class="ca-table ct-tab"><thead><tr><th>Seguro</th><th>Vence</th><th class="r">Rende em 12 meses</th></tr></thead><tbody>${linhas}</tbody></table>`;
@@ -11326,7 +11419,7 @@ async function renderIndicadores(){
       <div class="pv-grid">
         <div class="es-box"><div class="ql">Produção Aliança — novas apólices (6 meses)</div>
           ${meses.map(m=>`<div class="ind-line"><span>${OP_MESES[m.s0.getMonth()]}/${String(m.s0.getFullYear()).slice(2)}</span>${bar(m.n/maxN*100,'var(--green)')}<b>${m.n}</b><small>${fmtMoney(m.prem)}</small></div>`).join('')}
-          <div class="hint">Só conta apólice “Nova Aliança” com vínculo Aliança. Apólice existente/importada não é venda.</div>
+          <div class="hint">Só conta apólice “Venda nova” com vínculo da sua corretora. Apólice existente/importada não é venda.</div>
           <div class="ql" style="margin-top:10px">No período selecionado</div>
           <div>${Object.entries(porProd).map(([k,v])=>`<span class="tagx" style="margin:2px">${escapeHtml(k)}: ${v}</span>`).join('')||'<span class="hint">Sem vendas no período.</span>'}</div>
           <div class="ql" style="margin-top:10px">Produção por responsável <small style="text-transform:none;font-family:inherit;color:var(--ink-faint)">(prêmio vendido e comissão gerada)</small></div>
@@ -12464,11 +12557,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611251145"></script>
-<script src="painel.js?v=202611251145"></script>
-<script src="cobranca.js?v=202611251145"></script>
-<script src="cadastro.js?v=202611251145"></script>
-<script src="contrato.js?v=202611251145"></script>
-<script src="guarda.js?v=202611251145"></script>
+<script src="plataforma.js?v=202611251201"></script>
+<script src="painel.js?v=202611251201"></script>
+<script src="cobranca.js?v=202611251201"></script>
+<script src="cadastro.js?v=202611251201"></script>
+<script src="contrato.js?v=202611251201"></script>
+<script src="guarda.js?v=202611251201"></script>
 </body>
 </html>

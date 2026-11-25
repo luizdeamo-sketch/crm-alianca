@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611251201">
+<meta name="app-build" content="202611251208">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -10317,6 +10317,11 @@ async function flowAceite(p){
       g.prem += Number(r.prem)||0; g.cap += Number(r.cap)||0; if(r.cob) g.cobs.push(String(r.cob)); if(r.cat) g.cats.add(r.cat); m.set(k, g); });
     return [...m.values()].map(g=>({ ...g, prod: g.cats.has('Morte') ? 'Vida' : (g.cats.has('Renda') || g.cats.has('DIT') ? 'DIT' : ([...g.cats][0] || 'Vida')) })); };
   const S = { 1:grupos(1), 2:grupos(2) };
+  // 25/11/2026: trava contra venda em dobro (clique repetido em outro dia cria apólices repetidas)
+  const { data: jaNovas } = await sb.from('crm_apolices').select('id,seguradora,tipo_seguro,created_at,status').eq('pessoa_id', p.id).eq('origem_apolice','nova');
+  const jaAtivas = (jaNovas||[]).filter(a=>a.status!=='cancelada');
+  if(jaAtivas.length){ const ult = jaAtivas.map(a=>String(a.created_at||'')).sort().pop();
+    if(!confirm('Já existe venda registrada para '+(p.nome||'este cliente')+': '+jaAtivas.map(a=>[a.tipo_seguro,a.seguradora].filter(Boolean).join(' · ')).join('; ')+(ult?' (em '+fmtDate(ult.slice(0,10))+')':'')+'.\n\nRegistrar OUTRA venda (mais uma apólice) mesmo assim?\n\nOK = registrar outra   |   Cancelar = não registrar')) return; }
   if(!S[1].length && !S[2].length){ showToast('Marque na Fase 5 as coberturas da proposta (Solução 1 ou 2) e a seguradora de cada uma.'); flowGo(4); return; }
   let sol = S[1].length ? 1 : 2; const hoje = ymdToday();
   const tot = n => S[n].reduce((t,g)=>t+g.prem,0);
@@ -10341,7 +10346,7 @@ async function flowAceite(p){
     const itens = [...box.querySelectorAll('#fa-linhas tr[data-i]')].map(tr=>({ g:S[sol][+tr.dataset.i], seg:tr.querySelector('.fa-seg').value.trim(), prod:tr.querySelector('.fa-prod').value.trim(), prem:num(tr.querySelector('.fa-prem').value) }));
     const ruim = itens.find(x=>!x.seg || x.prem==null || isNaN(x.prem) || x.prem<=0); if(ruim){ err.textContent = 'Confira a seguradora e o prêmio mensal de cada linha.'; return; }
     const venc = new Date(ini+'T12:00:00'); venc.setFullYear(venc.getFullYear()+1); venc.setDate(venc.getDate()-1);
-    b.disabled = true; b.textContent = 'Registrando…';
+    if(box._gravou) return; b.disabled = true; b.textContent = 'Registrando…';
     try{
       for(const x of itens){
         const { error } = await sb.from('crm_apolices').insert({ pessoa_id:p.id, seguradora:x.seg, tipo_seguro:x.prod||'Vida', valor_premio:Math.round(x.prem*12*100)/100, valor_cobertura:x.g.cap||null,
@@ -10354,7 +10359,7 @@ async function flowAceite(p){
       for(const r of (pr||[]).filter(r=>!['Virou cliente'].includes(r.status))) await sb.from('crm_prospeccao').update({ status:'Virou cliente', proxima_acao:null, updated_at:agora }).eq('id', r.id);
       await sb.from('crm_atividades').insert({ pessoa_id:p.id, tipo:'outro', data_hora:agora, resumo:'Cliente aceitou a proposta (Solução '+sol+'): '+itens.map(x=>x.prod+' · '+x.seg+' · '+fmtMoney(x.prem)+'/mês').join('; '), resultado:'Venda fechada', responsavel:por, proxima_acao:'Anexar a apólice e enviar o Portal do cliente', proxima_data:ymdToday(), proximo_responsavel:por });
       try{ await vdFunilDoStatus({ pessoa_id:p.id, status:'Virou cliente' }); }catch(_){}
-      OP.dirty = true; if(typeof CRT!=='undefined') CRT.carregado = false; VD.ok = false;
+      box._gravou = true; OP.dirty = true; if(typeof CRT!=='undefined') CRT.carregado = false; VD.ok = false;
       dlgClose(); showToast('Venda registrada: '+itens.length+' apólice'+(itens.length>1?'s':'')+' na Carteira e "Virou cliente" na Prospecção.');
       try{ await flowStatusRefresh(); }catch(_){}
     }catch(x){ err.textContent = 'Não consegui registrar: '+(x.message||x)+' (parte pode já ter sido gravada: confira em Proteção › Apólices do cliente).'; b.disabled = false; b.textContent = 'Registrar a venda'; }
@@ -11100,6 +11105,10 @@ async function opHojeDialog(onlyMine){
   const lembR = await sb.rpc('crm_lembretes', { p_dias:7 });
   const reu = await reuCarregar();
   const incompl = OP.pessoas.filter(x=>opIsCliente(x.id) && (!x.data_nascimento));
+  // 25/11/2026: venda registrada pelo "Cliente aceitou" nasce sem número e sem PDF; o Hoje lembra até anexar
+  let semNum = []; try{ const { data: nv } = await sb.from('crm_apolices').select('id,pessoa_id,seguradora,tipo_seguro,numero_apolice,arquivo_apolice,created_at,status').eq('origem_apolice','nova').neq('status','cancelada');
+    semNum = (nv||[]).filter(a=>!String(a.numero_apolice||'').trim() || !a.arquivo_apolice).map(a=>({ a, p:OP.pessoas.find(x=>x.id===a.pessoa_id) })).filter(x=>x.p && (!onlyMine || !x.p.responsavel || x.p.responsavel===me))
+      .sort((x,y)=>String(x.a.created_at).localeCompare(String(y.a.created_at))); }catch(_){}
   const [ag, agNext, tar] = await Promise.all([
     sb.from('crm_agenda').select('titulo,data_inicio,crm_pessoas(nome)').gte('data_inicio',t0).lt('data_inicio',t1).order('data_inicio'),
     sb.from('crm_agenda').select('id',{count:'exact',head:true}).gte('data_inicio',ini2.toISOString()).lt('data_inicio',fim2.toISOString()),
@@ -11138,6 +11147,9 @@ async function opHojeDialog(onlyMine){
        <div class="sg-row" style="margin-top:8px"><input id="hj-task-new" class="ca-inp" placeholder="Nova tarefa (não precisa ter cliente ligado)..." style="flex:1"><button class="om-cancel" id="hj-task-add">+ Tarefa</button></div></div>`;
   document.getElementById('hj-body').innerHTML = contador + topo
     + (perguntas ? sec('Já faz uma semana da mensagem: renovou?', RV.pendentes.length, perguntas) : '')
+    + (semNum.length ? sec('Vendas novas sem o número ou o PDF da apólice (anexe em Proteção › Apólices do cliente)', semNum.length, semNum.slice(0,25).map(({a,p})=>{ const d = a.created_at ? Math.floor((Date.now()-new Date(a.created_at).getTime())/86400000) : 0;
+        const falta = [!String(a.numero_apolice||'').trim()?'número':'', !a.arquivo_apolice?'PDF':''].filter(Boolean).join(' e ');
+        return hojeRow(p, d>=7?`<span class="tagx bad">há ${d} dias</span>`:`<span class="tagx warn">${d?'há '+d+' dia'+(d>1?'s':''):'hoje'}</span>`, escapeHtml([a.tipo_seguro,a.seguradora].filter(Boolean).join(' · '))+' · falta '+falta); }).join('')) : '')
     + sec('Renovam nos próximos 60 dias', renovVer.length, renovVer.map(r=>{ const av = avDe(r.p.id), ult = RV.ultima.get(r.p.id);
         const jaMandou = ult && (ult.resultado==='Enviada' || ult.resultado==='Conversando') && (ult.apolice_id ? ult.apolice_id===r.a.id : true);
         return hojeRow(r.p, `<span class="tagx ${r.dd<=15?'bad':(r.dd<=30?'warn':'')}">vence em ${r.dd} dia${r.dd===1?'':'s'}</span> ${jaMandou ? `<span class="tagx">✔ mensagem enviada em ${fmtDate(String(ult.data_hora).slice(0,10))}</span>` : msgBtn(r.p.id, r.a.id)}${av?` <button class="om-cancel vd-btn" data-avfeito="${av.id}" title="Já falei com o cliente sobre esta renovação">Feito</button>`:''}`, escapeHtml([r.a.tipo_seguro, r.a.seguradora].filter(Boolean).join(' · '))); }).join(''))
@@ -12557,11 +12569,11 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611251201"></script>
-<script src="painel.js?v=202611251201"></script>
-<script src="cobranca.js?v=202611251201"></script>
-<script src="cadastro.js?v=202611251201"></script>
-<script src="contrato.js?v=202611251201"></script>
-<script src="guarda.js?v=202611251201"></script>
+<script src="plataforma.js?v=202611251208"></script>
+<script src="painel.js?v=202611251208"></script>
+<script src="cobranca.js?v=202611251208"></script>
+<script src="cadastro.js?v=202611251208"></script>
+<script src="contrato.js?v=202611251208"></script>
+<script src="guarda.js?v=202611251208"></script>
 </body>
 </html>

@@ -249,7 +249,36 @@
       ['📊 Indicadores', 'Painel com os números da corretora e de cada corretor.'],
       ['💼 Comercial', 'Metas, orçamento, funil com taxas de conversão e indicações (Mais Carlas).'],
       ['📝 Ata', 'Ata da semana com entregáveis e responsáveis.']] }];
+  // 27/11/2026 (decisão do Luiz): o CRM Aliança é gratuito para todas as corretoras. A tela Planos só explica o que está liberado;
+  // os planos pagos abaixo (abrirPlanosPagos) ficam guardados, sem uso.
   async function abrirPlanos() {
+    const mods = (window.ALIANCA && window.ALIANCA.modulos) || null, temEquipe = !mods || mods.includes('gestao');
+    const fundo = document.createElement('div'); fundo.id = 'tc-planos';
+    fundo.style.cssText = 'position:fixed;inset:0;z-index:99994;background:rgba(17,24,39,.6);overflow:auto;padding:24px 16px;font:15px/1.5 "Segoe UI",system-ui,sans-serif';
+    const item = (t, d) => `<li><b>${t}</b><br><span style="color:#5d6871;font-size:14px">${d}</span></li>`;
+    fundo.innerHTML = `<div role="dialog" aria-modal="true" aria-label="Seu plano" style="background:#fff;border-radius:18px;padding:22px 24px;margin:0 auto;display:grid;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:start"><div><h2 style="margin:0;font-size:22px;color:#111827">O CRM Aliança é gratuito</h2>
+        <p style="margin:4px 0 0;color:#5d6871">Sem mensalidade, sem cartão e sem fidelidade. Se um dia existir plano pago, você será avisado com 60 dias de antecedência e nada será cobrado sem o seu aceite.</p></div>
+        <button type="button" data-x style="font:inherit;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid #d5d8d2;background:#fff;cursor:pointer">✕ Fechar</button></div>
+      <div style="background:#e3f1e8;color:#1f5a37;border-radius:12px;padding:12px 14px"><b>Liberado para a sua corretora:</b> ${temEquipe ? 'Vendas, Carteira e Equipe' : 'Vendas e Carteira'}, com a marca da sua corretora e o seu link próprio.</div>
+      <ul style="margin:0;padding:0;list-style:none;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        ${item('🛡️ Clientes (Aliança)', 'Todos os clientes num lugar só, com histórico, família, documentos e a importação da sua planilha.')}
+        ${item('🔔 Renovação e pós-venda', 'Nos seguros que vencem, aviso 30, 15 e 7 dias antes com a mensagem pronta. No seguro de vida, que não vence, o pós-venda de 3, 6, 9 e 12 meses.')}
+        ${item('💰 Carteira e comissões', 'Quanto você deve receber nos próximos 12 meses, com o bônus da 1ª parcela.')}
+        ${item('📋 Lista da semana (Kanban)', 'Indicações e quem ligar na semana.')}
+        ${item('🧭 Consultoria e proposta', 'Diagnóstico em 6 fases e proposta em PDF com a sua marca. O "sim" do cliente vira apólice.')}
+        ${item('📱 Portal do cliente', 'Um link com a sua marca para o cliente ver os seguros e baixar o PDF.')}
+        ${item('💌 Mensagens do ano', 'Aniversários, datas especiais e quem está sem conversa, com a mensagem pronta.')}
+        ${item('✨ Inteligência artificial', 'Lê apólice e cotação, organiza a sua planilha e tira dúvidas no Pergunte aqui.')}
+        ${temEquipe ? item('📊 Equipe', 'Indicadores de cada corretor, metas, funil e Ata da semana.') : ''}
+      </ul>
+      <p style="margin:0;color:#5d6871;font-size:14px">${temEquipe ? 'Precisa de mais alguma coisa? Peça em <b>Sugestões</b>.' : 'Tem uma equipe de corretores? A <b>Equipe</b> (indicadores de cada corretor, metas e Ata) é liberada pela Capacity Case: peça em <b>Sugestões</b>.'} Toda segunda-feira sai uma versão nova com melhorias.</p></div>`;
+    document.body.appendChild(fundo);
+    const fechar = () => fundo.remove();
+    fundo.querySelector('[data-x]').onclick = fechar;
+    fundo.addEventListener('click', (e) => { if (e.target === fundo) fechar(); });
+  }
+  async function abrirPlanosPagos() {
     let info = {};
     try { const r = await sb.rpc('crm_planos_info'); if (!r.error && r.data) info = r.data; } catch (e) { /* mostra sem preço */ }
     const precos = info.precos || {}, lim = info.limites || { vendas: 3, carteira: 3, vendas_carteira: 5, completo: 10, permuta: 10 }, atual = info.plano || '';
@@ -315,7 +344,7 @@
       who.insertBefore(f, who.firstChild.nextSibling);
     }
     if (!document.getElementById('btn-planos')) {   // todos os usuários, em todos os planos
-      const p = document.createElement('button'); p.id = 'btn-planos'; p.type = 'button'; p.textContent = '📦 Planos';
+      const p = document.createElement('button'); p.id = 'btn-planos'; p.type = 'button'; p.textContent = '🎁 Seu plano';
       p.title = 'O que cada plano entrega e qual é o seu'; p.addEventListener('click', abrirPlanos);
       who.insertBefore(p, who.firstChild.nextSibling);
     }

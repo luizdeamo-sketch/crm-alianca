@@ -2,7 +2,8 @@
    - Liga sozinho quando o banco diz que a corretora atual pode usar (crm_treino_liberado(); hoje só a Bravita).
    - O conteúdo da apostila mora no banco (crm_treino_conteudo), nunca no site, que é público.
    - Anotações, dúvidas, transcrições, insights, aulas concluídas, checklist e funil ficam em crm_treino_registros,
-     um registro por aula e por usuário (só quem escreveu vê). Grava sozinho enquanto digita e no botão Salvar. */
+     um registro por aula e por corretora: caderno compartilhado (decisão do Luiz, 27/11/2026: ele ajuda a Vitória no mesmo caderno).
+     Grava sozinho enquanto digita e no botão Salvar. */
 (function () {
   'use strict';
   const CURSO = 'tcom-2026';
@@ -92,6 +93,10 @@
       let res;
       if (atual && atual.id) res = await sb.from('crm_treino_registros').update(campos).eq('id', atual.id).select().single();
       else res = await sb.from('crm_treino_registros').insert(Object.assign({ curso: CURSO, aula }, campos)).select().single();
+      if (res.error && res.error.code === '23505') {   // o caderno é da corretora: a outra pessoa já criou esta aula; grava por cima dela
+        const ex = await sb.from('crm_treino_registros').select('id').eq('curso', CURSO).eq('aula', aula).maybeSingle();
+        if (ex.data) res = await sb.from('crm_treino_registros').update(campos).eq('id', ex.data.id).select().single();
+      }
       if (res.error) throw res.error;
       S.reg[aula] = res.data;
       S.salvoEm = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });

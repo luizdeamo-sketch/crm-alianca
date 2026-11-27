@@ -8,7 +8,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#111827">
-<meta name="app-build" content="202611271143">
+<meta name="app-build" content="202611271148">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CRM Aliança">
 <title>CRM Aliança - by Capacity Case</title>
@@ -442,7 +442,7 @@ button.ct-mes{border:0;background:transparent;cursor:pointer;font:inherit;paddin
   <header>
     <div class="brand"><div class="hdr-brand"><b class="tc-marca">CRM Aliança<span class="tc-sep"> · </span><span class="tc-nm">by Capacity Case</span></b><small>Carreira, renda, patrimônio e legado.</small></div><img class="hdr-logo" src="assets/logo-icone.png" alt="CRM Aliança"><span class="hdr-title" id="hdr-title" style="display:none">Aliança</span><span class="info-ico" id="hdr-info" tabindex="0" title="Cada cliente numa linha do tempo: faixa do funil comercial + uma linha por produto. Clique na faixa do funil para marcar/desmarcar uma etapa na data; clique no nome para abrir o cadastro completo.">ⓘ</span></div>
     <form class="pq" id="pq-form" role="search" autocomplete="off" hidden><span class="pq-ico" aria-hidden="true">✨</span><input id="pq-in" type="search" maxlength="600" placeholder="Pergunte aqui: tire qualquer dúvida do sistema" aria-label="Pergunte aqui: tire qualquer dúvida do sistema"><button type="submit">Perguntar</button></form><button type="button" class="pq-mini" id="pq-mini" hidden title="Pergunte aqui: tire qualquer dúvida do sistema">✨ Pergunte aqui</button>
-    <div class="hdr-navy"><svg class="shield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg></div><div class="who"><span id="who-email"></span><button id="btn-app" type="button" title="CRM Aliança no celular: versão enxuta para a rua (buscar cliente, Hoje, resumo do dia por IA e registrar reunião). Abre em outra aba; no celular, use Adicionar à tela inicial.">📱 App</button><button id="btn-backup" title="Baixar uma cópia de todos os dados">Backup</button><button id="btn-logout">Sair</button></div>
+    <div class="hdr-navy"><svg class="shield" viewBox="0 0 100 140" aria-hidden="true"><path d="M50 3 L10 12 V70 C10 101 31 122 50 134 C69 122 90 101 90 70 V12 Z"/><path d="M50 22 L27 28 V70 C27 90 39 103 50 111 C61 103 73 90 73 70 V28 Z"/></svg></div><div class="who"><span id="who-email"></span><button id="btn-tour" type="button" class="icon-btn" title="Tour do sistema: onde fica cada coisa" aria-label="Tour do sistema">🧭</button><button id="btn-app" type="button" title="CRM Aliança no celular: versão enxuta para a rua (buscar cliente, Hoje, resumo do dia por IA e registrar reunião). Abre em outra aba; no celular, use Adicionar à tela inicial.">📱 App</button><button id="btn-backup" title="Baixar uma cópia de todos os dados">Backup</button><button id="btn-logout">Sair</button></div>
   </header>
 
   <nav id="rail">
@@ -10947,6 +10947,7 @@ function guiaBotao(e, feitos){
 function guiaAbrir(){ const b = document.querySelector('.nav-btn[data-view="comeco"]'); if(b){ b.style.display = ''; b.click(); } }
 async function guiaIniciar(){
   window.guiaProduto = true;
+  setTimeout(()=>{ if(window.tourTalvez) window.tourTalvez(); }, 1500);   // tour do sistema na 1ª entrada (27/11/2026)
   try{
     const e = await guiaEstado(); if(e.escondido) return;
     const d = await guiaDados(), passos = guiaPassos(d, e), feitos = passos.filter(p=>p.feito).length;
@@ -12569,11 +12570,101 @@ header.pq-compacto .pq{ display:none !important; } header.pq-compacto .pq-mini:n
   window.PerguntaAqui = { perguntar };
 })();
 </script>
-<script src="plataforma.js?v=202611271143"></script>
-<script src="painel.js?v=202611271143"></script>
-<script src="cobranca.js?v=202611271143"></script>
-<script src="cadastro.js?v=202611271143"></script>
-<script src="contrato.js?v=202611271143"></script>
-<script src="guarda.js?v=202611271143"></script>
+<style>
+/* Tour do sistema (27/11/2026, pedido do Luiz para os corretores do cadastro aberto): balões que apontam para a tela de verdade */
+#tour-veu{ position:fixed; inset:0; z-index:9000; pointer-events:auto; }
+#tour-luz{ position:fixed; z-index:9001; border-radius:12px; box-shadow:0 0 0 9999px rgba(17,24,39,.62); transition:all .25s ease; pointer-events:none; outline:3px solid #d9b866; }
+#tour-luz.sem{ box-shadow:0 0 0 9999px rgba(17,24,39,.62); outline:0; width:0 !important; height:0 !important; left:50% !important; top:50% !important; }
+#tour-bal{ position:fixed; z-index:9002; background:#fff; color:#1f2933; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,.3); padding:16px 18px 14px;
+  width:min(380px, calc(100vw - 32px)); font:15px/1.5 'Inter',system-ui,sans-serif; }
+#tour-bal h4{ margin:0 0 6px; font-size:17px; color:#111827; }
+#tour-bal p{ margin:0 0 12px; }
+#tour-bal .tour-pe{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#tour-bal .tour-n{ color:#5d6871; font-size:13px; margin-right:auto; }
+#tour-bal button{ font:600 14px 'Inter',sans-serif; min-height:38px; padding:0 14px; border-radius:9px; cursor:pointer; border:1px solid #d5d8d2; background:#fff; color:#1f2933; }
+#tour-bal button.pri{ background:var(--brand,#8a6714); border-color:var(--brand,#8a6714); color:#fff; }
+#tour-bal .tour-x{ position:absolute; top:8px; right:8px; border:0; background:none; font-size:18px; min-height:0; padding:4px 8px; color:#5d6871; }
+#tour-bal .tour-pts{ display:flex; gap:4px; margin:-4px 0 10px; }
+#tour-bal .tour-pts i{ width:7px; height:7px; border-radius:50%; background:#e4e6e2; }
+#tour-bal .tour-pts i.on{ background:var(--brand,#8a6714); }
+#btn-tour{ cursor:pointer; }
+</style>
+<script>
+// ===== Tour do sistema (27/11/2026): abre sozinho na 1ª entrada de cada pessoa (por navegador), dá para pular e rever no botão 🧭.
+// Cada parada leva até a tela certa e acende o botão de verdade; a última leva ao resultado: trazer a carteira.
+(function(){
+  const nav = v => { const b = document.querySelector('.nav-btn[data-view="'+v+'"]'); if(b) b.click(); };
+  const visivel = el => { if(!el) return false; const r = el.getBoundingClientRect(); return r.width > 4 && r.height > 4 && r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth && getComputedStyle(el).visibility !== 'hidden'; };
+  const kbModo = m => { try{ if(typeof KB!=='undefined'){ KB.modo = m; localStorage.setItem('kb_modo', m); if(typeof kbAoAbrir==='function') kbAoAbrir(); } }catch(_){} };
+  const PASSOS = [
+    { t:'Bem-vindo ao CRM Aliança 👋', x:'Em 1 minuto eu te mostro onde fica cada coisa. No fim você já sabe por onde começar.' },
+    { t:'Hoje: comece o dia aqui', x:'Quem renova nos próximos 60 dias (com a mensagem de WhatsApp pronta), as reuniões e o que fazer hoje.', ir:()=>nav('hoje'), alvo:'.nav-btn[data-view="hoje"]' },
+    { t:'Traga a sua carteira', x:'Suba a planilha dos seus clientes ou os PDFs das apólices. O sistema lê, você confere. É daqui que saem os avisos de renovação.', ir:()=>nav('operacao'), alvo:'#op-import' },
+    { t:'Quanto você vai receber', x:'Em Carteira você vê a comissão dos próximos 12 meses, mês a mês, com o bônus da 1ª parcela, e quem está com a renovação em risco.', ir:()=>nav('operacao'), alvo:'#kb-modo [data-kbm="carteira"]' },
+    { t:'Lista da semana', x:'No Kanban você junta as indicações e monta quem vai ligar na semana. Cada ligação registrada vira histórico do cliente.', ir:()=>nav('operacao'), alvo:'#kb-modo [data-kbm="kanban"]' },
+    { t:'Consultoria do cliente', x:'Em Vendas › Consultoria você faz o diagnóstico em 6 fases e gera a proposta em PDF com a sua marca. Quando o cliente aceita, vira apólice na Carteira.', ir:()=>nav('vendas'), alvo:'.nav-btn[data-view="vendas"]' },
+    { t:'Seu cliente tem o portal dele 📱', x:'Em cada cliente, o botão 📨 Portal do cliente gera um link só dele, com a sua marca: ele vê os seguros em vigor, quanto paga, as coberturas e baixa o PDF da apólice. Menos ligação pedindo documento, mais lembrança de você.', ir:()=>nav('operacao') },
+    { t:'Relacionamento o ano todo', x:'Em Mensagens o sistema lembra aniversários, datas especiais e quem está há 90 dias sem conversa, com a mensagem pronta.', ir:()=>nav('mensagens'), alvo:'.nav-btn[data-view="mensagens"]' },
+    { t:'Travou? Pergunte aqui', x:'Escreva a dúvida aqui em cima que o sistema explica o caminho. Ideia ou problema: o balão 💬 no canto fala com a equipe.', alvo:['#pq-in','#pq-mini','#ac-btn'] },
+    { t:'Agora é com você 🚀', x:'Traga a sua carteira agora: em 2 minutos você vê quem renova primeiro e quanto vai receber. Para rever este tour, toque em 🧭 no topo.', fim:true }
+  ];
+  let i = 0, veu, luz, bal, onResize;
+  const usoT = (alvo, det) => { try{ window.ACOMP && window.ACOMP.uso && window.ACOMP.uso('tour', alvo, det||null); }catch(_){} };
+  async function chave(){ try{ const { data } = await sb.auth.getSession(); const m = data && data.session && data.session.user && data.session.user.email; return 'tour_v1:' + String(m||'').toLowerCase(); }catch(_){ return 'tour_v1:'; } }
+  function fechar(motivo){
+    if(veu) veu.remove(); if(luz) luz.remove(); if(bal) bal.remove(); veu = luz = bal = null;
+    removeEventListener('resize', onResize); removeEventListener('keydown', tecla, true);
+    chave().then(k=>{ try{ localStorage.setItem(k, new Date().toISOString()); }catch(_){} });
+    usoT(motivo, { passo:i+1, de:PASSOS.length });
+  }
+  function tecla(e){ if(!bal) return; if(e.key==='Escape'){ e.preventDefault(); fechar('pulou'); } else if(e.key==='ArrowRight'){ ir(i+1); } else if(e.key==='ArrowLeft' && i>0){ ir(i-1); } }
+  function posicionar(){
+    const p = PASSOS[i]; const alvos = [].concat(p.alvo||[]); const el = alvos.map(s=>document.querySelector(s)).find(visivel);
+    if(el){ el.scrollIntoView({ block:'nearest', inline:'nearest' }); const r = el.getBoundingClientRect(), m = 6;
+      luz.classList.remove('sem'); Object.assign(luz.style, { left:(r.left-m)+'px', top:(r.top-m)+'px', width:(r.width+2*m)+'px', height:(r.height+2*m)+'px' });
+      const bw = bal.offsetWidth, bh = bal.offsetHeight; let x, y;
+      if(r.right + 16 + bw < innerWidth && r.width < innerWidth/2){ x = r.right + 16; y = r.top + r.height/2 - bh/2; }       // à direita (menu lateral)
+      else if(r.bottom + 16 + bh < innerHeight){ x = r.left + r.width/2 - bw/2; y = r.bottom + 16; }                           // embaixo
+      else { x = r.left + r.width/2 - bw/2; y = r.top - 16 - bh; }                                                               // em cima
+      bal.style.left = Math.max(16, Math.min(x, innerWidth - bw - 16)) + 'px'; bal.style.top = Math.max(16, Math.min(y, innerHeight - bh - 16)) + 'px';
+    } else { luz.classList.add('sem'); bal.style.left = Math.max(16, (innerWidth - bal.offsetWidth)/2) + 'px'; bal.style.top = Math.max(16, (innerHeight - bal.offsetHeight)/2) + 'px'; }
+  }
+  function desenhar(){
+    const p = PASSOS[i], ult = i === PASSOS.length-1;
+    bal.innerHTML = `<button type="button" class="tour-x" aria-label="Fechar o tour">✕</button><div class="tour-pts">${PASSOS.map((_,k)=>`<i class="${k<=i?'on':''}"></i>`).join('')}</div>
+      <h4>${p.t}</h4><p>${p.x}</p><div class="tour-pe"><span class="tour-n">${i+1} de ${PASSOS.length}</span>
+      ${ult ? '<button type="button" data-t="depois">Depois</button><button type="button" class="pri" data-t="importar">Trazer minha carteira</button>'
+            : (i>0 ? '<button type="button" data-t="volta">Voltar</button>' : '<button type="button" data-t="pular">Pular</button>') + `<button type="button" class="pri" data-t="segue">${i===0?'Começar':'Próximo'}</button>`}</div>`;
+    bal.querySelector('.tour-x').onclick = ()=>fechar('pulou');
+    bal.querySelectorAll('[data-t]').forEach(b=>b.onclick = ()=>{ const a = b.dataset.t;
+      if(a==='segue') ir(i+1); else if(a==='volta') ir(i-1); else if(a==='pular') fechar('pulou'); else if(a==='depois') fechar('concluiu');
+      else if(a==='importar'){ fechar('concluiu-importar'); nav('operacao'); setTimeout(()=>{ const im = document.getElementById('op-import'); if(im) im.click(); }, 700); } });
+    const foco = bal.querySelector('button.pri'); if(foco) foco.focus({ preventScroll:true });
+  }
+  function ir(n){
+    if(n < 0 || n >= PASSOS.length) return; i = n; const p = PASSOS[i];
+    try{ if(p.ir) p.ir(); }catch(_){}
+    desenhar(); posicionar(); setTimeout(posicionar, 450); setTimeout(posicionar, 1100);   // a tela troca e o botão aparece depois
+    usoT('passo-'+(i+1));
+  }
+  window.tourAbrir = function(){
+    if(bal) return; if(document.querySelector('.dlg-back.open, dialog[open]')) { try{ dlgClose(); }catch(_){} }
+    veu = document.createElement('div'); veu.id = 'tour-veu'; luz = document.createElement('div'); luz.id = 'tour-luz'; luz.className = 'sem';
+    bal = document.createElement('div'); bal.id = 'tour-bal'; bal.setAttribute('role','dialog'); bal.setAttribute('aria-label','Tour do sistema');
+    document.body.append(veu, luz, bal); onResize = ()=>posicionar(); addEventListener('resize', onResize); addEventListener('keydown', tecla, true);
+    ir(0);
+  };
+  // 1ª entrada: abre sozinho (uma vez por pessoa neste navegador)
+  window.tourTalvez = async function(){ try{ const k = await chave(); if(k === 'tour_v1:' || localStorage.getItem(k)) return; setTimeout(()=>{ if(!bal) window.tourAbrir(); }, 1200); }catch(_){} };
+  document.addEventListener('click', e=>{ if(e.target.closest('#btn-tour')) window.tourAbrir(); });
+})();
+</script>
+
+<script src="plataforma.js?v=202611271148"></script>
+<script src="painel.js?v=202611271148"></script>
+<script src="cobranca.js?v=202611271148"></script>
+<script src="cadastro.js?v=202611271148"></script>
+<script src="contrato.js?v=202611271148"></script>
+<script src="guarda.js?v=202611271148"></script>
 </body>
 </html>

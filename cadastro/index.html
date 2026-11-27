@@ -23,6 +23,10 @@ body{ margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Inter, "S
 .ben{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:14px 16px; }
 .ben b{ display:block; color:#fff; margin-bottom:2px; }
 .ben span{ color:#c9ced6; font-size:15px; }
+.portal-dest{ display:flex; gap:14px; align-items:flex-start; margin-top:14px; background:#d9b866; color:var(--navy); border-radius:14px; padding:16px 18px; }
+.portal-dest .portal-ico{ font-size:30px; line-height:1; }
+.portal-dest b{ display:block; font-size:clamp(17px, .5vw + 15px, 20px); margin-bottom:2px; }
+.portal-dest span{ font-size:15px; color:#2b2410; }
 .passos{ display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-top:18px; }
 .passo{ display:flex; gap:10px; align-items:flex-start; color:#d6dae0; font-size:15px; }
 .passo i{ font-style:normal; flex:0 0 28px; height:28px; border-radius:50%; background:#d9b866; color:var(--navy); font-weight:700; display:grid; place-items:center; }
@@ -67,6 +71,11 @@ footer{ text-align:center; color:var(--soft); font-size:14px; padding:0 16px 28p
   <h1>O CRM do corretor que vende proteção.</h1>
   <p>Sua carteira organizada, as renovações no dia certo, a consultoria do cliente do diagnóstico à proposta e quanto você vai receber de comissão. Num lugar só, com a sua marca.</p>
   <span class="gratis">Gratuito para corretores</span>
+  <div class="portal-dest">
+    <div class="portal-ico" aria-hidden="true">📱</div>
+    <div><b>E o seu cliente ganha um portal com a sua marca.</b>
+      <span>Um link só dele, protegido pela data de nascimento, onde ele vê todos os seguros em vigor, quanto paga por mês, as coberturas e a próxima renovação, e baixa o PDF da apólice. Ele para de te ligar pedindo documento e lembra de você toda vez que abre.</span></div>
+  </div>
   <div class="beneficios">
     <div class="ben"><b>🔔 Renovação sem esquecer</b><span>Aviso 30, 15 e 7 dias antes, com a mensagem de WhatsApp pronta.</span></div>
     <div class="ben"><b>💰 Sua comissão à vista</b><span>Quanto você deve receber nos próximos 12 meses, com o bônus da 1ª parcela.</span></div>

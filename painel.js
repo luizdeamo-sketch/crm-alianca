@@ -104,6 +104,7 @@
       EST.faturas = EST.faturas || []; EST.config = EST.config || {};
       try { await carregarSugestoes(); } catch (e) { EST.sugestoes = []; }
       try { EST.alertas = (await rpc('crm_plataforma_alertas_entrada')) || []; } catch (e) { EST.alertas = []; }
+      try { EST.solic = (await rpc('crm_plataforma_solicitacoes')) || []; EST.indic = (await rpc('crm_plataforma_indicadores')) || []; } catch (e) { EST.solic = EST.solic || []; EST.indic = EST.indic || []; }
     } catch (e) { raiz.innerHTML = `<div style="padding:40px">Erro ao carregar o painel: ${esc(e.message)} <button class="b" id="pp-x">Fechar</button></div>`; raiz.querySelector('#pp-x').onclick = fechar; return; }
     desenhar();
   }
@@ -116,7 +117,7 @@
     const revisao = lista.filter((c) => c.contrato && c.contrato.status === 'revisao').length, aguardando = lista.filter((c) => c.contrato && c.contrato.status === 'pendente').length;
     raiz.innerHTML = `
       <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Clientes, contratos, planos e administradores. Nenhum dado dos clientes deles aparece aqui.</small></div>
-        <div class="pp-abas"><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button data-aba="sugestoes" class="${EST.aba === 'sugestoes' ? 'on' : ''}">Sugestões${(EST.sugPend || 0) ? ' (' + EST.sugPend + ')' : ''}</button><button data-aba="historico" class="${EST.aba === 'historico' ? 'on' : ''}">Histórico</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
+        <div class="pp-abas"><button data-aba="cadastros" class="${EST.aba === 'cadastros' ? 'on' : ''}">Cadastros${(EST.solic || []).filter((x) => x.status === 'pendente').length ? ' (' + (EST.solic || []).filter((x) => x.status === 'pendente').length + ')' : ''}</button><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button data-aba="sugestoes" class="${EST.aba === 'sugestoes' ? 'on' : ''}">Sugestões${(EST.sugPend || 0) ? ' (' + EST.sugPend + ')' : ''}</button><button data-aba="historico" class="${EST.aba === 'historico' ? 'on' : ''}">Histórico</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
       <main>
         <div class="kpis">
           <div class="kpi"><b>${ativas}</b><span>corretoras ativas</span></div>
@@ -129,14 +130,86 @@
         </div>
         ${alertasEntrada()}
         ${EST.aviso || ''}
-        ${EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : EST.aba === 'historico' ? telaHistorico() : EST.aba === 'sugestoes' ? telaSugestoes() : telaUsuarios()}
+        ${EST.aba === 'cadastros' ? telaCadastros() : EST.aba === 'corretoras' ? telaCorretoras() : EST.aba === 'pagamentos' ? telaPagamentos() : EST.aba === 'contrato' ? telaContrato() : EST.aba === 'historico' ? telaHistorico() : EST.aba === 'sugestoes' ? telaSugestoes() : telaUsuarios()}
       </main>`;
     raiz.querySelector('#pp-fechar').onclick = fechar;
     raiz.querySelectorAll('[data-aba]').forEach((b) => b.onclick = async () => { EST.aba = b.dataset.aba; EST.aviso = '';
       if (EST.aba === 'historico') { try { EST.historico = await rpc('crm_plataforma_historico', { p_corretor: EST.histFiltro || null, p_limite: 500 }); } catch (err) { alert(err.message); return; } }
       if (EST.aba === 'sugestoes') { try { await carregarSugestoes(); } catch (err) { alert(err.message); return; } }
       desenhar(); });
-    if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else if (EST.aba === 'historico') ligarHistorico(); else if (EST.aba === 'sugestoes') ligarSugestoes(); else ligarUsuarios();
+    if (EST.aba === 'cadastros') ligarCadastros(); else if (EST.aba === 'corretoras') ligarCorretoras(); else if (EST.aba === 'pagamentos') ligarPagamentos(); else if (EST.aba === 'contrato') ligarContrato(); else if (EST.aba === 'historico') ligarHistorico(); else if (EST.aba === 'sugestoes') ligarSugestoes(); else ligarUsuarios();
+  }
+
+  /* ---------- cadastro aberto (27/11/2026, pedido do Luiz): pedidos de acesso gratuito e códigos de indicação ---------- */
+  const linkCadastro = (cod) => link() + 'cadastro/' + (cod ? '?ind=' + encodeURIComponent(cod) : '');
+  const dataBR = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '';
+  function telaCadastros() {
+    const L = EST.solic || [], pend = L.filter((x) => x.status === 'pendente'), feitos = L.filter((x) => x.status !== 'pendente');
+    const lin = (r, v) => v ? `<div><small style="color:#5d6871">${r}</small><br><b>${esc(v)}</b></div>` : '';
+    const cartao = (x) => `<div class="pp-card" style="border:1px solid #e4e6e2;border-radius:12px;padding:14px;background:#fff;display:grid;gap:10px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:baseline"><b style="font-size:17px">${esc(x.nome)}</b><span>${esc(x.nome_corretora || '')}</span>
+        <small style="color:#5d6871;margin-left:auto">${quando(x.criado_em)}</small></div>
+      <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+        ${lin(x.tipo_pessoa === 'PJ' ? 'CNPJ' : 'CPF', x.documento)}${lin('E-mail', x.email)}${lin('Celular', x.celular)}${lin('Cidade', [x.cidade, x.uf].filter(Boolean).join(' / ') || x.cep)}
+        ${lin('SUSEP', x.susep)}${lin('Atua como', [x.vinculo, x.vinculo_qual].filter(Boolean).join(' · '))}${lin('Tempo de mercado', x.anos_mercado)}${lin('Clientes ativos', x.clientes_faixa)}
+        ${lin('Prêmio/ano', x.premio_faixa)}${lin('Trabalha', x.equipe)}${lin('Organiza hoje', [x.gerencia, x.gerencia_qual].filter(Boolean).join(' · '))}
+        ${lin('Indicado por', x.indicador_nome ? x.indicador_nome + ' (' + x.indicador_codigo + ')' : x.indicador_texto)}</div>
+      ${(x.ramos || []).length ? `<div><small style="color:#5d6871">Vende</small><br>${(x.ramos || []).map(esc).join(' · ')}</div>` : ''}
+      ${(x.seguradoras || []).length ? `<div><small style="color:#5d6871">Seguradoras</small><br>${(x.seguradoras || []).map(esc).join(' · ')}</div>` : ''}
+      <small style="color:#5d6871">Aceitou os Termos e o uso dos dados do cadastro em ${quando(x.aceite_termos_em)} (versão ${esc(x.termo_versao)})</small>
+      ${x.status === 'pendente' ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b pri" data-aprovar="${x.id}">✅ Aprovar e gerar o convite</button><button class="b" data-recusar="${x.id}">Recusar</button></div>`
+        : `<small><b>${x.status === 'aprovada' ? '✅ Aprovado' : '✕ Recusado'}</b> em ${dataBR(x.decidido_em)}${x.motivo ? ' · ' + esc(x.motivo) : ''}</small>`}</div>`;
+    const ind = (EST.indic || []).map((i) => `<tr><td><b>${esc(i.nome)}</b>${i.email ? '<br><small>' + esc(i.email) + '</small>' : ''}</td><td><code>${esc(i.codigo)}</code></td>
+      <td style="text-align:right">${i.pedidos}</td><td style="text-align:right">${i.aprovados}</td><td><button class="b" data-copiar="${esc(linkCadastro(i.codigo))}">Copiar link</button></td></tr>`).join('');
+    return `<section style="display:grid;gap:14px">
+      <div><h3 style="margin:0">Pedidos de acesso gratuito</h3><small>Quem se cadastrou pelo link ${esc(linkCadastro(''))}. Aprovar cria a corretora gratuita (Vendas + Carteira) e o convite com o código de primeiro acesso.</small></div>
+      ${pend.length ? pend.map(cartao).join('') : '<div class="aviso">Nenhum pedido esperando.</div>'}
+      <div><h3 style="margin:8px 0 0">Códigos de indicação</h3><small>Cada aprovado ganha o seu. Para quem ainda não usa o sistema (ex.: a Vitória), crie aqui.</small></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="ci-nome" placeholder="Nome de quem indica" style="min-width:220px"><input id="ci-cod" placeholder="Código (opcional, ex.: vitoria)" style="min-width:200px"><button class="b" id="ci-criar">+ Criar código</button></div>
+      ${ind ? `<div style="overflow:auto"><table class="pp-tab" style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Quem indica</th><th style="text-align:left">Código</th><th style="text-align:right">Pedidos</th><th style="text-align:right">Aprovados</th><th></th></tr></thead><tbody>${ind}</tbody></table></div>` : ''}
+      ${feitos.length ? `<details><summary><b>Já decididos (${feitos.length})</b></summary><div style="display:grid;gap:10px;margin-top:10px">${feitos.map(cartao).join('')}</div></details>` : ''}
+    </section>`;
+  }
+  function conviteGratis(r) {
+    const nome1 = String(r.nome || '').split(' ')[0], cod = codFmt(r.codigo_acesso);
+    return `Olá, ${nome1}! 🎉 Seu acesso gratuito ao *CRM Aliança - by Capacity Case* foi liberado.
+
+*Seu link (salve nos favoritos):*
+${linkCorretora(r.slug)}
+
+*Primeiro acesso, passo a passo*
+1. Abra o link acima
+2. Clique em *"Primeiro acesso: criar minha senha"*
+3. Use o e-mail ${r.email} e o código *${cod}* (vale por 48 horas; não passe para ninguém)
+4. Crie uma senha com pelo menos 10 caracteres
+
+Para começar, siga os *Primeiros passos*: traga a sua planilha ou os PDFs das apólices e o sistema mostra quem renova primeiro.
+Dúvida de como usar: botão *Pergunte aqui* ou o balão 💬 dentro do sistema.
+
+*Conhece outro corretor que ia gostar?* Este é o seu link de indicação:
+${linkCadastro(r.codigo_indicacao)}`;
+  }
+  function ligarCadastros() {
+    raiz.querySelectorAll('[data-aprovar]').forEach((b) => b.onclick = async () => {
+      const x = (EST.solic || []).find((s) => s.id === b.dataset.aprovar); if (!x || !confirm('Aprovar ' + x.nome + ' e criar o acesso gratuito?')) return;
+      b.disabled = true; let r;
+      try { r = await rpc('crm_plataforma_solicitacao_decidir', { p_id: x.id, p_aprovar: true, p_motivo: null }); } catch (err) { alert(err.message); b.disabled = false; return; }
+      const txt = conviteGratis(r), cel = String(r.celular || '').replace(/\D/g, '');
+      EST.aviso = `<div class="aviso"><b>${esc(r.nome)} aprovado.</b> Mande o convite pelo WhatsApp:<pre style="white-space:pre-wrap;background:#fff;border:1px solid #e4e6e2;border-radius:10px;padding:10px;margin:8px 0">${esc(txt)}</pre>
+        <a target="_blank" style="display:inline-block;padding:8px 14px;border-radius:8px;background:#1f7a4d;color:#fff;font-weight:600;text-decoration:none" rel="noopener" href="https://wa.me/55${cel}?text=${encodeURIComponent(txt)}">Abrir no WhatsApp</a> <button class="b" id="cv-copiar">Copiar a mensagem</button></div>`;
+      await recarregar(EST.aviso); const cp = raiz.querySelector('#cv-copiar'); if (cp) cp.onclick = () => navigator.clipboard.writeText(txt).then(() => { cp.textContent = 'Copiado ✓'; });
+    });
+    raiz.querySelectorAll('[data-recusar]').forEach((b) => b.onclick = async () => {
+      const motivo = prompt('Motivo da recusa (fica só aqui no Painel):', ''); if (motivo === null) return;
+      try { await rpc('crm_plataforma_solicitacao_decidir', { p_id: b.dataset.recusar, p_aprovar: false, p_motivo: motivo }); } catch (err) { alert(err.message); return; }
+      recarregar('<div class="aviso">Pedido recusado.</div>');
+    });
+    raiz.querySelectorAll('[data-copiar]').forEach((b) => b.onclick = () => navigator.clipboard.writeText(b.dataset.copiar).then(() => { b.textContent = 'Copiado ✓'; }));
+    const cc = raiz.querySelector('#ci-criar'); if (cc) cc.onclick = async () => {
+      const nome = raiz.querySelector('#ci-nome').value.trim(), cod = raiz.querySelector('#ci-cod').value.trim();
+      let c; try { c = await rpc('crm_plataforma_indicador_criar', { p_nome: nome, p_codigo: cod || null }); } catch (err) { alert(err.message); return; }
+      recarregar(`<div class="aviso">Código <b>${esc(c)}</b> criado. Link para mandar: <b>${esc(linkCadastro(c))}</b></div>`);
+    };
   }
 
   /* ---------- alerta da primeira entrada (para a Amanda, todo dia; fluxo aprovado em 05/11/2026) ---------- */

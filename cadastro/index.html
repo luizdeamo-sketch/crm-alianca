@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://iuotvottnailofxbaynx.supabase.co https://viacep.com.br; frame-ancestors 'none'; base-uri 'none'; form-action 'none'">
+<title>CRM Aliança · cadastro gratuito</title>
+<meta name="description" content="CRM Aliança - by Capacity Case: o CRM do corretor que vende proteção. Gratuito.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Cadastro aberto do CRM Aliança (27/11/2026, pedido do Luiz): apresentação + cadastro qualificado + Termos do plano gratuito.
+   O pedido vai para o Painel da Plataforma; o acesso só nasce quando o dono da plataforma aprova. Nada fica guardado no navegador. */
+:root{ --gold:#8a6714; --gold-soft:#f7f1e3; --navy:#111827; --ink:#1f2933; --soft:#5d6871; --bg:#f6f6f3; --card:#fff; --line:#e4e6e2; --ok:#1f7a4d; --err:#9e2f24; }
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 Inter, "Segoe UI", system-ui, sans-serif; }
+.hero{ background:var(--navy); color:#fff; padding:28px 16px 32px; }
+.hero .marca{ font-weight:700; letter-spacing:.02em; color:#d9b866; font-size:15px; }
+.hero h1{ margin:8px 0 6px; font-size:clamp(26px, 2.6vw + 14px, 44px); line-height:1.15; }
+.hero p{ margin:0; color:#d6dae0; font-size:clamp(16px, .4vw + 14px, 19px); }
+.hero .gratis{ display:inline-block; margin-top:14px; background:#d9b866; color:var(--navy); font-weight:700; padding:6px 14px; border-radius:999px; }
+.beneficios{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 260px), 1fr)); margin-top:22px; }
+.ben{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:14px 16px; }
+.ben b{ display:block; color:#fff; margin-bottom:2px; }
+.ben span{ color:#c9ced6; font-size:15px; }
+.passos{ display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin-top:18px; }
+.passo{ display:flex; gap:10px; align-items:flex-start; color:#d6dae0; font-size:15px; }
+.passo i{ font-style:normal; flex:0 0 28px; height:28px; border-radius:50%; background:#d9b866; color:var(--navy); font-weight:700; display:grid; place-items:center; }
+main{ padding:20px 16px 48px; display:grid; gap:18px; }
+.caixa{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; }
+.caixa h2{ margin:0 0 4px; font-size:19px; color:var(--navy); }
+.caixa .sub{ margin:0 0 14px; color:var(--soft); font-size:15px; }
+.grade{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+label.campo{ display:grid; gap:6px; font-weight:600; font-size:15px; align-content:start; }
+label.campo small{ font-weight:400; color:var(--soft); }
+input[type=text], input[type=email], input[type=tel], select{ font:inherit; padding:11px 12px; border:1px solid var(--line); border-radius:10px; min-height:46px; width:100%; background:#fff; color:var(--ink); }
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.seg{ display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.seg button{ font:inherit; border:0; background:#fff; padding:8px 14px; cursor:pointer; color:var(--ink); min-height:40px; }
+.seg button.on{ background:var(--navy); color:#fff; font-weight:600; }
+.chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.chips label{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:999px; padding:7px 12px; cursor:pointer; font-size:15px; background:#fff; user-select:none; }
+.chips input{ accent-color:var(--gold); width:16px; height:16px; }
+.chips label:has(input:checked){ background:var(--gold-soft); border-color:var(--gold); font-weight:600; }
+.indicado{ background:var(--gold-soft); border:1px solid var(--gold); border-radius:12px; padding:12px 14px; font-weight:600; color:var(--navy); }
+details.termo{ border:1px solid var(--line); border-radius:12px; background:#fafaf8; }
+details.termo summary{ cursor:pointer; padding:12px 14px; font-weight:600; color:var(--navy); }
+details.termo .texto{ padding:0 16px 14px; font-size:14.5px; color:var(--ink); max-height:420px; overflow:auto; }
+details.termo h3{ font-size:15px; margin:14px 0 4px; color:var(--navy); }
+details.termo p, details.termo li{ margin:4px 0; }
+.aceite{ display:flex; gap:10px; align-items:flex-start; margin-top:12px; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+.aceite input{ width:20px; height:20px; margin-top:2px; accent-color:var(--gold); flex:0 0 auto; }
+.aceite.destaque{ border:2px solid var(--gold); background:var(--gold-soft); }
+.rodape{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+button.enviar{ font:inherit; font-weight:700; font-size:17px; min-height:52px; padding:0 28px; border-radius:12px; border:0; background:var(--gold); color:#fff; cursor:pointer; }
+button.enviar:disabled{ opacity:.6; cursor:default; }
+.msg{ color:var(--err); font-weight:600; }
+.pronto{ text-align:center; padding:36px 18px; }
+.pronto h2{ font-size:clamp(22px, 1.4vw + 16px, 30px); }
+.oculto{ display:none !important; }
+footer{ text-align:center; color:var(--soft); font-size:14px; padding:0 16px 28px; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="marca">CRM Aliança · by Capacity Case</div>
+  <h1>O CRM do corretor que vende proteção.</h1>
+  <p>Sua carteira organizada, as renovações no dia certo, a consultoria do cliente do diagnóstico à proposta e quanto você vai receber de comissão. Num lugar só, com a sua marca.</p>
+  <span class="gratis">Gratuito para corretores</span>
+  <div class="beneficios">
+    <div class="ben"><b>🔔 Renovação sem esquecer</b><span>Aviso 30, 15 e 7 dias antes, com a mensagem de WhatsApp pronta.</span></div>
+    <div class="ben"><b>💰 Sua comissão à vista</b><span>Quanto você deve receber nos próximos 12 meses, com o bônus da 1ª parcela.</span></div>
+    <div class="ben"><b>🧭 Consultoria em 6 fases</b><span>Do diagnóstico do cliente à proposta em PDF com a sua marca. O "sim" vira apólice na hora.</span></div>
+    <div class="ben"><b>📋 Lista da semana</b><span>Junte indicações e monte quem você vai ligar, no método de quem vende por indicação.</span></div>
+    <div class="ben"><b>💌 Relacionamento o ano todo</b><span>Aniversários, datas especiais e quem está há 90 dias sem conversa, com a mensagem pronta.</span></div>
+    <div class="ben"><b>🔒 Seus clientes são seus</b><span>Ninguém mais vê a sua carteira. A Capacity Case nunca usa os dados dos seus clientes.</span></div>
+  </div>
+  <div class="passos">
+    <div class="passo"><i>1</i><span>Preencha o cadastro abaixo (uns 3 minutos).</span></div>
+    <div class="passo"><i>2</i><span>A gente confere e libera em até 1 dia útil.</span></div>
+    <div class="passo"><i>3</i><span>Você recebe no WhatsApp o seu link e o código para criar a senha.</span></div>
+  </div>
+</section>
+
+<main id="form">
+  <section class="caixa">
+    <h2>1. Você</h2>
+    <p class="sub">Para criar o seu acesso.</p>
+    <div class="grade">
+      <label class="campo">Nome completo<input type="text" id="f-nome" autocomplete="name" maxlength="120"></label>
+      <div class="campo" style="display:grid;gap:6px"><span style="font-weight:600;font-size:15px">Documento</span>
+        <div class="seg" role="group" aria-label="Tipo de documento"><button type="button" data-tp="PF" class="on">CPF</button><button type="button" data-tp="PJ">CNPJ</button></div>
+        <input type="text" id="f-doc" inputmode="numeric" placeholder="000.000.000-00" aria-label="CPF ou CNPJ" maxlength="18"></div>
+      <label class="campo">Nome da sua corretora <small>como vai aparecer no sistema (se não tiver, deixe em branco que usamos o seu nome)</small><input type="text" id="f-corr" maxlength="80"></label>
+      <label class="campo">E-mail <small>vai ser o seu login</small><input type="email" id="f-email" autocomplete="email" maxlength="120"></label>
+      <label class="campo">Celular com DDD <small>é por aqui que mandamos o acesso</small><input type="tel" id="f-cel" autocomplete="tel" inputmode="tel" placeholder="(11) 90000-0000" maxlength="16"></label>
+      <label class="campo">CEP <small id="f-cidade-txt">a cidade aparece sozinha</small><input type="text" id="f-cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9"></label>
+    </div>
+  </section>
+
+  <section class="caixa">
+    <h2>2. Seu trabalho</h2>
+    <p class="sub">Ajuda a gente a deixar o sistema do jeito do seu dia a dia.</p>
+    <div class="grade">
+      <label class="campo">Número SUSEP <small>se tiver</small><input type="text" id="f-susep" maxlength="30"></label>
+      <label class="campo">Como você atua
+        <select id="f-vinc"><option value="">Escolha</option><option>Corretor independente</option><option>Representante de seguradora</option><option>Ligado a uma assessoria</option><option>Corretora com equipe</option><option>Outro</option></select></label>
+      <label class="campo oculto" id="f-vincq-box">Qual seguradora ou assessoria?<input type="text" id="f-vincq" maxlength="80" placeholder="Ex.: MetLife"></label>
+      <label class="campo">Há quanto tempo é corretor
+        <select id="f-anos"><option value="">Escolha</option><option>Menos de 1 ano</option><option>1 a 3 anos</option><option>3 a 10 anos</option><option>Mais de 10 anos</option></select></label>
+      <label class="campo">Clientes ativos hoje
+        <select id="f-cli"><option value="">Escolha</option><option>Ainda nenhum</option><option>Até 50</option><option>51 a 200</option><option>201 a 500</option><option>Mais de 500</option></select></label>
+      <label class="campo">Prêmio da carteira por ano <small>aproximado</small>
+        <select id="f-prem"><option value="">Escolha</option><option>Até R$ 100 mil</option><option>R$ 100 a 500 mil</option><option>R$ 500 mil a 2 mi</option><option>Mais de R$ 2 mi</option><option>Prefiro não dizer</option></select></label>
+      <label class="campo">Você trabalha
+        <select id="f-eq"><option value="">Escolha</option><option>Sozinho</option><option>Com 2 a 5 pessoas</option><option>Com 6 a 20 pessoas</option><option>Com mais de 20</option></select></label>
+      <label class="campo">Como organiza a carteira hoje
+        <select id="f-ger"><option value="">Escolha</option><option>Planilha</option><option>Caderno / agenda</option><option>Outro CRM</option><option>Sistema da seguradora</option><option>Não organizo</option></select></label>
+      <label class="campo oculto" id="f-gerq-box">Qual CRM?<input type="text" id="f-gerq" maxlength="80"></label>
+    </div>
+    <div style="margin-top:16px"><div style="font-weight:600;font-size:15px;margin-bottom:8px">Quais seguros você vende?</div><div class="chips" id="f-ramos"></div></div>
+    <div style="margin-top:16px"><div style="font-weight:600;font-size:15px;margin-bottom:8px">Com quais seguradoras você trabalha?</div><div class="chips" id="f-segs"></div>
+      <input type="text" id="f-segoutra" maxlength="60" placeholder="Outra seguradora (escreva aqui)" style="margin-top:10px;max-width:420px"></div>
+  </section>
+
+  <section class="caixa">
+    <h2>3. Quem indicou</h2>
+    <p class="sub">O CRM Aliança chega por indicação de quem já usa.</p>
+    <div class="indicado oculto" id="f-ind-ok"></div>
+    <label class="campo" id="f-ind-box">Quem indicou o CRM Aliança para você? <small>nome e, se souber, o celular</small><input type="text" id="f-ind" maxlength="120"></label>
+  </section>
+
+  <section class="caixa">
+    <h2>4. Termos do plano gratuito</h2>
+    <details class="termo"><summary>Ler os Termos de Uso e o uso dos dados (versão de 27/11/2026)</summary><div class="texto">
+      <h3>Quem somos</h3>
+      <p>O CRM Aliança - by Capacity Case é oferecido pela CAPACITY CASE CONSULTORIA ADMINISTRATIVA LTDA, CNPJ 47.251.415/0001-00, Salto/SP ("Capacity Case").</p>
+      <h3>1. O plano é gratuito</h3>
+      <p>O uso do CRM Aliança neste plano é gratuito e não há previsão de cobrança. Se um dia existir plano pago, você será avisado com pelo menos 60 dias de antecedência e nada será cobrado sem o seu aceite expresso. Você pode deixar de usar quando quiser.</p>
+      <h3>2. O sistema está em evolução constante</h3>
+      <p>Telas e funções podem mudar, ser melhoradas ou retiradas. Fazemos o possível para o sistema ficar no ar e seguro, mas não garantimos que ele nunca terá falha ou interrupção. Guarde também as suas apólices e documentos originais.</p>
+      <h3>3. Os seus clientes são seus</h3>
+      <p>Os dados dos seus clientes (nomes, contatos, apólices, documentos) pertencem a você, que é o controlador desses dados pela LGPD. A Capacity Case só os guarda e processa para o sistema funcionar para você (operadora). Não usamos, não vendemos e não compartilhamos os dados dos seus clientes, e ninguém de outra corretora os vê. Você é responsável por ter autorização para guardar os dados dos seus clientes e por usá-los dentro da lei.</p>
+      <h3>4. Uso correto</h3>
+      <p>O acesso é pessoal. Não é permitido usar o sistema para spam, para fins ilegais ou para tentar acessar dados de outras pessoas. Contas usadas assim podem ser suspensas.</p>
+      <h3>5. Uso dos dados do SEU cadastro</h3>
+      <p>Para manter o plano gratuito, a Capacity Case usa os dados do seu cadastro (nome, contato, cidade, SUSEP, como atua, seguros que vende, seguradoras, tamanho da carteira e como organiza o trabalho) e dados de uso do sistema (quais telas usa e com que frequência) para:</p>
+      <ul><li>falar com você sobre o sistema e oferecer produtos e serviços da Capacity Case e de parceiros (por exemplo seguradoras, assessorias, cursos e serviços para corretores);</li>
+        <li>fazer estudos de mercado em números agregados e sem identificar ninguém, que podem ser apresentados a parceiros.</li></ul>
+      <p>Seus dados de contato só são passados a um parceiro específico com uma nova autorização sua, para aquele caso. Os dados dos seus clientes nunca entram nisso.</p>
+      <h3>6. Seus direitos</h3>
+      <p>Você pode pedir a qualquer momento para ver, corrigir ou apagar os dados do seu cadastro e pode retirar o consentimento do item 5. Como o plano gratuito existe por causa desse uso, retirar o consentimento encerra o plano gratuito; antes disso você tem 30 dias para exportar a sua carteira. Fale com o encarregado de dados: Luiz Antonio de Amo Gomes dos Santos, luizdeamo@gmail.com.</p>
+      <h3>7. Encerramento</h3>
+      <p>Ao encerrar a conta, você pode exportar os seus dados. Depois de 90 dias eles são apagados, menos o que a lei mandar guardar.</p>
+      <h3>8. Foro</h3>
+      <p>Fica eleito o foro de Salto/SP.</p>
+    </div></details>
+    <label class="aceite"><input type="checkbox" id="f-ac1"><span>Li e aceito os <b>Termos de Uso do plano gratuito</b> do CRM Aliança.</span></label>
+    <label class="aceite destaque"><input type="checkbox" id="f-ac2"><span><b>Autorizo a Capacity Case a usar os dados do meu cadastro</b> para me oferecer produtos e serviços dela e de parceiros e para estudos de mercado sem identificação (item 5). Os dados dos meus clientes nunca entram nisso. É a condição para o plano gratuito e posso retirar quando quiser.</span></label>
+  </section>
+
+  <div class="rodape"><button type="button" class="enviar" id="f-enviar">Quero o meu acesso gratuito</button><span class="msg" id="f-msg" role="alert"></span></div>
+</main>
+
+<main id="pronto" class="oculto"><section class="caixa pronto">
+  <h2>Recebemos o seu cadastro! 🎉</h2>
+  <p>Em até 1 dia útil você recebe no WhatsApp <b id="p-cel"></b> o seu link do CRM Aliança e o código para criar a senha.</p>
+  <p style="color:var(--soft)">Se precisar falar com a gente antes, responda para quem te indicou.</p>
+</section></main>
+
+<footer>CRM Aliança - by Capacity Case · seus clientes são seus</footer>
+
+<script>
+(function(){
+  'use strict';
+  const URL_DB = 'https://iuotvottnailofxbaynx.supabase.co', ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1b3R2b3R0bmFpbG9meGJheW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1Mjg2NjMsImV4cCI6MjEwODEwNDY2M30._0FhywQ4Vq3km5Rl4tHEPtCLBVom4VAGaXG3X3nrUyQ', VERSAO = '2026-11-27-gratuito';
+  const $ = (s) => document.querySelector(s), so = (s) => String(s||'').replace(/\D/g,'');
+  const RAMOS = ['Vida','Doenças graves','Renda / DIT','Previdência','Saúde','Odonto','RC profissional','Auto','Residencial','Empresarial','Consórcio','Investimentos'];
+  const SEGS = ['MetLife','Prudential','Azos','MAG Seguros','Icatu','SulAmérica','Porto Seguro','Bradesco Seguros','Tokio Marine','Allianz','Zurich','HDI','Yelum (Liberty)','Omint','Sompo','Unimed','Amil','Itaú','Caixa'];
+  const chips = (el, list, nome) => { $(el).innerHTML = list.map((x) => `<label><input type="checkbox" name="${nome}" value="${x}"> ${x}</label>`).join(''); };
+  chips('#f-ramos', RAMOS, 'ramo'); chips('#f-segs', SEGS, 'seg');
+  const marcados = (nome) => [...document.querySelectorAll(`input[name="${nome}"]:checked`)].map((i) => i.value);
+  const rpc = async (fn, body) => {
+    const r = await fetch(`${URL_DB}/rest/v1/rpc/${fn}`, { method:'POST', headers:{ apikey:ANON, Authorization:'Bearer '+ANON, 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+    const j = await r.json().catch(() => null);
+    if (!r.ok) throw new Error((j && (j.message || j.hint)) || 'Não consegui enviar agora. Tente de novo em instantes.');
+    return j;
+  };
+  // tipo de documento
+  let TP = 'PF';
+  document.querySelectorAll('[data-tp]').forEach((b) => b.onclick = () => { TP = b.dataset.tp; document.querySelectorAll('[data-tp]').forEach((x) => x.classList.toggle('on', x === b));
+    $('#f-doc').placeholder = TP === 'PF' ? '000.000.000-00' : '00.000.000/0000-00'; $('#f-doc').value = ''; $('#f-doc').focus(); });
+  $('#f-doc').addEventListener('input', (e) => { const d = so(e.target.value).slice(0, TP === 'PF' ? 11 : 14);
+    e.target.value = TP === 'PF' ? d.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1-$2')
+      : d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2'); });
+  $('#f-cel').addEventListener('input', (e) => { const d = so(e.target.value).slice(0,11); e.target.value = d.length > 10 ? d.replace(/^(\d{2})(\d{5})(\d{0,4}).*/,'($1) $2-$3') : d.replace(/^(\d{2})(\d{4})(\d{0,4}).*/,'($1) $2-$3').replace(/^(\d{0,2})$/,'$1'); });
+  // CEP: cidade e UF pelo ViaCEP
+  let CID = '', UF = '';
+  $('#f-cep').addEventListener('input', async (e) => { const d = so(e.target.value).slice(0,8); e.target.value = d.length > 5 ? d.slice(0,5)+'-'+d.slice(5) : d;
+    CID = ''; UF = ''; $('#f-cidade-txt').textContent = 'a cidade aparece sozinha';
+    if (d.length === 8) { try { const r = await fetch(`https://viacep.com.br/ws/${d}/json/`); const j = await r.json();
+      if (j && !j.erro) { CID = j.localidade || ''; UF = j.uf || ''; $('#f-cidade-txt').textContent = '📍 ' + CID + ' / ' + UF; } else $('#f-cidade-txt').textContent = 'CEP não encontrado: confira'; } catch (_) { /* segue sem a cidade */ } } });
+  $('#f-vinc').onchange = () => $('#f-vincq-box').classList.toggle('oculto', !/seguradora|assessoria/i.test($('#f-vinc').value));
+  $('#f-ger').onchange = () => $('#f-gerq-box').classList.toggle('oculto', $('#f-ger').value !== 'Outro CRM');
+  // quem indicou: ?ind=<código>
+  let IND = (new URLSearchParams(location.search).get('ind') || '').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,31);
+  if (IND) rpc('crm_indicador_nome', { p_codigo: IND }).then((nome) => {
+    if (nome) { $('#f-ind-ok').textContent = '🤝 Indicado por ' + nome; $('#f-ind-ok').classList.remove('oculto'); $('#f-ind-box').classList.add('oculto'); } else IND = '';
+  }).catch(() => { IND = ''; });
+  $('#f-enviar').onclick = async () => {
+    const msg = $('#f-msg'); msg.textContent = '';
+    const v = (s) => $(s).value.trim();
+    const falta = (t, el) => { msg.textContent = t; if (el) $(el).focus(); };
+    if (v('#f-nome').split(/\s+/).length < 2) return falta('Escreva o seu nome completo.', '#f-nome');
+    if (so(v('#f-doc')).length !== (TP === 'PF' ? 11 : 14)) return falta('Confira o ' + (TP === 'PF' ? 'CPF' : 'CNPJ') + '.', '#f-doc');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('#f-email'))) return falta('Confira o e-mail.', '#f-email');
+    if (![10,11].includes(so(v('#f-cel')).length)) return falta('Confira o celular com DDD.', '#f-cel');
+    if (so(v('#f-cep')).length !== 8) return falta('Confira o CEP.', '#f-cep');
+    if (!v('#f-vinc')) return falta('Conte como você atua.', '#f-vinc');
+    if (!marcados('ramo').length) return falta('Marque pelo menos um seguro que você vende.');
+    if (!IND && v('#f-ind').length < 3) return falta('Conte quem indicou o CRM Aliança para você.', '#f-ind');
+    if (!$('#f-ac1').checked || !$('#f-ac2').checked) return falta('Para o plano gratuito, marque as duas autorizações dos Termos.');
+    const segs = marcados('seg'); if (v('#f-segoutra')) segs.push(v('#f-segoutra'));
+    const b = $('#f-enviar'); b.disabled = true; b.textContent = 'Enviando…';
+    try {
+      const r = await rpc('crm_solicitar_acesso', { p: {
+        nome: v('#f-nome'), nome_corretora: v('#f-corr'), tipo_pessoa: TP, documento: v('#f-doc'), email: v('#f-email'), celular: v('#f-cel'),
+        cep: v('#f-cep'), cidade: CID, uf: UF, susep: v('#f-susep'), vinculo: v('#f-vinc'), vinculo_qual: v('#f-vincq'),
+        ramos: marcados('ramo'), seguradoras: segs, clientes_faixa: v('#f-cli'), premio_faixa: v('#f-prem'), anos_mercado: v('#f-anos'),
+        equipe: v('#f-eq'), gerencia: v('#f-ger'), gerencia_qual: v('#f-gerq'), indicador_codigo: IND, indicador_texto: v('#f-ind'),
+        aceite_termos: true, aceite_dados: true, termo_versao: VERSAO, navegador: navigator.userAgent } });
+      $('#p-cel').textContent = v('#f-cel');
+      $('#form').classList.add('oculto'); $('#pronto').classList.remove('oculto'); window.scrollTo(0, 0);
+      if (r === 'repetido') $('#pronto h2').textContent = 'Já tínhamos recebido o seu cadastro 👍';
+    } catch (e) { msg.textContent = e.message; b.disabled = false; b.textContent = 'Quero o meu acesso gratuito'; }
+  };
+})();
+</script>
+</body>
+</html>

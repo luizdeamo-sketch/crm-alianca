@@ -247,7 +247,7 @@
     { k: 'completo', nome: 'Vendas + Carteira + Equipe', para: 'O complemento para quem gerencia corretores e quer os números de cada um.', itens: [
       ['➕ Os dois módulos', ''],
       ['📊 Indicadores', 'Painel com os números da corretora e de cada corretor.'],
-      ['💼 Comercial', 'Metas, orçamento, funil com taxas de conversão e indicações (Mais Carlas).'],
+      ['💼 Comercial', 'Metas, orçamento, funil com taxas de conversão e parceiros que indicam.'],
       ['📝 Ata', 'Ata da semana com entregáveis e responsáveis.']] }];
   // 27/11/2026 (decisão do Luiz): o CRM Aliança é gratuito para todas as corretoras. A tela Planos só explica o que está liberado;
   // os planos pagos abaixo (abrirPlanosPagos) ficam guardados, sem uso.
@@ -270,9 +270,9 @@
         ${item('📱 Portal do cliente', 'Um link com a sua marca para o cliente ver os seguros e baixar o PDF.')}
         ${item('💌 Mensagens do ano', 'Aniversários, datas especiais e quem está sem conversa, com a mensagem pronta.')}
         ${item('✨ Inteligência artificial', 'Lê apólice e cotação, organiza a sua planilha e tira dúvidas no Pergunte aqui.')}
-        ${temEquipe ? item('📊 Equipe', 'Indicadores de cada corretor, metas, funil e Ata da semana.') : ''}
+        ${temEquipe ? item('📊 Equipe', 'Indicadores de cada corretor, metas, funil e parceiros que indicam.') : ''}
       </ul>
-      <p style="margin:0;color:#5d6871;font-size:14px">${temEquipe ? 'Precisa de mais alguma coisa? Peça em <b>Sugestões</b>.' : 'Tem uma equipe de corretores? A <b>Equipe</b> (indicadores de cada corretor, metas e Ata) é liberada pela Capacity Case: peça em <b>Sugestões</b>.'} Toda segunda-feira sai uma versão nova com melhorias.</p></div>`;
+      <p style="margin:0;color:#5d6871;font-size:14px">${temEquipe ? 'Precisa de mais alguma coisa? Peça em <b>Sugestões</b>.' : 'Tem uma equipe de corretores? A <b>Equipe</b> (indicadores de cada corretor, metas e funil) é liberada pela Capacity Case: peça em <b>Sugestões</b>.'} Toda segunda-feira sai uma versão nova com melhorias.</p></div>`;
     document.body.appendChild(fundo);
     const fechar = () => fundo.remove();
     fundo.querySelector('[data-x]').onclick = fechar;

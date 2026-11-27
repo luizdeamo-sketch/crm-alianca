@@ -117,7 +117,7 @@
     const revisao = lista.filter((c) => c.contrato && c.contrato.status === 'revisao').length, aguardando = lista.filter((c) => c.contrato && c.contrato.status === 'pendente').length;
     raiz.innerHTML = `
       <header class="pp"><div><h2>🏢 Painel da Plataforma</h2><small>Clientes, contratos, planos e administradores. Nenhum dado dos clientes deles aparece aqui.</small></div>
-        <div class="pp-abas"><button data-aba="cadastros" class="${EST.aba === 'cadastros' ? 'on' : ''}">Cadastros${(EST.solic || []).filter((x) => x.status === 'pendente').length ? ' (' + (EST.solic || []).filter((x) => x.status === 'pendente').length + ')' : ''}</button><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button data-aba="sugestoes" class="${EST.aba === 'sugestoes' ? 'on' : ''}">Sugestões${(EST.sugPend || 0) ? ' (' + EST.sugPend + ')' : ''}</button><button data-aba="historico" class="${EST.aba === 'historico' ? 'on' : ''}">Histórico</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
+        <div class="pp-abas"><button data-aba="cadastros" class="${EST.aba === 'cadastros' ? 'on' : ''}">Cadastros${(EST.solic || []).filter((x) => x.status === 'pendente').length ? ' (' + (EST.solic || []).filter((x) => x.status === 'pendente').length + ')' : ''}</button><button data-aba="corretoras" class="${EST.aba === 'corretoras' ? 'on' : ''}">Corretoras</button><button data-aba="usuarios" class="${EST.aba === 'usuarios' ? 'on' : ''}">Administradores</button><button data-aba="pagamentos" class="${EST.aba === 'pagamentos' ? 'on' : ''}">Pagamentos</button><button data-aba="contrato" class="${EST.aba === 'contrato' ? 'on' : ''}">Contrato</button><button data-aba="sugestoes" class="${EST.aba === 'sugestoes' ? 'on' : ''}">Sugestões${(EST.sugPend || 0) ? ' (' + EST.sugPend + ')' : ''}</button><button data-aba="historico" class="${EST.aba === 'historico' ? 'on' : ''}">Histórico</button><button class="pp-fechar" id="pp-fechar">✕ Voltar ao sistema</button></div></header>
       <main>
         <div class="kpis">
           <div class="kpi"><b>${ativas}</b><span>corretoras ativas</span></div>
@@ -231,6 +231,7 @@ ${linkCadastro(r.codigo_indicacao)}`;
       return `<tr>
         <td>${c.logo_url ? `<img class="logo" src="${esc(c.logo_url)}" alt="">` : ''}<b>${esc(nome)}</b></td>
         <td><button class="b" data-modulos="${c.id}" title="Plano, extras, grátis, preço especial e degustação">${esc(PLANOS[c.plano] || resumoMods(c.modulos))}${Array.isArray(c.modulos) && c.modulos.some((k) => EXTRAS.some(([x]) => x === k)) ? ' + extras' : ''} ✎</button></td>
+        <td>${c.gratuita ? `<span class="pill neu" title="${esc(c.permuta_contrapartida || 'Sem contrapartida registrada')}">Permuta</span>${c.permuta_contrapartida ? `<br><span style="color:#5d6871;font-size:12px">${esc(c.permuta_contrapartida)}</span>` : ''}` : `${brl(c.valor_mensal)}${c.preco_especial != null ? ' <span class="pill neu" title="Preço especial">especial</span>' : ''}`}</td>
         <td>${sit} ${pagto(c)} ${c.slug === 'demonstracao' ? '<span class="pill neu" title="Corretora de demonstração, com dados fictícios: não tem contrato">Demonstração</span>' : c.encerrado_em ? (c.contrato ? contratoPill(c) : '') : contratoPill(c)}<br><button class="b" data-contrato="${c.id}" style="margin-top:4px" title="Dados do cliente, contrato, revisões e convite">📄 Cliente e contrato</button></td>
         <td><button class="b" data-ver-usuarios="${c.id}" title="Pessoas com acesso / limite do plano (a equipe é cuidada pelo administrador da corretora). Clique para ver o administrador.">👥 ${c.usuarios_ativos} de ${limite(c)}</button></td>
         <td>${c.slug ? `<button class="b" data-copiar-link="${esc(linkCorretora(c.slug))}" title="Copiar o link próprio da corretora">🔗 /${esc(c.slug)}</button>` : '—'}</td>
@@ -244,7 +245,7 @@ ${linkCadastro(r.codigo_indicacao)}`;
         </div></td></tr>`;
     }).join('');
     const semContratada = !contratadaOk();
-    const semContrato = EST.corretoras.filter((c) => c.slug !== 'demonstracao' && !c.contrato && !c.encerrado_em && !c.gratuita);
+    const semContrato = EST.corretoras.filter((c) => c.slug !== 'demonstracao' && !c.contrato && !c.encerrado_em);
     return `
       <div class="card"><h3>Novo cliente</h3>
         <p class="sub">Só o nome, o e-mail de acesso e o plano. Ao criar, sai a mensagem de boas-vindas pronta para o WhatsApp. No primeiro acesso o cliente cria a senha, completa os dados da empresa (CNPJ ou CPF, endereço, representante, e-mail financeiro, redes sociais), o sistema gera o contrato com esses dados e ele aceita; sem o aceite, ninguém da empresa usa o sistema. A degustação de ${esc((EST.config.regua || {}).degustacao_dias || 15)} dias começa no aceite e, depois dela, a cobrança mensal começa sozinha.</p>
@@ -254,7 +255,7 @@ ${linkCadastro(r.codigo_indicacao)}`;
           <label class="f" style="grid-column:span 2">Nome do cliente (corretora ou pessoa)*<input name="razao_social" required maxlength="160" placeholder="Ex.: Rafaela Jesuino Corretora"></label>
           <label class="f">Nome do administrador<input name="admin_nome" maxlength="80" placeholder="Quem vai usar e administrar"></label>
           <label class="f">E-mail de acesso do administrador*<input name="admin_email" type="email" required placeholder="é o login dele no sistema"></label>
-          <label class="f">Plano*<select name="plano">${Object.entries(PLANOS).map(([k, n]) => `<option value="${k}" ${k === 'completo' ? 'selected' : ''}>${n} · até ${limite({ plano: k })} pessoas</option>`).join('')}<option value="permuta">Permuta · sem mensalidade, todos os módulos</option></select></label>
+          <label class="f">Plano*<select name="plano">${Object.entries(PLANOS).map(([k, n]) => `<option value="${k}" ${k === 'completo' ? 'selected' : ''}>${n} · ${brl(preco(k))} · até ${limite({ plano: k })} pessoas</option>`).join('')}<option value="permuta">Permuta · sem mensalidade, todos os módulos</option></select></label>
           <label class="f" data-so-pago>Preço especial por mês (opcional)<input name="preco_especial" type="number" min="0" step="0.01"></label>
           <label class="f" data-so-permuta style="grid-column:span 2;display:none">Contrapartida da permuta*<input name="contrapartida" maxlength="200" placeholder="Ex.: indica 5 clientes por mês"></label>
         </div>
@@ -262,8 +263,8 @@ ${linkCadastro(r.codigo_indicacao)}`;
         </form><div class="msg" id="pp-msg"></div></div>
       <div class="card"><h3>Corretoras</h3>
         <p class="sub">Suspender corta o acesso de toda a equipe da corretora; os dados ficam guardados e voltam ao reativar. Clique nos usuários para administrar a equipe.</p>
-        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Situação</th><th>Usuários</th><th>Link próprio</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
-        <tbody>${linhas || '<tr><td colspan="8">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
+        <div class="tbl"><table><thead><tr><th>Corretora</th><th>Plano</th><th>Mensalidade</th><th>Situação</th><th>Usuários</th><th>Link próprio</th><th>Último acesso</th><th>Administrador</th><th>Ações</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="9">Nenhuma corretora.</td></tr>'}</tbody></table></div></div>`;
   }
 
   function ligarCorretoras() {
@@ -368,7 +369,6 @@ ${linkCadastro(r.codigo_indicacao)}`;
   }
 
   function pagto(c) {
-    return '';   // 27/11/2026: sem cobrança, sem etiqueta de fatura ou degustação
     if (c.gratuita || !c.ativo) return '';
     if (c.maior_atraso > 0) return `<span class="pill susp">${c.maior_atraso} dias em atraso</span>`;
     if (c.faturas_abertas > 0) return '<span class="pill pend">Fatura em aberto</span>';
@@ -522,7 +522,6 @@ ${linkCadastro(r.codigo_indicacao)}`;
 
   function contratoPill(c) {
     const k = c.contrato;
-    if (!k && c.gratuita) return `<span class="pill ok" title="${esc(c.permuta_contrapartida || '')}">Plano gratuito</span>`;
     if (!k) return '<span class="pill susp" title="Complete os dados do cliente e gere o contrato em 📄 Cliente e contrato">Falta cadastro e contrato</span>';
     if (k.status === 'revisao') return `<span class="pill susp" title="${esc(k.revisao_texto || '')}">Pediu revisão do contrato</span>`;
     if (k.status === 'pendente') return `<span class="pill pend">Contrato v${k.versao} aguardando aceite</span>`;

@@ -141,7 +141,7 @@ footer{ text-align:center; color:var(--soft); font-size:14px; padding:0 16px 28p
     <h2>3. Quem indicou</h2>
     <p class="sub">O CRM Aliança chega por indicação de quem já usa.</p>
     <div class="indicado oculto" id="f-ind-ok"></div>
-    <label class="campo" id="f-ind-box">Quem indicou o CRM Aliança para você? <small>nome e, se souber, o celular</small><input type="text" id="f-ind" maxlength="120"></label>
+    <label class="campo" id="f-ind-box">Como você conheceu o CRM Aliança?<select id="f-ind"><option value="">Escolha</option><option value="amanda">Pela Amanda</option><option value="vitoria">Pela Victoria</option><option value="site">Pelo site crmalianca.com.br</option></select></label>
   </section>
 
   <section class="caixa">
@@ -219,7 +219,7 @@ footer{ text-align:center; color:var(--soft); font-size:14px; padding:0 16px 28p
   // quem indicou: ?ind=<código>
   let IND = (new URLSearchParams(location.search).get('ind') || '').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,31);
   if (IND) rpc('crm_indicador_nome', { p_codigo: IND }).then((nome) => {
-    if (nome) { $('#f-ind-ok').textContent = '🤝 Indicado por ' + nome; $('#f-ind-ok').classList.remove('oculto'); $('#f-ind-box').classList.add('oculto'); } else IND = '';
+    if (nome) { $('#f-ind-ok').textContent = IND === 'site' ? '🌐 Você veio pelo site crmalianca.com.br' : '🤝 Indicado por ' + nome; $('#f-ind-ok').classList.remove('oculto'); $('#f-ind-box').classList.add('oculto'); } else IND = '';
   }).catch(() => { IND = ''; });
   $('#f-enviar').onclick = async () => {
     const msg = $('#f-msg'); msg.textContent = '';
@@ -232,7 +232,7 @@ footer{ text-align:center; color:var(--soft); font-size:14px; padding:0 16px 28p
     if (so(v('#f-cep')).length !== 8) return falta('Confira o CEP.', '#f-cep');
     if (!v('#f-vinc')) return falta('Conte como você atua.', '#f-vinc');
     if (!marcados('ramo').length) return falta('Marque pelo menos um seguro que você vende.');
-    if (!IND && v('#f-ind').length < 3) return falta('Conte quem indicou o CRM Aliança para você.', '#f-ind');
+    if (!IND && !v('#f-ind')) return falta('Escolha como você conheceu o CRM Aliança.', '#f-ind');
     if (!$('#f-ac1').checked || !$('#f-ac2').checked) return falta('Para o plano gratuito, marque as duas autorizações dos Termos.');
     const segs = marcados('seg'); if (v('#f-segoutra')) segs.push(v('#f-segoutra'));
     const b = $('#f-enviar'); b.disabled = true; b.textContent = 'Enviando…';
@@ -241,7 +241,7 @@ footer{ text-align:center; color:var(--soft); font-size:14px; padding:0 16px 28p
         nome: v('#f-nome'), nome_corretora: v('#f-corr'), tipo_pessoa: TP, documento: v('#f-doc'), email: v('#f-email'), celular: v('#f-cel'),
         cep: v('#f-cep'), cidade: CID, uf: UF, susep: v('#f-susep'), vinculo: v('#f-vinc'), vinculo_qual: v('#f-vincq'),
         ramos: marcados('ramo'), seguradoras: segs, clientes_faixa: v('#f-cli'), premio_faixa: v('#f-prem'), anos_mercado: v('#f-anos'),
-        equipe: v('#f-eq'), gerencia: v('#f-ger'), gerencia_qual: v('#f-gerq'), indicador_codigo: IND, indicador_texto: v('#f-ind'),
+        equipe: v('#f-eq'), gerencia: v('#f-ger'), gerencia_qual: v('#f-gerq'), indicador_codigo: IND || v('#f-ind'), indicador_texto: '',
         aceite_termos: true, aceite_dados: true, termo_versao: VERSAO, navegador: navigator.userAgent } });
       $('#p-cel').textContent = v('#f-cel');
       $('#form').classList.add('oculto'); $('#pronto').classList.remove('oculto'); window.scrollTo(0, 0);
